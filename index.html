@@ -59,14 +59,16 @@
     <!-- Balloon popping -->
     <section id="popGame" class="screen">
       <button class="home-btn" data-home>🏠</button>
+      <div id="popScore" class="badge">🎈 <span id="popScoreVal">0</span></div>
       <div id="popArea" class="pop-area"></div>
     </section>
 
     <!-- Matching game -->
     <section id="matchGame" class="screen">
       <button class="home-btn" data-home>🏠</button>
+      <div id="matchScore" class="badge">⭐ <span id="matchScoreVal">0</span></div>
       <div class="match-layout">
-        <div class="match-target-label">Find this!</div>
+        <div class="match-target-label" id="matchPrompt">Find this!</div>
         <div id="matchTarget" class="match-target"></div>
         <div id="matchChoices" class="match-choices"></div>
       </div>

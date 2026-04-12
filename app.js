@@ -21,10 +21,15 @@ if (synth) {
 }
 
 function unlockSpeech() {
-  if (speechUnlocked || !synth) return;
-  const u = new SpeechSynthesisUtterance(" ");
-  u.volume = 0;
-  synth.speak(u);
+  if (!synth) return;
+  // On iOS the speech engine can go silent after a period of inactivity.
+  // Nudging it with a near-silent utterance inside a real user gesture keeps
+  // it alive. Safe to call every navigation.
+  try {
+    const u = new SpeechSynthesisUtterance(" ");
+    u.volume = 0.01;
+    synth.speak(u);
+  } catch (_) {}
   speechUnlocked = true;
 }
 
@@ -137,15 +142,59 @@ function sparkleAt(x, y) {
   }
 }
 
-function showBigDisplay(text, color = "#4dabf7") {
+// Turn any CSS color into a usable hex for mixing. Only the common
+// hsl(...) / hex strings that we actually produce in this app.
+function cssColorToRgb(color) {
+  if (!color) return [77, 171, 247];
+  const m = color.match(/^#([0-9a-f]{6})$/i);
+  if (m) {
+    const n = parseInt(m[1], 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+  const h = color.match(/hsl\(\s*([\d.]+),?\s*([\d.]+)%,?\s*([\d.]+)%/);
+  if (h) return hslToRgb(+h[1], +h[2] / 100, +h[3] / 100);
+  return [77, 171, 247];
+}
+function hslToRgb(h, s, l) {
+  h /= 360;
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+  const hue2rgb = (p, q, t) => {
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    if (t < 1 / 6) return p + (q - p) * 6 * t;
+    if (t < 1 / 2) return q;
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+    return p;
+  };
+  return [
+    Math.round(hue2rgb(p, q, h + 1 / 3) * 255),
+    Math.round(hue2rgb(p, q, h) * 255),
+    Math.round(hue2rgb(p, q, h - 1 / 3) * 255),
+  ];
+}
+
+function showBigDisplay(text, color = "#4dabf7", caption = "") {
   const d = document.getElementById("bigDisplay");
-  d.textContent = text;
-  d.style.background = color;
+  const [r, g, b] = cssColorToRgb(color);
+  // Radial gradient: vivid color in center, darker at edges so white text pops
+  d.style.background = `radial-gradient(circle at center, rgba(${r},${g},${b},0.95) 0%, rgba(${Math.round(r*0.35)},${Math.round(g*0.35)},${Math.round(b*0.35)},0.95) 100%)`;
+  d.innerHTML = "";
+  const main = document.createElement("div");
+  main.textContent = text;
+  d.appendChild(main);
+  if (caption) {
+    const cap = document.createElement("div");
+    cap.className = "big-caption";
+    cap.textContent = caption;
+    d.appendChild(cap);
+  }
   d.classList.remove("show");
   // force reflow so the animation restarts on repeated taps
   void d.offsetWidth;
   d.classList.add("show");
-  setTimeout(() => d.classList.remove("show"), 800);
+  clearTimeout(showBigDisplay._t);
+  showBigDisplay._t = setTimeout(() => d.classList.remove("show"), 650);
 }
 
 // Get point from click or touch event
@@ -172,9 +221,16 @@ function onTap(el, fn) {
 }
 
 // ---------- Build activity screens ----------
-function buildLetters() {
+function resetStage() {
   const stage = document.getElementById("stage");
   stage.innerHTML = "";
+  stage.className = "stage";
+  return stage;
+}
+
+function buildLetters() {
+  const stage = resetStage();
+  stage.classList.add("stage--many");
   LETTERS.forEach((ch) => {
     const el = document.createElement("button");
     el.className = "item";
@@ -185,7 +241,7 @@ function buildLetters() {
       // iOS Safari mangles single-letter utterances — use phonetic spelling
       // and a single short sentence so it's read reliably.
       say(`${letterSound(ch)}, ${letterWord(ch)}`);
-      showBigDisplay(ch, el.style.getPropertyValue("--c"));
+      showBigDisplay(ch, el.style.getPropertyValue("--c"), letterWord(ch));
       const p = pointOf(e);
       sparkleAt(p.x, p.y);
     });
@@ -216,13 +272,12 @@ function letterWord(ch) {
   return words[ch] || ch;
 }
 
+const NUMBER_WORDS = {
+  1: "one", 2: "two", 3: "three", 4: "four", 5: "five",
+  6: "six", 7: "seven", 8: "eight", 9: "nine", 10: "ten",
+};
 function buildNumbers() {
-  const stage = document.getElementById("stage");
-  stage.innerHTML = "";
-  const numberWords = {
-    1: "one", 2: "two", 3: "three", 4: "four", 5: "five",
-    6: "six", 7: "seven", 8: "eight", 9: "nine", 10: "ten",
-  };
+  const stage = resetStage();
   NUMBERS.forEach((n) => {
     const el = document.createElement("button");
     el.className = "item";
@@ -230,10 +285,8 @@ function buildNumbers() {
     el.style.setProperty("--c", `hsl(${n * 36}, 80%, 55%)`);
     onTap(el, (e) => {
       happySound();
-      // Single utterance — reliable on iOS. Use the word, not the digit,
-      // because iOS sometimes reads "1" as "number one" or too fast.
-      say(numberWords[n]);
-      showBigDisplay(n, el.style.getPropertyValue("--c"));
+      say(NUMBER_WORDS[n]);
+      showBigDisplay(n, el.style.getPropertyValue("--c"), NUMBER_WORDS[n]);
       const p = pointOf(e);
       sparkleAt(p.x, p.y);
     });
@@ -242,8 +295,7 @@ function buildNumbers() {
 }
 
 function buildColors() {
-  const stage = document.getElementById("stage");
-  stage.innerHTML = "";
+  const stage = resetStage();
   COLORS.forEach((c) => {
     const el = document.createElement("button");
     el.className = "item";
@@ -262,8 +314,7 @@ function buildColors() {
 }
 
 function buildShapes() {
-  const stage = document.getElementById("stage");
-  stage.innerHTML = "";
+  const stage = resetStage();
   SHAPES.forEach((s) => {
     const el = document.createElement("button");
     el.className = "item";
@@ -272,7 +323,7 @@ function buildShapes() {
     onTap(el, (e) => {
       happySound();
       say(s.name);
-      showBigDisplay(s.name, el.style.getPropertyValue("--c"));
+      showBigDisplay(s.emoji, el.style.getPropertyValue("--c"), s.name);
       const p = pointOf(e);
       sparkleAt(p.x, p.y);
     });
@@ -281,8 +332,7 @@ function buildShapes() {
 }
 
 function buildAnimals() {
-  const stage = document.getElementById("stage");
-  stage.innerHTML = "";
+  const stage = resetStage();
   ANIMALS.forEach((a) => {
     const el = document.createElement("button");
     el.className = "item";
@@ -290,9 +340,8 @@ function buildAnimals() {
     el.style.setProperty("--c", `hsl(${Math.random() * 360}, 70%, 60%)`);
     onTap(el, (e) => {
       happySound();
-      // Single utterance so queue can't leak between taps
       say(`${a.name}. ${a.sound}`);
-      showBigDisplay(a.emoji, el.style.getPropertyValue("--c"));
+      showBigDisplay(a.emoji, el.style.getPropertyValue("--c"), a.name);
       const p = pointOf(e);
       sparkleAt(p.x, p.y);
     });
@@ -312,9 +361,23 @@ const BALLOON_COLORS = [
 ];
 
 let popTimer = null;
+let popScore = 0;
+function bumpBadge(id, val) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = val;
+  const badge = el.closest(".badge");
+  if (badge) {
+    badge.classList.remove("bump");
+    void badge.offsetWidth;
+    badge.classList.add("bump");
+  }
+}
 function startPopGame() {
   const area = document.getElementById("popArea");
   area.innerHTML = "";
+  popScore = 0;
+  document.getElementById("popScoreVal").textContent = "0";
 
   const spawn = () => {
     // Pick a real color and draw an SVG balloon in that exact color,
@@ -339,10 +402,11 @@ function startPopGame() {
       if (e.stopPropagation) e.stopPropagation();
       beep(300 + Math.random() * 400, 0.15, "triangle");
       say(c.name);
+      popScore += 1;
+      bumpBadge("popScoreVal", popScore);
       const burst = document.createElement("div");
       burst.className = "burst";
       burst.textContent = "💥";
-      burst.style.left = b.style.left;
       // Use getBoundingClientRect so the burst appears where the balloon
       // actually is on screen (accounting for its CSS float animation)
       const r = b.getBoundingClientRect();
@@ -370,9 +434,38 @@ function stopPopGame() {
 // "Find the match": show one target up top, show 3 choices below,
 // he taps the one that matches. Age-appropriate for 2-3.
 const MATCH_POOL = [
-  "🐶","🐱","🐮","🐷","🦆","🐑","🐴","🦁","🐸","🐵","🐘","🐝",
-  "🍎","🍌","🍓","🍇","🍉","🥕","🌽",
-  "⭐","❤️","🌈","☀️","🌙","⚽","🚗","🚂","✈️","🚀","🎈","🎁","🌸","🌼",
+  { emoji: "🐶", name: "dog" },
+  { emoji: "🐱", name: "cat" },
+  { emoji: "🐮", name: "cow" },
+  { emoji: "🐷", name: "pig" },
+  { emoji: "🦆", name: "duck" },
+  { emoji: "🐑", name: "sheep" },
+  { emoji: "🐴", name: "horse" },
+  { emoji: "🦁", name: "lion" },
+  { emoji: "🐸", name: "frog" },
+  { emoji: "🐵", name: "monkey" },
+  { emoji: "🐘", name: "elephant" },
+  { emoji: "🐝", name: "bee" },
+  { emoji: "🍎", name: "apple" },
+  { emoji: "🍌", name: "banana" },
+  { emoji: "🍓", name: "strawberry" },
+  { emoji: "🍇", name: "grapes" },
+  { emoji: "🍉", name: "watermelon" },
+  { emoji: "🥕", name: "carrot" },
+  { emoji: "🌽", name: "corn" },
+  { emoji: "⭐", name: "star" },
+  { emoji: "❤️", name: "heart" },
+  { emoji: "🌈", name: "rainbow" },
+  { emoji: "☀️", name: "sun" },
+  { emoji: "🌙", name: "moon" },
+  { emoji: "⚽", name: "ball" },
+  { emoji: "🚗", name: "car" },
+  { emoji: "🚂", name: "train" },
+  { emoji: "✈️", name: "plane" },
+  { emoji: "🚀", name: "rocket" },
+  { emoji: "🎈", name: "balloon" },
+  { emoji: "🎁", name: "present" },
+  { emoji: "🌸", name: "flower" },
 ];
 
 function pickRandom(arr, n) {
@@ -385,7 +478,10 @@ function pickRandom(arr, n) {
   return out;
 }
 
-function newMatchRound() {
+let matchScore = 0;
+const CHEER_PHRASES = ["Yay! Great job!", "You got it!", "Awesome!", "Super!", "Nice one!"];
+
+function newMatchRound(speakPrompt = true) {
   const target = document.getElementById("matchTarget");
   const choices = document.getElementById("matchChoices");
   target.innerHTML = "";
@@ -396,24 +492,38 @@ function newMatchRound() {
 
   const targetEl = document.createElement("div");
   targetEl.className = "match-target-item";
-  targetEl.textContent = answer;
+  targetEl.textContent = answer.emoji;
+  // Tap target to re-speak the hint
+  onTap(targetEl, () => say(`Find the ${answer.name}`));
   target.appendChild(targetEl);
 
-  options.forEach((emoji) => {
+  // Voice prompt tells the kid what to look for
+  if (speakPrompt) {
+    say(`Find the ${answer.name}`);
+  }
+
+  options.forEach((item) => {
     const btn = document.createElement("button");
     btn.className = "match-choice";
-    btn.textContent = emoji;
+    btn.textContent = item.emoji;
     onTap(btn, (e) => {
-      if (emoji === answer) {
+      if (item.emoji === answer.emoji) {
         happySound();
-        say("Yay! Great job!");
+        matchScore += 1;
+        bumpBadge("matchScoreVal", matchScore);
+        // Every 5: big celebration
+        if (matchScore % 5 === 0) {
+          say(`${CHEER_PHRASES[Math.floor(Math.random() * CHEER_PHRASES.length)]} ${matchScore} in a row!`);
+        } else {
+          say(CHEER_PHRASES[Math.floor(Math.random() * CHEER_PHRASES.length)]);
+        }
         btn.classList.add("correct");
         const p = pointOf(e);
         sparkleAt(p.x, p.y);
-        setTimeout(newMatchRound, 1400);
+        setTimeout(() => newMatchRound(true), 1300);
       } else {
         buzzSound();
-        say("Try again");
+        say(`Find the ${answer.name}`);
         btn.classList.add("wrong");
         setTimeout(() => btn.classList.remove("wrong"), 500);
       }
@@ -423,9 +533,9 @@ function newMatchRound() {
 }
 
 function startMatchGame() {
-  newMatchRound();
-  // Prompt
-  setTimeout(() => say("Find the match!"), 200);
+  matchScore = 0;
+  document.getElementById("matchScoreVal").textContent = "0";
+  newMatchRound(true);
 }
 
 // ---------- Routing ----------

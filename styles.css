@@ -93,7 +93,8 @@ header h1 {
   align-items: center;
   width: 100%;
   max-width: 900px;
-  padding: 10px;
+  /* Push content below the 🏠 button (64px + 10px top + 10px gap) */
+  padding: 84px 10px 10px;
 }
 .item {
   background: #fff;
@@ -113,10 +114,11 @@ header h1 {
   -webkit-tap-highlight-color: transparent;
 }
 /* Letters screen has 26 items — shrink a touch more so everything fits on iPad */
-#stage:has(.item:nth-child(22)) .item {
-  width: min(15vw, 100px);
-  height: min(15vw, 100px);
-  font-size: clamp(28px, 5vw, 60px);
+.stage.stage--many .item {
+  width: min(14vw, 90px);
+  height: min(14vw, 90px);
+  font-size: clamp(26px, 4.5vw, 56px);
+  border-width: 4px;
 }
 .item:active,
 .item.pressed {
@@ -131,19 +133,57 @@ header h1 {
   display: none;
   align-items: center;
   justify-content: center;
-  font-size: clamp(120px, 30vw, 400px);
+  flex-direction: column;
+  gap: 10px;
+  font-size: clamp(120px, 28vw, 360px);
   font-weight: bold;
   color: #fff;
-  text-shadow: 0 0 20px rgba(0,0,0,0.3);
+  text-shadow:
+    0 0 12px rgba(0,0,0,0.55),
+    0 4px 10px rgba(0,0,0,0.4),
+    0 0 2px rgba(0,0,0,0.8);
   pointer-events: none;
-  background: rgba(0,0,0,0.25);
-  animation: pop 0.8s ease-out;
+  /* Always dark scrim, tile color fills the scrim via --scrim */
+  background: var(--scrim, rgba(0,0,0,0.55));
+  z-index: 20;
+  animation: pop 0.55s ease-out;
 }
 .big-display.show { display: flex; }
+.big-display .big-caption {
+  font-size: clamp(32px, 5vw, 56px);
+  letter-spacing: 1px;
+  opacity: 0.95;
+}
 @keyframes pop {
-  0%   { transform: scale(0.2); opacity: 0; }
-  40%  { transform: scale(1.2); opacity: 1; }
+  0%   { transform: scale(0.4); opacity: 0; }
+  40%  { transform: scale(1.15); opacity: 1; }
   100% { transform: scale(1); opacity: 1; }
+}
+
+/* Score / streak badge */
+.badge {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  background: #fff;
+  border: 5px solid #ff4081;
+  border-radius: 999px;
+  padding: 8px 22px;
+  font-size: clamp(22px, 3.5vw, 36px);
+  font-weight: bold;
+  color: #ff4081;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 90px;
+  justify-content: center;
+}
+.badge.bump { animation: badgeBump 0.4s ease; }
+@keyframes badgeBump {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.25) rotate(-3deg); }
 }
 
 /* ---------- Balloon pop game ---------- */
