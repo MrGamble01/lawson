@@ -182,13 +182,27 @@ function buildLetters() {
     el.style.setProperty("--c", `hsl(${Math.random() * 360}, 80%, 55%)`);
     onTap(el, (e) => {
       happySound();
-      say(`${ch}. ${ch} is for ${letterWord(ch)}`);
+      // iOS Safari mangles single-letter utterances — use phonetic spelling
+      // and a single short sentence so it's read reliably.
+      say(`${letterSound(ch)}, ${letterWord(ch)}`);
       showBigDisplay(ch, el.style.getPropertyValue("--c"));
       const p = pointOf(e);
       sparkleAt(p.x, p.y);
     });
     stage.appendChild(el);
   });
+}
+
+// Phonetic letter names so iOS TTS pronounces them correctly every time
+function letterSound(ch) {
+  const sounds = {
+    A: "ay",   B: "bee",  C: "see",  D: "dee",  E: "ee",   F: "eff",
+    G: "jee",  H: "aitch",I: "eye",  J: "jay",  K: "kay",  L: "el",
+    M: "em",   N: "en",   O: "oh",   P: "pee",  Q: "cue",  R: "are",
+    S: "ess",  T: "tee",  U: "you",  V: "vee",  W: "double you",
+    X: "ex",   Y: "why",  Z: "zee",
+  };
+  return sounds[ch] || ch;
 }
 
 function letterWord(ch) {
