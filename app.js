@@ -1,32 +1,61 @@
 // ---------- Speech ----------
+// iOS Safari quirks:
+//  - speechSynthesis.speak() must be called synchronously inside a user gesture
+//  - Queued utterances DO work if all queued in the same gesture tick
+//  - cancel() can break the next speak() on iOS, so we avoid cancel() mid-flow
 const synth = window.speechSynthesis;
+let speechUnlocked = false;
+
+function unlockSpeech() {
+  if (speechUnlocked || !synth) return;
+  // Silent utterance inside a user gesture unlocks iOS speech engine
+  const u = new SpeechSynthesisUtterance("");
+  u.volume = 0;
+  synth.speak(u);
+  speechUnlocked = true;
+}
+
 function say(text, rate = 0.9) {
   if (!synth) return;
-  synth.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.rate = rate;
   u.pitch = 1.2;
+  u.volume = 1;
   u.lang = "en-US";
   synth.speak(u);
 }
 
+// Queue multiple phrases in one gesture — required for iOS Safari to play them all
+function sayQueue(phrases, rate = 1) {
+  if (!synth) return;
+  phrases.forEach((p) => say(p, rate));
+}
+
 // ---------- Simple beep/pop sounds via Web Audio ----------
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+const audioCtx = new AudioCtx();
+
+function unlockAudio() {
+  if (audioCtx.state === "suspended") audioCtx.resume();
+}
+
 function beep(freq = 440, dur = 0.15, type = "sine") {
-  const o = audioCtx.createOscillator();
-  const g = audioCtx.createGain();
-  o.type = type;
-  o.frequency.value = freq;
-  g.gain.value = 0.2;
-  o.connect(g).connect(audioCtx.destination);
-  o.start();
-  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
-  o.stop(audioCtx.currentTime + dur);
+  try {
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = type;
+    o.frequency.value = freq;
+    g.gain.value = 0.2;
+    o.connect(g).connect(audioCtx.destination);
+    o.start();
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+    o.stop(audioCtx.currentTime + dur);
+  } catch (_) {}
 }
 function happySound() {
   beep(523, 0.12);
-  setTimeout(() => beep(659, 0.12), 120);
-  setTimeout(() => beep(784, 0.18), 240);
+  beep(659, 0.12);
+  beep(784, 0.18);
 }
 
 // ---------- Screens ----------
@@ -92,8 +121,34 @@ function showBigDisplay(text, color = "#4dabf7") {
   const d = document.getElementById("bigDisplay");
   d.textContent = text;
   d.style.background = color;
+  d.classList.remove("show");
+  // force reflow so the animation restarts on repeated taps
+  void d.offsetWidth;
   d.classList.add("show");
   setTimeout(() => d.classList.remove("show"), 800);
+}
+
+// Get point from click or touch event
+function pointOf(e) {
+  if (e.clientX != null) return { x: e.clientX, y: e.clientY };
+  const t = e.changedTouches && e.changedTouches[0];
+  if (t) return { x: t.clientX, y: t.clientY };
+  return { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+}
+
+// Attach a tap handler that works reliably on iOS (touchend fires first, click fallback)
+function onTap(el, fn) {
+  let handled = false;
+  el.addEventListener("touchend", (e) => {
+    e.preventDefault();
+    handled = true;
+    fn(e);
+    setTimeout(() => { handled = false; }, 400);
+  }, { passive: false });
+  el.addEventListener("click", (e) => {
+    if (handled) return;
+    fn(e);
+  });
 }
 
 // ---------- Build activity screens ----------
@@ -104,12 +159,13 @@ function buildLetters() {
     const el = document.createElement("button");
     el.className = "item";
     el.textContent = ch;
-    el.style.setProperty("--c", `hsl(${Math.random() * 360}, 80%, 60%)`);
-    el.addEventListener("click", (e) => {
+    el.style.setProperty("--c", `hsl(${Math.random() * 360}, 80%, 55%)`);
+    onTap(el, (e) => {
       happySound();
       say(`${ch}. ${ch} is for ${letterWord(ch)}`);
       showBigDisplay(ch, el.style.getPropertyValue("--c"));
-      sparkleAt(e.clientX, e.clientY);
+      const p = pointOf(e);
+      sparkleAt(p.x, p.y);
     });
     stage.appendChild(el);
   });
@@ -134,19 +190,15 @@ function buildNumbers() {
     el.className = "item";
     el.textContent = n;
     el.style.setProperty("--c", `hsl(${n * 36}, 80%, 55%)`);
-    el.addEventListener("click", (e) => {
+    onTap(el, (e) => {
       happySound();
-      // Count up to n
-      let i = 1;
-      const count = () => {
-        if (i > n) return;
-        say(String(i), 1);
-        i++;
-        setTimeout(count, 500);
-      };
-      count();
+      // Queue the whole count in one gesture so iOS plays all of it
+      const phrases = [];
+      for (let i = 1; i <= n; i++) phrases.push(String(i));
+      sayQueue(phrases, 1);
       showBigDisplay(n, el.style.getPropertyValue("--c"));
-      sparkleAt(e.clientX, e.clientY);
+      const p = pointOf(e);
+      sparkleAt(p.x, p.y);
     });
     stage.appendChild(el);
   });
@@ -161,11 +213,12 @@ function buildColors() {
     el.style.background = c.hex;
     el.style.setProperty("--c", c.hex);
     el.textContent = "";
-    el.addEventListener("click", (e) => {
+    onTap(el, (e) => {
       happySound();
       say(c.name);
       showBigDisplay(c.name, c.hex);
-      sparkleAt(e.clientX, e.clientY);
+      const p = pointOf(e);
+      sparkleAt(p.x, p.y);
     });
     stage.appendChild(el);
   });
@@ -179,11 +232,12 @@ function buildShapes() {
     el.className = "item";
     el.textContent = s.emoji;
     el.style.setProperty("--c", `hsl(${Math.random() * 360}, 70%, 60%)`);
-    el.addEventListener("click", (e) => {
+    onTap(el, (e) => {
       happySound();
       say(s.name);
       showBigDisplay(s.name, el.style.getPropertyValue("--c"));
-      sparkleAt(e.clientX, e.clientY);
+      const p = pointOf(e);
+      sparkleAt(p.x, p.y);
     });
     stage.appendChild(el);
   });
@@ -197,11 +251,12 @@ function buildAnimals() {
     el.className = "item";
     el.textContent = a.emoji;
     el.style.setProperty("--c", `hsl(${Math.random() * 360}, 70%, 60%)`);
-    el.addEventListener("click", (e) => {
+    onTap(el, (e) => {
       happySound();
-      say(`${a.name}. ${a.sound}`);
+      sayQueue([a.name, a.sound], 1);
       showBigDisplay(a.emoji, el.style.getPropertyValue("--c"));
-      sparkleAt(e.clientX, e.clientY);
+      const p = pointOf(e);
+      sparkleAt(p.x, p.y);
     });
     stage.appendChild(el);
   });
@@ -224,8 +279,8 @@ function startPopGame() {
     const dur = 4 + Math.random() * 4;
     b.style.animationDuration = dur + "s";
     const color = colors[Math.floor(Math.random() * colors.length)];
-    b.addEventListener("click", (e) => {
-      e.stopPropagation();
+    onTap(b, (e) => {
+      if (e.stopPropagation) e.stopPropagation();
       beep(200 + Math.random() * 600, 0.2, "triangle");
       say(color, 1.2);
       const burst = document.createElement("div");
@@ -238,7 +293,7 @@ function startPopGame() {
       b.remove();
     });
     area.appendChild(b);
-    setTimeout(() => b.remove(), dur * 1000);
+    setTimeout(() => { if (b.parentNode) b.remove(); }, dur * 1000);
   };
 
   popTimer = setInterval(spawn, 900);
@@ -253,7 +308,9 @@ function stopPopGame() {
 
 // ---------- Routing ----------
 document.querySelectorAll("[data-go]").forEach((btn) => {
-  btn.addEventListener("click", () => {
+  onTap(btn, () => {
+    unlockAudio();
+    unlockSpeech();
     const where = btn.dataset.go;
     beep(600, 0.1);
     if (where === "pop") {
@@ -271,25 +328,26 @@ document.querySelectorAll("[data-go]").forEach((btn) => {
 });
 
 document.querySelectorAll("[data-home]").forEach((btn) => {
-  btn.addEventListener("click", () => {
+  onTap(btn, () => {
     stopPopGame();
-    synth && synth.cancel();
+    if (synth) synth.cancel();
     show("menu");
     beep(400, 0.1);
   });
 });
 
-// Prevent double-tap zoom on iOS
-document.addEventListener("touchstart", () => {}, { passive: true });
+// Prevent multi-touch pinch-zoom gestures on iOS (belt-and-braces with viewport meta)
+document.addEventListener("gesturestart", (e) => e.preventDefault());
+document.addEventListener("touchmove", (e) => {
+  if (e.touches.length > 1) e.preventDefault();
+}, { passive: false });
 
-// Warm up speech on first user interaction (required on some browsers)
-document.addEventListener(
-  "click",
-  () => {
-    if (audioCtx.state === "suspended") audioCtx.resume();
-    if (synth && !synth.speaking) {
-      // no-op but primes the engine
-    }
-  },
-  { once: true }
-);
+// Unlock audio + speech on the very first user interaction anywhere
+function firstUnlock() {
+  unlockAudio();
+  unlockSpeech();
+  document.removeEventListener("touchstart", firstUnlock);
+  document.removeEventListener("click", firstUnlock);
+}
+document.addEventListener("touchstart", firstUnlock, { passive: true });
+document.addEventListener("click", firstUnlock);
