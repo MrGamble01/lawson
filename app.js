@@ -1,37 +1,63 @@
 // ---------- Speech ----------
-// iOS Safari quirks:
-//  - speechSynthesis.speak() must be called synchronously inside a user gesture
-//  - Queued utterances DO work if all queued in the same gesture tick
-//  - cancel() can break the next speak() on iOS, so we avoid cancel() mid-flow
 const synth = window.speechSynthesis;
 let speechUnlocked = false;
+let preferredVoice = null;
+
+function pickVoice() {
+  if (!synth) return;
+  const voices = synth.getVoices();
+  if (!voices.length) return;
+  // Prefer a clear English female voice; iOS has "Samantha", "Karen", "Moira"
+  const prefs = ["Samantha", "Karen", "Moira", "Google US English", "Microsoft Zira"];
+  for (const p of prefs) {
+    const v = voices.find((x) => x.name.includes(p));
+    if (v) { preferredVoice = v; return; }
+  }
+  preferredVoice = voices.find((v) => v.lang && v.lang.startsWith("en")) || voices[0];
+}
+if (synth) {
+  pickVoice();
+  synth.onvoiceschanged = pickVoice;
+}
 
 function unlockSpeech() {
   if (speechUnlocked || !synth) return;
-  // Silent utterance inside a user gesture unlocks iOS speech engine
-  const u = new SpeechSynthesisUtterance("");
+  const u = new SpeechSynthesisUtterance(" ");
   u.volume = 0;
   synth.speak(u);
   speechUnlocked = true;
 }
 
-function say(text, rate = 0.9) {
+// Speak a single phrase, ALWAYS clearing anything queued first.
+// This is the fix for "click cow, hear frog" — old queue no longer leaks.
+function say(text, rate = 0.95) {
   if (!synth) return;
+  synth.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.rate = rate;
-  u.pitch = 1.2;
+  u.pitch = 1.15;
   u.volume = 1;
   u.lang = "en-US";
+  if (preferredVoice) u.voice = preferredVoice;
   synth.speak(u);
 }
 
-// Queue multiple phrases in one gesture — required for iOS Safari to play them all
-function sayQueue(phrases, rate = 1) {
+// Queue multiple phrases for counting (clears queue first, then enqueues all)
+function sayCount(n, rate = 1.05) {
   if (!synth) return;
-  phrases.forEach((p) => say(p, rate));
+  synth.cancel();
+  for (let i = 1; i <= n; i++) {
+    const u = new SpeechSynthesisUtterance(String(i));
+    u.rate = rate;
+    u.pitch = 1.2;
+    u.volume = 1;
+    u.lang = "en-US";
+    if (preferredVoice) u.voice = preferredVoice;
+    synth.speak(u);
+  }
 }
 
-// ---------- Simple beep/pop sounds via Web Audio ----------
+// ---------- Simple sounds via Web Audio ----------
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 const audioCtx = new AudioCtx();
 
@@ -39,23 +65,32 @@ function unlockAudio() {
   if (audioCtx.state === "suspended") audioCtx.resume();
 }
 
-function beep(freq = 440, dur = 0.15, type = "sine") {
+function beep(freq = 440, dur = 0.15, type = "sine", when = 0) {
   try {
+    const t = audioCtx.currentTime + when;
     const o = audioCtx.createOscillator();
     const g = audioCtx.createGain();
     o.type = type;
     o.frequency.value = freq;
-    g.gain.value = 0.2;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.25, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
     o.connect(g).connect(audioCtx.destination);
-    o.start();
-    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
-    o.stop(audioCtx.currentTime + dur);
+    o.start(t);
+    o.stop(t + dur + 0.02);
   } catch (_) {}
 }
+
+// Pleasant ascending chime (C-E-G), not three simultaneous beeps
 function happySound() {
-  beep(523, 0.12);
-  beep(659, 0.12);
-  beep(784, 0.18);
+  beep(523.25, 0.12, "triangle", 0);
+  beep(659.25, 0.12, "triangle", 0.1);
+  beep(783.99, 0.2,  "triangle", 0.2);
+}
+
+function buzzSound() {
+  beep(180, 0.18, "square", 0);
+  beep(140, 0.22, "square", 0.1);
 }
 
 // ---------- Screens ----------
@@ -192,10 +227,7 @@ function buildNumbers() {
     el.style.setProperty("--c", `hsl(${n * 36}, 80%, 55%)`);
     onTap(el, (e) => {
       happySound();
-      // Queue the whole count in one gesture so iOS plays all of it
-      const phrases = [];
-      for (let i = 1; i <= n; i++) phrases.push(String(i));
-      sayQueue(phrases, 1);
+      sayCount(n);
       showBigDisplay(n, el.style.getPropertyValue("--c"));
       const p = pointOf(e);
       sparkleAt(p.x, p.y);
@@ -253,7 +285,8 @@ function buildAnimals() {
     el.style.setProperty("--c", `hsl(${Math.random() * 360}, 70%, 60%)`);
     onTap(el, (e) => {
       happySound();
-      sayQueue([a.name, a.sound], 1);
+      // Single utterance so queue can't leak between taps
+      say(`${a.name}. ${a.sound}`);
       showBigDisplay(a.emoji, el.style.getPropertyValue("--c"));
       const p = pointOf(e);
       sparkleAt(p.x, p.y);
@@ -263,31 +296,54 @@ function buildAnimals() {
 }
 
 // ---------- Balloon pop game ----------
+const BALLOON_COLORS = [
+  { name: "Red",    hex: "#ff3b30" },
+  { name: "Orange", hex: "#ff9500" },
+  { name: "Yellow", hex: "#ffd60a" },
+  { name: "Green",  hex: "#34c759" },
+  { name: "Blue",   hex: "#007aff" },
+  { name: "Purple", hex: "#af52de" },
+  { name: "Pink",   hex: "#ff2d92" },
+];
+
 let popTimer = null;
 function startPopGame() {
   const area = document.getElementById("popArea");
   area.innerHTML = "";
-  const balloons = ["🎈", "🎈", "🎈", "🌟", "🎁", "🧸", "🍎", "🍌", "🍭"];
-  const colors = ["red","blue","green","purple","pink","orange","yellow"];
 
   const spawn = () => {
+    // Pick a real color and draw an SVG balloon in that exact color,
+    // so the spoken color always matches what the kid sees.
+    const c = BALLOON_COLORS[Math.floor(Math.random() * BALLOON_COLORS.length)];
     const b = document.createElement("div");
     b.className = "balloon";
-    b.textContent = balloons[Math.floor(Math.random() * balloons.length)];
+    b.innerHTML = `
+      <svg viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <ellipse cx="50" cy="55" rx="42" ry="50" fill="${c.hex}"/>
+        <ellipse cx="36" cy="38" rx="10" ry="16" fill="rgba(255,255,255,0.5)"/>
+        <polygon points="46,104 54,104 50,112" fill="${c.hex}"/>
+        <path d="M50 112 Q56 124 48 134 Q42 140 50 140" stroke="#555" stroke-width="2" fill="none"/>
+      </svg>
+    `;
     b.style.left = Math.random() * 80 + 10 + "%";
     b.style.top = "110%";
-    const dur = 4 + Math.random() * 4;
+    const dur = 5 + Math.random() * 4;
     b.style.animationDuration = dur + "s";
-    const color = colors[Math.floor(Math.random() * colors.length)];
+
     onTap(b, (e) => {
       if (e.stopPropagation) e.stopPropagation();
-      beep(200 + Math.random() * 600, 0.2, "triangle");
-      say(color, 1.2);
+      beep(300 + Math.random() * 400, 0.15, "triangle");
+      say(c.name);
       const burst = document.createElement("div");
       burst.className = "burst";
       burst.textContent = "💥";
       burst.style.left = b.style.left;
-      burst.style.top = b.offsetTop + "px";
+      // Use getBoundingClientRect so the burst appears where the balloon
+      // actually is on screen (accounting for its CSS float animation)
+      const r = b.getBoundingClientRect();
+      const ar = area.getBoundingClientRect();
+      burst.style.top = (r.top - ar.top) + "px";
+      burst.style.left = (r.left - ar.left) + "px";
       area.appendChild(burst);
       setTimeout(() => burst.remove(), 500);
       b.remove();
@@ -296,14 +352,75 @@ function startPopGame() {
     setTimeout(() => { if (b.parentNode) b.remove(); }, dur * 1000);
   };
 
-  popTimer = setInterval(spawn, 900);
-  // spawn a few immediately
+  popTimer = setInterval(spawn, 1100);
   spawn(); spawn(); spawn();
 }
 function stopPopGame() {
   clearInterval(popTimer);
   popTimer = null;
   document.getElementById("popArea").innerHTML = "";
+}
+
+// ---------- Matching game ----------
+// "Find the match": show one target up top, show 3 choices below,
+// he taps the one that matches. Age-appropriate for 2-3.
+const MATCH_POOL = [
+  "🐶","🐱","🐮","🐷","🦆","🐑","🐴","🦁","🐸","🐵","🐘","🐝",
+  "🍎","🍌","🍓","🍇","🍉","🥕","🌽",
+  "⭐","❤️","🌈","☀️","🌙","⚽","🚗","🚂","✈️","🚀","🎈","🎁","🌸","🌼",
+];
+
+function pickRandom(arr, n) {
+  const copy = arr.slice();
+  const out = [];
+  while (out.length < n && copy.length) {
+    const i = Math.floor(Math.random() * copy.length);
+    out.push(copy.splice(i, 1)[0]);
+  }
+  return out;
+}
+
+function newMatchRound() {
+  const target = document.getElementById("matchTarget");
+  const choices = document.getElementById("matchChoices");
+  target.innerHTML = "";
+  choices.innerHTML = "";
+
+  const [answer, d1, d2] = pickRandom(MATCH_POOL, 3);
+  const options = [answer, d1, d2].sort(() => Math.random() - 0.5);
+
+  const targetEl = document.createElement("div");
+  targetEl.className = "match-target-item";
+  targetEl.textContent = answer;
+  target.appendChild(targetEl);
+
+  options.forEach((emoji) => {
+    const btn = document.createElement("button");
+    btn.className = "match-choice";
+    btn.textContent = emoji;
+    onTap(btn, (e) => {
+      if (emoji === answer) {
+        happySound();
+        say("Yay! Great job!");
+        btn.classList.add("correct");
+        const p = pointOf(e);
+        sparkleAt(p.x, p.y);
+        setTimeout(newMatchRound, 1400);
+      } else {
+        buzzSound();
+        say("Try again");
+        btn.classList.add("wrong");
+        setTimeout(() => btn.classList.remove("wrong"), 500);
+      }
+    });
+    choices.appendChild(btn);
+  });
+}
+
+function startMatchGame() {
+  newMatchRound();
+  // Prompt
+  setTimeout(() => say("Find the match!"), 200);
 }
 
 // ---------- Routing ----------
@@ -316,6 +433,11 @@ document.querySelectorAll("[data-go]").forEach((btn) => {
     if (where === "pop") {
       show("popGame");
       startPopGame();
+      return;
+    }
+    if (where === "match") {
+      show("matchGame");
+      startMatchGame();
       return;
     }
     show("activity");

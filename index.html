@@ -44,6 +44,9 @@
       <button class="tile" data-go="pop" style="--c:#ff922b">
         <span class="emoji">🎈</span><span class="label">Pop!</span>
       </button>
+      <button class="tile" data-go="match" style="--c:#20c997">
+        <span class="emoji">🧩</span><span class="label">Match</span>
+      </button>
     </section>
 
     <!-- Generic activity screen (letters/numbers/colors/shapes/animals) -->
@@ -57,6 +60,16 @@
     <section id="popGame" class="screen">
       <button class="home-btn" data-home>🏠</button>
       <div id="popArea" class="pop-area"></div>
+    </section>
+
+    <!-- Matching game -->
+    <section id="matchGame" class="screen">
+      <button class="home-btn" data-home>🏠</button>
+      <div class="match-layout">
+        <div class="match-target-label">Find this!</div>
+        <div id="matchTarget" class="match-target"></div>
+        <div id="matchChoices" class="match-choices"></div>
+      </div>
     </section>
   </main>
 
