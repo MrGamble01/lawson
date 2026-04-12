@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Lawson's Learning Playground</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Lawson's Playground</h1>
+  </header>
+
+  <main id="app">
+    <!-- Home menu -->
+    <section id="menu" class="screen active">
+      <button class="tile" data-go="letters" style="--c:#ff6b6b">
+        <span class="emoji">🔤</span><span class="label">ABC</span>
+      </button>
+      <button class="tile" data-go="numbers" style="--c:#4dabf7">
+        <span class="emoji">🔢</span><span class="label">123</span>
+      </button>
+      <button class="tile" data-go="colors" style="--c:#ffd43b">
+        <span class="emoji">🎨</span><span class="label">Colors</span>
+      </button>
+      <button class="tile" data-go="shapes" style="--c:#69db7c">
+        <span class="emoji">⭐</span><span class="label">Shapes</span>
+      </button>
+      <button class="tile" data-go="animals" style="--c:#da77f2">
+        <span class="emoji">🐶</span><span class="label">Animals</span>
+      </button>
+      <button class="tile" data-go="pop" style="--c:#ff922b">
+        <span class="emoji">🎈</span><span class="label">Pop!</span>
+      </button>
+    </section>
+
+    <!-- Generic activity screen (letters/numbers/colors/shapes/animals) -->
+    <section id="activity" class="screen">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="stage" class="stage"></div>
+      <div id="bigDisplay" class="big-display"></div>
+    </section>
+
+    <!-- Balloon popping -->
+    <section id="popGame" class="screen">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="popArea" class="pop-area"></div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
