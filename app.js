@@ -42,21 +42,6 @@ function say(text, rate = 0.95) {
   synth.speak(u);
 }
 
-// Queue multiple phrases for counting (clears queue first, then enqueues all)
-function sayCount(n, rate = 1.05) {
-  if (!synth) return;
-  synth.cancel();
-  for (let i = 1; i <= n; i++) {
-    const u = new SpeechSynthesisUtterance(String(i));
-    u.rate = rate;
-    u.pitch = 1.2;
-    u.volume = 1;
-    u.lang = "en-US";
-    if (preferredVoice) u.voice = preferredVoice;
-    synth.speak(u);
-  }
-}
-
 // ---------- Simple sounds via Web Audio ----------
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 const audioCtx = new AudioCtx();
@@ -220,6 +205,10 @@ function letterWord(ch) {
 function buildNumbers() {
   const stage = document.getElementById("stage");
   stage.innerHTML = "";
+  const numberWords = {
+    1: "one", 2: "two", 3: "three", 4: "four", 5: "five",
+    6: "six", 7: "seven", 8: "eight", 9: "nine", 10: "ten",
+  };
   NUMBERS.forEach((n) => {
     const el = document.createElement("button");
     el.className = "item";
@@ -227,7 +216,9 @@ function buildNumbers() {
     el.style.setProperty("--c", `hsl(${n * 36}, 80%, 55%)`);
     onTap(el, (e) => {
       happySound();
-      sayCount(n);
+      // Single utterance — reliable on iOS. Use the word, not the digit,
+      // because iOS sometimes reads "1" as "number one" or too fast.
+      say(numberWords[n]);
       showBigDisplay(n, el.style.getPropertyValue("--c"));
       const p = pointOf(e);
       sparkleAt(p.x, p.y);
