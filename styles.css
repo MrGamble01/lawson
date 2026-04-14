@@ -5,7 +5,8 @@ html, body {
   height: 100dvh;
   width: 100%;
   font-family: "Chalkboard SE", "Comic Sans MS", "Baloo", -apple-system, system-ui, sans-serif;
-  background: linear-gradient(135deg, #ffe0f0 0%, #e0f7ff 50%, #fff7cc 100%);
+  /* Backdrop is now an animated SVG, body stays transparent so it shows through */
+  background: #d4f1ff;
   overflow: hidden;
   user-select: none;
   -webkit-user-select: none;
@@ -17,15 +18,68 @@ html, body {
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
+/* ---------- Animated world backdrop ---------- */
+#worldBg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+#worldBg svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.bg-sun {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: sunPulse 5s ease-in-out infinite;
+}
+@keyframes sunPulse {
+  0%, 100% { transform: scale(1);    filter: drop-shadow(0 0 18px rgba(255, 212, 59, 0.6)); }
+  50%      { transform: scale(1.04); filter: drop-shadow(0 0 32px rgba(255, 212, 59, 0.85)); }
+}
+.bg-sun-rays {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: raySpin 40s linear infinite;
+}
+@keyframes raySpin {
+  to { transform: rotate(360deg); }
+}
+.bg-cloud {
+  animation: cloudDrift 80s linear infinite;
+}
+.cloud-a { animation-duration: 95s; }
+.cloud-b { animation-duration: 70s; animation-delay: -25s; }
+.cloud-c { animation-duration: 110s; animation-delay: -55s; }
+@keyframes cloudDrift {
+  from { transform: translateX(-220px); }
+  to   { transform: translateX(1220px); }
+}
+.bg-hill-back, .bg-hill-front {
+  transform-origin: center bottom;
+  animation: hillSway 12s ease-in-out infinite;
+}
+.bg-hill-front { animation-delay: -6s; }
+@keyframes hillSway {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(3px); }
+}
+
 header {
   text-align: center;
   padding: 12px;
   position: relative;
+  z-index: 2;
 }
 header h1 {
   font-size: clamp(22px, 4vw, 40px);
   color: #ff4081;
-  text-shadow: 2px 2px 0 #fff, 4px 4px 0 rgba(0,0,0,0.08);
+  text-shadow:
+    2px 2px 0 #fff,
+    4px 4px 0 rgba(0,0,0,0.15),
+    0 0 20px rgba(255,255,255,0.6);
   letter-spacing: 1px;
 }
 
@@ -55,13 +109,33 @@ header h1 {
   position: relative;
 }
 
+/* Screens are always laid out; we fade/scale between them. Non-active
+ * screens are hidden via visibility+opacity AND pointer-events so they
+ * can't intercept taps through the active screen. */
 .screen {
   position: absolute;
   inset: 0;
-  display: none;
+  display: flex;
   padding: 16px;
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.94);
+  pointer-events: none;
+  transition:
+    opacity 0.35s ease,
+    transform 0.4s cubic-bezier(0.34, 1.4, 0.64, 1),
+    visibility 0s linear 0.35s;
 }
-.screen.active { display: flex; }
+.screen.active {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
+  pointer-events: auto;
+  transition:
+    opacity 0.35s ease,
+    transform 0.4s cubic-bezier(0.34, 1.4, 0.64, 1),
+    visibility 0s;
+}
 
 /* ---------- Home menu ---------- */
 #menu {
@@ -76,17 +150,30 @@ header h1 {
   border-radius: 28px;
   width: min(28vw, 180px);
   height: min(28vw, 180px);
-  box-shadow: 0 8px 0 rgba(0,0,0,0.15), 0 12px 25px rgba(0,0,0,0.18);
+  box-shadow:
+    0 8px 0 rgba(0,0,0,0.15),
+    0 12px 25px rgba(0,0,0,0.18),
+    inset 0 -8px 0 rgba(0,0,0,0.08),
+    inset 0 4px 0 rgba(255,255,255,0.25);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: transform 0.08s ease;
+  /* Springy overshoot on the way back up from a press */
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.2s ease;
   color: #fff;
   font-weight: bold;
 }
-.tile:active { transform: scale(0.94) translateY(4px); }
+.tile:active {
+  transform: scale(0.92) translateY(5px);
+  box-shadow:
+    0 3px 0 rgba(0,0,0,0.15),
+    0 5px 12px rgba(0,0,0,0.15),
+    inset 0 -4px 0 rgba(0,0,0,0.1),
+    inset 0 2px 0 rgba(255,255,255,0.2);
+}
 .tile .emoji { font-size: clamp(40px, 8vw, 72px); }
 .tile .label { font-size: clamp(16px, 2.4vw, 28px); margin-top: 6px; text-shadow: 2px 2px 0 rgba(0,0,0,0.2); }
 
@@ -421,6 +508,130 @@ header h1 {
   100% { transform: translate(var(--dx), var(--dy)) scale(1.5); opacity: 0; }
 }
 
+/* ---------- Mascot character ---------- */
+.mascot {
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+  animation: mascotBob 3s ease-in-out infinite;
+}
+.mascot-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  filter: drop-shadow(0 10px 18px rgba(0,0,0,0.2));
+}
+.mascot-rays {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: raySpin 22s linear infinite;
+}
+@keyframes mascotBob {
+  0%, 100% { transform: translateY(0)    rotate(-1deg); }
+  50%      { transform: translateY(-10px) rotate(1deg); }
+}
+
+/* ---------- Splash / welcome screen ---------- */
+#splash {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.splash-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  animation: splashIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.splash-content .mascot {
+  width: clamp(140px, 28vw, 220px);
+  height: clamp(140px, 28vw, 220px);
+}
+.splash-title {
+  font-size: clamp(36px, 7vw, 64px);
+  text-align: center;
+  color: #ff4081;
+  line-height: 1;
+  text-shadow:
+    3px 3px 0 #fff,
+    6px 6px 0 rgba(0,0,0,0.12),
+    0 0 25px rgba(255,255,255,0.7);
+  letter-spacing: 1px;
+}
+.splash-hint {
+  font-size: clamp(18px, 3vw, 28px);
+  color: #fff;
+  background: #ff4081;
+  padding: 10px 24px;
+  border-radius: 999px;
+  box-shadow: 0 6px 0 rgba(0,0,0,0.15);
+  animation: hintPulse 1.4s ease-in-out infinite;
+}
+@keyframes splashIn {
+  from { opacity: 0; transform: translateY(40px) scale(0.8); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);   }
+}
+@keyframes hintPulse {
+  0%, 100% { transform: scale(1);    box-shadow: 0 6px 0 rgba(0,0,0,0.15); }
+  50%      { transform: scale(1.08); box-shadow: 0 10px 0 rgba(0,0,0,0.2); }
+}
+
+/* ---------- Milestone cheer overlay ---------- */
+.cheer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  background: radial-gradient(circle at center,
+    rgba(255, 255, 255, 0.15) 0%,
+    rgba(0, 0, 0, 0.35) 100%);
+}
+.cheer-overlay.show {
+  opacity: 1;
+}
+.cheer-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  transform: scale(0.4) rotate(-8deg);
+  opacity: 0;
+}
+.cheer-overlay.show .cheer-content {
+  animation: cheerIn 1.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+.cheer-content .mascot {
+  width: clamp(140px, 28vw, 240px);
+  height: clamp(140px, 28vw, 240px);
+}
+.cheer-banner {
+  background: linear-gradient(135deg, #ff4081, #ff9500);
+  color: #fff;
+  font-size: clamp(32px, 5.5vw, 56px);
+  font-weight: bold;
+  padding: 14px 40px;
+  border-radius: 999px;
+  border: 5px solid #fff;
+  box-shadow: 0 10px 0 rgba(0,0,0,0.2), 0 15px 40px rgba(0,0,0,0.3);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.25);
+  white-space: nowrap;
+}
+@keyframes cheerIn {
+  0%   { transform: scale(0.4) rotate(-8deg); opacity: 0; }
+  20%  { transform: scale(1.15) rotate(3deg); opacity: 1; }
+  40%  { transform: scale(0.95) rotate(-2deg); }
+  55%  { transform: scale(1.05) rotate(1deg); }
+  80%  { transform: scale(1) rotate(0); opacity: 1; }
+  100% { transform: scale(1) rotate(0); opacity: 0; }
+}
+
 /* ---------- Reduced-motion support ----------
  * Respect users who prefer reduced motion. We disable the flashy
  * feedback animations (pop, shake, bump, correct pulse, burst, sparkle)
@@ -433,6 +644,14 @@ header h1 {
   .match-choice.wrong { animation: none; }
   .burst { animation-duration: 0.2s; }
   .sparkle { animation-duration: 0.3s; }
+  .bg-sun, .bg-sun-rays, .bg-cloud, .bg-hill-back, .bg-hill-front,
+  .mascot, .mascot-rays, .splash-content, .splash-hint {
+    animation: none !important;
+  }
+  .cheer-overlay.show .cheer-content { animation-duration: 0.2s; }
+  .screen {
+    transition-duration: 0.01ms;
+  }
   .tile, .item, .match-choice, .count-item, .xkey, .home-btn, .mute-btn {
     transition-duration: 0.01ms;
   }

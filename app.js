@@ -115,6 +115,17 @@ function buzzSound() {
   beep(140, 0.22, "square", 0.1);
 }
 
+// Bigger, more triumphant chord for milestones and splash-to-menu
+function cheerJingle() {
+  // C-E-G-C major arpeggio, longer sustain, rising
+  beep(523.25,  0.18, "triangle", 0);
+  beep(659.25,  0.18, "triangle", 0.12);
+  beep(783.99,  0.18, "triangle", 0.24);
+  beep(1046.50, 0.35, "triangle", 0.36);
+  // A sparkle on top for a little extra magic
+  beep(1318.51, 0.25, "sine", 0.55);
+}
+
 // ---------- Mute toggle ----------
 function updateMuteButton() {
   const btn = document.getElementById("muteBtn");
@@ -131,9 +142,129 @@ function toggleMute() {
 }
 
 // ---------- Screens ----------
+// Screens overlap in the layout; we toggle a single `.active` class and
+// let CSS handle the opacity/scale transition.
 const screens = document.querySelectorAll(".screen");
 function show(id) {
   screens.forEach((s) => s.classList.toggle("active", s.id === id));
+}
+
+// ---------- Confetti particle system ----------
+// Canvas-based physics confetti. Shared by match wins, count wins and
+// milestone cheers. Runs a RAF loop only while particles are alive.
+class Confetti {
+  constructor() {
+    this.canvas = document.createElement("canvas");
+    this.canvas.setAttribute("aria-hidden", "true");
+    this.canvas.style.cssText =
+      "position:fixed;inset:0;pointer-events:none;z-index:55";
+    document.body.appendChild(this.canvas);
+    this.ctx = this.canvas.getContext("2d");
+    this.particles = [];
+    this.running = false;
+    this.colors = [
+      "#ff4081", "#4dabf7", "#ffd43b", "#69db7c",
+      "#845ec2", "#ff9500", "#20c997", "#ff6b6b",
+    ];
+    this.resize();
+    window.addEventListener("resize", () => this.resize());
+  }
+  resize() {
+    const dpr = window.devicePixelRatio || 1;
+    this.w = window.innerWidth;
+    this.h = window.innerHeight;
+    this.canvas.width = Math.floor(this.w * dpr);
+    this.canvas.height = Math.floor(this.h * dpr);
+    this.canvas.style.width = this.w + "px";
+    this.canvas.style.height = this.h + "px";
+    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  burst(x, y, count = 40, power = 1) {
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = (4 + Math.random() * 8) * power;
+      this.particles.push({
+        x, y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - Math.random() * 4 * power,
+        gravity: 0.35,
+        drag: 0.992,
+        color: this.colors[Math.floor(Math.random() * this.colors.length)],
+        size: 5 + Math.random() * 6,
+        rot: Math.random() * Math.PI * 2,
+        vrot: (Math.random() - 0.5) * 0.35,
+        life: 0,
+        maxLife: 110 + Math.random() * 80,
+      });
+    }
+    if (!this.running) this.loop();
+  }
+  loop() {
+    this.running = true;
+    const tick = () => {
+      const ctx = this.ctx;
+      ctx.clearRect(0, 0, this.w, this.h);
+      this.particles = this.particles.filter((p) => {
+        p.life += 1;
+        if (p.life > p.maxLife || p.y > this.h + 40) return false;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += p.gravity;
+        p.vx *= p.drag;
+        p.rot += p.vrot;
+        const alpha = Math.max(0, 1 - (p.life / p.maxLife));
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.fillStyle = p.color;
+        // Rectangle strip that looks like real paper confetti
+        ctx.fillRect(-p.size / 2, -p.size * 0.75, p.size, p.size * 1.5);
+        ctx.restore();
+        return true;
+      });
+      if (this.particles.length > 0) {
+        requestAnimationFrame(tick);
+      } else {
+        this.running = false;
+        ctx.clearRect(0, 0, this.w, this.h);
+      }
+    };
+    requestAnimationFrame(tick);
+  }
+}
+const confetti = new Confetti();
+
+// ---------- Milestone cheer overlay ----------
+// Full-screen celebration: mascot bounces in, banner shows, confetti
+// bursts from a few spots. Auto-hides after ~1.8s.
+const CHEER_MESSAGES = [
+  "Great Job!", "Amazing!", "Wow!", "Woohoo!", "You rock!", "Super Star!",
+];
+let cheerHideTimer = null;
+function triggerCheer(message) {
+  const overlay = document.getElementById("cheerOverlay");
+  if (!overlay) return;
+  const text =
+    message || CHEER_MESSAGES[Math.floor(Math.random() * CHEER_MESSAGES.length)];
+  overlay.querySelector("#cheerText").textContent = text;
+  overlay.classList.remove("show");
+  void overlay.offsetWidth; // restart the CSS animation on repeat fires
+  overlay.classList.add("show");
+
+  cheerJingle();
+  say(text);
+  vibrate(80);
+
+  // Fire a few confetti bursts across the top of the screen
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  confetti.burst(w * 0.5, h * 0.35, 70, 1.2);
+  setTimeout(() => confetti.burst(w * 0.2, h * 0.4, 45), 180);
+  setTimeout(() => confetti.burst(w * 0.8, h * 0.4, 45), 360);
+
+  clearTimeout(cheerHideTimer);
+  cheerHideTimer = setTimeout(() => overlay.classList.remove("show"), 1800);
 }
 
 // ---------- Data ----------
@@ -451,6 +582,10 @@ function startPopGame() {
       say(c.name);
       popScore += 1;
       bumpBadge("popScoreVal", popScore);
+      // Every 10 pops: big celebration
+      if (popScore % 10 === 0) {
+        triggerCheer(`${popScore} Pops!`);
+      }
       const burst = document.createElement("div");
       burst.className = "burst";
       burst.textContent = "💥";
@@ -563,17 +698,18 @@ function newMatchRound(speakPrompt = true) {
         vibrate(50);
         matchScore += 1;
         bumpBadge("matchScoreVal", matchScore);
-        // Every 5: big celebration
-        if (matchScore % 5 === 0) {
-          say(`${CHEER_PHRASES[Math.floor(Math.random() * CHEER_PHRASES.length)]} ${matchScore} in a row!`);
-        } else {
-          say(CHEER_PHRASES[Math.floor(Math.random() * CHEER_PHRASES.length)]);
-        }
+        const isMilestone = matchScore % 5 === 0;
         btn.classList.add("correct");
         const p = pointOf(e);
         sparkleAt(p.x, p.y);
+        confetti.burst(p.x, p.y, 30);
+        if (isMilestone) {
+          triggerCheer(`${matchScore} in a row!`);
+        } else {
+          say(CHEER_PHRASES[Math.floor(Math.random() * CHEER_PHRASES.length)]);
+        }
         clearTimeout(matchRoundTimer);
-        matchRoundTimer = setTimeout(() => newMatchRound(true), 1300);
+        matchRoundTimer = setTimeout(() => newMatchRound(true), isMilestone ? 2100 : 1300);
       } else {
         buzzSound();
         say(`Find the ${answer.name}`);
@@ -658,11 +794,18 @@ function newCountRound() {
       if (counted === total) {
         countScore += 1;
         bumpBadge("countScoreVal", countScore);
+        confetti.burst(window.innerWidth / 2, window.innerHeight * 0.45, 55);
         clearTimeout(countTimer);
+        const isMilestone = countScore % 3 === 0;
         countTimer = setTimeout(() => {
-          happySound();
-          say(`${NUMBER_WORDS[total]} ${label}!`);
-          countTimer = setTimeout(newCountRound, 1700);
+          if (isMilestone) {
+            triggerCheer(`${countScore} Rounds!`);
+            countTimer = setTimeout(newCountRound, 2300);
+          } else {
+            happySound();
+            say(`${NUMBER_WORDS[total]} ${label}!`);
+            countTimer = setTimeout(newCountRound, 1700);
+          }
         }, 600);
       }
     });
@@ -728,6 +871,19 @@ document.querySelectorAll("[data-home]").forEach((btn) => {
 
 // Attach one-time handlers to the xylophone keys
 initMusicGame();
+
+// Splash screen: any tap unlocks audio and slides into the menu with a
+// cheerful welcome chord. Pointer-events are already gated by the
+// screen-transition CSS, so this only fires while splash is active.
+const splashScreen = document.getElementById("splash");
+if (splashScreen) {
+  onTap(splashScreen, () => {
+    unlockAudio();
+    unlockSpeech();
+    cheerJingle();
+    show("menu");
+  });
+}
 
 // Wire up the mute button (exists in the header on every screen)
 const muteBtn = document.getElementById("muteBtn");
