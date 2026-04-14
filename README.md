@@ -15,6 +15,8 @@ in a browser or host it anywhere that serves static files.
 - **Animals** — twelve animals with their sounds
 - **Pop!** — tap floating balloons; the spoken color always matches the balloon
 - **Match** — find the matching picture (gets harder after a score of 10)
+- **Count** — tap N items one-by-one to count them out loud
+- **Music** — a rainbow xylophone (C major)
 
 ## Notes
 - Tuned for iPad / iPad mini in Safari. Add it to the home screen for a

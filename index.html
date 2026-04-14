@@ -48,6 +48,12 @@
       <button class="tile" data-go="match" style="--c:#20c997">
         <span class="emoji">🧩</span><span class="label">Match</span>
       </button>
+      <button class="tile" data-go="count" style="--c:#fab005">
+        <span class="emoji">🍎</span><span class="label">Count</span>
+      </button>
+      <button class="tile" data-go="music" style="--c:#845ec2">
+        <span class="emoji">🎵</span><span class="label">Music</span>
+      </button>
     </section>
 
     <!-- Generic activity screen (letters/numbers/colors/shapes/animals) -->
@@ -72,6 +78,30 @@
         <div class="match-target-label" id="matchPrompt">Find this!</div>
         <div id="matchTarget" class="match-target"></div>
         <div id="matchChoices" class="match-choices"></div>
+      </div>
+    </section>
+
+    <!-- Counting game -->
+    <section id="countGame" class="screen">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="countScore" class="badge">🏆 <span id="countScoreVal">0</span></div>
+      <div class="count-layout">
+        <div class="match-target-label" id="countPrompt">Count them!</div>
+        <div id="countItems" class="count-items"></div>
+      </div>
+    </section>
+
+    <!-- Music / xylophone -->
+    <section id="musicGame" class="screen">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="xylophone" class="xylophone" role="group" aria-label="Xylophone keys">
+        <button class="xkey" type="button" style="--c:#ff5252" data-note="C" data-freq="261.63" aria-label="Note C">C</button>
+        <button class="xkey" type="button" style="--c:#ff9800" data-note="D" data-freq="293.66" aria-label="Note D">D</button>
+        <button class="xkey" type="button" style="--c:#ffc107" data-note="E" data-freq="329.63" aria-label="Note E">E</button>
+        <button class="xkey" type="button" style="--c:#4caf50" data-note="F" data-freq="349.23" aria-label="Note F">F</button>
+        <button class="xkey" type="button" style="--c:#00bcd4" data-note="G" data-freq="392.00" aria-label="Note G">G</button>
+        <button class="xkey" type="button" style="--c:#3f51b5" data-note="A" data-freq="440.00" aria-label="Note A">A</button>
+        <button class="xkey" type="button" style="--c:#9c27b0" data-note="B" data-freq="493.88" aria-label="Note B">B</button>
       </div>
     </section>
   </main>

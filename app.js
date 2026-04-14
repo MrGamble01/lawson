@@ -63,28 +63,44 @@ function say(text, rate = 0.95) {
 }
 
 // ---------- Simple sounds via Web Audio ----------
+// Lazy-init so modern browsers don't warn about AudioContext created
+// before a user gesture. Created on the first call to unlockAudio / beep.
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
-const audioCtx = new AudioCtx();
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx && AudioCtx) audioCtx = new AudioCtx();
+  return audioCtx;
+}
 
 function unlockAudio() {
-  if (audioCtx.state === "suspended") audioCtx.resume();
+  const ctx = getAudioCtx();
+  if (ctx && ctx.state === "suspended") ctx.resume();
 }
 
 function beep(freq = 440, dur = 0.15, type = "sine", when = 0) {
   if (muted) return;
+  const ctx = getAudioCtx();
+  if (!ctx) return;
   try {
-    const t = audioCtx.currentTime + when;
-    const o = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
+    const t = ctx.currentTime + when;
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
     o.type = type;
     o.frequency.value = freq;
     g.gain.setValueAtTime(0.0001, t);
     g.gain.exponentialRampToValueAtTime(0.25, t + 0.01);
     g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    o.connect(g).connect(audioCtx.destination);
+    o.connect(g).connect(ctx.destination);
     o.start(t);
     o.stop(t + dur + 0.02);
   } catch (_) {}
+}
+
+// Short haptic tick on supported devices (Android). Silent on iOS.
+// Gated on `muted` so "quiet mode" also means "don't buzz".
+function vibrate(ms) {
+  if (muted) return;
+  try { navigator.vibrate && navigator.vibrate(ms); } catch (_) {}
 }
 
 // Pleasant ascending chime (C-E-G), not three simultaneous beeps
@@ -544,6 +560,7 @@ function newMatchRound(speakPrompt = true) {
     onTap(btn, (e) => {
       if (item.emoji === answer.emoji) {
         happySound();
+        vibrate(50);
         matchScore += 1;
         bumpBadge("matchScoreVal", matchScore);
         // Every 5: big celebration
@@ -578,6 +595,91 @@ function stopMatchGame() {
   matchRoundTimer = null;
 }
 
+// ---------- Music / xylophone ----------
+// Wire up the keys once; they live in the HTML, not generated per visit.
+function initMusicGame() {
+  document.querySelectorAll("#xylophone .xkey").forEach((key) => {
+    onTap(key, () => {
+      const freq = parseFloat(key.dataset.freq);
+      beep(freq, 0.55, "triangle");
+      key.classList.add("playing");
+      setTimeout(() => key.classList.remove("playing"), 220);
+      vibrate(20);
+    });
+  });
+}
+
+// ---------- Counting game ----------
+// Show N of the same item (1-5). Tap each one and the app counts aloud.
+// Teaches the *act* of counting, which the static 123 tiles don't.
+const COUNT_POOL = [
+  { emoji: "🍎", singular: "apple",      plural: "apples" },
+  { emoji: "🍌", singular: "banana",     plural: "bananas" },
+  { emoji: "🍓", singular: "strawberry", plural: "strawberries" },
+  { emoji: "⭐", singular: "star",       plural: "stars" },
+  { emoji: "🎈", singular: "balloon",    plural: "balloons" },
+  { emoji: "🐟", singular: "fish",       plural: "fish" },
+  { emoji: "🌸", singular: "flower",     plural: "flowers" },
+  { emoji: "🍇", singular: "grape",      plural: "grapes" },
+  { emoji: "🐞", singular: "bug",        plural: "bugs" },
+];
+
+let countScore = 0;
+let countTimer = null;
+
+function newCountRound() {
+  const wrap = document.getElementById("countItems");
+  const prompt = document.getElementById("countPrompt");
+  wrap.innerHTML = "";
+
+  const subject = COUNT_POOL[Math.floor(Math.random() * COUNT_POOL.length)];
+  const total = 1 + Math.floor(Math.random() * 5); // 1-5 items
+  let counted = 0;
+
+  const label = total === 1 ? subject.singular : subject.plural;
+  prompt.textContent = `Count the ${label}!`;
+  say(`Count the ${label}`);
+
+  for (let i = 0; i < total; i++) {
+    const el = document.createElement("button");
+    el.className = "count-item";
+    el.textContent = subject.emoji;
+    onTap(el, (e) => {
+      if (el.classList.contains("counted")) return;
+      counted += 1;
+      el.classList.add("counted");
+      say(NUMBER_WORDS[counted]);
+      // Each count a semitone higher so it's pleasantly ascending
+      beep(330 + counted * 55, 0.12, "triangle");
+      vibrate(30);
+      const p = pointOf(e);
+      sparkleAt(p.x, p.y);
+
+      if (counted === total) {
+        countScore += 1;
+        bumpBadge("countScoreVal", countScore);
+        clearTimeout(countTimer);
+        countTimer = setTimeout(() => {
+          happySound();
+          say(`${NUMBER_WORDS[total]} ${label}!`);
+          countTimer = setTimeout(newCountRound, 1700);
+        }, 600);
+      }
+    });
+    wrap.appendChild(el);
+  }
+}
+
+function startCountGame() {
+  countScore = 0;
+  document.getElementById("countScoreVal").textContent = "0";
+  newCountRound();
+}
+function stopCountGame() {
+  clearTimeout(countTimer);
+  countTimer = null;
+}
+
 // ---------- Routing ----------
 document.querySelectorAll("[data-go]").forEach((btn) => {
   onTap(btn, () => {
@@ -595,6 +697,15 @@ document.querySelectorAll("[data-go]").forEach((btn) => {
       startMatchGame();
       return;
     }
+    if (where === "music") {
+      show("musicGame");
+      return;
+    }
+    if (where === "count") {
+      show("countGame");
+      startCountGame();
+      return;
+    }
     show("activity");
     if (where === "letters") buildLetters();
     if (where === "numbers") buildNumbers();
@@ -608,11 +719,15 @@ document.querySelectorAll("[data-home]").forEach((btn) => {
   onTap(btn, () => {
     stopPopGame();
     stopMatchGame();
+    stopCountGame();
     if (synth) synth.cancel();
     show("menu");
     beep(400, 0.1);
   });
 });
+
+// Attach one-time handlers to the xylophone keys
+initMusicGame();
 
 // Wire up the mute button (exists in the header on every screen)
 const muteBtn = document.getElementById("muteBtn");
