@@ -1,3 +1,17 @@
+// ---------- Persistent settings ----------
+const LS = {
+  get(key, fallback) {
+    try {
+      const v = localStorage.getItem(key);
+      return v == null ? fallback : JSON.parse(v);
+    } catch (_) { return fallback; }
+  },
+  set(key, value) {
+    try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) {}
+  },
+};
+let muted = LS.get("lawson.muted", false);
+
 // ---------- Speech ----------
 const synth = window.speechSynthesis;
 let speechUnlocked = false;
@@ -38,6 +52,7 @@ function unlockSpeech() {
 function say(text, rate = 0.95) {
   if (!synth) return;
   synth.cancel();
+  if (muted) return;
   const u = new SpeechSynthesisUtterance(text);
   u.rate = rate;
   u.pitch = 1.15;
@@ -56,6 +71,7 @@ function unlockAudio() {
 }
 
 function beep(freq = 440, dur = 0.15, type = "sine", when = 0) {
+  if (muted) return;
   try {
     const t = audioCtx.currentTime + when;
     const o = audioCtx.createOscillator();
@@ -81,6 +97,21 @@ function happySound() {
 function buzzSound() {
   beep(180, 0.18, "square", 0);
   beep(140, 0.22, "square", 0.1);
+}
+
+// ---------- Mute toggle ----------
+function updateMuteButton() {
+  const btn = document.getElementById("muteBtn");
+  if (!btn) return;
+  btn.textContent = muted ? "🔇" : "🔊";
+  btn.setAttribute("aria-label", muted ? "Unmute sounds" : "Mute sounds");
+  btn.setAttribute("aria-pressed", muted ? "true" : "false");
+}
+function toggleMute() {
+  muted = !muted;
+  LS.set("lawson.muted", muted);
+  if (muted && synth) synth.cancel();
+  updateMuteButton();
 }
 
 // ---------- Screens ----------
@@ -479,6 +510,7 @@ function pickRandom(arr, n) {
 }
 
 let matchScore = 0;
+let matchRoundTimer = null;
 const CHEER_PHRASES = ["Yay! Great job!", "You got it!", "Awesome!", "Super!", "Nice one!"];
 
 function newMatchRound(speakPrompt = true) {
@@ -487,8 +519,11 @@ function newMatchRound(speakPrompt = true) {
   target.innerHTML = "";
   choices.innerHTML = "";
 
-  const [answer, d1, d2] = pickRandom(MATCH_POOL, 3);
-  const options = [answer, d1, d2].sort(() => Math.random() - 0.5);
+  // Start with 3 choices; bump to 4 once the kid is comfortable.
+  const numChoices = matchScore < 10 ? 3 : 4;
+  const picked = pickRandom(MATCH_POOL, numChoices);
+  const answer = picked[0];
+  const options = picked.slice().sort(() => Math.random() - 0.5);
 
   const targetEl = document.createElement("div");
   targetEl.className = "match-target-item";
@@ -520,7 +555,8 @@ function newMatchRound(speakPrompt = true) {
         btn.classList.add("correct");
         const p = pointOf(e);
         sparkleAt(p.x, p.y);
-        setTimeout(() => newMatchRound(true), 1300);
+        clearTimeout(matchRoundTimer);
+        matchRoundTimer = setTimeout(() => newMatchRound(true), 1300);
       } else {
         buzzSound();
         say(`Find the ${answer.name}`);
@@ -536,6 +572,10 @@ function startMatchGame() {
   matchScore = 0;
   document.getElementById("matchScoreVal").textContent = "0";
   newMatchRound(true);
+}
+function stopMatchGame() {
+  clearTimeout(matchRoundTimer);
+  matchRoundTimer = null;
 }
 
 // ---------- Routing ----------
@@ -567,11 +607,27 @@ document.querySelectorAll("[data-go]").forEach((btn) => {
 document.querySelectorAll("[data-home]").forEach((btn) => {
   onTap(btn, () => {
     stopPopGame();
+    stopMatchGame();
     if (synth) synth.cancel();
     show("menu");
     beep(400, 0.1);
   });
 });
+
+// Wire up the mute button (exists in the header on every screen)
+const muteBtn = document.getElementById("muteBtn");
+if (muteBtn) {
+  updateMuteButton();
+  onTap(muteBtn, () => {
+    unlockAudio();
+    toggleMute();
+    // Give a tiny click so you can feel the button — but only if we just unmuted
+    if (!muted) beep(600, 0.08);
+  });
+}
+
+// Block iOS long-press context menu (kids love to hold things down)
+document.addEventListener("contextmenu", (e) => e.preventDefault());
 
 // Prevent multi-touch pinch-zoom gestures on iOS (belt-and-braces with viewport meta)
 document.addEventListener("gesturestart", (e) => e.preventDefault());
