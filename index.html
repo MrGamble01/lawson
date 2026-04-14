@@ -12,63 +12,15 @@
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="theme-color" content="#ff4081" />
 
-<!-- Inline SVG favicon / home screen icon (no file needed) -->
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%88%3C/text%3E%3C/svg%3E" />
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23ff4081'/%3E%3Ctext x='50' y='72' text-anchor='middle' font-size='64'%3E%F0%9F%8E%88%3C/text%3E%3C/svg%3E" />
+<link rel="manifest" href="assets/manifest.webmanifest" />
+<link rel="icon" type="image/svg+xml" href="assets/icon.svg" />
+<link rel="apple-touch-icon" href="assets/icon.svg" />
 
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <!-- Animated world backdrop (sits behind everything) -->
-  <div id="worldBg" aria-hidden="true">
-    <svg viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid slice">
-      <defs>
-        <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"   stop-color="#ffe4f2"/>
-          <stop offset="45%"  stop-color="#d4f1ff"/>
-          <stop offset="100%" stop-color="#fff7cc"/>
-        </linearGradient>
-        <radialGradient id="sunGrad" cx="50%" cy="50%" r="50%">
-          <stop offset="0%"   stop-color="#fff3a0"/>
-          <stop offset="70%"  stop-color="#ffd43b"/>
-          <stop offset="100%" stop-color="#ffb74d"/>
-        </radialGradient>
-      </defs>
-      <rect width="1000" height="700" fill="url(#skyGrad)"/>
-      <!-- Sun with rays -->
-      <g class="bg-sun">
-        <circle cx="850" cy="130" r="68" fill="url(#sunGrad)"/>
-        <g class="bg-sun-rays" fill="#ffd43b" opacity="0.6">
-          <polygon points="850,20 862,52 838,52"/>
-          <polygon points="850,240 838,208 862,208"/>
-          <polygon points="740,130 772,118 772,142"/>
-          <polygon points="960,130 928,118 928,142"/>
-          <polygon points="775,55 800,80 782,90"/>
-          <polygon points="925,55 900,80 918,90"/>
-          <polygon points="775,205 800,180 782,170"/>
-          <polygon points="925,205 900,180 918,170"/>
-        </g>
-      </g>
-      <!-- Drifting clouds -->
-      <g class="bg-cloud cloud-a" transform="translate(200 160)">
-        <ellipse cx="0"   cy="0"   rx="56" ry="26" fill="#fff"/>
-        <ellipse cx="38"  cy="-12" rx="40" ry="24" fill="#fff"/>
-        <ellipse cx="-38" cy="-8"  rx="34" ry="20" fill="#fff"/>
-      </g>
-      <g class="bg-cloud cloud-b" transform="translate(520 90)">
-        <ellipse cx="0"  cy="0"   rx="44" ry="22" fill="#fff"/>
-        <ellipse cx="30" cy="-10" rx="30" ry="18" fill="#fff"/>
-      </g>
-      <g class="bg-cloud cloud-c" transform="translate(100 280)">
-        <ellipse cx="0"   cy="0"   rx="64" ry="28" fill="#fff"/>
-        <ellipse cx="46"  cy="-14" rx="42" ry="24" fill="#fff"/>
-        <ellipse cx="-44" cy="-10" rx="36" ry="22" fill="#fff"/>
-      </g>
-      <!-- Rolling hills -->
-      <path class="bg-hill-back"  d="M0 500 Q 250 420 500 480 Q 750 550 1000 460 L 1000 700 L 0 700 Z" fill="#a8e6cf"/>
-      <path class="bg-hill-front" d="M0 600 Q 200 530 450 580 Q 700 640 1000 560 L 1000 700 L 0 700 Z" fill="#88d8a0"/>
-    </svg>
-  </div>
+  <!-- Animated world backdrop (SVG loaded via CSS background-image) -->
+  <div id="worldBg" aria-hidden="true"></div>
 
   <header>
     <h1>Lawson's Playground</h1>
@@ -79,28 +31,7 @@
     <!-- Splash / welcome screen -->
     <section id="splash" class="screen active">
       <div class="splash-content">
-        <div class="mascot">
-          <svg viewBox="0 0 200 200" class="mascot-svg" aria-hidden="true">
-            <g class="mascot-rays" fill="#ffd43b">
-              <polygon points="100,4   112,38  88,38"/>
-              <polygon points="100,196 88,162  112,162"/>
-              <polygon points="4,100   38,88   38,112"/>
-              <polygon points="196,100 162,88  162,112"/>
-              <polygon points="32,32   60,50   50,60"/>
-              <polygon points="168,32  140,50  150,60"/>
-              <polygon points="32,168  50,140  60,150"/>
-              <polygon points="168,168 150,140 140,150"/>
-            </g>
-            <circle cx="100" cy="100" r="55" fill="#ffd43b" stroke="#ff9500" stroke-width="5"/>
-            <circle cx="82"  cy="92" r="8" fill="#333"/>
-            <circle cx="118" cy="92" r="8" fill="#333"/>
-            <circle cx="84"  cy="89" r="3" fill="#fff"/>
-            <circle cx="120" cy="89" r="3" fill="#fff"/>
-            <ellipse cx="70"  cy="112" rx="8" ry="5" fill="#ff9ecb" opacity="0.7"/>
-            <ellipse cx="130" cy="112" rx="8" ry="5" fill="#ff9ecb" opacity="0.7"/>
-            <path d="M80 116 Q100 136 120 116" stroke="#333" stroke-width="5" fill="none" stroke-linecap="round"/>
-          </svg>
-        </div>
+        <img class="mascot" src="assets/mascot.svg" alt="" aria-hidden="true" draggable="false" />
         <h2 class="splash-title">Lawson's<br>Playground</h2>
         <div class="splash-hint">Tap to play!</div>
       </div>
@@ -190,28 +121,7 @@
   <!-- Milestone cheer overlay (mascot + banner + confetti) -->
   <div id="cheerOverlay" class="cheer-overlay" aria-hidden="true">
     <div class="cheer-content">
-      <div class="mascot mascot-cheer">
-        <svg viewBox="0 0 200 200" class="mascot-svg" aria-hidden="true">
-          <g class="mascot-rays" fill="#ffd43b">
-            <polygon points="100,4   112,38  88,38"/>
-            <polygon points="100,196 88,162  112,162"/>
-            <polygon points="4,100   38,88   38,112"/>
-            <polygon points="196,100 162,88  162,112"/>
-            <polygon points="32,32   60,50   50,60"/>
-            <polygon points="168,32  140,50  150,60"/>
-            <polygon points="32,168  50,140  60,150"/>
-            <polygon points="168,168 150,140 140,150"/>
-          </g>
-          <circle cx="100" cy="100" r="55" fill="#ffd43b" stroke="#ff9500" stroke-width="5"/>
-          <circle cx="82"  cy="92" r="8" fill="#333"/>
-          <circle cx="118" cy="92" r="8" fill="#333"/>
-          <circle cx="84"  cy="89" r="3" fill="#fff"/>
-          <circle cx="120" cy="89" r="3" fill="#fff"/>
-          <ellipse cx="70"  cy="112" rx="8" ry="5" fill="#ff9ecb" opacity="0.7"/>
-          <ellipse cx="130" cy="112" rx="8" ry="5" fill="#ff9ecb" opacity="0.7"/>
-          <path d="M80 116 Q100 136 120 116" stroke="#333" stroke-width="5" fill="none" stroke-linecap="round"/>
-        </svg>
-      </div>
+      <img class="mascot mascot-cheer" src="assets/mascot.svg" alt="" aria-hidden="true" draggable="false" />
       <div class="cheer-banner"><span id="cheerText">Great Job!</span></div>
     </div>
   </div>

@@ -103,11 +103,82 @@ function vibrate(ms) {
   try { navigator.vibrate && navigator.vibrate(ms); } catch (_) {}
 }
 
-// Pleasant ascending chime (C-E-G), not three simultaneous beeps
+// ---------- Shared reverb bus ----------
+// Synthesized impulse-response convolver that other instruments can
+// send wet signal to. Built once, on demand, the first time any
+// instrument asks for it.
+let reverbInput = null;
+function ensureReverb() {
+  const ctx = getAudioCtx();
+  if (!ctx || reverbInput) return;
+  try {
+    const sr = ctx.sampleRate;
+    const len = Math.floor(sr * 1.8); // ~1.8s tail
+    const impulse = ctx.createBuffer(2, len, sr);
+    for (let ch = 0; ch < 2; ch++) {
+      const data = impulse.getChannelData(ch);
+      for (let i = 0; i < len; i++) {
+        const t = i / len;
+        // Exponentially decaying white noise
+        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - t, 3);
+      }
+    }
+    const convolver = ctx.createConvolver();
+    convolver.buffer = impulse;
+    const wetGain = ctx.createGain();
+    wetGain.gain.value = 0.3;
+    convolver.connect(wetGain).connect(ctx.destination);
+    reverbInput = convolver;
+  } catch (_) {}
+}
+
+// ---------- Mallet / bell instrument ----------
+// Additive synthesis: a stack of sine partials at inharmonic ratios, each
+// with its own quick attack and exponential decay. Sounds much closer to
+// a real bell/xylophone than a single triangle wave. Also sends ~35%
+// through the reverb bus for that "in-a-room" quality.
+const BELL_PARTIALS = [
+  { ratio: 1.0,   amp: 1.0,  decay: 1.0  },
+  { ratio: 2.0,   amp: 0.5,  decay: 0.7  },
+  { ratio: 3.01,  amp: 0.25, decay: 0.45 },
+  { ratio: 4.2,   amp: 0.12, decay: 0.3  },
+];
+function playBell(freq, dur = 1.3, vol = 0.3) {
+  if (muted) return;
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  ensureReverb();
+  try {
+    const t = ctx.currentTime;
+    const master = ctx.createGain();
+    master.gain.value = vol;
+    master.connect(ctx.destination);
+    if (reverbInput) {
+      const send = ctx.createGain();
+      send.gain.value = 0.35;
+      master.connect(send).connect(reverbInput);
+    }
+    for (const p of BELL_PARTIALS) {
+      const osc = ctx.createOscillator();
+      osc.type = "sine";
+      osc.frequency.value = freq * p.ratio;
+      const g = ctx.createGain();
+      const pDur = dur * p.decay;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(p.amp, t + 0.003);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + pDur);
+      osc.connect(g).connect(master);
+      osc.start(t);
+      osc.stop(t + pDur + 0.1);
+    }
+  } catch (_) {}
+}
+
+// Pleasant ascending chime (C-E-G) — bell tones for a warmer sound
 function happySound() {
-  beep(523.25, 0.12, "triangle", 0);
-  beep(659.25, 0.12, "triangle", 0.1);
-  beep(783.99, 0.2,  "triangle", 0.2);
+  playBell(523.25, 0.9, 0.28);
+  setTimeout(() => playBell(659.25, 0.9,  0.28), 90);
+  setTimeout(() => playBell(783.99, 1.1,  0.32), 180);
 }
 
 function buzzSound() {
@@ -115,15 +186,15 @@ function buzzSound() {
   beep(140, 0.22, "square", 0.1);
 }
 
-// Bigger, more triumphant chord for milestones and splash-to-menu
+// Bigger, more triumphant arpeggio for milestones and splash-to-menu
 function cheerJingle() {
-  // C-E-G-C major arpeggio, longer sustain, rising
-  beep(523.25,  0.18, "triangle", 0);
-  beep(659.25,  0.18, "triangle", 0.12);
-  beep(783.99,  0.18, "triangle", 0.24);
-  beep(1046.50, 0.35, "triangle", 0.36);
+  // C-E-G-C major arpeggio, now using bell instrument
+  playBell(523.25, 0.9, 0.3);
+  setTimeout(() => playBell(659.25,  0.9,  0.3),  110);
+  setTimeout(() => playBell(783.99,  1.0,  0.3),  220);
+  setTimeout(() => playBell(1046.50, 1.3,  0.34), 330);
   // A sparkle on top for a little extra magic
-  beep(1318.51, 0.25, "sine", 0.55);
+  setTimeout(() => playBell(1318.51, 1.0,  0.22), 500);
 }
 
 // ---------- Mute toggle ----------
@@ -733,11 +804,12 @@ function stopMatchGame() {
 
 // ---------- Music / xylophone ----------
 // Wire up the keys once; they live in the HTML, not generated per visit.
+// Each key plays a real mallet/bell tone through the reverb bus.
 function initMusicGame() {
   document.querySelectorAll("#xylophone .xkey").forEach((key) => {
     onTap(key, () => {
       const freq = parseFloat(key.dataset.freq);
-      beep(freq, 0.55, "triangle");
+      playBell(freq, 1.6, 0.32);
       key.classList.add("playing");
       setTimeout(() => key.classList.remove("playing"), 220);
       vibrate(20);

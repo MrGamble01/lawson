@@ -18,53 +18,22 @@ html, body {
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
-/* ---------- Animated world backdrop ---------- */
+/* ---------- Animated world backdrop ----------
+ * The backdrop is a single SVG file (assets/scene.svg) loaded as a CSS
+ * background. All of its animations (sun pulse, clouds drifting, birds
+ * flying) live inside the SVG's own <style> block so they run without
+ * the page's stylesheet needing to know anything about them.
+ */
 #worldBg {
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-}
-#worldBg svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-.bg-sun {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: sunPulse 5s ease-in-out infinite;
-}
-@keyframes sunPulse {
-  0%, 100% { transform: scale(1);    filter: drop-shadow(0 0 18px rgba(255, 212, 59, 0.6)); }
-  50%      { transform: scale(1.04); filter: drop-shadow(0 0 32px rgba(255, 212, 59, 0.85)); }
-}
-.bg-sun-rays {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: raySpin 40s linear infinite;
-}
-@keyframes raySpin {
-  to { transform: rotate(360deg); }
-}
-.bg-cloud {
-  animation: cloudDrift 80s linear infinite;
-}
-.cloud-a { animation-duration: 95s; }
-.cloud-b { animation-duration: 70s; animation-delay: -25s; }
-.cloud-c { animation-duration: 110s; animation-delay: -55s; }
-@keyframes cloudDrift {
-  from { transform: translateX(-220px); }
-  to   { transform: translateX(1220px); }
-}
-.bg-hill-back, .bg-hill-front {
-  transform-origin: center bottom;
-  animation: hillSway 12s ease-in-out infinite;
-}
-.bg-hill-front { animation-delay: -6s; }
-@keyframes hillSway {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(3px); }
+  background-color: #d4f1ff;
+  background-image: url("assets/scene.svg");
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
 }
 
 header {
@@ -508,27 +477,17 @@ header h1 {
   100% { transform: translate(var(--dx), var(--dy)) scale(1.5); opacity: 0; }
 }
 
-/* ---------- Mascot character ---------- */
-.mascot {
-  display: inline-block;
-  width: 100%;
-  height: 100%;
-  animation: mascotBob 3s ease-in-out infinite;
-}
-.mascot-svg {
-  width: 100%;
-  height: 100%;
+/* ---------- Mascot character ----------
+ * Rendered by loading assets/mascot.svg via <img>. The bob + ray-spin
+ * animations are inside the SVG file itself, so this CSS only needs to
+ * size the container and apply a soft drop-shadow.
+ */
+img.mascot {
   display: block;
-  filter: drop-shadow(0 10px 18px rgba(0,0,0,0.2));
-}
-.mascot-rays {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: raySpin 22s linear infinite;
-}
-@keyframes mascotBob {
-  0%, 100% { transform: translateY(0)    rotate(-1deg); }
-  50%      { transform: translateY(-10px) rotate(1deg); }
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+  filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.22));
 }
 
 /* ---------- Splash / welcome screen ---------- */
@@ -644,8 +603,7 @@ header h1 {
   .match-choice.wrong { animation: none; }
   .burst { animation-duration: 0.2s; }
   .sparkle { animation-duration: 0.3s; }
-  .bg-sun, .bg-sun-rays, .bg-cloud, .bg-hill-back, .bg-hill-front,
-  .mascot, .mascot-rays, .splash-content, .splash-hint {
+  .splash-content, .splash-hint {
     animation: none !important;
   }
   .cheer-overlay.show .cheer-content { animation-duration: 0.2s; }

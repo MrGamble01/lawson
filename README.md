@@ -1,11 +1,23 @@
 # Lawson's Learning Playground
 
-A tiny mobile-friendly web app for toddlers. Tap letters, numbers, colors,
-shapes, and animals to hear them spoken aloud, pop floating balloons, and
-play a picture-matching game.
+A mobile-friendly web app for toddlers. Tap letters, numbers, colors,
+shapes, and animals to hear them spoken aloud, pop floating balloons,
+count apples, play a xylophone, and play a picture-matching game.
 
-No build step, no dependencies — just three static files. Open `index.html`
-in a browser or host it anywhere that serves static files.
+No build step, no dependencies. Open `index.html` in a browser or host
+it anywhere that serves static files.
+
+## Project layout
+```
+index.html    Page skeleton, screens, splash, cheer overlay
+styles.css    Layout, screen transitions, tile/game/overlay styles
+app.js        All logic: speech, audio synth, games, confetti, routing
+assets/
+  mascot.svg              The smiling-sun character (animations inside)
+  scene.svg               Animated sky backdrop (sun, clouds, birds, hills)
+  icon.svg                App icon used by the favicon + manifest
+  manifest.webmanifest    PWA install metadata
+```
 
 ## Activities
 - **ABC** — the alphabet, each letter with an example word (A is for Apple…)

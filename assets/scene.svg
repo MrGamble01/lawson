@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#ffe4f2"/>
+      <stop offset="45%"  stop-color="#d4f1ff"/>
+      <stop offset="100%" stop-color="#fff7cc"/>
+    </linearGradient>
+    <radialGradient id="sunGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#fff3a0"/>
+      <stop offset="70%"  stop-color="#ffd43b"/>
+      <stop offset="100%" stop-color="#ffb74d"/>
+    </radialGradient>
+    <linearGradient id="hillBack" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#b9ecd1"/>
+      <stop offset="100%" stop-color="#8fdfb0"/>
+    </linearGradient>
+    <linearGradient id="hillFront" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#98e0b2"/>
+      <stop offset="100%" stop-color="#6fcf93"/>
+    </linearGradient>
+  </defs>
+  <style><![CDATA[
+    .sun-body {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: sunPulse 5s ease-in-out infinite;
+    }
+    .sun-rays {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: raySpin 40s linear infinite;
+    }
+    .cloud   { animation: drift 90s linear infinite; }
+    .cloud-a { animation-duration: 95s;  }
+    .cloud-b { animation-duration: 70s;  animation-delay: -25s; }
+    .cloud-c { animation-duration: 110s; animation-delay: -55s; }
+    .bird    { animation: fly 28s linear infinite; }
+    .bird-a  { animation-duration: 30s; animation-delay:  -5s; }
+    .bird-b  { animation-duration: 45s; animation-delay: -20s; }
+    @keyframes sunPulse {
+      0%, 100% { transform: scale(1);    filter: drop-shadow(0 0 12px rgba(255, 212, 59, 0.6)); }
+      50%      { transform: scale(1.05); filter: drop-shadow(0 0 22px rgba(255, 212, 59, 0.9)); }
+    }
+    @keyframes raySpin { to { transform: rotate(360deg); } }
+    @keyframes drift {
+      from { transform: translateX(-260px); }
+      to   { transform: translateX(1260px); }
+    }
+    @keyframes fly {
+      from { transform: translateX(-60px); }
+      to   { transform: translateX(1060px); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .sun-body, .sun-rays, .cloud, .bird { animation: none; }
+    }
+  ]]></style>
+
+  <!-- Sky -->
+  <rect width="1000" height="700" fill="url(#sky)"/>
+
+  <!-- Sun with rays -->
+  <g transform="translate(850 130)">
+    <g class="sun-rays" fill="#ffd43b" opacity="0.55">
+      <polygon points="0,-110 12,-78 -12,-78"/>
+      <polygon points="0,110 -12,78 12,78"/>
+      <polygon points="-110,0 -78,-12 -78,12"/>
+      <polygon points="110,0 78,-12 78,12"/>
+      <polygon points="-75,-75 -50,-58 -68,-42"/>
+      <polygon points="75,-75 50,-58 68,-42"/>
+      <polygon points="-75,75 -58,50 -42,68"/>
+      <polygon points="75,75 58,50 42,68"/>
+    </g>
+    <circle class="sun-body" cx="0" cy="0" r="68" fill="url(#sunGrad)"/>
+  </g>
+
+  <!-- Distant birds -->
+  <g class="bird bird-a" transform="translate(0 220)">
+    <path d="M0 0 Q8 -10 16 0 Q24 -10 32 0" stroke="#444" stroke-width="3" fill="none" stroke-linecap="round"/>
+  </g>
+  <g class="bird bird-b" transform="translate(0 310)">
+    <path d="M0 0 Q6 -7 12 0 Q18 -7 24 0" stroke="#444" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- Clouds -->
+  <g class="cloud cloud-a" transform="translate(200 160)">
+    <ellipse cx="0"   cy="0"   rx="56" ry="26" fill="#fff"/>
+    <ellipse cx="38"  cy="-12" rx="40" ry="24" fill="#fff"/>
+    <ellipse cx="-38" cy="-8"  rx="34" ry="20" fill="#fff"/>
+  </g>
+  <g class="cloud cloud-b" transform="translate(520 90)">
+    <ellipse cx="0"  cy="0"   rx="44" ry="22" fill="#fff"/>
+    <ellipse cx="30" cy="-10" rx="30" ry="18" fill="#fff"/>
+  </g>
+  <g class="cloud cloud-c" transform="translate(100 280)">
+    <ellipse cx="0"   cy="0"   rx="64" ry="28" fill="#fff"/>
+    <ellipse cx="46"  cy="-14" rx="42" ry="24" fill="#fff"/>
+    <ellipse cx="-44" cy="-10" rx="36" ry="22" fill="#fff"/>
+  </g>
+
+  <!-- Rolling hills -->
+  <path d="M0 500 Q 250 420 500 480 Q 750 550 1000 460 L 1000 700 L 0 700 Z" fill="url(#hillBack)"/>
+  <path d="M0 600 Q 200 530 450 580 Q 700 640 1000 560 L 1000 700 L 0 700 Z" fill="url(#hillFront)"/>
+
+  <!-- Flowers on the hills -->
+  <g>
+    <g fill="#ff6b9a">
+      <circle cx="150" cy="625" r="8"/>
+      <circle cx="350" cy="615" r="7"/>
+      <circle cx="580" cy="630" r="8"/>
+      <circle cx="780" cy="620" r="7"/>
+      <circle cx="900" cy="625" r="8"/>
+    </g>
+    <g fill="#ffd43b">
+      <circle cx="200" cy="635" r="6"/>
+      <circle cx="420" cy="620" r="6"/>
+      <circle cx="650" cy="635" r="6"/>
+      <circle cx="830" cy="625" r="6"/>
+    </g>
+    <g fill="#fff">
+      <circle cx="280" cy="630" r="5"/>
+      <circle cx="500" cy="625" r="5"/>
+      <circle cx="720" cy="632" r="5"/>
+      <circle cx="60"  cy="628" r="5"/>
+      <circle cx="960" cy="630" r="5"/>
+    </g>
+  </g>
+
+  <!-- Little grass tufts -->
+  <g stroke="#3ba368" stroke-width="2" stroke-linecap="round">
+    <path d="M100 640 L 100 630 M105 640 L 108 628 M95 640 L 92 628"/>
+    <path d="M300 648 L 300 638 M305 648 L 308 636 M295 648 L 292 636"/>
+    <path d="M600 648 L 600 638 M605 648 L 608 636 M595 648 L 592 636"/>
+    <path d="M850 642 L 850 632 M855 642 L 858 630 M845 642 L 842 630"/>
+  </g>
+</svg>

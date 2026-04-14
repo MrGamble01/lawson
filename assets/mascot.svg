@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <radialGradient id="bodyGrad" cx="38%" cy="32%" r="70%">
+      <stop offset="0%"   stop-color="#fff6b0"/>
+      <stop offset="55%"  stop-color="#ffd43b"/>
+      <stop offset="100%" stop-color="#ffb74d"/>
+    </radialGradient>
+  </defs>
+  <style><![CDATA[
+    .m-root {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: bob 3s ease-in-out infinite;
+    }
+    .m-rays {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: spin 22s linear infinite;
+    }
+    @keyframes bob {
+      0%, 100% { transform: translateY(0px)  rotate(-1.5deg); }
+      50%      { transform: translateY(-8px) rotate( 1.5deg); }
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .m-root, .m-rays { animation: none; }
+    }
+  ]]></style>
+  <g class="m-root">
+    <!-- Rays behind the body -->
+    <g class="m-rays" fill="#ffd43b">
+      <polygon points="100,4   112,38  88,38"/>
+      <polygon points="100,196 88,162  112,162"/>
+      <polygon points="4,100   38,88   38,112"/>
+      <polygon points="196,100 162,88  162,112"/>
+      <polygon points="32,32   60,50   50,60"/>
+      <polygon points="168,32  140,50  150,60"/>
+      <polygon points="32,168  50,140  60,150"/>
+      <polygon points="168,168 150,140 140,150"/>
+    </g>
+    <!-- Body -->
+    <circle cx="100" cy="100" r="55" fill="url(#bodyGrad)" stroke="#ff9500" stroke-width="5"/>
+    <!-- Eyes -->
+    <ellipse cx="82"  cy="94" rx="8" ry="10" fill="#2c3e50"/>
+    <ellipse cx="118" cy="94" rx="8" ry="10" fill="#2c3e50"/>
+    <!-- Eye highlights -->
+    <circle cx="84"  cy="90" r="3"   fill="#fff"/>
+    <circle cx="120" cy="90" r="3"   fill="#fff"/>
+    <circle cx="79"  cy="98" r="1.5" fill="#fff"/>
+    <circle cx="115" cy="98" r="1.5" fill="#fff"/>
+    <!-- Cheeks -->
+    <ellipse cx="68"  cy="114" rx="9" ry="5" fill="#ff9ecb" opacity="0.75"/>
+    <ellipse cx="132" cy="114" rx="9" ry="5" fill="#ff9ecb" opacity="0.75"/>
+    <!-- Smile -->
+    <path d="M78 116 Q100 140 122 116" stroke="#2c3e50" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <!-- Little tongue peek -->
+    <path d="M94 130 Q100 138 106 130 Q103 134 100 134 Q97 134 94 130 Z" fill="#ff6b9a"/>
+  </g>
+</svg>

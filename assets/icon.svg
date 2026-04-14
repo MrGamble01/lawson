@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#ff6b9a"/>
+      <stop offset="100%" stop-color="#ff4081"/>
+    </linearGradient>
+    <radialGradient id="face" cx="38%" cy="32%" r="70%">
+      <stop offset="0%"   stop-color="#fff6b0"/>
+      <stop offset="55%"  stop-color="#ffd43b"/>
+      <stop offset="100%" stop-color="#ffb74d"/>
+    </radialGradient>
+  </defs>
+  <!-- Rounded app icon background -->
+  <rect width="1024" height="1024" rx="220" fill="url(#bg)"/>
+  <!-- Little stars in the background -->
+  <g fill="#fff" opacity="0.35">
+    <circle cx="150" cy="180" r="12"/>
+    <circle cx="880" cy="160" r="10"/>
+    <circle cx="230" cy="860" r="9"/>
+    <circle cx="840" cy="880" r="12"/>
+    <circle cx="520" cy="100" r="7"/>
+    <circle cx="110" cy="520" r="7"/>
+    <circle cx="920" cy="480" r="9"/>
+  </g>
+  <!-- Mascot face centered -->
+  <g transform="translate(512 520)">
+    <!-- Rays -->
+    <g fill="#ffd43b" opacity="0.9">
+      <polygon points="0,-470 55,-360 -55,-360"/>
+      <polygon points="0,470 -55,360 55,360"/>
+      <polygon points="-470,0 -360,-55 -360,55"/>
+      <polygon points="470,0 360,-55 360,55"/>
+      <polygon points="-340,-340 -230,-270 -270,-230"/>
+      <polygon points="340,-340 230,-270 270,-230"/>
+      <polygon points="-340,340 -270,230 -230,270"/>
+      <polygon points="340,340 270,230 230,270"/>
+    </g>
+    <!-- Face body -->
+    <circle cx="0" cy="0" r="310" fill="url(#face)" stroke="#ff9500" stroke-width="26"/>
+    <!-- Eyes -->
+    <ellipse cx="-100" cy="-40" rx="42" ry="54" fill="#2c3e50"/>
+    <ellipse cx="100"  cy="-40" rx="42" ry="54" fill="#2c3e50"/>
+    <circle cx="-88"  cy="-60" r="16" fill="#fff"/>
+    <circle cx="112"  cy="-60" r="16" fill="#fff"/>
+    <!-- Cheeks -->
+    <ellipse cx="-180" cy="70" rx="48" ry="28" fill="#ff9ecb" opacity="0.7"/>
+    <ellipse cx="180"  cy="70" rx="48" ry="28" fill="#ff9ecb" opacity="0.7"/>
+    <!-- Smile -->
+    <path d="M-120 80 Q0 240 120 80" stroke="#2c3e50" stroke-width="28" fill="none" stroke-linecap="round"/>
+  </g>
+</svg>
