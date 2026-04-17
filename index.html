@@ -47,6 +47,15 @@
       <button class="tile" data-go="match" style="--c:#20c997">
         <span class="emoji">🧩</span><span class="label">Match</span>
       </button>
+      <button class="tile" data-go="piano" style="--c:#845ef7">
+        <span class="emoji">🎹</span><span class="label">Piano</span>
+      </button>
+      <button class="tile" data-go="whack" style="--c:#f06595">
+        <span class="emoji">🐹</span><span class="label">Whack!</span>
+      </button>
+      <button class="tile" data-go="doodle" style="--c:#22b8cf">
+        <span class="emoji">🎨</span><span class="label">Doodle</span>
+      </button>
     </section>
 
     <!-- Generic activity screen (letters/numbers/colors/shapes/animals) -->
@@ -60,7 +69,32 @@
     <section id="popGame" class="screen">
       <button class="home-btn" data-home>🏠</button>
       <div id="popScore" class="badge">🎈 <span id="popScoreVal">0</span></div>
+      <div id="popStreak" class="badge badge--streak">🔥 <span id="popStreakVal">0</span></div>
       <div id="popArea" class="pop-area"></div>
+    </section>
+
+    <!-- Piano -->
+    <section id="pianoGame" class="screen">
+      <button class="home-btn" data-home>🏠</button>
+      <button id="pianoSong" class="piano-song-btn">🎵 Song</button>
+      <div id="pianoBoard" class="piano-board"></div>
+    </section>
+
+    <!-- Whack-a-Mole -->
+    <section id="whackGame" class="screen">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="whackScore" class="badge">🔨 <span id="whackScoreVal">0</span></div>
+      <div id="whackGrid" class="whack-grid"></div>
+    </section>
+
+    <!-- Doodle -->
+    <section id="doodleGame" class="screen">
+      <button class="home-btn" data-home>🏠</button>
+      <div class="doodle-tools">
+        <button id="doodleStamp" class="doodle-tool">✨ Stamp</button>
+        <button id="doodleClear" class="doodle-tool doodle-tool--clear">🧽 Clear</button>
+      </div>
+      <canvas id="doodleCanvas" class="doodle-canvas"></canvas>
     </section>
 
     <!-- Matching game -->
@@ -76,5 +110,9 @@
   </main>
 
   <script src="app.js"></script>
+  <script src="games/pop.js"></script>
+  <script src="games/piano.js"></script>
+  <script src="games/whack.js"></script>
+  <script src="games/doodle.js"></script>
 </body>
 </html>

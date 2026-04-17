@@ -349,19 +349,7 @@ function buildAnimals() {
   });
 }
 
-// ---------- Balloon pop game ----------
-const BALLOON_COLORS = [
-  { name: "Red",    hex: "#ff3b30" },
-  { name: "Orange", hex: "#ff9500" },
-  { name: "Yellow", hex: "#ffd60a" },
-  { name: "Green",  hex: "#34c759" },
-  { name: "Blue",   hex: "#007aff" },
-  { name: "Purple", hex: "#af52de" },
-  { name: "Pink",   hex: "#ff2d92" },
-];
-
-let popTimer = null;
-let popScore = 0;
+// Badge bump helper (shared by games)
 function bumpBadge(id, val) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -372,62 +360,6 @@ function bumpBadge(id, val) {
     void badge.offsetWidth;
     badge.classList.add("bump");
   }
-}
-function startPopGame() {
-  const area = document.getElementById("popArea");
-  area.innerHTML = "";
-  popScore = 0;
-  document.getElementById("popScoreVal").textContent = "0";
-
-  const spawn = () => {
-    // Pick a real color and draw an SVG balloon in that exact color,
-    // so the spoken color always matches what the kid sees.
-    const c = BALLOON_COLORS[Math.floor(Math.random() * BALLOON_COLORS.length)];
-    const b = document.createElement("div");
-    b.className = "balloon";
-    b.innerHTML = `
-      <svg viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <ellipse cx="50" cy="55" rx="42" ry="50" fill="${c.hex}"/>
-        <ellipse cx="36" cy="38" rx="10" ry="16" fill="rgba(255,255,255,0.5)"/>
-        <polygon points="46,104 54,104 50,112" fill="${c.hex}"/>
-        <path d="M50 112 Q56 124 48 134 Q42 140 50 140" stroke="#555" stroke-width="2" fill="none"/>
-      </svg>
-    `;
-    b.style.left = Math.random() * 80 + 10 + "%";
-    b.style.top = "110%";
-    const dur = 5 + Math.random() * 4;
-    b.style.animationDuration = dur + "s";
-
-    onTap(b, (e) => {
-      if (e.stopPropagation) e.stopPropagation();
-      beep(300 + Math.random() * 400, 0.15, "triangle");
-      say(c.name);
-      popScore += 1;
-      bumpBadge("popScoreVal", popScore);
-      const burst = document.createElement("div");
-      burst.className = "burst";
-      burst.textContent = "💥";
-      // Use getBoundingClientRect so the burst appears where the balloon
-      // actually is on screen (accounting for its CSS float animation)
-      const r = b.getBoundingClientRect();
-      const ar = area.getBoundingClientRect();
-      burst.style.top = (r.top - ar.top) + "px";
-      burst.style.left = (r.left - ar.left) + "px";
-      area.appendChild(burst);
-      setTimeout(() => burst.remove(), 500);
-      b.remove();
-    });
-    area.appendChild(b);
-    setTimeout(() => { if (b.parentNode) b.remove(); }, dur * 1000);
-  };
-
-  popTimer = setInterval(spawn, 1100);
-  spawn(); spawn(); spawn();
-}
-function stopPopGame() {
-  clearInterval(popTimer);
-  popTimer = null;
-  document.getElementById("popArea").innerHTML = "";
 }
 
 // ---------- Matching game ----------
@@ -538,23 +470,47 @@ function startMatchGame() {
   newMatchRound(true);
 }
 
+// ---------- Shared namespace for game modules ----------
+// Each game file in /games registers itself on window.Lawson.games and uses
+// the utilities below. Keeping each game self-contained makes it easy to
+// tweak one without touching the others.
+window.Lawson = {
+  say, beep, happySound, buzzSound, sparkleAt, onTap, pointOf, bumpBadge, show,
+  audioCtx, unlockAudio,
+  games: {}, // each game adds { screen, start, stop } here
+};
+
 // ---------- Routing ----------
+let activeGame = null;
+function leaveActiveGame() {
+  if (activeGame && typeof activeGame.stop === "function") activeGame.stop();
+  activeGame = null;
+}
+
 document.querySelectorAll("[data-go]").forEach((btn) => {
   onTap(btn, () => {
     unlockAudio();
     unlockSpeech();
     const where = btn.dataset.go;
     beep(600, 0.1);
-    if (where === "pop") {
-      show("popGame");
-      startPopGame();
+
+    leaveActiveGame();
+
+    // Registered game modules (pop, doodle, whack, piano, ...)
+    const game = window.Lawson.games[where];
+    if (game) {
+      show(game.screen);
+      activeGame = game;
+      game.start();
       return;
     }
+
     if (where === "match") {
       show("matchGame");
       startMatchGame();
       return;
     }
+
     show("activity");
     if (where === "letters") buildLetters();
     if (where === "numbers") buildNumbers();
@@ -566,7 +522,7 @@ document.querySelectorAll("[data-go]").forEach((btn) => {
 
 document.querySelectorAll("[data-home]").forEach((btn) => {
   onTap(btn, () => {
-    stopPopGame();
+    leaveActiveGame();
     if (synth) synth.cancel();
     show("menu");
     beep(400, 0.1);
