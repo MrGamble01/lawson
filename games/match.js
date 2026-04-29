@@ -40,8 +40,6 @@
     { emoji: "🌸", name: "flower" },
   ];
 
-  const CHEERS = ["Yay! Great job!", "You got it!", "Awesome!", "Super!", "Nice one!"];
-
   function pickRandom(arr, n) {
     const copy = arr.slice();
     const out = [];
@@ -83,9 +81,9 @@
           const best = L.bumpHighScore("matchBest", score);
           document.getElementById("matchBestVal").textContent = best;
 
-          const cheer = CHEERS[Math.floor(Math.random() * CHEERS.length)];
-          if (score % 5 === 0) L.say(`${cheer} ${score} in a row!`);
-          else                 L.say(cheer);
+          const c = L.cheer();
+          if (score % 5 === 0) L.say(`${c} ${score} in a row!`);
+          else                 L.say(c);
 
           btn.classList.add("correct");
           const p = L.pointOf(e);

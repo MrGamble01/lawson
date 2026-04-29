@@ -554,6 +554,77 @@ header h1 {
   color: #ff6b6b;
 }
 
+/* ---------- Counting ---------- */
+#countGame {
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 16px;
+  background: linear-gradient(180deg, #e7f5ff 0%, #d0ebff 100%);
+}
+.count-prompt {
+  margin-top: 80px;
+  font-size: clamp(28px, 5vw, 48px);
+  color: #1864ab;
+  text-shadow: 2px 2px 0 #fff;
+  font-weight: bold;
+  text-align: center;
+}
+.count-stage {
+  flex: 1;
+  width: 100%;
+  max-width: 900px;
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(12px, 2.5vw, 28px);
+  padding: 12px;
+}
+.count-item {
+  background: #fff;
+  border: 6px solid #4dabf7;
+  border-radius: 24px;
+  width: clamp(90px, 16vw, 160px);
+  height: clamp(90px, 16vw, 160px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(50px, 9vw, 100px);
+  cursor: pointer;
+  box-shadow: 0 6px 0 rgba(0,0,0,0.12);
+  transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  animation: countPop 0.35s ease-out backwards;
+}
+@keyframes countPop {
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+.count-item:active { transform: scale(0.92); }
+.count-item.counted {
+  background: #b2f2bb;
+  border-color: #2f9e44;
+  position: relative;
+  animation: countTapped 0.4s ease;
+}
+.count-item.counted::after {
+  content: "✓";
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  font-size: clamp(20px, 3vw, 32px);
+  color: #2f9e44;
+  font-weight: bold;
+  text-shadow: 0 0 4px #fff;
+}
+@keyframes countTapped {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.18) rotate(-5deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
 /* ---------- Coloring pages ---------- */
 #colorGame {
   flex-direction: column;
