@@ -56,6 +56,9 @@
       <button class="tile" data-go="doodle" style="--c:#22b8cf">
         <span class="emoji">🎨</span><span class="label">Doodle</span>
       </button>
+      <button class="tile" data-go="color" style="--c:#fa5252">
+        <span class="emoji">🖍️</span><span class="label">Coloring</span>
+      </button>
     </section>
 
     <!-- Generic activity screen (letters/numbers/colors/shapes/animals) -->
@@ -97,6 +100,17 @@
       <canvas id="doodleCanvas" class="doodle-canvas"></canvas>
     </section>
 
+    <!-- Coloring Pages -->
+    <section id="colorGame" class="screen">
+      <button class="home-btn" data-home>🏠</button>
+      <div class="color-tools">
+        <button id="colorNext" class="color-tool">📄 Next</button>
+        <button id="colorClear" class="color-tool color-tool--clear">🧽 Clear</button>
+      </div>
+      <div id="colorStage" class="color-stage"></div>
+      <div id="colorPalette" class="color-palette"></div>
+    </section>
+
     <!-- Matching game -->
     <section id="matchGame" class="screen">
       <button class="home-btn" data-home>🏠</button>
@@ -114,5 +128,6 @@
   <script src="games/piano.js"></script>
   <script src="games/whack.js"></script>
   <script src="games/doodle.js"></script>
+  <script src="games/color.js"></script>
 </body>
 </html>
