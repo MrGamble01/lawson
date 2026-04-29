@@ -41,6 +41,15 @@
       <button class="tile" data-go="animals" style="--c:#da77f2">
         <span class="emoji">🐶</span><span class="label">Animals</span>
       </button>
+      <button class="tile" data-go="vehicles" style="--c:#fab005">
+        <span class="emoji">🚗</span><span class="label">Vehicles</span>
+      </button>
+      <button class="tile" data-go="dinosaurs" style="--c:#37b24d">
+        <span class="emoji">🦖</span><span class="label">Dinos</span>
+      </button>
+      <button class="tile" data-go="count" style="--c:#5c7cfa">
+        <span class="emoji">🔢</span><span class="label">Count</span>
+      </button>
       <button class="tile" data-go="pop" style="--c:#ff922b">
         <span class="emoji">🎈</span><span class="label">Pop!</span>
       </button>
@@ -102,6 +111,15 @@
       <canvas id="doodleCanvas" class="doodle-canvas"></canvas>
     </section>
 
+    <!-- Counting -->
+    <section id="countGame" class="screen">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="countScore" class="badge">🔢 <span id="countScoreVal">0</span></div>
+      <div id="countBest" class="badge badge--best">🏆 <span id="countBestVal">0</span></div>
+      <div id="countPrompt" class="count-prompt">Count!</div>
+      <div id="countStage" class="count-stage"></div>
+    </section>
+
     <!-- Coloring Pages -->
     <section id="colorGame" class="screen">
       <button class="home-btn" data-home>🏠</button>
@@ -135,5 +153,6 @@
   <script src="games/doodle.js"></script>
   <script src="games/color.js"></script>
   <script src="games/match.js"></script>
+  <script src="games/count.js"></script>
 </body>
 </html>

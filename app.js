@@ -1,3 +1,33 @@
+// ---------- Kid personalization ----------
+// Used in cheers and milestone celebrations across games. Centralized so
+// hand-off to a sibling later is a one-line change.
+const KID_NAME = "Lawson";
+
+const CHEER_PHRASES = [
+  "Yay {name}!",
+  "Way to go {name}!",
+  "Awesome {name}!",
+  "You got it {name}!",
+  "Super {name}!",
+  "Great job {name}!",
+  "Wow {name}!",
+  "Nice one {name}!",
+];
+function cheer() {
+  return CHEER_PHRASES[Math.floor(Math.random() * CHEER_PHRASES.length)]
+    .replace("{name}", KID_NAME);
+}
+
+// Fisher-Yates shuffle (returns a new array, leaves the input alone).
+function shuffled(arr) {
+  const out = arr.slice();
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
 // ---------- Screens ----------
 const screens = document.querySelectorAll(".screen");
 function show(id) {
@@ -151,6 +181,28 @@ const ANIMALS = [
   { name: "Elephant",emoji: "🐘", sound: "Toot!" },
   { name: "Bee",     emoji: "🐝", sound: "Buzz buzz!" },
 ];
+const VEHICLES = [
+  { name: "Car",         emoji: "🚗", sound: "Beep beep!" },
+  { name: "Truck",       emoji: "🚚", sound: "Honk honk!" },
+  { name: "Bus",         emoji: "🚌", sound: "Vroom!" },
+  { name: "Train",       emoji: "🚂", sound: "Choo choo!" },
+  { name: "Plane",       emoji: "✈️", sound: "Wheee!" },
+  { name: "Helicopter",  emoji: "🚁", sound: "Whoop whoop whoop!" },
+  { name: "Boat",        emoji: "⛵", sound: "Toot toot!" },
+  { name: "Fire truck",  emoji: "🚒", sound: "Wee-oh wee-oh!" },
+  { name: "Police car",  emoji: "🚓", sound: "Wee-oo wee-oo!" },
+  { name: "Tractor",     emoji: "🚜", sound: "Putt putt!" },
+  { name: "Bike",        emoji: "🚲", sound: "Ring ring!" },
+  { name: "Rocket",      emoji: "🚀", sound: "Blast off!" },
+];
+const DINOSAURS = [
+  { name: "T-Rex",        emoji: "🦖", sound: "ROAR!" },
+  { name: "Triceratops",  emoji: "🦖", sound: "Snort!" },
+  { name: "Stegosaurus",  emoji: "🦖", sound: "Grumble!" },
+  { name: "Brontosaurus", emoji: "🦕", sound: "Boom boom boom!" },
+  { name: "Brachiosaurus",emoji: "🦕", sound: "Stomp stomp!" },
+  { name: "Pterodactyl",  emoji: "🦅", sound: "Screech!" },
+];
 
 // Phonetic letter names so iOS TTS pronounces them correctly every time
 const LETTER_SOUND = {
@@ -172,6 +224,8 @@ const NUMBER_WORD = {
   6: "six", 7: "seven", 8: "eight", 9: "nine", 10: "ten",
 };
 
+// `shuffle: false` opts an activity out of randomization (numbers stay
+// in 1..10 order so he can recognize the sequence).
 const ACTIVITIES = {
   letters: {
     items: LETTERS,
@@ -183,6 +237,7 @@ const ACTIVITIES = {
   },
   numbers: {
     items: NUMBERS,
+    shuffle: false,
     color: (n) => `hsl(${n * 36}, 80%, 55%)`,
     label: (n) => n,
     speak: (n) => NUMBER_WORD[n],
@@ -210,6 +265,20 @@ const ACTIVITIES = {
     speak: (a) => `${a.name}. ${a.sound}`,
     display: (a, c) => ({ text: a.emoji, color: c, caption: a.name }),
   },
+  vehicles: {
+    items: VEHICLES,
+    color: () => `hsl(${Math.random() * 360}, 80%, 55%)`,
+    label: (v) => v.emoji,
+    speak: (v) => `${v.name}. ${v.sound}`,
+    display: (v, c) => ({ text: v.emoji, color: c, caption: v.name }),
+  },
+  dinosaurs: {
+    items: DINOSAURS,
+    color: () => `hsl(${Math.random() * 360}, 70%, 50%)`,
+    label: (d) => d.emoji,
+    speak: (d) => `${d.name}. ${d.sound}`,
+    display: (d, c) => ({ text: d.emoji, color: c, caption: d.name }),
+  },
 };
 
 function buildFlashcards(name) {
@@ -219,7 +288,8 @@ function buildFlashcards(name) {
   stage.innerHTML = "";
   stage.className = "stage" + (cfg.many ? " stage--many" : "");
 
-  cfg.items.forEach((item, i) => {
+  const items = cfg.shuffle === false ? cfg.items : shuffled(cfg.items);
+  items.forEach((item, i) => {
     const el = document.createElement("button");
     el.className = "item";
     el.textContent = cfg.label(item, i);
@@ -246,6 +316,7 @@ window.Lawson = {
   say, beep, happySound, buzzSound, sparkleAt, onTap, pointOf, bumpBadge, show,
   audioCtx, unlockAudio,
   getHighScore, setHighScore, bumpHighScore,
+  KID_NAME, cheer, shuffled,
   games: {}, // each game adds { screen, start, stop } here
 };
 

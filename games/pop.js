@@ -17,7 +17,6 @@
   ];
 
   const STREAK_MILESTONES = [5, 10, 25, 50];
-  const STREAK_CHEERS = ["Wow!", "Awesome!", "Keep going!", "Super!", "Amazing!"];
 
   let spawnTimer = null;
   let score = 0;
@@ -118,8 +117,7 @@
       b.remove();
 
       if (STREAK_MILESTONES.includes(streak)) {
-        const cheer = STREAK_CHEERS[Math.floor(Math.random() * STREAK_CHEERS.length)];
-        celebrate(`${cheer} ${streak} in a row!`);
+        celebrate(`${L.cheer()} ${streak} in a row!`);
         L.happySound();
       }
     });
