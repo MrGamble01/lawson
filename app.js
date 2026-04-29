@@ -1,129 +1,8 @@
-// ---------- Speech ----------
-const synth = window.speechSynthesis;
-let speechUnlocked = false;
-let preferredVoice = null;
-
-function pickVoice() {
-  if (!synth) return;
-  const voices = synth.getVoices();
-  if (!voices.length) return;
-  // Prefer a clear English female voice; iOS has "Samantha", "Karen", "Moira"
-  const prefs = ["Samantha", "Karen", "Moira", "Google US English", "Microsoft Zira"];
-  for (const p of prefs) {
-    const v = voices.find((x) => x.name.includes(p));
-    if (v) { preferredVoice = v; return; }
-  }
-  preferredVoice = voices.find((v) => v.lang && v.lang.startsWith("en")) || voices[0];
-}
-if (synth) {
-  pickVoice();
-  synth.onvoiceschanged = pickVoice;
-}
-
-function unlockSpeech() {
-  if (!synth) return;
-  // On iOS the speech engine can go silent after a period of inactivity.
-  // Nudging it with a near-silent utterance inside a real user gesture keeps
-  // it alive. Safe to call every navigation.
-  try {
-    const u = new SpeechSynthesisUtterance(" ");
-    u.volume = 0.01;
-    synth.speak(u);
-  } catch (_) {}
-  speechUnlocked = true;
-}
-
-// Speak a single phrase, ALWAYS clearing anything queued first.
-// This is the fix for "click cow, hear frog" — old queue no longer leaks.
-function say(text, rate = 0.95) {
-  if (!synth) return;
-  synth.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.rate = rate;
-  u.pitch = 1.15;
-  u.volume = 1;
-  u.lang = "en-US";
-  if (preferredVoice) u.voice = preferredVoice;
-  synth.speak(u);
-}
-
-// ---------- Simple sounds via Web Audio ----------
-const AudioCtx = window.AudioContext || window.webkitAudioContext;
-const audioCtx = new AudioCtx();
-
-function unlockAudio() {
-  if (audioCtx.state === "suspended") audioCtx.resume();
-}
-
-function beep(freq = 440, dur = 0.15, type = "sine", when = 0) {
-  try {
-    const t = audioCtx.currentTime + when;
-    const o = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
-    o.type = type;
-    o.frequency.value = freq;
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(0.25, t + 0.01);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    o.connect(g).connect(audioCtx.destination);
-    o.start(t);
-    o.stop(t + dur + 0.02);
-  } catch (_) {}
-}
-
-// Pleasant ascending chime (C-E-G), not three simultaneous beeps
-function happySound() {
-  beep(523.25, 0.12, "triangle", 0);
-  beep(659.25, 0.12, "triangle", 0.1);
-  beep(783.99, 0.2,  "triangle", 0.2);
-}
-
-function buzzSound() {
-  beep(180, 0.18, "square", 0);
-  beep(140, 0.22, "square", 0.1);
-}
-
 // ---------- Screens ----------
 const screens = document.querySelectorAll(".screen");
 function show(id) {
   screens.forEach((s) => s.classList.toggle("active", s.id === id));
 }
-
-// ---------- Data ----------
-const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-const NUMBERS = Array.from({ length: 10 }, (_, i) => i + 1);
-const COLORS = [
-  { name: "Red",    hex: "#ff5252" },
-  { name: "Orange", hex: "#ff9800" },
-  { name: "Yellow", hex: "#ffeb3b" },
-  { name: "Green",  hex: "#4caf50" },
-  { name: "Blue",   hex: "#2196f3" },
-  { name: "Purple", hex: "#9c27b0" },
-  { name: "Pink",   hex: "#ff4081" },
-  { name: "Brown",  hex: "#795548" },
-];
-const SHAPES = [
-  { name: "Circle",   emoji: "⭕" },
-  { name: "Square",   emoji: "🟦" },
-  { name: "Triangle", emoji: "🔺" },
-  { name: "Star",     emoji: "⭐" },
-  { name: "Heart",    emoji: "❤️" },
-  { name: "Diamond",  emoji: "🔷" },
-];
-const ANIMALS = [
-  { name: "Dog",     emoji: "🐶", sound: "Woof woof!" },
-  { name: "Cat",     emoji: "🐱", sound: "Meow!" },
-  { name: "Cow",     emoji: "🐮", sound: "Moo!" },
-  { name: "Pig",     emoji: "🐷", sound: "Oink oink!" },
-  { name: "Duck",    emoji: "🦆", sound: "Quack quack!" },
-  { name: "Sheep",   emoji: "🐑", sound: "Baa!" },
-  { name: "Horse",   emoji: "🐴", sound: "Neigh!" },
-  { name: "Lion",    emoji: "🦁", sound: "Roar!" },
-  { name: "Frog",    emoji: "🐸", sound: "Ribbit!" },
-  { name: "Monkey",  emoji: "🐵", sound: "Ooh ooh ah ah!" },
-  { name: "Elephant",emoji: "🐘", sound: "Toot!" },
-  { name: "Bee",     emoji: "🐝", sound: "Buzz buzz!" },
-];
 
 // ---------- Helpers ----------
 function sparkleAt(x, y) {
@@ -220,135 +99,6 @@ function onTap(el, fn) {
   });
 }
 
-// ---------- Build activity screens ----------
-function resetStage() {
-  const stage = document.getElementById("stage");
-  stage.innerHTML = "";
-  stage.className = "stage";
-  return stage;
-}
-
-function buildLetters() {
-  const stage = resetStage();
-  stage.classList.add("stage--many");
-  LETTERS.forEach((ch) => {
-    const el = document.createElement("button");
-    el.className = "item";
-    el.textContent = ch;
-    el.style.setProperty("--c", `hsl(${Math.random() * 360}, 80%, 55%)`);
-    onTap(el, (e) => {
-      happySound();
-      // iOS Safari mangles single-letter utterances — use phonetic spelling
-      // and a single short sentence so it's read reliably.
-      say(`${letterSound(ch)}, ${letterWord(ch)}`);
-      showBigDisplay(ch, el.style.getPropertyValue("--c"), letterWord(ch));
-      const p = pointOf(e);
-      sparkleAt(p.x, p.y);
-    });
-    stage.appendChild(el);
-  });
-}
-
-// Phonetic letter names so iOS TTS pronounces them correctly every time
-function letterSound(ch) {
-  const sounds = {
-    A: "ay",   B: "bee",  C: "see",  D: "dee",  E: "ee",   F: "eff",
-    G: "jee",  H: "aitch",I: "eye",  J: "jay",  K: "kay",  L: "el",
-    M: "em",   N: "en",   O: "oh",   P: "pee",  Q: "cue",  R: "are",
-    S: "ess",  T: "tee",  U: "you",  V: "vee",  W: "double you",
-    X: "ex",   Y: "why",  Z: "zee",
-  };
-  return sounds[ch] || ch;
-}
-
-function letterWord(ch) {
-  const words = {
-    A: "Apple", B: "Ball", C: "Cat", D: "Dog", E: "Egg", F: "Fish",
-    G: "Goat", H: "Hat", I: "Ice", J: "Juice", K: "Kite", L: "Lion",
-    M: "Moon", N: "Nest", O: "Orange", P: "Pig", Q: "Queen", R: "Rabbit",
-    S: "Sun", T: "Tree", U: "Umbrella", V: "Van", W: "Water", X: "Xylophone",
-    Y: "Yo-yo", Z: "Zebra",
-  };
-  return words[ch] || ch;
-}
-
-const NUMBER_WORDS = {
-  1: "one", 2: "two", 3: "three", 4: "four", 5: "five",
-  6: "six", 7: "seven", 8: "eight", 9: "nine", 10: "ten",
-};
-function buildNumbers() {
-  const stage = resetStage();
-  NUMBERS.forEach((n) => {
-    const el = document.createElement("button");
-    el.className = "item";
-    el.textContent = n;
-    el.style.setProperty("--c", `hsl(${n * 36}, 80%, 55%)`);
-    onTap(el, (e) => {
-      happySound();
-      say(NUMBER_WORDS[n]);
-      showBigDisplay(n, el.style.getPropertyValue("--c"), NUMBER_WORDS[n]);
-      const p = pointOf(e);
-      sparkleAt(p.x, p.y);
-    });
-    stage.appendChild(el);
-  });
-}
-
-function buildColors() {
-  const stage = resetStage();
-  COLORS.forEach((c) => {
-    const el = document.createElement("button");
-    el.className = "item";
-    el.style.background = c.hex;
-    el.style.setProperty("--c", c.hex);
-    el.textContent = "";
-    onTap(el, (e) => {
-      happySound();
-      say(c.name);
-      showBigDisplay(c.name, c.hex);
-      const p = pointOf(e);
-      sparkleAt(p.x, p.y);
-    });
-    stage.appendChild(el);
-  });
-}
-
-function buildShapes() {
-  const stage = resetStage();
-  SHAPES.forEach((s) => {
-    const el = document.createElement("button");
-    el.className = "item";
-    el.textContent = s.emoji;
-    el.style.setProperty("--c", `hsl(${Math.random() * 360}, 70%, 60%)`);
-    onTap(el, (e) => {
-      happySound();
-      say(s.name);
-      showBigDisplay(s.emoji, el.style.getPropertyValue("--c"), s.name);
-      const p = pointOf(e);
-      sparkleAt(p.x, p.y);
-    });
-    stage.appendChild(el);
-  });
-}
-
-function buildAnimals() {
-  const stage = resetStage();
-  ANIMALS.forEach((a) => {
-    const el = document.createElement("button");
-    el.className = "item";
-    el.textContent = a.emoji;
-    el.style.setProperty("--c", `hsl(${Math.random() * 360}, 70%, 60%)`);
-    onTap(el, (e) => {
-      happySound();
-      say(`${a.name}. ${a.sound}`);
-      showBigDisplay(a.emoji, el.style.getPropertyValue("--c"), a.name);
-      const p = pointOf(e);
-      sparkleAt(p.x, p.y);
-    });
-    stage.appendChild(el);
-  });
-}
-
 // Badge bump helper (shared by games)
 function bumpBadge(id, val) {
   const el = document.getElementById(id);
@@ -362,112 +112,130 @@ function bumpBadge(id, val) {
   }
 }
 
-// ---------- Matching game ----------
-// "Find the match": show one target up top, show 3 choices below,
-// he taps the one that matches. Age-appropriate for 2-3.
-const MATCH_POOL = [
-  { emoji: "🐶", name: "dog" },
-  { emoji: "🐱", name: "cat" },
-  { emoji: "🐮", name: "cow" },
-  { emoji: "🐷", name: "pig" },
-  { emoji: "🦆", name: "duck" },
-  { emoji: "🐑", name: "sheep" },
-  { emoji: "🐴", name: "horse" },
-  { emoji: "🦁", name: "lion" },
-  { emoji: "🐸", name: "frog" },
-  { emoji: "🐵", name: "monkey" },
-  { emoji: "🐘", name: "elephant" },
-  { emoji: "🐝", name: "bee" },
-  { emoji: "🍎", name: "apple" },
-  { emoji: "🍌", name: "banana" },
-  { emoji: "🍓", name: "strawberry" },
-  { emoji: "🍇", name: "grapes" },
-  { emoji: "🍉", name: "watermelon" },
-  { emoji: "🥕", name: "carrot" },
-  { emoji: "🌽", name: "corn" },
-  { emoji: "⭐", name: "star" },
-  { emoji: "❤️", name: "heart" },
-  { emoji: "🌈", name: "rainbow" },
-  { emoji: "☀️", name: "sun" },
-  { emoji: "🌙", name: "moon" },
-  { emoji: "⚽", name: "ball" },
-  { emoji: "🚗", name: "car" },
-  { emoji: "🚂", name: "train" },
-  { emoji: "✈️", name: "plane" },
-  { emoji: "🚀", name: "rocket" },
-  { emoji: "🎈", name: "balloon" },
-  { emoji: "🎁", name: "present" },
-  { emoji: "🌸", name: "flower" },
+// ---------- Flashcard activities ----------
+// Letters / Numbers / Colors / Shapes / Animals all share the same shape:
+// a grid of tappable items that play a sound, speak a phrase, and pop up a
+// big visual display when tapped. Each activity just supplies its data and
+// a few small functions for label / spoken text / display.
+const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+const NUMBERS = Array.from({ length: 10 }, (_, i) => i + 1);
+const COLORS = [
+  { name: "Red",    hex: "#ff5252" },
+  { name: "Orange", hex: "#ff9800" },
+  { name: "Yellow", hex: "#ffeb3b" },
+  { name: "Green",  hex: "#4caf50" },
+  { name: "Blue",   hex: "#2196f3" },
+  { name: "Purple", hex: "#9c27b0" },
+  { name: "Pink",   hex: "#ff4081" },
+  { name: "Brown",  hex: "#795548" },
+];
+const SHAPES = [
+  { name: "Circle",   emoji: "⭕" },
+  { name: "Square",   emoji: "🟦" },
+  { name: "Triangle", emoji: "🔺" },
+  { name: "Star",     emoji: "⭐" },
+  { name: "Heart",    emoji: "❤️" },
+  { name: "Diamond",  emoji: "🔷" },
+];
+const ANIMALS = [
+  { name: "Dog",     emoji: "🐶", sound: "Woof woof!" },
+  { name: "Cat",     emoji: "🐱", sound: "Meow!" },
+  { name: "Cow",     emoji: "🐮", sound: "Moo!" },
+  { name: "Pig",     emoji: "🐷", sound: "Oink oink!" },
+  { name: "Duck",    emoji: "🦆", sound: "Quack quack!" },
+  { name: "Sheep",   emoji: "🐑", sound: "Baa!" },
+  { name: "Horse",   emoji: "🐴", sound: "Neigh!" },
+  { name: "Lion",    emoji: "🦁", sound: "Roar!" },
+  { name: "Frog",    emoji: "🐸", sound: "Ribbit!" },
+  { name: "Monkey",  emoji: "🐵", sound: "Ooh ooh ah ah!" },
+  { name: "Elephant",emoji: "🐘", sound: "Toot!" },
+  { name: "Bee",     emoji: "🐝", sound: "Buzz buzz!" },
 ];
 
-function pickRandom(arr, n) {
-  const copy = arr.slice();
-  const out = [];
-  while (out.length < n && copy.length) {
-    const i = Math.floor(Math.random() * copy.length);
-    out.push(copy.splice(i, 1)[0]);
-  }
-  return out;
-}
+// Phonetic letter names so iOS TTS pronounces them correctly every time
+const LETTER_SOUND = {
+  A: "ay",   B: "bee",  C: "see",  D: "dee",  E: "ee",   F: "eff",
+  G: "jee",  H: "aitch",I: "eye",  J: "jay",  K: "kay",  L: "el",
+  M: "em",   N: "en",   O: "oh",   P: "pee",  Q: "cue",  R: "are",
+  S: "ess",  T: "tee",  U: "you",  V: "vee",  W: "double you",
+  X: "ex",   Y: "why",  Z: "zee",
+};
+const LETTER_WORD = {
+  A: "Apple", B: "Ball", C: "Cat", D: "Dog", E: "Egg", F: "Fish",
+  G: "Goat", H: "Hat", I: "Ice", J: "Juice", K: "Kite", L: "Lion",
+  M: "Moon", N: "Nest", O: "Orange", P: "Pig", Q: "Queen", R: "Rabbit",
+  S: "Sun", T: "Tree", U: "Umbrella", V: "Van", W: "Water", X: "Xylophone",
+  Y: "Yo-yo", Z: "Zebra",
+};
+const NUMBER_WORD = {
+  1: "one", 2: "two", 3: "three", 4: "four", 5: "five",
+  6: "six", 7: "seven", 8: "eight", 9: "nine", 10: "ten",
+};
 
-let matchScore = 0;
-const CHEER_PHRASES = ["Yay! Great job!", "You got it!", "Awesome!", "Super!", "Nice one!"];
+const ACTIVITIES = {
+  letters: {
+    items: LETTERS,
+    many: true,
+    color: () => `hsl(${Math.random() * 360}, 80%, 55%)`,
+    label: (ch) => ch,
+    speak: (ch) => `${LETTER_SOUND[ch]}, ${LETTER_WORD[ch]}`,
+    display: (ch, c) => ({ text: ch, color: c, caption: LETTER_WORD[ch] }),
+  },
+  numbers: {
+    items: NUMBERS,
+    color: (n) => `hsl(${n * 36}, 80%, 55%)`,
+    label: (n) => n,
+    speak: (n) => NUMBER_WORD[n],
+    display: (n, c) => ({ text: n, color: c, caption: NUMBER_WORD[n] }),
+  },
+  colors: {
+    items: COLORS,
+    color: (c) => c.hex,
+    background: (c) => c.hex,
+    label: () => "",
+    speak: (c) => c.name,
+    display: (c) => ({ text: c.name, color: c.hex, caption: "" }),
+  },
+  shapes: {
+    items: SHAPES,
+    color: () => `hsl(${Math.random() * 360}, 70%, 60%)`,
+    label: (s) => s.emoji,
+    speak: (s) => s.name,
+    display: (s, c) => ({ text: s.emoji, color: c, caption: s.name }),
+  },
+  animals: {
+    items: ANIMALS,
+    color: () => `hsl(${Math.random() * 360}, 70%, 60%)`,
+    label: (a) => a.emoji,
+    speak: (a) => `${a.name}. ${a.sound}`,
+    display: (a, c) => ({ text: a.emoji, color: c, caption: a.name }),
+  },
+};
 
-function newMatchRound(speakPrompt = true) {
-  const target = document.getElementById("matchTarget");
-  const choices = document.getElementById("matchChoices");
-  target.innerHTML = "";
-  choices.innerHTML = "";
+function buildFlashcards(name) {
+  const cfg = ACTIVITIES[name];
+  if (!cfg) return;
+  const stage = document.getElementById("stage");
+  stage.innerHTML = "";
+  stage.className = "stage" + (cfg.many ? " stage--many" : "");
 
-  const [answer, d1, d2] = pickRandom(MATCH_POOL, 3);
-  const options = [answer, d1, d2].sort(() => Math.random() - 0.5);
-
-  const targetEl = document.createElement("div");
-  targetEl.className = "match-target-item";
-  targetEl.textContent = answer.emoji;
-  // Tap target to re-speak the hint
-  onTap(targetEl, () => say(`Find the ${answer.name}`));
-  target.appendChild(targetEl);
-
-  // Voice prompt tells the kid what to look for
-  if (speakPrompt) {
-    say(`Find the ${answer.name}`);
-  }
-
-  options.forEach((item) => {
-    const btn = document.createElement("button");
-    btn.className = "match-choice";
-    btn.textContent = item.emoji;
-    onTap(btn, (e) => {
-      if (item.emoji === answer.emoji) {
-        happySound();
-        matchScore += 1;
-        bumpBadge("matchScoreVal", matchScore);
-        // Every 5: big celebration
-        if (matchScore % 5 === 0) {
-          say(`${CHEER_PHRASES[Math.floor(Math.random() * CHEER_PHRASES.length)]} ${matchScore} in a row!`);
-        } else {
-          say(CHEER_PHRASES[Math.floor(Math.random() * CHEER_PHRASES.length)]);
-        }
-        btn.classList.add("correct");
-        const p = pointOf(e);
-        sparkleAt(p.x, p.y);
-        setTimeout(() => newMatchRound(true), 1300);
-      } else {
-        buzzSound();
-        say(`Find the ${answer.name}`);
-        btn.classList.add("wrong");
-        setTimeout(() => btn.classList.remove("wrong"), 500);
-      }
+  cfg.items.forEach((item, i) => {
+    const el = document.createElement("button");
+    el.className = "item";
+    el.textContent = cfg.label(item, i);
+    const c = cfg.color(item, i);
+    el.style.setProperty("--c", c);
+    if (cfg.background) el.style.background = cfg.background(item);
+    onTap(el, (e) => {
+      happySound();
+      say(cfg.speak(item));
+      const d = cfg.display(item, c);
+      showBigDisplay(d.text, d.color, d.caption);
+      const p = pointOf(e);
+      sparkleAt(p.x, p.y);
     });
-    choices.appendChild(btn);
+    stage.appendChild(el);
   });
-}
-
-function startMatchGame() {
-  matchScore = 0;
-  document.getElementById("matchScoreVal").textContent = "0";
-  newMatchRound(true);
 }
 
 // ---------- Shared namespace for game modules ----------
@@ -477,6 +245,7 @@ function startMatchGame() {
 window.Lawson = {
   say, beep, happySound, buzzSound, sparkleAt, onTap, pointOf, bumpBadge, show,
   audioCtx, unlockAudio,
+  getHighScore, setHighScore, bumpHighScore,
   games: {}, // each game adds { screen, start, stop } here
 };
 
@@ -496,7 +265,6 @@ document.querySelectorAll("[data-go]").forEach((btn) => {
 
     leaveActiveGame();
 
-    // Registered game modules (pop, doodle, whack, piano, ...)
     const game = window.Lawson.games[where];
     if (game) {
       show(game.screen);
@@ -505,18 +273,10 @@ document.querySelectorAll("[data-go]").forEach((btn) => {
       return;
     }
 
-    if (where === "match") {
-      show("matchGame");
-      startMatchGame();
-      return;
+    if (ACTIVITIES[where]) {
+      show("activity");
+      buildFlashcards(where);
     }
-
-    show("activity");
-    if (where === "letters") buildLetters();
-    if (where === "numbers") buildNumbers();
-    if (where === "colors") buildColors();
-    if (where === "shapes") buildShapes();
-    if (where === "animals") buildAnimals();
   });
 });
 
@@ -534,13 +294,3 @@ document.addEventListener("gesturestart", (e) => e.preventDefault());
 document.addEventListener("touchmove", (e) => {
   if (e.touches.length > 1) e.preventDefault();
 }, { passive: false });
-
-// Unlock audio + speech on the very first user interaction anywhere
-function firstUnlock() {
-  unlockAudio();
-  unlockSpeech();
-  document.removeEventListener("touchstart", firstUnlock);
-  document.removeEventListener("click", firstUnlock);
-}
-document.addEventListener("touchstart", firstUnlock, { passive: true });
-document.addEventListener("click", firstUnlock);

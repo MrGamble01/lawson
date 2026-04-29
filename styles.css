@@ -309,12 +309,21 @@ header h1 {
   100% { transform: translate(var(--dx), var(--dy)) scale(1.5); opacity: 0; }
 }
 
-/* ---------- Balloon pop streak badge ---------- */
+/* ---------- Score badge variants ---------- */
 .badge--streak {
   top: auto;
   bottom: 14px;
   border-color: #ff922b;
   color: #ff922b;
+}
+.badge--best {
+  top: 14px;
+  right: auto;
+  left: 90px;
+  border-color: #fab005;
+  color: #fab005;
+  font-size: clamp(18px, 2.8vw, 28px);
+  padding: 6px 16px;
 }
 .balloon--rainbow {
   filter: drop-shadow(0 0 14px rgba(255,64,129,0.7)) drop-shadow(0 4px 6px rgba(0,0,0,0.25));

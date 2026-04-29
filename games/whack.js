@@ -48,6 +48,9 @@
         const pts = current.gold ? 3 : 1;
         score += pts;
         L.bumpBadge("whackScoreVal", score);
+        const best = L.bumpHighScore("whackBest", score);
+        const bestEl = document.getElementById("whackBestVal");
+        if (bestEl) bestEl.textContent = best;
         L.happySound();
         L.say(current.gold ? `Gold ${current.critter.name}!` : CHEERS[Math.floor(Math.random() * CHEERS.length)]);
 
@@ -113,6 +116,8 @@
     score = 0;
     popInterval = 1200;
     L.bumpBadge("whackScoreVal", 0);
+    const bestEl = document.getElementById("whackBestVal");
+    if (bestEl) bestEl.textContent = L.getHighScore("whackBest");
     makeHoles();
     L.say("Tap the animals!");
     cycleTimer = setTimeout(tick, 600);
