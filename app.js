@@ -349,112 +349,7 @@ function buildAnimals() {
   });
 }
 
-// ---------- Piano ----------
-// White keys span one octave (C4 → C5). Rainbow colors for toddler appeal.
-const PIANO_WHITE = [
-  { note: "C", display: "C", freq: 261.63, color: "#ff5252" },
-  { note: "D", display: "D", freq: 293.66, color: "#ff9800" },
-  { note: "E", display: "E", freq: 329.63, color: "#ffd60a" },
-  { note: "F", display: "F", freq: 349.23, color: "#34c759" },
-  { note: "G", display: "G", freq: 392.00, color: "#2196f3" },
-  { note: "A", display: "A", freq: 440.00, color: "#845ef7" },
-  { note: "B", display: "B", freq: 493.88, color: "#ff2d92" },
-  { note: "C5", display: "C", freq: 523.25, color: "#ff5252" },
-];
-// Black keys positioned between specific white keys (by white-key index)
-const PIANO_BLACK = [
-  { note: "C#", freq: 277.18, after: 0 },
-  { note: "D#", freq: 311.13, after: 1 },
-  { note: "F#", freq: 369.99, after: 3 },
-  { note: "G#", freq: 415.30, after: 4 },
-  { note: "A#", freq: 466.16, after: 5 },
-];
-
-function playPianoNote(freq) {
-  try {
-    const t = audioCtx.currentTime;
-    // Fundamental (triangle → warm, softer than square)
-    const o1 = audioCtx.createOscillator();
-    const g1 = audioCtx.createGain();
-    o1.type = "triangle";
-    o1.frequency.value = freq;
-    g1.gain.setValueAtTime(0.0001, t);
-    g1.gain.exponentialRampToValueAtTime(0.3, t + 0.01);
-    g1.gain.exponentialRampToValueAtTime(0.0001, t + 1.4);
-    o1.connect(g1).connect(audioCtx.destination);
-    o1.start(t);
-    o1.stop(t + 1.5);
-    // Second harmonic adds a bit of sparkle
-    const o2 = audioCtx.createOscillator();
-    const g2 = audioCtx.createGain();
-    o2.type = "sine";
-    o2.frequency.value = freq * 2;
-    g2.gain.setValueAtTime(0.0001, t);
-    g2.gain.exponentialRampToValueAtTime(0.08, t + 0.01);
-    g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.7);
-    o2.connect(g2).connect(audioCtx.destination);
-    o2.start(t);
-    o2.stop(t + 0.8);
-  } catch (_) {}
-}
-
-function attachPianoKey(el, freq) {
-  const press = (e) => {
-    e.preventDefault();
-    unlockAudio();
-    el.classList.add("active");
-    playPianoNote(freq);
-  };
-  const release = () => el.classList.remove("active");
-  // pointerdown covers mouse, touch, and pen on modern iOS/Safari
-  el.addEventListener("pointerdown", press);
-  el.addEventListener("pointerup", release);
-  el.addEventListener("pointerleave", release);
-  el.addEventListener("pointercancel", release);
-}
-
-function buildPiano() {
-  const keys = document.getElementById("pianoKeys");
-  keys.innerHTML = "";
-  const inner = document.createElement("div");
-  inner.className = "piano-inner";
-  keys.appendChild(inner);
-
-  PIANO_WHITE.forEach((k) => {
-    const el = document.createElement("div");
-    el.className = "key-white";
-    el.style.setProperty("--c", k.color);
-    el.textContent = k.display;
-    attachPianoKey(el, k.freq);
-    inner.appendChild(el);
-  });
-
-  const whiteCount = PIANO_WHITE.length;
-  const blackWidthPct = 8;       // must match .key-black width in CSS
-  const slotPct = 100 / whiteCount;
-  PIANO_BLACK.forEach((k) => {
-    const el = document.createElement("div");
-    el.className = "key-black";
-    // Center the black key on the seam after its assigned white key
-    el.style.left = (slotPct * (k.after + 1) - blackWidthPct / 2) + "%";
-    attachPianoKey(el, k.freq);
-    inner.appendChild(el);
-  });
-}
-
-// ---------- Balloon pop game ----------
-const BALLOON_COLORS = [
-  { name: "Red",    hex: "#ff3b30" },
-  { name: "Orange", hex: "#ff9500" },
-  { name: "Yellow", hex: "#ffd60a" },
-  { name: "Green",  hex: "#34c759" },
-  { name: "Blue",   hex: "#007aff" },
-  { name: "Purple", hex: "#af52de" },
-  { name: "Pink",   hex: "#ff2d92" },
-];
-
-let popTimer = null;
-let popScore = 0;
+// Badge bump helper (shared by games)
 function bumpBadge(id, val) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -465,62 +360,6 @@ function bumpBadge(id, val) {
     void badge.offsetWidth;
     badge.classList.add("bump");
   }
-}
-function startPopGame() {
-  const area = document.getElementById("popArea");
-  area.innerHTML = "";
-  popScore = 0;
-  document.getElementById("popScoreVal").textContent = "0";
-
-  const spawn = () => {
-    // Pick a real color and draw an SVG balloon in that exact color,
-    // so the spoken color always matches what the kid sees.
-    const c = BALLOON_COLORS[Math.floor(Math.random() * BALLOON_COLORS.length)];
-    const b = document.createElement("div");
-    b.className = "balloon";
-    b.innerHTML = `
-      <svg viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <ellipse cx="50" cy="55" rx="42" ry="50" fill="${c.hex}"/>
-        <ellipse cx="36" cy="38" rx="10" ry="16" fill="rgba(255,255,255,0.5)"/>
-        <polygon points="46,104 54,104 50,112" fill="${c.hex}"/>
-        <path d="M50 112 Q56 124 48 134 Q42 140 50 140" stroke="#555" stroke-width="2" fill="none"/>
-      </svg>
-    `;
-    b.style.left = Math.random() * 80 + 10 + "%";
-    b.style.top = "110%";
-    const dur = 5 + Math.random() * 4;
-    b.style.animationDuration = dur + "s";
-
-    onTap(b, (e) => {
-      if (e.stopPropagation) e.stopPropagation();
-      beep(300 + Math.random() * 400, 0.15, "triangle");
-      say(c.name);
-      popScore += 1;
-      bumpBadge("popScoreVal", popScore);
-      const burst = document.createElement("div");
-      burst.className = "burst";
-      burst.textContent = "💥";
-      // Use getBoundingClientRect so the burst appears where the balloon
-      // actually is on screen (accounting for its CSS float animation)
-      const r = b.getBoundingClientRect();
-      const ar = area.getBoundingClientRect();
-      burst.style.top = (r.top - ar.top) + "px";
-      burst.style.left = (r.left - ar.left) + "px";
-      area.appendChild(burst);
-      setTimeout(() => burst.remove(), 500);
-      b.remove();
-    });
-    area.appendChild(b);
-    setTimeout(() => { if (b.parentNode) b.remove(); }, dur * 1000);
-  };
-
-  popTimer = setInterval(spawn, 1100);
-  spawn(); spawn(); spawn();
-}
-function stopPopGame() {
-  clearInterval(popTimer);
-  popTimer = null;
-  document.getElementById("popArea").innerHTML = "";
 }
 
 // ---------- Matching game ----------
@@ -631,28 +470,47 @@ function startMatchGame() {
   newMatchRound(true);
 }
 
+// ---------- Shared namespace for game modules ----------
+// Each game file in /games registers itself on window.Lawson.games and uses
+// the utilities below. Keeping each game self-contained makes it easy to
+// tweak one without touching the others.
+window.Lawson = {
+  say, beep, happySound, buzzSound, sparkleAt, onTap, pointOf, bumpBadge, show,
+  audioCtx, unlockAudio,
+  games: {}, // each game adds { screen, start, stop } here
+};
+
 // ---------- Routing ----------
+let activeGame = null;
+function leaveActiveGame() {
+  if (activeGame && typeof activeGame.stop === "function") activeGame.stop();
+  activeGame = null;
+}
+
 document.querySelectorAll("[data-go]").forEach((btn) => {
   onTap(btn, () => {
     unlockAudio();
     unlockSpeech();
     const where = btn.dataset.go;
     beep(600, 0.1);
-    if (where === "pop") {
-      show("popGame");
-      startPopGame();
+
+    leaveActiveGame();
+
+    // Registered game modules (pop, doodle, whack, piano, ...)
+    const game = window.Lawson.games[where];
+    if (game) {
+      show(game.screen);
+      activeGame = game;
+      game.start();
       return;
     }
+
     if (where === "match") {
       show("matchGame");
       startMatchGame();
       return;
     }
-    if (where === "piano") {
-      show("piano");
-      buildPiano();
-      return;
-    }
+
     show("activity");
     if (where === "letters") buildLetters();
     if (where === "numbers") buildNumbers();
@@ -664,7 +522,7 @@ document.querySelectorAll("[data-go]").forEach((btn) => {
 
 document.querySelectorAll("[data-home]").forEach((btn) => {
   onTap(btn, () => {
-    stopPopGame();
+    leaveActiveGame();
     if (synth) synth.cancel();
     show("menu");
     beep(400, 0.1);
