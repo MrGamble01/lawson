@@ -349,6 +349,99 @@ function buildAnimals() {
   });
 }
 
+// ---------- Piano ----------
+// White keys span one octave (C4 → C5). Rainbow colors for toddler appeal.
+const PIANO_WHITE = [
+  { note: "C", display: "C", freq: 261.63, color: "#ff5252" },
+  { note: "D", display: "D", freq: 293.66, color: "#ff9800" },
+  { note: "E", display: "E", freq: 329.63, color: "#ffd60a" },
+  { note: "F", display: "F", freq: 349.23, color: "#34c759" },
+  { note: "G", display: "G", freq: 392.00, color: "#2196f3" },
+  { note: "A", display: "A", freq: 440.00, color: "#845ef7" },
+  { note: "B", display: "B", freq: 493.88, color: "#ff2d92" },
+  { note: "C5", display: "C", freq: 523.25, color: "#ff5252" },
+];
+// Black keys positioned between specific white keys (by white-key index)
+const PIANO_BLACK = [
+  { note: "C#", freq: 277.18, after: 0 },
+  { note: "D#", freq: 311.13, after: 1 },
+  { note: "F#", freq: 369.99, after: 3 },
+  { note: "G#", freq: 415.30, after: 4 },
+  { note: "A#", freq: 466.16, after: 5 },
+];
+
+function playPianoNote(freq) {
+  try {
+    const t = audioCtx.currentTime;
+    // Fundamental (triangle → warm, softer than square)
+    const o1 = audioCtx.createOscillator();
+    const g1 = audioCtx.createGain();
+    o1.type = "triangle";
+    o1.frequency.value = freq;
+    g1.gain.setValueAtTime(0.0001, t);
+    g1.gain.exponentialRampToValueAtTime(0.3, t + 0.01);
+    g1.gain.exponentialRampToValueAtTime(0.0001, t + 1.4);
+    o1.connect(g1).connect(audioCtx.destination);
+    o1.start(t);
+    o1.stop(t + 1.5);
+    // Second harmonic adds a bit of sparkle
+    const o2 = audioCtx.createOscillator();
+    const g2 = audioCtx.createGain();
+    o2.type = "sine";
+    o2.frequency.value = freq * 2;
+    g2.gain.setValueAtTime(0.0001, t);
+    g2.gain.exponentialRampToValueAtTime(0.08, t + 0.01);
+    g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.7);
+    o2.connect(g2).connect(audioCtx.destination);
+    o2.start(t);
+    o2.stop(t + 0.8);
+  } catch (_) {}
+}
+
+function attachPianoKey(el, freq) {
+  const press = (e) => {
+    e.preventDefault();
+    unlockAudio();
+    el.classList.add("active");
+    playPianoNote(freq);
+  };
+  const release = () => el.classList.remove("active");
+  // pointerdown covers mouse, touch, and pen on modern iOS/Safari
+  el.addEventListener("pointerdown", press);
+  el.addEventListener("pointerup", release);
+  el.addEventListener("pointerleave", release);
+  el.addEventListener("pointercancel", release);
+}
+
+function buildPiano() {
+  const keys = document.getElementById("pianoKeys");
+  keys.innerHTML = "";
+  const inner = document.createElement("div");
+  inner.className = "piano-inner";
+  keys.appendChild(inner);
+
+  PIANO_WHITE.forEach((k) => {
+    const el = document.createElement("div");
+    el.className = "key-white";
+    el.style.setProperty("--c", k.color);
+    el.textContent = k.display;
+    attachPianoKey(el, k.freq);
+    inner.appendChild(el);
+  });
+
+  const whiteCount = PIANO_WHITE.length;
+  const blackWidthPct = 8;       // must match .key-black width in CSS
+  const slotPct = 100 / whiteCount;
+  PIANO_BLACK.forEach((k) => {
+    const el = document.createElement("div");
+    el.className = "key-black";
+    // Center the black key on the seam after its assigned white key
+    el.style.left = (slotPct * (k.after + 1) - blackWidthPct / 2) + "%";
+    attachPianoKey(el, k.freq);
+    inner.appendChild(el);
+  });
+}
+
 // ---------- Balloon pop game ----------
 const BALLOON_COLORS = [
   { name: "Red",    hex: "#ff3b30" },
@@ -553,6 +646,11 @@ document.querySelectorAll("[data-go]").forEach((btn) => {
     if (where === "match") {
       show("matchGame");
       startMatchGame();
+      return;
+    }
+    if (where === "piano") {
+      show("piano");
+      buildPiano();
       return;
     }
     show("activity");
