@@ -22,7 +22,6 @@
   let spawnTimer = null;
   let score = 0;
   let streak = 0;
-  let best = 0;
 
   function balloonSvg(hex) {
     return `
@@ -58,6 +57,8 @@
     L.bumpBadge("popScoreVal", score);
     const streakEl = document.getElementById("popStreakVal");
     if (streakEl) streakEl.textContent = streak;
+    const bestEl = document.getElementById("popBestVal");
+    if (bestEl) bestEl.textContent = L.getHighScore("popBest");
   }
 
   function celebrate(text) {
@@ -99,7 +100,7 @@
       const pts = rainbow ? 3 : 1;
       score += pts;
       streak += 1;
-      if (streak > best) best = streak;
+      L.bumpHighScore("popBest", streak);
 
       L.beep(300 + Math.random() * 400, 0.15, "triangle");
       L.say(c.name);

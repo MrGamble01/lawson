@@ -73,6 +73,7 @@
       <button class="home-btn" data-home>🏠</button>
       <div id="popScore" class="badge">🎈 <span id="popScoreVal">0</span></div>
       <div id="popStreak" class="badge badge--streak">🔥 <span id="popStreakVal">0</span></div>
+      <div id="popBest" class="badge badge--best">🏆 <span id="popBestVal">0</span></div>
       <div id="popArea" class="pop-area"></div>
     </section>
 
@@ -87,6 +88,7 @@
     <section id="whackGame" class="screen">
       <button class="home-btn" data-home>🏠</button>
       <div id="whackScore" class="badge">🔨 <span id="whackScoreVal">0</span></div>
+      <div id="whackBest" class="badge badge--best">🏆 <span id="whackBestVal">0</span></div>
       <div id="whackGrid" class="whack-grid"></div>
     </section>
 
@@ -115,6 +117,7 @@
     <section id="matchGame" class="screen">
       <button class="home-btn" data-home>🏠</button>
       <div id="matchScore" class="badge">⭐ <span id="matchScoreVal">0</span></div>
+      <div id="matchBest" class="badge badge--best">🏆 <span id="matchBestVal">0</span></div>
       <div class="match-layout">
         <div class="match-target-label" id="matchPrompt">Find this!</div>
         <div id="matchTarget" class="match-target"></div>
@@ -123,11 +126,14 @@
     </section>
   </main>
 
+  <script src="lib/audio.js"></script>
+  <script src="lib/storage.js"></script>
   <script src="app.js"></script>
   <script src="games/pop.js"></script>
   <script src="games/piano.js"></script>
   <script src="games/whack.js"></script>
   <script src="games/doodle.js"></script>
   <script src="games/color.js"></script>
+  <script src="games/match.js"></script>
 </body>
 </html>
