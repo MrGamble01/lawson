@@ -1,7 +1,19 @@
 // ---------- Kid personalization ----------
-// Used in cheers and milestone celebrations across games. Centralized so
-// hand-off to a sibling later is a one-line change.
-const KID_NAME = "Lawson";
+// Used in cheers and milestone celebrations across games. Editable from
+// the Settings panel and persisted in localStorage so a sibling can take
+// over with no code changes.
+const DEFAULT_KID_NAME = "Lawson";
+let KID_NAME = (function () {
+  try {
+    const stored = localStorage.getItem("lawson:kidName");
+    return (stored && stored.trim()) || DEFAULT_KID_NAME;
+  } catch (_) { return DEFAULT_KID_NAME; }
+})();
+function setKidName(name) {
+  KID_NAME = (name && name.trim()) || DEFAULT_KID_NAME;
+  try { localStorage.setItem("lawson:kidName", KID_NAME); } catch (_) {}
+  if (window.Lawson) window.Lawson.KID_NAME = KID_NAME;
+}
 
 const CHEER_PHRASES = [
   "Yay {name}!",
@@ -308,6 +320,33 @@ function buildFlashcards(name) {
   });
 }
 
+// ---------- New-high-score celebration ----------
+// Shared big-bang moment for any game when a new personal best is set.
+// Uses a fixed-position overlay so it works on top of any screen, not
+// just the flashcard activity that owns #bigDisplay.
+function celebrateNewHigh(value) {
+  happySound();
+  setTimeout(() => say(`New best! ${value}!`), 220);
+  const overlay = document.getElementById("bestOverlay");
+  const valEl = document.getElementById("bestValue");
+  if (overlay && valEl) {
+    valEl.textContent = value;
+    overlay.classList.remove("show");
+    void overlay.offsetWidth; // restart animation on rapid re-bests
+    overlay.classList.add("show");
+    clearTimeout(celebrateNewHigh._t);
+    celebrateNewHigh._t = setTimeout(() => overlay.classList.remove("show"), 1800);
+  }
+  const cx = window.innerWidth / 2;
+  const cy = window.innerHeight / 2;
+  for (let i = 0; i < 24; i++) {
+    setTimeout(() => sparkleAt(
+      cx + (Math.random() - 0.5) * 340,
+      cy + (Math.random() - 0.5) * 340,
+    ), i * 35);
+  }
+}
+
 // ---------- Shared namespace for game modules ----------
 // Each game file in /games registers itself on window.Lawson.games and uses
 // the utilities below. Keeping each game self-contained makes it easy to
@@ -315,8 +354,8 @@ function buildFlashcards(name) {
 window.Lawson = {
   say, beep, happySound, buzzSound, sparkleAt, onTap, pointOf, bumpBadge, show,
   audioCtx, unlockAudio,
-  getHighScore, setHighScore, bumpHighScore,
-  KID_NAME, cheer, shuffled,
+  getHighScore, setHighScore, bumpHighScore, tryNewHighScore,
+  KID_NAME, cheer, shuffled, celebrateNewHigh,
   games: {}, // each game adds { screen, start, stop } here
 };
 
@@ -365,3 +404,68 @@ document.addEventListener("gesturestart", (e) => e.preventDefault());
 document.addEventListener("touchmove", (e) => {
   if (e.touches.length > 1) e.preventDefault();
 }, { passive: false });
+
+// ---------- Settings panel ----------
+// Tiny parent-facing modal: change the kid's name (used in cheers across
+// every game) and wipe all high scores. The "Reset" button requires a
+// confirm tap so a passing toddler can't nuke their own bests.
+(function setupSettings() {
+  const openBtn = document.getElementById("settingsBtn");
+  const overlay = document.getElementById("settingsOverlay");
+  if (!openBtn || !overlay) return;
+  const nameInput = document.getElementById("settingsName");
+  const closeBtn  = document.getElementById("settingsClose");
+  const resetBtn  = document.getElementById("settingsReset");
+
+  function open() {
+    nameInput.value = KID_NAME;
+    resetBtn.textContent = "🧹 Reset scores";
+    resetBtn.classList.remove("confirming");
+    overlay.classList.add("open");
+    setTimeout(() => nameInput.focus({ preventScroll: true }), 50);
+  }
+  function close() {
+    setKidName(nameInput.value);
+    overlay.classList.remove("open");
+    beep(500, 0.08);
+  }
+  onTap(openBtn, (e) => { if (e.stopPropagation) e.stopPropagation(); open(); });
+  onTap(closeBtn, close);
+  // Tapping the dimmed backdrop closes too, but only if you tap outside the panel.
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
+
+  // Two-tap reset: first tap turns the button red and asks for confirmation;
+  // second tap within ~4s actually wipes scores. Keeps a toddler from clearing them.
+  let confirmT = null;
+  onTap(resetBtn, () => {
+    if (resetBtn.classList.contains("confirming")) {
+      resetAllHighScores();
+      clearTimeout(confirmT);
+      resetBtn.classList.remove("confirming");
+      resetBtn.textContent = "✅ Cleared";
+      happySound();
+      setTimeout(() => { resetBtn.textContent = "🧹 Reset scores"; }, 1400);
+    } else {
+      resetBtn.classList.add("confirming");
+      resetBtn.textContent = "⚠️ Tap again to confirm";
+      buzzSound();
+      confirmT = setTimeout(() => {
+        resetBtn.classList.remove("confirming");
+        resetBtn.textContent = "🧹 Reset scores";
+      }, 4000);
+    }
+  });
+
+  // Submit on Enter, in case a parent prefers the keyboard.
+  nameInput.addEventListener("keydown", (e) => { if (e.key === "Enter") close(); });
+})();
+
+// ---------- Service worker (offline play) ----------
+// Cache static assets so the playground keeps working when the iPad's
+// offline (in a car, on a plane, weak Wi-Fi, etc.). The SW file lives at
+// the repo root so its scope covers everything below it.
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
+  });
+}

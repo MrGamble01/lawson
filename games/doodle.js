@@ -14,6 +14,7 @@
   let mode = "paint"; // "paint" | "stamp"
   let stampTimeout = null;
   let unlisten = null;
+  let lastStampAt = 0; // throttle continuous stamping while dragging
 
   function resize() {
     if (!canvas) return;
@@ -74,7 +75,7 @@
     last = pointIn(e);
     if (mode === "stamp") {
       stampAt(last);
-      drawing = false;
+      lastStampAt = Date.now();
       return;
     }
     dot(last, 8);
@@ -85,6 +86,17 @@
     if (!drawing) return;
     e.preventDefault();
     const p = pointIn(e);
+    if (mode === "stamp") {
+      // Throttle so finger drags lay down a row of stamps, not a smear.
+      const now = Date.now();
+      const dx = p.x - last.x, dy = p.y - last.y;
+      if (now - lastStampAt > 160 && (dx * dx + dy * dy) > 1600) {
+        stampAt(p);
+        lastStampAt = now;
+        last = p;
+      }
+      return;
+    }
     line(last, p);
     last = p;
     hue = (hue + 4) % 360;

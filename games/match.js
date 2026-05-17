@@ -78,7 +78,10 @@
           L.happySound();
           score += 1;
           L.bumpBadge("matchScoreVal", score);
-          const best = L.bumpHighScore("matchBest", score);
+          const best = L.tryNewHighScore("matchBest", score, (next) => {
+            document.getElementById("matchBestVal").textContent = next;
+            setTimeout(() => L.celebrateNewHigh(next), 700);
+          });
           document.getElementById("matchBestVal").textContent = best;
 
           const c = L.cheer();

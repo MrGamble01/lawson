@@ -12,15 +12,19 @@
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="theme-color" content="#ff4081" />
 
+<!-- PWA manifest (installable + offline via sw.js) -->
+<link rel="manifest" href="manifest.json" />
+
 <!-- Inline SVG favicon / home screen icon (no file needed) -->
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%88%3C/text%3E%3C/svg%3E" />
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23ff4081'/%3E%3Ctext x='50' y='72' text-anchor='middle' font-size='64'%3E%F0%9F%8E%88%3C/text%3E%3C/svg%3E" />
+<link rel="apple-touch-icon" href="icon.svg" />
 
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header>
     <h1>Lawson's Playground</h1>
+    <button id="settingsBtn" class="settings-btn" aria-label="Settings">⚙️</button>
   </header>
 
   <main id="app">
@@ -55,6 +59,9 @@
       </button>
       <button class="tile" data-go="match" style="--c:#20c997">
         <span class="emoji">🧩</span><span class="label">Match</span>
+      </button>
+      <button class="tile" data-go="memory" style="--c:#cc5de8">
+        <span class="emoji">🃏</span><span class="label">Memory</span>
       </button>
       <button class="tile" data-go="piano" style="--c:#845ef7">
         <span class="emoji">🎹</span><span class="label">Piano</span>
@@ -142,7 +149,36 @@
         <div id="matchChoices" class="match-choices"></div>
       </div>
     </section>
+
+    <!-- Memory Match (concentration) -->
+    <section id="memoryGame" class="screen">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="memoryScore" class="badge">🃏 <span id="memoryScoreVal">0</span></div>
+      <div id="memoryBest" class="badge badge--best">🏆 <span id="memoryBestVal">0</span></div>
+      <div id="memoryBoard" class="memory-board"></div>
+    </section>
   </main>
+
+  <!-- New-best-score celebration (overlays any screen) -->
+  <div id="bestOverlay" class="best-overlay" aria-hidden="true">
+    <div class="best-trophy">🏆</div>
+    <div class="best-text">New best!</div>
+    <div id="bestValue" class="best-value">0</div>
+  </div>
+
+  <!-- Settings panel (overlays everything) -->
+  <div id="settingsOverlay" class="settings-overlay" aria-hidden="true">
+    <div class="settings-panel" role="dialog" aria-label="Settings">
+      <h2>Settings</h2>
+      <label class="settings-field">
+        <span>Kid's name</span>
+        <input id="settingsName" type="text" maxlength="20" autocomplete="off" autocapitalize="words" spellcheck="false" />
+      </label>
+      <p class="settings-hint">Used in cheers across every game.</p>
+      <button id="settingsReset" class="settings-reset" type="button">🧹 Reset scores</button>
+      <button id="settingsClose" class="settings-close" type="button">✅ Done</button>
+    </div>
+  </div>
 
   <script src="lib/audio.js"></script>
   <script src="lib/storage.js"></script>
@@ -154,5 +190,6 @@
   <script src="games/color.js"></script>
   <script src="games/match.js"></script>
   <script src="games/count.js"></script>
+  <script src="games/memory.js"></script>
 </body>
 </html>

@@ -99,7 +99,10 @@
       const pts = rainbow ? 3 : 1;
       score += pts;
       streak += 1;
-      L.bumpHighScore("popBest", streak);
+      L.tryNewHighScore("popBest", streak, (next) => {
+        // Defer slightly so the pop sound and big celebration don't collide.
+        setTimeout(() => L.celebrateNewHigh(next), 500);
+      });
 
       L.beep(300 + Math.random() * 400, 0.15, "triangle");
       L.say(c.name);

@@ -20,6 +20,7 @@ html, body {
 header {
   text-align: center;
   padding: 12px;
+  position: relative;
 }
 header h1 {
   font-size: clamp(22px, 4vw, 40px);
@@ -27,6 +28,22 @@ header h1 {
   text-shadow: 2px 2px 0 #fff, 4px 4px 0 rgba(0,0,0,0.08);
   letter-spacing: 1px;
 }
+.settings-btn {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  background: rgba(255, 255, 255, 0.65);
+  font-size: 22px;
+  cursor: pointer;
+  box-shadow: 0 3px 0 rgba(0,0,0,0.1);
+  -webkit-tap-highlight-color: transparent;
+}
+.settings-btn:active { transform: translateY(calc(-50% + 2px)); box-shadow: 0 1px 0 rgba(0,0,0,0.1); }
 
 #app {
   height: calc(100% - 60px);
@@ -47,7 +64,11 @@ header h1 {
   align-content: center;
   justify-content: center;
   gap: 18px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
+#menu::-webkit-scrollbar { display: none; }
 .tile {
   background: var(--c, #ff6b6b);
   border: 6px solid #fff;
@@ -707,3 +728,208 @@ header h1 {
   outline: 4px solid #ff4081;
   transform: scale(1.12);
 }
+
+/* ---------- Memory Match ---------- */
+#memoryGame {
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 16px;
+  background: linear-gradient(180deg, #fff0f5 0%, #ffe0ec 60%, #f5e0ff 100%);
+}
+.memory-board {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(8px, 1.5vw, 16px);
+  width: 100%;
+  max-width: 720px;
+  margin-top: 80px;
+  padding: 8px;
+}
+.memory-card {
+  aspect-ratio: 1 / 1;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  perspective: 800px;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.memory-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.45s cubic-bezier(.4,.7,.5,1.2);
+  transform-style: preserve-3d;
+}
+.memory-card.flipped .memory-card-inner { transform: rotateY(180deg); }
+.memory-card.matched .memory-card-inner {
+  transform: rotateY(180deg) scale(1.04);
+  filter: drop-shadow(0 0 14px gold);
+}
+.memory-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(38px, 7vw, 78px);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  box-shadow: 0 6px 0 rgba(0,0,0,0.12);
+}
+.memory-face--back {
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255,255,255,0.45) 0%, transparent 60%),
+    var(--c, #ff6b6b);
+  color: #fff;
+  font-size: clamp(28px, 5vw, 50px);
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+.memory-face--front {
+  background: #fff;
+  border: 4px solid #ffd43b;
+  transform: rotateY(180deg);
+}
+.memory-card.matched .memory-face--front {
+  background: #fff8d6;
+  border-color: #ff922b;
+}
+.memory-card:active .memory-card-inner { transform: scale(0.97); }
+.memory-card.flipped:active .memory-card-inner { transform: rotateY(180deg) scale(0.97); }
+
+/* ---------- New-best celebration overlay ---------- */
+.best-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: radial-gradient(circle at center, rgba(250,176,5,0.94) 0%, rgba(80,40,0,0.85) 100%);
+  z-index: 150;
+  pointer-events: none;
+  color: #fff;
+  text-shadow: 0 4px 10px rgba(0,0,0,0.55), 0 0 2px rgba(0,0,0,0.8);
+}
+.best-overlay.show { display: flex; animation: bestPop 0.6s ease-out; }
+.best-trophy {
+  font-size: clamp(120px, 25vw, 280px);
+  animation: bestSpin 1.4s ease-in-out infinite;
+}
+.best-text {
+  font-size: clamp(34px, 6vw, 60px);
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+.best-value {
+  font-size: clamp(80px, 18vw, 200px);
+  font-weight: bold;
+}
+@keyframes bestPop {
+  0%   { transform: scale(0.5); opacity: 0; }
+  40%  { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes bestSpin {
+  0%, 100% { transform: rotate(-8deg) scale(1); }
+  50%      { transform: rotate(8deg) scale(1.06); }
+}
+
+/* ---------- Settings overlay ---------- */
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 20px;
+}
+.settings-overlay.open { display: flex; animation: settingsFade 0.18s ease-out; }
+@keyframes settingsFade { from { opacity: 0; } to { opacity: 1; } }
+
+.settings-panel {
+  background: #fff;
+  border-radius: 24px;
+  border: 6px solid #ff4081;
+  padding: 24px 24px 20px;
+  width: min(100%, 380px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+  animation: settingsPop 0.25s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes settingsPop {
+  from { transform: scale(0.85); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+.settings-panel h2 {
+  color: #ff4081;
+  margin-bottom: 14px;
+  font-size: 26px;
+}
+.settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-weight: bold;
+  color: #555;
+  font-size: 16px;
+}
+.settings-field input {
+  font: inherit;
+  font-size: 22px;
+  padding: 10px 14px;
+  border: 3px solid #4dabf7;
+  border-radius: 14px;
+  background: #f8fbff;
+  color: #222;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.settings-field input:focus { border-color: #ff4081; background: #fff; }
+.settings-field input {
+  user-select: text;
+  -webkit-user-select: text;
+  -webkit-touch-callout: default;
+}
+.settings-hint {
+  color: #888;
+  font-size: 13px;
+  margin: 6px 2px 14px;
+}
+.settings-reset,
+.settings-close {
+  width: 100%;
+  font: inherit;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 12px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  border: 4px solid;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.06s ease, box-shadow 0.06s ease, background 0.15s ease;
+}
+.settings-reset {
+  background: #fff;
+  color: #fa5252;
+  border-color: #fa5252;
+  margin-bottom: 10px;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.12);
+}
+.settings-reset.confirming {
+  background: #fa5252;
+  color: #fff;
+}
+.settings-close {
+  background: #51cf66;
+  color: #fff;
+  border-color: #2f9e44;
+  box-shadow: 0 4px 0 #2f9e44;
+}
+.settings-reset:active,
+.settings-close:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.12); }
