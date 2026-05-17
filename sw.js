@@ -1,5 +1,5 @@
 // Service worker for offline play. Bump CACHE when assets change.
-const CACHE = "lawson-v2";
+const CACHE = "lawson-v3";
 const ASSETS = [
   "./",
   "./index.html",
@@ -17,6 +17,7 @@ const ASSETS = [
   "./games/match.js",
   "./games/count.js",
   "./games/memory.js",
+  "./games/dots.js",
 ];
 
 self.addEventListener("install", (e) => {

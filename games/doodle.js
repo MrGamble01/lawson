@@ -7,6 +7,20 @@
 
   const STAMPS = ["⭐", "❤️", "🌈", "🌸", "🐶", "🐱", "🐸", "🎈", "🚗", "🍎", "🌟", "🦋"];
 
+  // null = rainbow auto-cycle (the original behavior); anything else is
+  // a solid-color brush. Listed in order so taps map left-to-right.
+  const BRUSHES = [
+    { name: "Rainbow", hex: null,      label: "🌈" },
+    { name: "Red",     hex: "#ff3b30", label: "" },
+    { name: "Orange",  hex: "#ff9500", label: "" },
+    { name: "Yellow",  hex: "#ffd60a", label: "" },
+    { name: "Green",   hex: "#34c759", label: "" },
+    { name: "Blue",    hex: "#007aff", label: "" },
+    { name: "Purple",  hex: "#af52de", label: "" },
+    { name: "Pink",    hex: "#ff2d92", label: "" },
+    { name: "Black",   hex: "#222222", label: "" },
+  ];
+
   let canvas, ctx;
   let drawing = false;
   let last = null;
@@ -15,6 +29,7 @@
   let stampTimeout = null;
   let unlisten = null;
   let lastStampAt = 0; // throttle continuous stamping while dragging
+  let brush = BRUSHES[0]; // current brush; null hex => rainbow
 
   function resize() {
     if (!canvas) return;
@@ -39,18 +54,27 @@
     return { x: src.clientX - rect.left, y: src.clientY - rect.top };
   }
 
+  function strokeColor(offset = 0) {
+    if (brush.hex) return brush.hex;
+    return `hsl(${(hue + offset) % 360}, 90%, 55%)`;
+  }
+
   function dot(p, r) {
-    ctx.fillStyle = `hsl(${hue}, 90%, 55%)`;
+    ctx.fillStyle = strokeColor();
     ctx.beginPath();
     ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
     ctx.fill();
   }
 
   function line(a, b) {
-    const grad = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
-    grad.addColorStop(0, `hsl(${hue}, 90%, 55%)`);
-    grad.addColorStop(1, `hsl(${(hue + 20) % 360}, 90%, 55%)`);
-    ctx.strokeStyle = grad;
+    if (brush.hex) {
+      ctx.strokeStyle = brush.hex;
+    } else {
+      const grad = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+      grad.addColorStop(0, strokeColor(0));
+      grad.addColorStop(1, strokeColor(20));
+      ctx.strokeStyle = grad;
+    }
     ctx.lineWidth = 14;
     ctx.beginPath();
     ctx.moveTo(a.x, a.y);
@@ -99,7 +123,36 @@
     }
     line(last, p);
     last = p;
-    hue = (hue + 4) % 360;
+    if (!brush.hex) hue = (hue + 4) % 360; // only rainbow mode cycles
+  }
+
+  function renderBrushes() {
+    const row = document.getElementById("doodleBrushes");
+    if (!row) return;
+    row.innerHTML = "";
+    BRUSHES.forEach((b) => {
+      const sw = document.createElement("button");
+      sw.className = "doodle-brush";
+      sw.dataset.name = b.name;
+      sw.title = b.name;
+      if (b.hex) {
+        sw.style.background = b.hex;
+      } else {
+        // Rainbow gradient swatch
+        sw.style.background = "conic-gradient(from 0deg, #ff3b30, #ff9500, #ffd60a, #34c759, #007aff, #af52de, #ff3b30)";
+        sw.textContent = b.label;
+      }
+      if (b.name === brush.name) sw.classList.add("active");
+      L.onTap(sw, (e) => {
+        if (e.stopPropagation) e.stopPropagation();
+        brush = b;
+        row.querySelectorAll(".doodle-brush").forEach((x) => x.classList.remove("active"));
+        sw.classList.add("active");
+        L.beep(450 + Math.random() * 200, 0.08, "sine");
+        L.say(b.name);
+      });
+      row.appendChild(sw);
+    });
   }
 
   function onUp(e) {
@@ -162,7 +215,9 @@
     };
 
     mode = "paint";
+    brush = BRUSHES[0];
     stampBtn.classList.remove("active");
+    renderBrushes();
     L.say("Draw with your finger!");
   }
 

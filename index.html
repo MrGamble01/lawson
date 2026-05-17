@@ -63,6 +63,9 @@
       <button class="tile" data-go="memory" style="--c:#cc5de8">
         <span class="emoji">🃏</span><span class="label">Memory</span>
       </button>
+      <button class="tile" data-go="dots" style="--c:#15aabf">
+        <span class="emoji">🔗</span><span class="label">Dots</span>
+      </button>
       <button class="tile" data-go="piano" style="--c:#845ef7">
         <span class="emoji">🎹</span><span class="label">Piano</span>
       </button>
@@ -115,6 +118,7 @@
         <button id="doodleStamp" class="doodle-tool">✨ Stamp</button>
         <button id="doodleClear" class="doodle-tool doodle-tool--clear">🧽 Clear</button>
       </div>
+      <div id="doodleBrushes" class="doodle-brushes"></div>
       <canvas id="doodleCanvas" class="doodle-canvas"></canvas>
     </section>
 
@@ -157,6 +161,14 @@
       <div id="memoryBest" class="badge badge--best">🏆 <span id="memoryBestVal">0</span></div>
       <div id="memoryBoard" class="memory-board"></div>
     </section>
+
+    <!-- Connect the Dots -->
+    <section id="dotsGame" class="screen">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="dotsScore" class="badge">🔗 <span id="dotsScoreVal">0</span></div>
+      <div id="dotsBest" class="badge badge--best">🏆 <span id="dotsBestVal">0</span></div>
+      <div id="dotsStage" class="dots-stage"></div>
+    </section>
   </main>
 
   <!-- New-best-score celebration (overlays any screen) -->
@@ -175,6 +187,18 @@
         <input id="settingsName" type="text" maxlength="20" autocomplete="off" autocapitalize="words" spellcheck="false" />
       </label>
       <p class="settings-hint">Used in cheers across every game.</p>
+
+      <label class="settings-toggle">
+        <input id="settingsVoice" type="checkbox" />
+        <span class="settings-toggle-track" aria-hidden="true"></span>
+        <span class="settings-toggle-label">🗣️ Voice</span>
+      </label>
+      <label class="settings-toggle">
+        <input id="settingsSound" type="checkbox" />
+        <span class="settings-toggle-track" aria-hidden="true"></span>
+        <span class="settings-toggle-label">🔊 Sound effects</span>
+      </label>
+
       <button id="settingsReset" class="settings-reset" type="button">🧹 Reset scores</button>
       <button id="settingsClose" class="settings-close" type="button">✅ Done</button>
     </div>
@@ -191,5 +215,6 @@
   <script src="games/match.js"></script>
   <script src="games/count.js"></script>
   <script src="games/memory.js"></script>
+  <script src="games/dots.js"></script>
 </body>
 </html>

@@ -355,6 +355,7 @@ window.Lawson = {
   say, beep, happySound, buzzSound, sparkleAt, onTap, pointOf, bumpBadge, show,
   audioCtx, unlockAudio,
   getHighScore, setHighScore, bumpHighScore, tryNewHighScore,
+  setVoiceMuted, setSoundMuted, isVoiceMuted, isSoundMuted,
   KID_NAME, cheer, shuffled, celebrateNewHigh,
   games: {}, // each game adds { screen, start, stop } here
 };
@@ -413,12 +414,24 @@ document.addEventListener("touchmove", (e) => {
   const openBtn = document.getElementById("settingsBtn");
   const overlay = document.getElementById("settingsOverlay");
   if (!openBtn || !overlay) return;
-  const nameInput = document.getElementById("settingsName");
-  const closeBtn  = document.getElementById("settingsClose");
-  const resetBtn  = document.getElementById("settingsReset");
+  const nameInput  = document.getElementById("settingsName");
+  const voiceTgl   = document.getElementById("settingsVoice");
+  const soundTgl   = document.getElementById("settingsSound");
+  const closeBtn   = document.getElementById("settingsClose");
+  const resetBtn   = document.getElementById("settingsReset");
+
+  // Toggles are "on means enabled", so the checkbox value is the inverse
+  // of the muted flag.
+  voiceTgl.addEventListener("change", () => setVoiceMuted(!voiceTgl.checked));
+  soundTgl.addEventListener("change", () => {
+    setSoundMuted(!soundTgl.checked);
+    if (soundTgl.checked) beep(500, 0.08); // little chirp when re-enabling
+  });
 
   function open() {
     nameInput.value = KID_NAME;
+    voiceTgl.checked = !isVoiceMuted();
+    soundTgl.checked = !isSoundMuted();
     resetBtn.textContent = "🧹 Reset scores";
     resetBtn.classList.remove("confirming");
     overlay.classList.add("open");

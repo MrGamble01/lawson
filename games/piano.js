@@ -101,6 +101,7 @@
 
   // Nicer piano-ish tone: triangle fundamental + soft sine harmonic + envelope.
   function playNote(freq, dur = 0.5) {
+    if (L.isSoundMuted && L.isSoundMuted()) return;
     try {
       const ac = L.audioCtx;
       if (ac.state === "suspended") ac.resume();
