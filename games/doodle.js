@@ -166,6 +166,7 @@
     ctx.clearRect(0, 0, rect.width, rect.height);
     L.happySound();
     L.say("Clean slate!");
+    L.earnSticker && L.earnSticker("doodleClear");
   }
 
   function toggleStamp(btn) {

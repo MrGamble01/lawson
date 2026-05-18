@@ -93,6 +93,7 @@
 
   function winRound() {
     rounds += 1;
+    if (rounds >= 3) L.earnSticker && L.earnSticker("memory3");
     L.bumpBadge("memoryScoreVal", rounds);
     L.tryNewHighScore("memoryBest", rounds, (next) => {
       document.getElementById("memoryBestVal").textContent = next;

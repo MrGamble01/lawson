@@ -110,6 +110,7 @@
 
   let currentColor = PALETTE[0];
   let pageIndex = 0;
+  let fillsThisSession = 0;
 
   function renderPage() {
     const stage = document.getElementById("colorStage");
@@ -120,10 +121,17 @@
       region.style.cursor = "pointer";
       L.onTap(region, (e) => {
         if (e.stopPropagation) e.stopPropagation();
+        const wasWhite = (region.getAttribute("fill") || "white").toLowerCase() === "white";
         region.setAttribute("fill", currentColor.hex);
         L.beep(400 + Math.random() * 300, 0.08, "triangle");
         const part = region.getAttribute("data-name");
         L.say(part ? `${currentColor.name} ${part}` : currentColor.name);
+        // Count only first-time fills per region so re-coloring the same
+        // spot doesn't farm the sticker.
+        if (wasWhite) {
+          fillsThisSession += 1;
+          if (fillsThisSession >= 10) L.earnSticker && L.earnSticker("color10");
+        }
       });
     });
 
@@ -166,6 +174,7 @@
   function start() {
     pageIndex = 0;
     currentColor = PALETTE[0];
+    fillsThisSession = 0;
     renderPalette();
     renderPage();
     L.onTap(document.getElementById("colorClear"), clearAll);

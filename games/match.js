@@ -77,6 +77,7 @@
         if (item.emoji === answer.emoji) {
           L.happySound();
           score += 1;
+          if (score >= 10) L.earnSticker && L.earnSticker("match10");
           L.bumpBadge("matchScoreVal", score);
           const best = L.tryNewHighScore("matchBest", score, (next) => {
             document.getElementById("matchBestVal").textContent = next;

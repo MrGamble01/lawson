@@ -66,6 +66,12 @@
       <button class="tile" data-go="dots" style="--c:#15aabf">
         <span class="emoji">🔗</span><span class="label">Dots</span>
       </button>
+      <button class="tile" data-go="listen" style="--c:#3b82f6">
+        <span class="emoji">👂</span><span class="label">Listen</span>
+      </button>
+      <button class="tile" data-go="stickers" style="--c:#ffc078">
+        <span class="emoji">🌟</span><span class="label">Stickers</span>
+      </button>
       <button class="tile" data-go="piano" style="--c:#845ef7">
         <span class="emoji">🎹</span><span class="label">Piano</span>
       </button>
@@ -169,6 +175,28 @@
       <div id="dotsBest" class="badge badge--best">🏆 <span id="dotsBestVal">0</span></div>
       <div id="dotsStage" class="dots-stage"></div>
     </section>
+
+    <!-- Listen & Find -->
+    <section id="listenGame" class="screen">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="listenScore" class="badge">👂 <span id="listenScoreVal">0</span></div>
+      <div id="listenBest" class="badge badge--best">🏆 <span id="listenBestVal">0</span></div>
+      <div class="listen-layout">
+        <button id="listenReplay" class="listen-prompt" aria-label="Hear the clue again">👂</button>
+        <div class="listen-hint">Tap to hear again</div>
+        <div id="listenChoices" class="listen-choices"></div>
+      </div>
+    </section>
+
+    <!-- Sticker collection -->
+    <section id="stickersGame" class="screen">
+      <button class="home-btn" data-home>🏠</button>
+      <div class="stickers-header">
+        <h2>🌟 Sticker Book</h2>
+        <div id="stickerCount" class="stickers-count">0 / 0</div>
+      </div>
+      <div id="stickerGrid" class="sticker-grid"></div>
+    </section>
   </main>
 
   <!-- New-best-score celebration (overlays any screen) -->
@@ -206,6 +234,7 @@
 
   <script src="lib/audio.js"></script>
   <script src="lib/storage.js"></script>
+  <script src="lib/achievements.js"></script>
   <script src="app.js"></script>
   <script src="games/pop.js"></script>
   <script src="games/piano.js"></script>
@@ -216,5 +245,7 @@
   <script src="games/count.js"></script>
   <script src="games/memory.js"></script>
   <script src="games/dots.js"></script>
+  <script src="games/listen.js"></script>
+  <script src="games/stickers.js"></script>
 </body>
 </html>

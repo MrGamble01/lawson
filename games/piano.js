@@ -199,6 +199,7 @@
 
   function playSong() {
     stopSong();
+    L.earnSticker && L.earnSticker("pianoSong");
     const song = SONGS[songIndex % SONGS.length];
     songIndex += 1;
     const beat = 60 / song.bpm; // seconds per beat

@@ -151,6 +151,7 @@
   function winPuzzle(p, svg) {
     L.happySound();
     solved += 1;
+    if (solved >= 3) L.earnSticker && L.earnSticker("dots3");
     L.bumpBadge("dotsScoreVal", solved);
     L.tryNewHighScore("dotsBest", solved, (next) => {
       document.getElementById("dotsBestVal").textContent = next;

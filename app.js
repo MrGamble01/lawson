@@ -326,6 +326,7 @@ function buildFlashcards(name) {
 // just the flashcard activity that owns #bigDisplay.
 function celebrateNewHigh(value) {
   happySound();
+  if (typeof earnSticker === "function") earnSticker("firstHigh");
   setTimeout(() => say(`New best! ${value}!`), 220);
   const overlay = document.getElementById("bestOverlay");
   const valEl = document.getElementById("bestValue");
@@ -356,6 +357,7 @@ window.Lawson = {
   audioCtx, unlockAudio,
   getHighScore, setHighScore, bumpHighScore, tryNewHighScore,
   setVoiceMuted, setSoundMuted, isVoiceMuted, isSoundMuted,
+  earnSticker, isStickerEarned, listStickers, resetStickers,
   KID_NAME, cheer, shuffled, celebrateNewHigh,
   games: {}, // each game adds { screen, start, stop } here
 };
@@ -453,6 +455,7 @@ document.addEventListener("touchmove", (e) => {
   onTap(resetBtn, () => {
     if (resetBtn.classList.contains("confirming")) {
       resetAllHighScores();
+      resetStickers();
       clearTimeout(confirmT);
       resetBtn.classList.remove("confirming");
       resetBtn.textContent = "✅ Cleared";

@@ -46,6 +46,8 @@
         if (!current) return;
         const pts = current.gold ? 3 : 1;
         score += pts;
+        if (current.gold) L.earnSticker && L.earnSticker("whackGold");
+        if (score >= 20) L.earnSticker && L.earnSticker("whack20");
         L.bumpBadge("whackScoreVal", score);
         const best = L.tryNewHighScore("whackBest", score, (next) => {
           const el = document.getElementById("whackBestVal");

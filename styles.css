@@ -1056,3 +1056,203 @@ header h1 {
   opacity: 1;
   transform: scale(1);
 }
+
+/* ---------- Listen & Find ---------- */
+#listenGame {
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 16px;
+  background: linear-gradient(180deg, #e7f5ff 0%, #d0bfff 100%);
+}
+.listen-layout {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  padding: 80px 20px 20px;
+  gap: 12px;
+}
+.listen-prompt {
+  font-size: clamp(80px, 18vw, 180px);
+  background: transparent;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 30px;
+  cursor: pointer;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+  animation: listenPulse 1.6s ease-in-out infinite;
+  -webkit-tap-highlight-color: transparent;
+}
+.listen-prompt:active { transform: scale(0.92); }
+.listen-hint {
+  font-size: clamp(16px, 2.6vw, 22px);
+  color: #5c4b8e;
+  font-weight: bold;
+  text-shadow: 1px 1px 0 #fff;
+  opacity: 0.85;
+}
+@keyframes listenPulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.08); }
+}
+.listen-choices {
+  display: flex;
+  gap: clamp(14px, 3vw, 36px);
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.listen-choice {
+  font-size: clamp(70px, 14vw, 150px);
+  background: #fff;
+  border: 6px solid #845ef7;
+  border-radius: 25px;
+  width: clamp(120px, 22vw, 220px);
+  height: clamp(120px, 22vw, 220px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 8px 0 rgba(0,0,0,0.12);
+  transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.listen-choice:active { transform: scale(0.95) translateY(4px); }
+.listen-choice.correct {
+  background: #b2f2bb;
+  border-color: #2f9e44;
+  animation: correctPulse 0.6s ease;
+}
+.listen-choice.wrong {
+  background: #ffc9c9;
+  border-color: #e03131;
+  animation: shake 0.4s ease;
+}
+
+/* ---------- Stickers screen ---------- */
+#stickersGame {
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 16px;
+  background: linear-gradient(180deg, #fff7e6 0%, #ffe0a3 100%);
+}
+.stickers-header {
+  margin-top: 70px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.stickers-header h2 {
+  font-size: clamp(24px, 4vw, 38px);
+  color: #f59f00;
+  text-shadow: 2px 2px 0 #fff;
+}
+.stickers-count {
+  background: #fff;
+  border: 4px solid #ffd43b;
+  color: #b45a00;
+  font-weight: bold;
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: clamp(16px, 2.4vw, 22px);
+  box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+}
+.sticker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: clamp(12px, 2vw, 20px);
+  width: 100%;
+  max-width: 900px;
+  padding: 8px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+}
+.sticker-card {
+  background: #fff;
+  border: 5px solid #ffd43b;
+  border-radius: 22px;
+  padding: 14px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 5px 0 rgba(0,0,0,0.1);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.1s ease;
+  min-height: 130px;
+}
+.sticker-card:active { transform: scale(0.95); }
+.sticker-card.earned {
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255,255,255,0.7) 0%, transparent 60%),
+    linear-gradient(135deg, #fff8d6 0%, #fff 100%);
+  border-color: #fab005;
+  filter: drop-shadow(0 0 8px rgba(255,212,59,0.6));
+}
+.sticker-card.locked {
+  background: #f1f3f5;
+  border-color: #ced4da;
+  color: #adb5bd;
+  filter: grayscale(1);
+  opacity: 0.7;
+}
+.sticker-card-emoji {
+  font-size: clamp(40px, 8vw, 64px);
+  line-height: 1;
+}
+.sticker-card-title {
+  font-size: clamp(13px, 2vw, 17px);
+  font-weight: bold;
+  color: #b45a00;
+  text-align: center;
+}
+.sticker-card.locked .sticker-card-title { color: #868e96; }
+
+/* ---------- Sticker toast (unlock notification) ---------- */
+.sticker-toasts {
+  position: fixed;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 20px);
+  left: 50%;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 8px;
+  z-index: 180;
+  pointer-events: none;
+  max-width: calc(100% - 28px);
+  transform: translateX(-50%);
+  align-items: center;
+}
+.sticker-toast {
+  background: linear-gradient(135deg, #ffd43b 0%, #ff922b 100%);
+  border: 4px solid #fff;
+  border-radius: 18px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+  color: #fff;
+  font-weight: bold;
+  transform: translateY(140%);
+  transition: transform 0.32s cubic-bezier(.34,1.56,.64,1);
+  min-width: 220px;
+  max-width: 360px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.25);
+}
+.sticker-toast.show { transform: translateY(0); }
+.sticker-toast-emoji {
+  font-size: 36px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
+}
+.sticker-toast-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.sticker-toast-title { font-size: 16px; }
+.sticker-toast-desc { font-size: 13px; opacity: 0.95; font-weight: 500; }
