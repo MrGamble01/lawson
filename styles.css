@@ -60,15 +60,35 @@ header h1 {
 
 /* ---------- Home menu ---------- */
 #menu {
-  flex-wrap: wrap;
-  align-content: center;
-  justify-content: center;
-  gap: 18px;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0;
+  padding: 12px 12px 24px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
 #menu::-webkit-scrollbar { display: none; }
+.menu-section {
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+}
+.menu-section-title {
+  font-size: clamp(16px, 2.4vw, 22px);
+  font-weight: bold;
+  color: #ff4081;
+  text-shadow: 2px 2px 0 #fff, 3px 3px 0 rgba(0,0,0,0.06);
+  letter-spacing: 1px;
+  margin: 4px 12px 10px;
+}
+.menu-tiles {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+}
 .tile {
   background: var(--c, #ff6b6b);
   border: 6px solid #fff;
@@ -1248,6 +1268,96 @@ header h1 {
   text-shadow: 0 1px 2px rgba(0,0,0,0.25);
 }
 .sticker-toast.show { transform: translateY(0); }
+
+/* ---------- Spelling Helper ---------- */
+#spellGame {
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 16px;
+  background: linear-gradient(180deg, #fff0f6 0%, #ffd6e7 100%);
+}
+.spell-layout {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  padding: 80px 16px 24px;
+  gap: 14px;
+}
+.spell-emoji {
+  font-size: clamp(100px, 22vw, 220px);
+  filter: drop-shadow(0 6px 10px rgba(0,0,0,0.15));
+}
+.spell-word {
+  display: flex;
+  gap: clamp(8px, 1.5vw, 14px);
+  background: #fff;
+  border-radius: 22px;
+  padding: 12px 22px;
+  box-shadow: 0 6px 0 rgba(0,0,0,0.12);
+  border: 5px solid #e64980;
+}
+.spell-letter {
+  font-size: clamp(50px, 9vw, 90px);
+  font-weight: 900;
+  color: #495057;
+  font-family: "Chalkboard SE", "Comic Sans MS", -apple-system, sans-serif;
+  min-width: clamp(40px, 8vw, 70px);
+  text-align: center;
+  line-height: 1;
+}
+.spell-letter.blank {
+  color: #e64980;
+  background: #ffe3ec;
+  border-radius: 10px;
+  animation: blankPulse 1.4s ease-in-out infinite;
+}
+@keyframes blankPulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.07); }
+}
+.spell-letter.found {
+  animation: foundPop 0.5s cubic-bezier(.34,1.56,.64,1);
+  color: #2f9e44;
+}
+@keyframes foundPop {
+  0%   { transform: scale(0.4); }
+  60%  { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+.spell-choices {
+  display: flex;
+  gap: clamp(14px, 3vw, 30px);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.spell-choice {
+  font-size: clamp(50px, 9vw, 80px);
+  font-weight: 900;
+  background: #fff;
+  border: 6px solid #4dabf7;
+  border-radius: 22px;
+  width: clamp(90px, 18vw, 150px);
+  height: clamp(90px, 18vw, 150px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #1864ab;
+  box-shadow: 0 8px 0 rgba(0,0,0,0.12);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.1s ease, background 0.2s ease, border-color 0.2s ease;
+  font-family: inherit;
+}
+.spell-choice:active { transform: scale(0.95) translateY(4px); }
+.spell-choice.wrong {
+  background: #ffc9c9;
+  border-color: #e03131;
+  animation: shake 0.4s ease;
+}
 .sticker-toast-emoji {
   font-size: 36px;
   flex-shrink: 0;

@@ -30,60 +30,86 @@
   <main id="app">
     <!-- Home menu -->
     <section id="menu" class="screen active">
-      <button class="tile" data-go="letters" style="--c:#ff6b6b">
-        <span class="emoji">🔤</span><span class="label">ABC</span>
-      </button>
-      <button class="tile" data-go="numbers" style="--c:#4dabf7">
-        <span class="emoji">🔢</span><span class="label">123</span>
-      </button>
-      <button class="tile" data-go="colors" style="--c:#ffd43b">
-        <span class="emoji">🎨</span><span class="label">Colors</span>
-      </button>
-      <button class="tile" data-go="shapes" style="--c:#69db7c">
-        <span class="emoji">⭐</span><span class="label">Shapes</span>
-      </button>
-      <button class="tile" data-go="animals" style="--c:#da77f2">
-        <span class="emoji">🐶</span><span class="label">Animals</span>
-      </button>
-      <button class="tile" data-go="vehicles" style="--c:#fab005">
-        <span class="emoji">🚗</span><span class="label">Vehicles</span>
-      </button>
-      <button class="tile" data-go="dinosaurs" style="--c:#37b24d">
-        <span class="emoji">🦖</span><span class="label">Dinos</span>
-      </button>
-      <button class="tile" data-go="count" style="--c:#5c7cfa">
-        <span class="emoji">🔢</span><span class="label">Count</span>
-      </button>
-      <button class="tile" data-go="pop" style="--c:#ff922b">
-        <span class="emoji">🎈</span><span class="label">Pop!</span>
-      </button>
-      <button class="tile" data-go="match" style="--c:#20c997">
-        <span class="emoji">🧩</span><span class="label">Match</span>
-      </button>
-      <button class="tile" data-go="memory" style="--c:#cc5de8">
-        <span class="emoji">🃏</span><span class="label">Memory</span>
-      </button>
-      <button class="tile" data-go="dots" style="--c:#15aabf">
-        <span class="emoji">🔗</span><span class="label">Dots</span>
-      </button>
-      <button class="tile" data-go="listen" style="--c:#3b82f6">
-        <span class="emoji">👂</span><span class="label">Listen</span>
-      </button>
-      <button class="tile" data-go="stickers" style="--c:#ffc078">
-        <span class="emoji">🌟</span><span class="label">Stickers</span>
-      </button>
-      <button class="tile" data-go="piano" style="--c:#845ef7">
-        <span class="emoji">🎹</span><span class="label">Piano</span>
-      </button>
-      <button class="tile" data-go="whack" style="--c:#f06595">
-        <span class="emoji">🐹</span><span class="label">Whack!</span>
-      </button>
-      <button class="tile" data-go="doodle" style="--c:#22b8cf">
-        <span class="emoji">🎨</span><span class="label">Doodle</span>
-      </button>
-      <button class="tile" data-go="color" style="--c:#fa5252">
-        <span class="emoji">🖍️</span><span class="label">Coloring</span>
-      </button>
+      <div class="menu-section">
+        <div class="menu-section-title">📚 Learn</div>
+        <div class="menu-tiles">
+          <button class="tile" data-go="letters" style="--c:#ff6b6b">
+            <span class="emoji">🔤</span><span class="label">ABC</span>
+          </button>
+          <button class="tile" data-go="numbers" style="--c:#4dabf7">
+            <span class="emoji">🔢</span><span class="label">123</span>
+          </button>
+          <button class="tile" data-go="colors" style="--c:#ffd43b">
+            <span class="emoji">🎨</span><span class="label">Colors</span>
+          </button>
+          <button class="tile" data-go="shapes" style="--c:#69db7c">
+            <span class="emoji">⭐</span><span class="label">Shapes</span>
+          </button>
+          <button class="tile" data-go="animals" style="--c:#da77f2">
+            <span class="emoji">🐶</span><span class="label">Animals</span>
+          </button>
+          <button class="tile" data-go="vehicles" style="--c:#fab005">
+            <span class="emoji">🚗</span><span class="label">Vehicles</span>
+          </button>
+          <button class="tile" data-go="dinosaurs" style="--c:#37b24d">
+            <span class="emoji">🦖</span><span class="label">Dinos</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="menu-section">
+        <div class="menu-section-title">🎮 Play</div>
+        <div class="menu-tiles">
+          <button class="tile" data-go="count" style="--c:#5c7cfa">
+            <span class="emoji">🔢</span><span class="label">Count</span>
+          </button>
+          <button class="tile" data-go="pop" style="--c:#ff922b">
+            <span class="emoji">🎈</span><span class="label">Pop!</span>
+          </button>
+          <button class="tile" data-go="match" style="--c:#20c997">
+            <span class="emoji">🧩</span><span class="label">Match</span>
+          </button>
+          <button class="tile" data-go="memory" style="--c:#cc5de8">
+            <span class="emoji">🃏</span><span class="label">Memory</span>
+          </button>
+          <button class="tile" data-go="dots" style="--c:#15aabf">
+            <span class="emoji">🔗</span><span class="label">Dots</span>
+          </button>
+          <button class="tile" data-go="listen" style="--c:#3b82f6">
+            <span class="emoji">👂</span><span class="label">Listen</span>
+          </button>
+          <button class="tile" data-go="spell" style="--c:#e64980">
+            <span class="emoji">🔡</span><span class="label">Spell</span>
+          </button>
+          <button class="tile" data-go="whack" style="--c:#f06595">
+            <span class="emoji">🐹</span><span class="label">Whack!</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="menu-section">
+        <div class="menu-section-title">🎨 Create</div>
+        <div class="menu-tiles">
+          <button class="tile" data-go="piano" style="--c:#845ef7">
+            <span class="emoji">🎹</span><span class="label">Piano</span>
+          </button>
+          <button class="tile" data-go="doodle" style="--c:#22b8cf">
+            <span class="emoji">🎨</span><span class="label">Doodle</span>
+          </button>
+          <button class="tile" data-go="color" style="--c:#fa5252">
+            <span class="emoji">🖍️</span><span class="label">Coloring</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="menu-section">
+        <div class="menu-section-title">🌟 Collection</div>
+        <div class="menu-tiles">
+          <button class="tile" data-go="stickers" style="--c:#ffc078">
+            <span class="emoji">🌟</span><span class="label">Stickers</span>
+          </button>
+        </div>
+      </div>
     </section>
 
     <!-- Generic activity screen (letters/numbers/colors/shapes/animals) -->
@@ -188,6 +214,18 @@
       </div>
     </section>
 
+    <!-- Spelling Helper -->
+    <section id="spellGame" class="screen">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="spellScore" class="badge">🔡 <span id="spellScoreVal">0</span></div>
+      <div id="spellBest" class="badge badge--best">🏆 <span id="spellBestVal">0</span></div>
+      <div class="spell-layout">
+        <div id="spellEmoji" class="spell-emoji">🐱</div>
+        <div id="spellLetters" class="spell-word"></div>
+        <div id="spellChoices" class="spell-choices"></div>
+      </div>
+    </section>
+
     <!-- Sticker collection -->
     <section id="stickersGame" class="screen">
       <button class="home-btn" data-home>🏠</button>
@@ -246,6 +284,7 @@
   <script src="games/memory.js"></script>
   <script src="games/dots.js"></script>
   <script src="games/listen.js"></script>
+  <script src="games/spell.js"></script>
   <script src="games/stickers.js"></script>
 </body>
 </html>
