@@ -375,6 +375,29 @@ function leaveActiveGame() {
   activeGame = null;
 }
 
+// Time-of-day greeting shown as a top-of-screen toast on app load.
+// Visual only — speaking it would collide with game intros and feel
+// awkward, since some games speak the moment you enter them.
+(function showWelcome() {
+  const h = new Date().getHours();
+  let prefix;
+  if (h < 5)        prefix = "🌙 Hello";
+  else if (h < 12)  prefix = "☀️ Good morning";
+  else if (h < 17)  prefix = "🌤️ Good afternoon";
+  else if (h < 21)  prefix = "🌆 Good evening";
+  else              prefix = "🌙 Hello";
+
+  const el = document.createElement("div");
+  el.className = "welcome-toast";
+  el.textContent = `${prefix}, ${KID_NAME}!`;
+  document.body.appendChild(el);
+  setTimeout(() => el.classList.add("show"), 60);
+  setTimeout(() => {
+    el.classList.remove("show");
+    setTimeout(() => el.remove(), 500);
+  }, 3200);
+})();
+
 document.querySelectorAll("[data-go]").forEach((btn) => {
   onTap(btn, () => {
     unlockAudio();

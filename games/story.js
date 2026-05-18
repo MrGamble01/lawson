@@ -33,6 +33,24 @@
         { scene: "💫💤",  text: "And dreamed sweet dreams all night long.",            bg: "linear-gradient(180deg,#1a1a3a,#0d0d22)", dark: true },
       ],
     },
+    {
+      title: "The Hungry Caterpillar",
+      pages: [
+        { scene: "🐛🍃",  text: "A tiny caterpillar wiggled out of his leaf.",         bg: "linear-gradient(180deg,#d8f5a2,#b2f2bb)" },
+        { scene: "🐛🍎",  text: "On Monday he ate one big red apple.",                 bg: "linear-gradient(180deg,#ffd6d6,#ffc9c9)" },
+        { scene: "🐛🍓🍌", text: "He kept munching, growing bigger and rounder.",      bg: "linear-gradient(180deg,#fff3bf,#ffe066)" },
+        { scene: "🦋🌈",  text: "Until pop! He spread his wings as a butterfly!",      bg: "linear-gradient(180deg,#d0bfff,#c5f6fa)" },
+      ],
+    },
+    {
+      title: "Choo-Choo Train",
+      pages: [
+        { scene: "🚂💨",  text: "Choo choo! The little train left the station.",      bg: "linear-gradient(180deg,#c5f6fa,#a5d8ff)" },
+        { scene: "🚂⛰️",  text: "It chugged up and over a tall green mountain.",      bg: "linear-gradient(180deg,#d8f5a2,#a9e34b)" },
+        { scene: "🚂🌑",  text: "Whoosh! It zoomed through a dark tunnel.",           bg: "linear-gradient(180deg,#495057,#212529)", dark: true },
+        { scene: "🚂🌅",  text: "Finally it pulled into the sunny station. Hooray!",  bg: "linear-gradient(180deg,#ffd8a8,#ffe8cc)" },
+      ],
+    },
   ];
 
   let storyIdx = -1;

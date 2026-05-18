@@ -63,6 +63,9 @@
           <button class="tile" data-go="count" style="--c:#5c7cfa">
             <span class="emoji">🔢</span><span class="label">Count</span>
           </button>
+          <button class="tile" data-go="howmany" style="--c:#228be6">
+            <span class="emoji">🧮</span><span class="label">How Many?</span>
+          </button>
           <button class="tile" data-go="pop" style="--c:#ff922b">
             <span class="emoji">🎈</span><span class="label">Pop!</span>
           </button>
@@ -226,6 +229,18 @@
       </div>
     </section>
 
+    <!-- How Many? -->
+    <section id="howmanyGame" class="screen">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="howmanyScore" class="badge">🧮 <span id="howmanyScoreVal">0</span></div>
+      <div id="howmanyBest" class="badge badge--best">🏆 <span id="howmanyBestVal">0</span></div>
+      <div class="howmany-layout">
+        <div id="howmanyStage" class="howmany-stage"></div>
+        <div class="howmany-prompt">How many?</div>
+        <div id="howmanyChoices" class="howmany-choices"></div>
+      </div>
+    </section>
+
     <!-- Find It! -->
     <section id="findGame" class="screen">
       <button class="home-btn" data-home>🏠</button>
@@ -339,6 +354,7 @@
   <script src="games/pattern.js"></script>
   <script src="games/find.js"></script>
   <script src="games/story.js"></script>
+  <script src="games/howmany.js"></script>
   <script src="games/stickers.js"></script>
 </body>
 </html>
