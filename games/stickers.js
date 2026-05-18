@@ -36,6 +36,11 @@
     });
 
     if (counter) counter.textContent = `${earned} / ${all.length}`;
+    const bar = document.getElementById("stickerProgress");
+    if (bar) {
+      const pct = all.length ? Math.round((earned / all.length) * 100) : 0;
+      bar.style.width = pct + "%";
+    }
   }
 
   function start() {

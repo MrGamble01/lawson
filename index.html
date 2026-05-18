@@ -90,6 +90,9 @@
           <button class="tile" data-go="find" style="--c:#12b886">
             <span class="emoji">🔍</span><span class="label">Find It!</span>
           </button>
+          <button class="tile" data-go="mix" style="--c:#f76707">
+            <span class="emoji">🧪</span><span class="label">Mix</span>
+          </button>
           <button class="tile" data-go="whack" style="--c:#f06595">
             <span class="emoji">🐹</span><span class="label">Whack!</span>
           </button>
@@ -268,6 +271,21 @@
       </div>
     </section>
 
+    <!-- Color Mix -->
+    <section id="mixGame" class="screen">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="mixScore" class="badge">🧪 <span id="mixScoreVal">0</span></div>
+      <div id="mixBest" class="badge badge--best">🏆 <span id="mixBestVal">0</span></div>
+      <div class="mix-layout">
+        <div class="mix-target-row">
+          <div id="mixTarget" class="mix-target-swatch"></div>
+          <div id="mixTargetName" class="mix-target-name">Make Orange!</div>
+        </div>
+        <div id="mixBowl" class="mix-bowl"></div>
+        <div id="mixPalette" class="mix-palette"></div>
+      </div>
+    </section>
+
     <!-- Story Time -->
     <section id="storyGame" class="screen">
       <button class="home-btn" data-home>🏠</button>
@@ -297,6 +315,9 @@
       <div class="stickers-header">
         <h2>🌟 Sticker Book</h2>
         <div id="stickerCount" class="stickers-count">0 / 0</div>
+      </div>
+      <div class="stickers-progress">
+        <div id="stickerProgress" class="stickers-progress-fill"></div>
       </div>
       <div id="stickerGrid" class="sticker-grid"></div>
     </section>
@@ -355,6 +376,7 @@
   <script src="games/find.js"></script>
   <script src="games/story.js"></script>
   <script src="games/howmany.js"></script>
+  <script src="games/mix.js"></script>
   <script src="games/stickers.js"></script>
 </body>
 </html>

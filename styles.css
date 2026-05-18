@@ -104,8 +104,26 @@ header h1 {
   transition: transform 0.08s ease;
   color: #fff;
   font-weight: bold;
+  animation: tileEntry 0.5s cubic-bezier(.34,1.56,.64,1) backwards;
 }
 .tile:active { transform: scale(0.94) translateY(4px); }
+/* Stagger tiles within a section so they pop in like popcorn. */
+.menu-tiles .tile:nth-child(1)  { animation-delay: 0.04s; }
+.menu-tiles .tile:nth-child(2)  { animation-delay: 0.08s; }
+.menu-tiles .tile:nth-child(3)  { animation-delay: 0.12s; }
+.menu-tiles .tile:nth-child(4)  { animation-delay: 0.16s; }
+.menu-tiles .tile:nth-child(5)  { animation-delay: 0.20s; }
+.menu-tiles .tile:nth-child(6)  { animation-delay: 0.24s; }
+.menu-tiles .tile:nth-child(7)  { animation-delay: 0.28s; }
+.menu-tiles .tile:nth-child(8)  { animation-delay: 0.32s; }
+.menu-tiles .tile:nth-child(9)  { animation-delay: 0.36s; }
+.menu-tiles .tile:nth-child(10) { animation-delay: 0.40s; }
+.menu-tiles .tile:nth-child(11) { animation-delay: 0.44s; }
+.menu-tiles .tile:nth-child(12) { animation-delay: 0.48s; }
+@keyframes tileEntry {
+  from { transform: scale(0.4) translateY(20px); opacity: 0; }
+  to   { transform: scale(1) translateY(0); opacity: 1; }
+}
 .tile .emoji { font-size: clamp(40px, 8vw, 72px); }
 .tile .label { font-size: clamp(16px, 2.4vw, 28px); margin-top: 6px; text-shadow: 2px 2px 0 rgba(0,0,0,0.2); }
 
@@ -1189,6 +1207,25 @@ header h1 {
   font-size: clamp(16px, 2.4vw, 22px);
   box-shadow: 0 4px 0 rgba(0,0,0,0.1);
 }
+.stickers-progress {
+  width: 100%;
+  max-width: 900px;
+  height: 16px;
+  background: #fff3bf;
+  border: 3px solid #fab005;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.08);
+}
+.stickers-progress-fill {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #ffd43b 0%, #ff922b 100%);
+  border-radius: 999px;
+  transition: width 0.5s cubic-bezier(.34,1.56,.64,1);
+  box-shadow: inset 0 0 8px rgba(255,255,255,0.4);
+}
 .sticker-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -1748,6 +1785,91 @@ header h1 {
   background: #ffc9c9;
   border-color: #e03131;
   animation: shake 0.4s ease;
+}
+
+/* ---------- Color Mix ---------- */
+#mixGame {
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 16px;
+  background: linear-gradient(180deg, #fff4e6 0%, #ffe8cc 100%);
+}
+.mix-layout {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  padding: 80px 16px 24px;
+  gap: 16px;
+}
+.mix-target-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #fff;
+  border: 4px solid #f76707;
+  border-radius: 18px;
+  padding: 8px 18px;
+  box-shadow: 0 5px 0 rgba(0,0,0,0.12);
+}
+.mix-target-swatch {
+  width: clamp(50px, 9vw, 80px);
+  height: clamp(50px, 9vw, 80px);
+  border-radius: 14px;
+  border: 4px solid #fff;
+  outline: 2px solid #ced4da;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+}
+.mix-target-name {
+  font-size: clamp(22px, 4vw, 34px);
+  font-weight: bold;
+  color: #d9480f;
+}
+.mix-bowl {
+  width: clamp(160px, 36vw, 280px);
+  height: clamp(160px, 36vw, 280px);
+  border-radius: 50% 50% 50% 50% / 38% 38% 62% 62%;
+  border: 8px solid #444;
+  background: #fff;
+  box-shadow:
+    inset 0 -18px 25px rgba(0,0,0,0.18),
+    inset 0 8px 18px rgba(255,255,255,0.4),
+    0 10px 0 rgba(0,0,0,0.15);
+  transition: background 0.4s ease, transform 0.3s ease;
+  position: relative;
+}
+.mix-bowl.filled { transform: scale(1.05); }
+.mix-bowl.correct { animation: bowlPulse 0.7s ease; box-shadow: inset 0 -18px 25px rgba(0,0,0,0.18), 0 0 30px gold; }
+.mix-bowl.wrong   { animation: shake 0.5s ease; }
+@keyframes bowlPulse {
+  0%, 100% { transform: scale(1.05); }
+  50%      { transform: scale(1.18); }
+}
+.mix-palette {
+  display: flex;
+  gap: clamp(14px, 3vw, 30px);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.mix-drop {
+  width: clamp(70px, 13vw, 110px);
+  height: clamp(70px, 13vw, 110px);
+  border-radius: 50%;
+  border: 5px solid #fff;
+  outline: 3px solid rgba(0,0,0,0.15);
+  cursor: pointer;
+  box-shadow: 0 6px 0 rgba(0,0,0,0.18);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.1s ease, opacity 0.2s ease;
+}
+.mix-drop:active { transform: scale(0.9) translateY(4px); }
+.mix-drop.used {
+  opacity: 0.35;
+  transform: scale(0.85);
+  pointer-events: none;
 }
 @keyframes findShake {
   0%, 100% { transform: translate(-50%, -50%) rotate(0); }
