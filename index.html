@@ -105,6 +105,9 @@
           <button class="tile" data-go="body" style="--c:#fcc419">
             <span class="emoji">👀</span><span class="label">Body Parts</span>
           </button>
+          <button class="tile" data-go="size" style="--c:#94d82d">
+            <span class="emoji">📏</span><span class="label">Big/Small</span>
+          </button>
           <button class="tile" data-go="whack" style="--c:#f06595">
             <span class="emoji">🐹</span><span class="label">Whack!</span>
           </button>
@@ -296,6 +299,15 @@
       </div>
     </section>
 
+    <!-- Big / Small -->
+    <section id="sizeGame" class="screen">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="sizeScore" class="badge">📏 <span id="sizeScoreVal">0</span></div>
+      <div id="sizeBest" class="badge badge--best">🏆 <span id="sizeBestVal">0</span></div>
+      <div id="sizePrompt" class="size-prompt">Tap the BIGGER one!</div>
+      <div id="sizeStage" class="size-stage"></div>
+    </section>
+
     <!-- Body Parts -->
     <section id="bodyGame" class="screen">
       <button class="home-btn" data-home>🏠</button>
@@ -396,6 +408,11 @@
         <span class="settings-toggle-track" aria-hidden="true"></span>
         <span class="settings-toggle-label">🔊 Sound effects</span>
       </label>
+      <label class="settings-toggle">
+        <input id="settingsDark" type="checkbox" />
+        <span class="settings-toggle-track" aria-hidden="true"></span>
+        <span class="settings-toggle-label">🌙 Dark mode</span>
+      </label>
 
       <button id="settingsReset" class="settings-reset" type="button">🧹 Reset scores</button>
       <button id="settingsClose" class="settings-close" type="button">✅ Done</button>
@@ -426,6 +443,7 @@
   <script src="games/add.js"></script>
   <script src="games/body.js"></script>
   <script src="games/read.js"></script>
+  <script src="games/size.js"></script>
   <script src="games/stickers.js"></script>
 </body>
 </html>

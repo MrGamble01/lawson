@@ -2176,6 +2176,94 @@ header h1 {
   border-color: #e03131;
   animation: shake 0.4s ease;
 }
+
+/* ---------- Big / Small ---------- */
+#sizeGame {
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 16px;
+  background: linear-gradient(180deg, #f4fce3 0%, #d8f5a2 100%);
+}
+.size-prompt {
+  position: absolute;
+  top: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  border: 5px solid #74b816;
+  border-radius: 999px;
+  padding: 10px 24px;
+  font-size: clamp(22px, 4vw, 32px);
+  font-weight: bold;
+  color: #2b8a3e;
+  box-shadow: 0 5px 0 rgba(0,0,0,0.12);
+  z-index: 5;
+  white-space: nowrap;
+  letter-spacing: 1px;
+  max-width: calc(100% - 32px);
+}
+.size-stage {
+  flex: 1;
+  width: 100%;
+  margin-top: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: clamp(20px, 5vw, 60px);
+  padding: 12px;
+}
+.size-choice {
+  background: #fff;
+  border: 6px solid #82c91e;
+  border-radius: 28px;
+  padding: clamp(12px, 3vw, 28px);
+  cursor: pointer;
+  box-shadow: 0 8px 0 rgba(0,0,0,0.12);
+  -webkit-tap-highlight-color: transparent;
+  line-height: 1;
+  transition: transform 0.1s ease, background 0.2s ease, border-color 0.2s ease;
+}
+.size-choice:active { transform: scale(0.95) translateY(4px); }
+.size-choice.correct {
+  background: #b2f2bb;
+  border-color: #2f9e44;
+  animation: correctPulse 0.6s ease;
+}
+.size-choice.wrong {
+  background: #ffc9c9;
+  border-color: #e03131;
+  animation: shake 0.4s ease;
+}
+
+/* ---------- Dark mode ---------- */
+html.dark body {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f1626 100%);
+  color: #e9ecef;
+}
+html.dark header h1 {
+  color: #ff8ab0;
+  text-shadow: 2px 2px 0 #0d1226, 4px 4px 0 rgba(0,0,0,0.4);
+}
+html.dark .settings-btn {
+  background: rgba(40, 40, 60, 0.65);
+  color: #ffd6a5;
+  border-color: rgba(255,255,255,0.3);
+}
+html.dark .tile {
+  border-color: rgba(255,255,255,0.85);
+  box-shadow: 0 8px 0 rgba(0,0,0,0.45), 0 12px 25px rgba(0,0,0,0.55);
+}
+html.dark .menu-section-title {
+  color: #ffc9d6;
+  text-shadow: 1px 1px 0 #0d1226, 2px 2px 0 rgba(0,0,0,0.3);
+}
+/* Welcome toast adapts to dark mode automatically via this rule. */
+html.dark .welcome-toast {
+  background: rgba(30, 30, 50, 0.95);
+  color: #ffb3c8;
+  border-color: #ff8ab0;
+}
 @keyframes findShake {
   0%, 100% { transform: translate(-50%, -50%) rotate(0); }
   25%      { transform: translate(-50%, -50%) translateX(-6px) rotate(-4deg); }

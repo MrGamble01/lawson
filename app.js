@@ -15,6 +15,18 @@ function setKidName(name) {
   if (window.Lawson) window.Lawson.KID_NAME = KID_NAME;
 }
 
+// Dark mode: a `dark` class on <html> swaps the background gradients
+// to deeper colors. Persisted so it sticks between sessions.
+function setDarkMode(on) {
+  try { localStorage.setItem("lawson:dark", on ? "1" : "0"); } catch (_) {}
+  document.documentElement.classList.toggle("dark", !!on);
+}
+function isDarkMode() {
+  try { return localStorage.getItem("lawson:dark") === "1"; } catch (_) { return false; }
+}
+// Apply saved dark-mode preference as early as possible.
+setDarkMode(isDarkMode());
+
 const CHEER_PHRASES = [
   "Yay {name}!",
   "Way to go {name}!",
@@ -506,6 +518,7 @@ document.addEventListener("touchmove", (e) => {
   const nameInput  = document.getElementById("settingsName");
   const voiceTgl   = document.getElementById("settingsVoice");
   const soundTgl   = document.getElementById("settingsSound");
+  const darkTgl    = document.getElementById("settingsDark");
   const closeBtn   = document.getElementById("settingsClose");
   const resetBtn   = document.getElementById("settingsReset");
 
@@ -516,11 +529,13 @@ document.addEventListener("touchmove", (e) => {
     setSoundMuted(!soundTgl.checked);
     if (soundTgl.checked) beep(500, 0.08); // little chirp when re-enabling
   });
+  if (darkTgl) darkTgl.addEventListener("change", () => setDarkMode(darkTgl.checked));
 
   function open() {
     nameInput.value = KID_NAME;
     voiceTgl.checked = !isVoiceMuted();
     soundTgl.checked = !isSoundMuted();
+    if (darkTgl) darkTgl.checked = isDarkMode();
     resetBtn.textContent = "🧹 Reset scores";
     resetBtn.classList.remove("confirming");
     overlay.classList.add("open");
