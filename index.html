@@ -54,6 +54,9 @@
           <button class="tile" data-go="dinosaurs" style="--c:#37b24d">
             <span class="emoji">🦖</span><span class="label">Dinos</span>
           </button>
+          <button class="tile" data-go="weather" style="--c:#74c0fc">
+            <span class="emoji">🌤️</span><span class="label">Weather</span>
+          </button>
         </div>
       </div>
 
@@ -95,6 +98,9 @@
           </button>
           <button class="tile" data-go="mix" style="--c:#f76707">
             <span class="emoji">🧪</span><span class="label">Mix</span>
+          </button>
+          <button class="tile" data-go="body" style="--c:#fcc419">
+            <span class="emoji">👀</span><span class="label">Body Parts</span>
           </button>
           <button class="tile" data-go="whack" style="--c:#f06595">
             <span class="emoji">🐹</span><span class="label">Whack!</span>
@@ -286,6 +292,15 @@
       </div>
     </section>
 
+    <!-- Body Parts -->
+    <section id="bodyGame" class="screen">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="bodyScore" class="badge">👀 <span id="bodyScoreVal">0</span></div>
+      <div id="bodyBest" class="badge badge--best">🏆 <span id="bodyBestVal">0</span></div>
+      <div id="bodyPrompt" class="body-prompt">Tap the nose!</div>
+      <div id="bodyFace" class="body-face-wrap"></div>
+    </section>
+
     <!-- Color Mix -->
     <section id="mixGame" class="screen">
       <button class="home-btn" data-home>🏠</button>
@@ -393,6 +408,7 @@
   <script src="games/howmany.js"></script>
   <script src="games/mix.js"></script>
   <script src="games/add.js"></script>
+  <script src="games/body.js"></script>
   <script src="games/stickers.js"></script>
 </body>
 </html>

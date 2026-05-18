@@ -215,6 +215,16 @@ const DINOSAURS = [
   { name: "Brachiosaurus",emoji: "🦕", sound: "Stomp stomp!" },
   { name: "Pterodactyl",  emoji: "🦅", sound: "Screech!" },
 ];
+const WEATHER = [
+  { name: "Sunny",   emoji: "☀️" },
+  { name: "Cloudy",  emoji: "☁️" },
+  { name: "Rainy",   emoji: "🌧️" },
+  { name: "Stormy",  emoji: "⛈️" },
+  { name: "Snowy",   emoji: "❄️" },
+  { name: "Windy",   emoji: "💨" },
+  { name: "Foggy",   emoji: "🌫️" },
+  { name: "Rainbow", emoji: "🌈" },
+];
 
 // Phonetic letter names so iOS TTS pronounces them correctly every time
 const LETTER_SOUND = {
@@ -295,6 +305,13 @@ const ACTIVITIES = {
     label: (d) => d.emoji,
     speak: (d) => `${d.name}. ${d.sound}`,
     display: (d, c) => ({ text: d.emoji, color: c, caption: d.name }),
+  },
+  weather: {
+    items: WEATHER,
+    color: () => `hsl(${190 + Math.random() * 60}, 60%, 55%)`,
+    label: (w) => w.emoji,
+    speak: (w) => w.name,
+    display: (w, c) => ({ text: w.emoji, color: c, caption: w.name }),
   },
 };
 
