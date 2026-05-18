@@ -245,9 +245,12 @@ const ACTIVITIES = {
     items: LETTERS,
     many: true,
     color: () => `hsl(${Math.random() * 360}, 80%, 55%)`,
-    label: (ch) => ch,
+    // Show both forms ("Aa") so the kid learns uppercase and lowercase
+    // at the same time. The lowercase is rendered smaller in CSS.
+    label: (ch) => `${ch}<span class="letter-lower">${ch.toLowerCase()}</span>`,
+    labelHtml: true,
     speak: (ch) => `${LETTER_SOUND[ch]}, ${LETTER_WORD[ch]}`,
-    display: (ch, c) => ({ text: ch, color: c, caption: LETTER_WORD[ch] }),
+    display: (ch, c) => ({ text: `${ch}${ch.toLowerCase()}`, color: c, caption: LETTER_WORD[ch] }),
   },
   numbers: {
     items: NUMBERS,
@@ -306,7 +309,8 @@ function buildFlashcards(name) {
   items.forEach((item, i) => {
     const el = document.createElement("button");
     el.className = "item";
-    el.textContent = cfg.label(item, i);
+    const lbl = cfg.label(item, i);
+    if (cfg.labelHtml) el.innerHTML = lbl; else el.textContent = lbl;
     const c = cfg.color(item, i);
     el.style.setProperty("--c", c);
     if (cfg.background) el.style.background = cfg.background(item);

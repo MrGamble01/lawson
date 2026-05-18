@@ -166,6 +166,13 @@ header h1 {
   transform: scale(1.1) rotate(-3deg);
   box-shadow: 0 2px 0 rgba(0,0,0,0.1);
 }
+/* Lowercase letter inset in ABC tiles ("A" + small "a") */
+.item .letter-lower {
+  font-size: 0.55em;
+  margin-left: 0.05em;
+  opacity: 0.75;
+  text-transform: lowercase;
+}
 
 /* Big display pop-up for feedback */
 .big-display {
@@ -1354,6 +1361,143 @@ header h1 {
 }
 .spell-choice:active { transform: scale(0.95) translateY(4px); }
 .spell-choice.wrong {
+  background: #ffc9c9;
+  border-color: #e03131;
+  animation: shake 0.4s ease;
+}
+
+/* ---------- Drum Kit ---------- */
+#drumsGame {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: linear-gradient(180deg, #2b2b3d 0%, #0d0d18 100%);
+}
+.drum-pads {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: clamp(14px, 3vw, 30px);
+  width: 100%;
+  max-width: 720px;
+  aspect-ratio: 1 / 1;
+  margin-top: 70px;
+  padding: 10px;
+}
+.drum-pad {
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255,255,255,0.45) 0%, transparent 55%),
+    radial-gradient(circle at center, var(--c) 0%, color-mix(in srgb, var(--c) 60%, #000) 100%);
+  border: 6px solid #fff;
+  border-radius: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  color: #fff;
+  font-weight: 900;
+  font-size: clamp(20px, 3.4vw, 32px);
+  text-shadow: 0 2px 4px rgba(0,0,0,0.45);
+  box-shadow: 0 10px 0 rgba(0,0,0,0.5), inset 0 -6px 12px rgba(0,0,0,0.4);
+  transition: transform 0.05s ease, box-shadow 0.05s ease, filter 0.1s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.drum-pad:active,
+.drum-pad.pressed {
+  transform: translateY(8px) scale(0.98);
+  box-shadow: 0 2px 0 rgba(0,0,0,0.5), inset 0 -3px 8px rgba(0,0,0,0.4), 0 0 40px var(--c);
+  filter: brightness(1.18);
+}
+.drum-emoji {
+  font-size: clamp(60px, 12vw, 120px);
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
+}
+.drum-name { letter-spacing: 1.5px; }
+
+/* ---------- Pattern game ---------- */
+#patternGame {
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 16px;
+  background: linear-gradient(180deg, #f3f0ff 0%, #d0bfff 100%);
+}
+.pattern-layout {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  padding: 80px 12px 20px;
+  gap: 18px;
+}
+.pattern-prompt {
+  font-size: clamp(22px, 4vw, 36px);
+  font-weight: bold;
+  color: #5f3dc4;
+  text-shadow: 2px 2px 0 #fff;
+}
+.pattern-seq {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(6px, 1.4vw, 12px);
+  background: #fff;
+  border: 5px solid #7950f2;
+  border-radius: 22px;
+  padding: 12px 16px;
+  box-shadow: 0 6px 0 rgba(0,0,0,0.12);
+  max-width: 95%;
+}
+.pattern-cell {
+  font-size: clamp(40px, 7vw, 72px);
+  width: clamp(50px, 8vw, 88px);
+  height: clamp(50px, 8vw, 88px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.pattern-cell--q {
+  background: #f3f0ff;
+  border: 3px dashed #7950f2;
+  border-radius: 12px;
+  color: #7950f2;
+  font-weight: 900;
+  animation: blankPulse 1.4s ease-in-out infinite;
+}
+.pattern-cell--found {
+  background: #d8f5a2;
+  border-radius: 12px;
+  animation: foundPop 0.5s cubic-bezier(.34,1.56,.64,1);
+}
+.pattern-choices {
+  display: flex;
+  gap: clamp(14px, 3vw, 30px);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.pattern-choice {
+  font-size: clamp(60px, 11vw, 110px);
+  background: #fff;
+  border: 6px solid #7950f2;
+  border-radius: 22px;
+  width: clamp(100px, 20vw, 180px);
+  height: clamp(100px, 20vw, 180px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 8px 0 rgba(0,0,0,0.12);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.1s ease, background 0.2s ease, border-color 0.2s ease;
+}
+.pattern-choice:active { transform: scale(0.95) translateY(4px); }
+.pattern-choice.wrong {
   background: #ffc9c9;
   border-color: #e03131;
   animation: shake 0.4s ease;

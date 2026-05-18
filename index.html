@@ -81,6 +81,9 @@
           <button class="tile" data-go="spell" style="--c:#e64980">
             <span class="emoji">🔡</span><span class="label">Spell</span>
           </button>
+          <button class="tile" data-go="pattern" style="--c:#7950f2">
+            <span class="emoji">🧠</span><span class="label">Pattern</span>
+          </button>
           <button class="tile" data-go="whack" style="--c:#f06595">
             <span class="emoji">🐹</span><span class="label">Whack!</span>
           </button>
@@ -92,6 +95,9 @@
         <div class="menu-tiles">
           <button class="tile" data-go="piano" style="--c:#845ef7">
             <span class="emoji">🎹</span><span class="label">Piano</span>
+          </button>
+          <button class="tile" data-go="drums" style="--c:#e8590c">
+            <span class="emoji">🥁</span><span class="label">Drums</span>
           </button>
           <button class="tile" data-go="doodle" style="--c:#22b8cf">
             <span class="emoji">🎨</span><span class="label">Doodle</span>
@@ -214,6 +220,24 @@
       </div>
     </section>
 
+    <!-- Drum Kit -->
+    <section id="drumsGame" class="screen">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="drumPads" class="drum-pads"></div>
+    </section>
+
+    <!-- Pattern -->
+    <section id="patternGame" class="screen">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="patternScore" class="badge">🧠 <span id="patternScoreVal">0</span></div>
+      <div id="patternBest" class="badge badge--best">🏆 <span id="patternBestVal">0</span></div>
+      <div class="pattern-layout">
+        <div class="pattern-prompt">What comes next?</div>
+        <div id="patternSeq" class="pattern-seq"></div>
+        <div id="patternChoices" class="pattern-choices"></div>
+      </div>
+    </section>
+
     <!-- Spelling Helper -->
     <section id="spellGame" class="screen">
       <button class="home-btn" data-home>🏠</button>
@@ -285,6 +309,8 @@
   <script src="games/dots.js"></script>
   <script src="games/listen.js"></script>
   <script src="games/spell.js"></script>
+  <script src="games/drums.js"></script>
+  <script src="games/pattern.js"></script>
   <script src="games/stickers.js"></script>
 </body>
 </html>
