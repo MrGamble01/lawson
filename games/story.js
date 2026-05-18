@@ -51,6 +51,24 @@
         { scene: "🚂🌅",  text: "Finally it pulled into the sunny station. Hooray!",  bg: "linear-gradient(180deg,#ffd8a8,#ffe8cc)" },
       ],
     },
+    {
+      title: "The Helpful Bee",
+      pages: [
+        { scene: "🐝🌸",  text: "A friendly bee buzzed from flower to flower.",        bg: "linear-gradient(180deg,#fff3bf,#ffe066)" },
+        { scene: "🐝🍯",  text: "She tickled each petal and gathered sweet pollen.",   bg: "linear-gradient(180deg,#fff0a3,#ffc078)" },
+        { scene: "🐝🏠",  text: "She flew home to the hive to share with her friends.", bg: "linear-gradient(180deg,#ffe066,#fab005)" },
+        { scene: "🍯😋",  text: "Together they made the sweetest honey in town!",       bg: "linear-gradient(180deg,#ffd8a8,#ffe8cc)" },
+      ],
+    },
+    {
+      title: "The Lost Puppy",
+      pages: [
+        { scene: "🐶🌧️",  text: "A little puppy got lost in the rainy park.",          bg: "linear-gradient(180deg,#a5d8ff,#74c0fc)" },
+        { scene: "🐶🐦",  text: "A kind bird showed him the way back home.",            bg: "linear-gradient(180deg,#d0ebff,#bac8ff)" },
+        { scene: "🐶🏃",  text: "He ran fast, faster, fastest through the puddles.",     bg: "linear-gradient(180deg,#c5f6fa,#99e9f2)" },
+        { scene: "🐶🏠",  text: "Home at last! Mom gave him the warmest hug.",          bg: "linear-gradient(180deg,#ffd6d6,#ffc9c9)" },
+      ],
+    },
   ];
 
   let storyIdx = -1;
