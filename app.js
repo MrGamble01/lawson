@@ -375,6 +375,34 @@ function leaveActiveGame() {
   activeGame = null;
 }
 
+// Daily streak: increments when today's first visit is on the day after
+// the last visit, resets to 1 if a day was missed, no-op if same day.
+// Stored as YYYY-MM-DD strings to be timezone-stable for the local user.
+function _today() {
+  const d = new Date();
+  const z = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())}`;
+}
+function _yesterdayOf(s) {
+  if (!s) return null;
+  const [y, m, d] = s.split("-").map(Number);
+  const dt = new Date(y, m - 1, d - 1);
+  const z = (n) => String(n).padStart(2, "0");
+  return `${dt.getFullYear()}-${z(dt.getMonth() + 1)}-${z(dt.getDate())}`;
+}
+function bumpDailyStreak() {
+  try {
+    const today = _today();
+    const last = localStorage.getItem("lawson:lastDay") || "";
+    let streak = parseInt(localStorage.getItem("lawson:streak") || "0", 10) || 0;
+    if (last === today) return streak;
+    streak = (last && last === _yesterdayOf(today)) ? streak + 1 : 1;
+    localStorage.setItem("lawson:lastDay", today);
+    localStorage.setItem("lawson:streak", String(streak));
+    return streak;
+  } catch (_) { return 1; }
+}
+
 // Time-of-day greeting shown as a top-of-screen toast on app load.
 // Visual only — speaking it would collide with game intros and feel
 // awkward, since some games speak the moment you enter them.
@@ -387,15 +415,18 @@ function leaveActiveGame() {
   else if (h < 21)  prefix = "🌆 Good evening";
   else              prefix = "🌙 Hello";
 
+  const streak = bumpDailyStreak();
+  const streakBit = streak >= 2 ? `  ·  🔥 Day ${streak}` : "";
+
   const el = document.createElement("div");
   el.className = "welcome-toast";
-  el.textContent = `${prefix}, ${KID_NAME}!`;
+  el.textContent = `${prefix}, ${KID_NAME}!${streakBit}`;
   document.body.appendChild(el);
   setTimeout(() => el.classList.add("show"), 60);
   setTimeout(() => {
     el.classList.remove("show");
     setTimeout(() => el.remove(), 500);
-  }, 3200);
+  }, 3400);
 })();
 
 document.querySelectorAll("[data-go]").forEach((btn) => {

@@ -66,6 +66,9 @@
           <button class="tile" data-go="howmany" style="--c:#228be6">
             <span class="emoji">🧮</span><span class="label">How Many?</span>
           </button>
+          <button class="tile" data-go="add" style="--c:#1c7ed6">
+            <span class="emoji">➕</span><span class="label">Add It Up</span>
+          </button>
           <button class="tile" data-go="pop" style="--c:#ff922b">
             <span class="emoji">🎈</span><span class="label">Pop!</span>
           </button>
@@ -169,6 +172,7 @@
         <button id="doodleClear" class="doodle-tool doodle-tool--clear">🧽 Clear</button>
       </div>
       <div id="doodleBrushes" class="doodle-brushes"></div>
+      <div id="doodleSizes" class="doodle-sizes"></div>
       <canvas id="doodleCanvas" class="doodle-canvas"></canvas>
     </section>
 
@@ -229,6 +233,17 @@
         <button id="listenReplay" class="listen-prompt" aria-label="Hear the clue again">👂</button>
         <div class="listen-hint">Tap to hear again</div>
         <div id="listenChoices" class="listen-choices"></div>
+      </div>
+    </section>
+
+    <!-- Add It Up -->
+    <section id="addGame" class="screen">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="addScore" class="badge">➕ <span id="addScoreVal">0</span></div>
+      <div id="addBest" class="badge badge--best">🏆 <span id="addBestVal">0</span></div>
+      <div class="add-layout">
+        <div id="addStage" class="add-stage"></div>
+        <div id="addChoices" class="add-choices"></div>
       </div>
     </section>
 
@@ -377,6 +392,7 @@
   <script src="games/story.js"></script>
   <script src="games/howmany.js"></script>
   <script src="games/mix.js"></script>
+  <script src="games/add.js"></script>
   <script src="games/stickers.js"></script>
 </body>
 </html>

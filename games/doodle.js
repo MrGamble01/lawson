@@ -22,6 +22,14 @@
     { name: "Eraser",  hex: null, erase: true, label: "🧼" },
   ];
 
+  // Brush stroke sizes selectable from the bottom-row picker. Eraser is
+  // always larger than paint so wipes feel deliberate.
+  const SIZES = [
+    { name: "Small",  paint: 8,  erase: 22 },
+    { name: "Medium", paint: 14, erase: 36 },
+    { name: "Large",  paint: 22, erase: 56 },
+  ];
+
   let canvas, ctx;
   let drawing = false;
   let last = null;
@@ -31,6 +39,7 @@
   let unlisten = null;
   let lastStampAt = 0; // throttle continuous stamping while dragging
   let brush = BRUSHES[0]; // current brush; null hex => rainbow
+  let size = SIZES[1];   // current stroke size
 
   function resize() {
     if (!canvas) return;
@@ -75,8 +84,9 @@
   function dot(p, r) {
     withBrushMode(() => {
       ctx.fillStyle = brush.erase ? "#000" : strokeColor();
+      const radius = brush.erase ? size.erase * 0.7 : (r || size.paint * 0.6);
       ctx.beginPath();
-      ctx.arc(p.x, p.y, brush.erase ? r * 2.2 : r, 0, Math.PI * 2);
+      ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
       ctx.fill();
     });
   }
@@ -85,16 +95,16 @@
     withBrushMode(() => {
       if (brush.erase) {
         ctx.strokeStyle = "#000";
-        ctx.lineWidth = 36;
+        ctx.lineWidth = size.erase;
       } else if (brush.hex) {
         ctx.strokeStyle = brush.hex;
-        ctx.lineWidth = 14;
+        ctx.lineWidth = size.paint;
       } else {
         const grad = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
         grad.addColorStop(0, strokeColor(0));
         grad.addColorStop(1, strokeColor(20));
         ctx.strokeStyle = grad;
-        ctx.lineWidth = 14;
+        ctx.lineWidth = size.paint;
       }
       ctx.beginPath();
       ctx.moveTo(a.x, a.y);
@@ -123,7 +133,7 @@
       lastStampAt = Date.now();
       return;
     }
-    dot(last, 8);
+    dot(last, size.paint * 0.6);
     L.beep(300 + (hue / 360) * 400, 0.06, "sine");
   }
 
@@ -145,6 +155,28 @@
     line(last, p);
     last = p;
     if (!brush.hex) hue = (hue + 4) % 360; // only rainbow mode cycles
+  }
+
+  function renderSizes() {
+    const row = document.getElementById("doodleSizes");
+    if (!row) return;
+    row.innerHTML = "";
+    SIZES.forEach((s) => {
+      const sw = document.createElement("button");
+      sw.className = "doodle-size";
+      sw.title = s.name;
+      sw.innerHTML = `<span class="doodle-size-dot" style="--d:${Math.round(s.paint * 1.4)}px"></span>`;
+      if (s.name === size.name) sw.classList.add("active");
+      L.onTap(sw, (e) => {
+        if (e.stopPropagation) e.stopPropagation();
+        size = s;
+        row.querySelectorAll(".doodle-size").forEach((x) => x.classList.remove("active"));
+        sw.classList.add("active");
+        L.beep(380 + Math.random() * 120, 0.08, "sine");
+        L.say(s.name);
+      });
+      row.appendChild(sw);
+    });
   }
 
   function renderBrushes() {
@@ -243,8 +275,10 @@
 
     mode = "paint";
     brush = BRUSHES[0];
+    size = SIZES[1];
     stampBtn.classList.remove("active");
     renderBrushes();
+    renderSizes();
     L.say("Draw with your finger!");
   }
 
