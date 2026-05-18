@@ -108,6 +108,9 @@
           <button class="tile" data-go="color" style="--c:#fa5252">
             <span class="emoji">🖍️</span><span class="label">Coloring</span>
           </button>
+          <button class="tile" data-go="story" style="--c:#9775fa">
+            <span class="emoji">📖</span><span class="label">Story</span>
+          </button>
         </div>
       </div>
 
@@ -250,6 +253,17 @@
       </div>
     </section>
 
+    <!-- Story Time -->
+    <section id="storyGame" class="screen">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="storyCounter" class="story-counter">1 / 4</div>
+      <div id="storyStage" class="story-stage"></div>
+      <div class="story-bubble">
+        <div id="storyText" class="story-text"></div>
+        <div class="story-hint">Tap anywhere to keep going →</div>
+      </div>
+    </section>
+
     <!-- Spelling Helper -->
     <section id="spellGame" class="screen">
       <button class="home-btn" data-home>🏠</button>
@@ -324,6 +338,7 @@
   <script src="games/drums.js"></script>
   <script src="games/pattern.js"></script>
   <script src="games/find.js"></script>
+  <script src="games/story.js"></script>
   <script src="games/stickers.js"></script>
 </body>
 </html>
