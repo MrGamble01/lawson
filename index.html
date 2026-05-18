@@ -90,6 +90,9 @@
           <button class="tile" data-go="spell" style="--c:#e64980">
             <span class="emoji">🔡</span><span class="label">Spell</span>
           </button>
+          <button class="tile" data-go="read" style="--c:#d6336c">
+            <span class="emoji">📚</span><span class="label">Read</span>
+          </button>
           <button class="tile" data-go="pattern" style="--c:#7950f2">
             <span class="emoji">🧠</span><span class="label">Pattern</span>
           </button>
@@ -328,6 +331,18 @@
       </div>
     </section>
 
+    <!-- Read -->
+    <section id="readGame" class="screen">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="readScore" class="badge">📚 <span id="readScoreVal">0</span></div>
+      <div id="readBest" class="badge badge--best">🏆 <span id="readBestVal">0</span></div>
+      <div class="read-layout">
+        <div id="readEmoji" class="read-emoji">🐱</div>
+        <div class="read-prompt">Which word?</div>
+        <div id="readChoices" class="read-choices"></div>
+      </div>
+    </section>
+
     <!-- Spelling Helper -->
     <section id="spellGame" class="screen">
       <button class="home-btn" data-home>🏠</button>
@@ -410,6 +425,7 @@
   <script src="games/mix.js"></script>
   <script src="games/add.js"></script>
   <script src="games/body.js"></script>
+  <script src="games/read.js"></script>
   <script src="games/stickers.js"></script>
 </body>
 </html>
