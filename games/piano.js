@@ -139,6 +139,39 @@
         {w:2,d:1},{w:1,d:1},{w:1,d:1},{w:2,d:1},{w:1,d:2},{w:4,d:2},
       ],
     },
+    {
+      name: "The ABC Song",
+      bpm: 120,
+      notes: [
+        {w:0,d:1},{w:0,d:1},{w:4,d:1},{w:4,d:1},{w:5,d:1},{w:5,d:1},{w:4,d:2},
+        {w:3,d:1},{w:3,d:1},{w:2,d:1},{w:2,d:1},{w:1,d:1},{w:1,d:1},{w:0,d:2},
+        {w:4,d:1},{w:4,d:1},{w:3,d:1},{w:3,d:1},{w:2,d:1},{w:2,d:1},{w:1,d:2},
+        {w:4,d:1},{w:4,d:1},{w:3,d:1},{w:3,d:1},{w:2,d:1},{w:2,d:1},{w:1,d:2},
+        {w:0,d:1},{w:0,d:1},{w:4,d:1},{w:4,d:1},{w:5,d:1},{w:5,d:1},{w:4,d:2},
+        {w:3,d:1},{w:3,d:1},{w:2,d:1},{w:2,d:1},{w:1,d:1},{w:1,d:1},{w:0,d:2},
+      ],
+    },
+    {
+      name: "London Bridge",
+      bpm: 120,
+      notes: [
+        {w:4,d:1},{w:5,d:1},{w:4,d:1},{w:3,d:1},{w:2,d:1},{w:3,d:1},{w:4,d:2},
+        {w:1,d:1},{w:2,d:1},{w:3,d:2},
+        {w:2,d:1},{w:3,d:1},{w:4,d:2},
+        {w:4,d:1},{w:5,d:1},{w:4,d:1},{w:3,d:1},{w:2,d:1},{w:3,d:1},{w:4,d:2},
+        {w:1,d:2},{w:4,d:1},{w:2,d:1},{w:0,d:4},
+      ],
+    },
+    {
+      name: "This Old Man",
+      bpm: 130,
+      notes: [
+        {w:2,d:1},{w:0,d:1},{w:2,d:2},{w:2,d:1},{w:0,d:1},{w:2,d:2},
+        {w:3,d:1},{w:2,d:1},{w:1,d:1},{w:1,d:1},{w:2,d:1},{w:3,d:1},{w:4,d:2},
+        {w:0,d:1},{w:0,d:1},{w:0,d:2},
+        {w:4,d:1},{w:3,d:1},{w:2,d:1},{w:1,d:1},{w:0,d:4},
+      ],
+    },
   ];
 
   let songIndex = 0;
@@ -271,7 +304,7 @@
   function start() {
     build();
     const songBtn = document.getElementById("pianoSong");
-    L.onTap(songBtn, () => {
+    L.onTapOnce(songBtn, () => {
       if (songBtn.classList.contains("playing")) stopSong();
       else playSong();
     });

@@ -619,6 +619,10 @@ header h1 {
   border-color: #ff6b6b;
   color: #ff6b6b;
 }
+.doodle-tool--save {
+  border-color: #51cf66;
+  color: #2f9e44;
+}
 
 /* ---------- Counting ---------- */
 #countGame {

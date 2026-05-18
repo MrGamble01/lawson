@@ -98,7 +98,7 @@
     L.bumpBadge("listenScoreVal", 0);
     document.getElementById("listenBestVal").textContent = L.getHighScore("listenBest");
     const replay = document.getElementById("listenReplay");
-    if (replay) L.onTap(replay, (e) => {
+    if (replay) L.onTapOnce(replay, (e) => {
       if (e.stopPropagation) e.stopPropagation();
       L.beep(620, 0.08, "triangle");
       speakClue();

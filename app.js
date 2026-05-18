@@ -141,6 +141,16 @@ function onTap(el, fn) {
   });
 }
 
+// Same as onTap but no-ops if this element already has a tap handler
+// attached by us. Use for FIXED DOM elements (tool buttons, etc.) whose
+// game's start() runs every time the user re-enters — without this guard
+// each visit doubles the listener count.
+function onTapOnce(el, fn) {
+  if (!el || el.__lawsonTap) return;
+  el.__lawsonTap = true;
+  onTap(el, fn);
+}
+
 // Badge bump helper (shared by games)
 function bumpBadge(id, val) {
   const el = document.getElementById(id);
@@ -376,7 +386,7 @@ function celebrateNewHigh(value) {
 // the utilities below. Keeping each game self-contained makes it easy to
 // tweak one without touching the others.
 window.Lawson = {
-  say, beep, happySound, buzzSound, sparkleAt, onTap, pointOf, bumpBadge, show,
+  say, beep, happySound, buzzSound, sparkleAt, onTap, onTapOnce, pointOf, bumpBadge, show,
   audioCtx, unlockAudio,
   getHighScore, setHighScore, bumpHighScore, tryNewHighScore,
   setVoiceMuted, setSoundMuted, isVoiceMuted, isSoundMuted,

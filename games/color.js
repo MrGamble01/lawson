@@ -234,8 +234,8 @@
     fillsThisSession = 0;
     renderPalette();
     renderPage();
-    L.onTap(document.getElementById("colorClear"), clearAll);
-    L.onTap(document.getElementById("colorNext"), nextPage);
+    L.onTapOnce(document.getElementById("colorClear"), clearAll);
+    L.onTapOnce(document.getElementById("colorNext"), nextPage);
   }
 
   function stop() {}

@@ -227,6 +227,35 @@
     L.earnSticker && L.earnSticker("doodleClear");
   }
 
+  // Export the current canvas as a PNG download. We composite the
+  // strokes over a white background so the saved file looks like what
+  // the kid sees on screen (the grid background is CSS-only).
+  function save() {
+    if (!canvas) return;
+    const out = document.createElement("canvas");
+    out.width = canvas.width;
+    out.height = canvas.height;
+    const octx = out.getContext("2d");
+    octx.fillStyle = "#fffdf5";
+    octx.fillRect(0, 0, out.width, out.height);
+    octx.drawImage(canvas, 0, 0);
+    out.toBlob((blob) => {
+      if (!blob) return;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const d = new Date();
+      const z = (n) => String(n).padStart(2, "0");
+      a.href = url;
+      a.download = `${(window.Lawson && window.Lawson.KID_NAME) || "lawson"}-doodle-${d.getFullYear()}${z(d.getMonth()+1)}${z(d.getDate())}-${z(d.getHours())}${z(d.getMinutes())}.png`;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { a.remove(); URL.revokeObjectURL(url); }, 1500);
+      L.happySound();
+      L.say("Saved!");
+      L.earnSticker && L.earnSticker("doodleSave");
+    }, "image/png");
+  }
+
   function toggleStamp(btn) {
     mode = mode === "stamp" ? "paint" : "stamp";
     btn.classList.toggle("active", mode === "stamp");
@@ -257,10 +286,10 @@
 
     const clearBtn = document.getElementById("doodleClear");
     const stampBtn = document.getElementById("doodleStamp");
-    const cb = () => clear();
-    const sb = () => toggleStamp(stampBtn);
-    L.onTap(clearBtn, cb);
-    L.onTap(stampBtn, sb);
+    const saveBtn  = document.getElementById("doodleSave");
+    L.onTapOnce(clearBtn, () => clear());
+    L.onTapOnce(stampBtn, () => toggleStamp(stampBtn));
+    L.onTapOnce(saveBtn,  () => save());
 
     unlisten = () => {
       window.removeEventListener("resize", resize);
