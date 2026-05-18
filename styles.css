@@ -1502,6 +1502,76 @@ header h1 {
   border-color: #e03131;
   animation: shake 0.4s ease;
 }
+
+/* ---------- Find It! ---------- */
+#findGame {
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  background: linear-gradient(180deg, #e6fcf5 0%, #c3fae8 100%);
+  overflow: hidden;
+}
+.find-prompt {
+  position: absolute;
+  top: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  border: 5px solid #12b886;
+  border-radius: 999px;
+  padding: 10px 22px;
+  font-size: clamp(20px, 3.4vw, 32px);
+  font-weight: bold;
+  color: #087f5b;
+  box-shadow: 0 5px 0 rgba(0,0,0,0.12);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: calc(100% - 32px);
+  z-index: 5;
+  white-space: nowrap;
+}
+.find-target { font-size: 1.2em; line-height: 1; }
+.find-target-name { color: #087f5b; }
+.find-stage {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  margin-top: 160px;
+  margin-bottom: 10px;
+  max-width: 900px;
+}
+.find-item {
+  position: absolute;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  line-height: 1;
+  filter: drop-shadow(0 4px 4px rgba(0,0,0,0.25));
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.1s ease, filter 0.2s ease;
+}
+.find-item:active {
+  filter: drop-shadow(0 4px 4px rgba(0,0,0,0.25)) brightness(1.2);
+}
+.find-item.found {
+  animation: foundFly 0.7s cubic-bezier(.34,1.56,.64,1) forwards;
+  pointer-events: none;
+}
+@keyframes foundFly {
+  0%   { opacity: 1; }
+  60%  { transform: translate(-50%, -50%) scale(1.6) rotate(15deg); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(0.4) rotate(40deg); }
+}
+.find-item.wrong {
+  animation: findShake 0.4s ease;
+}
+@keyframes findShake {
+  0%, 100% { transform: translate(-50%, -50%) rotate(0); }
+  25%      { transform: translate(-50%, -50%) translateX(-6px) rotate(-4deg); }
+  75%      { transform: translate(-50%, -50%) translateX(6px) rotate(4deg); }
+}
 .sticker-toast-emoji {
   font-size: 36px;
   flex-shrink: 0;

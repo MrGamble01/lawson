@@ -19,6 +19,7 @@
     { name: "Purple",  hex: "#af52de", label: "" },
     { name: "Pink",    hex: "#ff2d92", label: "" },
     { name: "Black",   hex: "#222222", label: "" },
+    { name: "Eraser",  hex: null, erase: true, label: "🧼" },
   ];
 
   let canvas, ctx;
@@ -59,27 +60,47 @@
     return `hsl(${(hue + offset) % 360}, 90%, 55%)`;
   }
 
+  // Switches the canvas into erase mode (transparent pixels) while the
+  // eraser brush is active, then restores normal compositing.
+  function withBrushMode(fn) {
+    if (brush.erase) {
+      const prev = ctx.globalCompositeOperation;
+      ctx.globalCompositeOperation = "destination-out";
+      try { fn(); } finally { ctx.globalCompositeOperation = prev; }
+    } else {
+      fn();
+    }
+  }
+
   function dot(p, r) {
-    ctx.fillStyle = strokeColor();
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
-    ctx.fill();
+    withBrushMode(() => {
+      ctx.fillStyle = brush.erase ? "#000" : strokeColor();
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, brush.erase ? r * 2.2 : r, 0, Math.PI * 2);
+      ctx.fill();
+    });
   }
 
   function line(a, b) {
-    if (brush.hex) {
-      ctx.strokeStyle = brush.hex;
-    } else {
-      const grad = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
-      grad.addColorStop(0, strokeColor(0));
-      grad.addColorStop(1, strokeColor(20));
-      ctx.strokeStyle = grad;
-    }
-    ctx.lineWidth = 14;
-    ctx.beginPath();
-    ctx.moveTo(a.x, a.y);
-    ctx.lineTo(b.x, b.y);
-    ctx.stroke();
+    withBrushMode(() => {
+      if (brush.erase) {
+        ctx.strokeStyle = "#000";
+        ctx.lineWidth = 36;
+      } else if (brush.hex) {
+        ctx.strokeStyle = brush.hex;
+        ctx.lineWidth = 14;
+      } else {
+        const grad = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+        grad.addColorStop(0, strokeColor(0));
+        grad.addColorStop(1, strokeColor(20));
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 14;
+      }
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.stroke();
+    });
   }
 
   function stampAt(p) {
@@ -137,6 +158,11 @@
       sw.title = b.name;
       if (b.hex) {
         sw.style.background = b.hex;
+      } else if (b.erase) {
+        // White swatch with the eraser glyph so it reads as "wipe".
+        sw.style.background = "#fff";
+        sw.style.color = "#444";
+        sw.textContent = b.label;
       } else {
         // Rainbow gradient swatch
         sw.style.background = "conic-gradient(from 0deg, #ff3b30, #ff9500, #ffd60a, #34c759, #007aff, #af52de, #ff3b30)";

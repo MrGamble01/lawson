@@ -84,6 +84,9 @@
           <button class="tile" data-go="pattern" style="--c:#7950f2">
             <span class="emoji">🧠</span><span class="label">Pattern</span>
           </button>
+          <button class="tile" data-go="find" style="--c:#12b886">
+            <span class="emoji">🔍</span><span class="label">Find It!</span>
+          </button>
           <button class="tile" data-go="whack" style="--c:#f06595">
             <span class="emoji">🐹</span><span class="label">Whack!</span>
           </button>
@@ -220,6 +223,15 @@
       </div>
     </section>
 
+    <!-- Find It! -->
+    <section id="findGame" class="screen">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="findScore" class="badge">🔍 <span id="findScoreVal">0</span></div>
+      <div id="findBest" class="badge badge--best">🏆 <span id="findBestVal">0</span></div>
+      <div id="findPrompt" class="find-prompt">Find!</div>
+      <div id="findStage" class="find-stage"></div>
+    </section>
+
     <!-- Drum Kit -->
     <section id="drumsGame" class="screen">
       <button class="home-btn" data-home>🏠</button>
@@ -311,6 +323,7 @@
   <script src="games/spell.js"></script>
   <script src="games/drums.js"></script>
   <script src="games/pattern.js"></script>
+  <script src="games/find.js"></script>
   <script src="games/stickers.js"></script>
 </body>
 </html>
