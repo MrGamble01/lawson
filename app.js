@@ -247,6 +247,29 @@ const WEATHER = [
   { name: "Foggy",   emoji: "🌫️" },
   { name: "Rainbow", emoji: "🌈" },
 ];
+const FOOD = [
+  { name: "Apple",     emoji: "🍎" },
+  { name: "Banana",    emoji: "🍌" },
+  { name: "Pizza",     emoji: "🍕" },
+  { name: "Hot dog",   emoji: "🌭" },
+  { name: "Burger",    emoji: "🍔" },
+  { name: "Cookie",    emoji: "🍪" },
+  { name: "Cake",      emoji: "🍰" },
+  { name: "Ice cream", emoji: "🍦" },
+  { name: "Bread",     emoji: "🍞" },
+  { name: "Cheese",    emoji: "🧀" },
+  { name: "Egg",       emoji: "🥚" },
+  { name: "Milk",      emoji: "🥛" },
+];
+const FAMILY = [
+  { name: "Mommy",   emoji: "👩" },
+  { name: "Daddy",   emoji: "👨" },
+  { name: "Baby",    emoji: "👶" },
+  { name: "Sister",  emoji: "👧" },
+  { name: "Brother", emoji: "👦" },
+  { name: "Grandma", emoji: "👵" },
+  { name: "Grandpa", emoji: "👴" },
+];
 
 // Phonetic letter names so iOS TTS pronounces them correctly every time
 const LETTER_SOUND = {
@@ -334,6 +357,21 @@ const ACTIVITIES = {
     label: (w) => w.emoji,
     speak: (w) => w.name,
     display: (w, c) => ({ text: w.emoji, color: c, caption: w.name }),
+  },
+  food: {
+    items: FOOD,
+    color: () => `hsl(${Math.random() * 50}, 75%, 55%)`,
+    label: (f) => f.emoji,
+    speak: (f) => f.name,
+    display: (f, c) => ({ text: f.emoji, color: c, caption: f.name }),
+  },
+  family: {
+    items: FAMILY,
+    shuffle: false,
+    color: () => `hsl(${300 + Math.random() * 60}, 60%, 60%)`,
+    label: (p) => p.emoji,
+    speak: (p) => p.name,
+    display: (p, c) => ({ text: p.emoji, color: c, caption: p.name }),
   },
 };
 
