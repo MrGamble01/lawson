@@ -1,3 +1,55 @@
+/* ---------- Design tokens ---------- */
+:root {
+  --c-brand: #ff4081;
+  --c-brand-soft: #ff8ab0;
+  --c-brand-deep: #c2255c;
+  --c-ink: #2b2333;
+  --c-ink-soft: #6b6275;
+  --c-paper: #ffffff;
+  --c-paper-cream: #fffdf5;
+  --c-warn: #fa5252;
+  --c-good: #2f9e44;
+  --c-good-soft: #b2f2bb;
+  --c-best: #fab005;
+  --c-best-soft: #ffd43b;
+
+  --shadow-tile: 0 8px 0 rgba(0,0,0,0.14), 0 12px 28px rgba(0,0,0,0.18);
+  --shadow-tile-pressed: 0 2px 0 rgba(0,0,0,0.14), 0 4px 10px rgba(0,0,0,0.18);
+  --shadow-pop: 0 6px 0 rgba(0,0,0,0.12);
+
+  --radius-tile: 28px;
+  --radius-card: 22px;
+  --radius-pill: 999px;
+
+  --ease-spring: cubic-bezier(.34,1.56,.64,1);
+  --ease-snap: cubic-bezier(.4,1.3,.5,1);
+
+  --dur-fast: 0.12s;
+  --dur-base: 0.32s;
+}
+
+/* Respect users / kids who need less motion. Disable animations and
+   long transitions; keep instant state changes. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Visible focus ring for keyboard users (a-z navigators on the PC port
+   of the app, screen reader nav, etc.). Touch users won't see this
+   thanks to :focus-visible. */
+*:focus { outline: none; }
+button:focus-visible,
+input:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--c-brand);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
 html, body {
@@ -145,21 +197,36 @@ header h1 {
 .tile {
   background: var(--c, #ff6b6b);
   border: 6px solid #fff;
-  border-radius: 28px;
+  border-radius: var(--radius-tile);
   width: min(28vw, 180px);
   height: min(28vw, 180px);
-  box-shadow: 0 8px 0 rgba(0,0,0,0.15), 0 12px 25px rgba(0,0,0,0.18);
+  box-shadow: var(--shadow-tile);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: transform 0.08s ease;
+  transition: transform var(--dur-fast) var(--ease-snap), box-shadow var(--dur-fast) ease;
   color: #fff;
   font-weight: bold;
-  animation: tileEntry 0.5s cubic-bezier(.34,1.56,.64,1) backwards;
+  animation: tileEntry 0.5s var(--ease-spring) backwards;
+  position: relative;
+  overflow: hidden;
 }
-.tile:active { transform: scale(0.94) translateY(4px); }
+/* Soft inner sheen for depth — adds the "premium" tile feel without
+   competing with the emoji glyph. */
+.tile::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 30% 25%, rgba(255,255,255,0.28) 0%, transparent 55%);
+  pointer-events: none;
+  border-radius: inherit;
+}
+.tile:active {
+  transform: scale(0.94) translateY(4px);
+  box-shadow: var(--shadow-tile-pressed);
+}
 /* Stagger tiles within a section so they pop in like popcorn. */
 .menu-tiles .tile:nth-child(1)  { animation-delay: 0.04s; }
 .menu-tiles .tile:nth-child(2)  { animation-delay: 0.08s; }
@@ -187,13 +254,20 @@ header h1 {
   width: 64px; height: 64px;
   border-radius: 50%;
   border: 4px solid #fff;
-  background: #4dabf7;
+  background: linear-gradient(180deg, #74c0fc 0%, #4dabf7 100%);
   font-size: 32px;
   cursor: pointer;
-  box-shadow: 0 4px 0 rgba(0,0,0,0.15);
+  box-shadow: 0 6px 0 rgba(0,0,0,0.18), 0 8px 18px rgba(0,0,0,0.15);
   z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--dur-fast) var(--ease-snap), box-shadow var(--dur-fast) ease;
 }
-.home-btn:active { transform: translateY(2px); }
+.home-btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 3px 0 rgba(0,0,0,0.18), 0 5px 12px rgba(0,0,0,0.15);
+}
 
 /* ---------- Activity stage ---------- */
 #activity { flex-direction: column; align-items: center; justify-content: center; }
