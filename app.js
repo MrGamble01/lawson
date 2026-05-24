@@ -462,6 +462,7 @@ function buildFlashcards(name) {
 // just the flashcard activity that owns #bigDisplay.
 function celebrateNewHigh(value) {
   happySound();
+  haptic([15, 30, 15, 30, 25]);
   if (typeof earnSticker === "function") earnSticker("firstHigh");
   setTimeout(() => say(`New best! ${value}!`), 220);
   const overlay = document.getElementById("bestOverlay");
@@ -489,7 +490,7 @@ function celebrateNewHigh(value) {
 // the utilities below. Keeping each game self-contained makes it easy to
 // tweak one without touching the others.
 window.Lawson = {
-  say, beep, happySound, buzzSound, sparkleAt, onTap, onTapOnce, pointOf, bumpBadge, show,
+  say, beep, happySound, buzzSound, haptic, sparkleAt, onTap, onTapOnce, pointOf, bumpBadge, show,
   audioCtx, unlockAudio,
   getHighScore, setHighScore, bumpHighScore, tryNewHighScore,
   setVoiceMuted, setSoundMuted, isVoiceMuted, isSoundMuted,
