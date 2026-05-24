@@ -13,12 +13,14 @@ home screen" support, serve over HTTP (e.g. `python3 -m http.server`).
 
 Tiles are grouped on the home screen into four sections.
 
-**Learn** — five tiles, two are hubs that open sub-menus.
+Tuned for a 3-year-old: no reading required, no abstract pattern
+recognition, small counting numbers only.
+
+**Learn** — four tiles, two are hubs that open sub-menus.
 
 - **ABC** (uppercase + lowercase together)
 - **123** (1–20)
-- **Numbers** hub — Count, How Many?, Add It Up
-- **Words** hub — Spell, Read, Listen
+- **Numbers** hub — Count, How Many? (max 5)
 - **Explore** hub — Colors, Shapes, Animals, Vehicles, Dinos, Weather,
   Food, Family
 
@@ -26,11 +28,12 @@ Tiles are grouped on the home screen into four sections.
 
 - **Pop!** — pop floating balloons, streak bonuses, rare rainbow
 - **Match** — find the matching emoji
-- **Memory** — 4×3 concentration board, six themed sets
+- **Memory** — 4-pair concentration board (8 cards), five themed sets
 - **Dots** — Connect the Dots, seven puzzles with reveal emoji
-- **Pattern** — what comes next?
+- **Pattern** — what comes next? (ABAB only)
 - **Find It!** — find the named item among 16 scattered emoji
 - **Mix** — combine two paint drops to make the target color
+- **Listen** — hear the clue, find the emoji (audio-only)
 - **Whack!** — whack the critters before they duck back down
 
 **Create** — open-ended creative play.

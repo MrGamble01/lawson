@@ -22,9 +22,11 @@
   ];
   const NUMBER_WORDS = [
     "", "one", "two", "three", "four", "five",
-    "six", "seven", "eight", "nine", "ten",
   ];
-  const MAX_N = 10;
+  // 3-year-olds reliably subitize to ~3-4. Capping at 5 keeps the
+  // game in the comfortable-but-stretching zone — high enough to
+  // feel like counting, low enough not to frustrate.
+  const MAX_N = 5;
 
   let score = 0;
   let activeTimer = null;

@@ -59,11 +59,7 @@
           </button>
           <button class="tile" data-hub="numbersHub" style="--c:#5c7cfa">
             <span class="emoji">🧮</span><span class="label">Numbers</span>
-            <span class="tile-counter">3 games</span>
-          </button>
-          <button class="tile" data-hub="wordsHub" style="--c:#e64980">
-            <span class="emoji">🔡</span><span class="label">Words</span>
-            <span class="tile-counter">3 games</span>
+            <span class="tile-counter">2 games</span>
           </button>
           <button class="tile" data-hub="exploreHub" style="--c:#da77f2">
             <span class="emoji">🌍</span><span class="label">Explore</span>
@@ -95,6 +91,9 @@
           </button>
           <button class="tile" data-go="mix" style="--c:#f76707">
             <span class="emoji">🧪</span><span class="label">Mix</span>
+          </button>
+          <button class="tile" data-go="listen" style="--c:#3b82f6">
+            <span class="emoji">👂</span><span class="label">Listen</span>
           </button>
           <button class="tile" data-go="whack" style="--c:#f06595">
             <span class="emoji">🐹</span><span class="label">Whack!</span>
@@ -141,26 +140,6 @@
         </button>
         <button class="tile" data-go="howmany" style="--c:#228be6">
           <span class="emoji">🧮</span><span class="label">How Many?</span>
-        </button>
-        <button class="tile" data-go="add" style="--c:#1c7ed6">
-          <span class="emoji">➕</span><span class="label">Add It Up</span>
-        </button>
-      </div>
-    </section>
-
-    <!-- Words hub: reading + spelling games -->
-    <section id="wordsHub" class="screen hub-screen">
-      <button class="home-btn" data-home>🏠</button>
-      <h2 class="hub-title">🔡 Words</h2>
-      <div class="hub-tiles">
-        <button class="tile" data-go="spell" style="--c:#e64980">
-          <span class="emoji">🔡</span><span class="label">Spell</span>
-        </button>
-        <button class="tile" data-go="read" style="--c:#d6336c">
-          <span class="emoji">📚</span><span class="label">Read</span>
-        </button>
-        <button class="tile" data-go="listen" style="--c:#3b82f6">
-          <span class="emoji">👂</span><span class="label">Listen</span>
         </button>
       </div>
     </section>
@@ -301,17 +280,6 @@
       </div>
     </section>
 
-    <!-- Add It Up -->
-    <section id="addGame" class="screen">
-      <button class="home-btn" data-home>🏠</button>
-      <div id="addScore" class="badge">➕ <span id="addScoreVal">0</span></div>
-      <div id="addBest" class="badge badge--best">🏆 <span id="addBestVal">0</span></div>
-      <div class="add-layout">
-        <div id="addStage" class="add-stage"></div>
-        <div id="addChoices" class="add-choices"></div>
-      </div>
-    </section>
-
     <!-- How Many? -->
     <section id="howmanyGame" class="screen">
       <button class="home-btn" data-home>🏠</button>
@@ -368,30 +336,6 @@
       <div class="story-bubble">
         <div id="storyText" class="story-text"></div>
         <div class="story-hint">Tap anywhere to keep going →</div>
-      </div>
-    </section>
-
-    <!-- Read -->
-    <section id="readGame" class="screen">
-      <button class="home-btn" data-home>🏠</button>
-      <div id="readScore" class="badge">📚 <span id="readScoreVal">0</span></div>
-      <div id="readBest" class="badge badge--best">🏆 <span id="readBestVal">0</span></div>
-      <div class="read-layout">
-        <div id="readEmoji" class="read-emoji">🐱</div>
-        <div class="read-prompt">Which word?</div>
-        <div id="readChoices" class="read-choices"></div>
-      </div>
-    </section>
-
-    <!-- Spelling Helper -->
-    <section id="spellGame" class="screen">
-      <button class="home-btn" data-home>🏠</button>
-      <div id="spellScore" class="badge">🔡 <span id="spellScoreVal">0</span></div>
-      <div id="spellBest" class="badge badge--best">🏆 <span id="spellBestVal">0</span></div>
-      <div class="spell-layout">
-        <div id="spellEmoji" class="spell-emoji">🐱</div>
-        <div id="spellLetters" class="spell-word"></div>
-        <div id="spellChoices" class="spell-choices"></div>
       </div>
     </section>
 
@@ -461,14 +405,11 @@
   <script src="games/memory.js"></script>
   <script src="games/dots.js"></script>
   <script src="games/listen.js"></script>
-  <script src="games/spell.js"></script>
   <script src="games/pattern.js"></script>
   <script src="games/find.js"></script>
   <script src="games/story.js"></script>
   <script src="games/howmany.js"></script>
   <script src="games/mix.js"></script>
-  <script src="games/add.js"></script>
-  <script src="games/read.js"></script>
   <script src="games/stickers.js"></script>
 </body>
 </html>

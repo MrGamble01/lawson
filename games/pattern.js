@@ -16,16 +16,13 @@
     [{ e: "🦁", n: "lion"   }, { e: "🐸", n: "frog"   }, { e: "🐝", n: "bee"    }],
   ];
 
-  // Templates use indices into the chosen item set; `answer` is what
-  // index appears next. Easy → hard order.
+  // ABAB only. More complex patterns (AABB, ABB, ABC) require
+  // abstraction a 3-year-old typically hasn't developed yet — simple
+  // alternation is the sweet spot for this age.
   const PATTERNS = [
-    { seq: [0,1,0,1],         answer: 0 }, // ABAB → A
-    { seq: [0,1,0,1,0],       answer: 1 }, // ABABA → B
-    { seq: [0,0,1,1,0,0],     answer: 1 }, // AABB AA → B
-    { seq: [0,1,1,0,1,1],     answer: 0 }, // ABB ABB → A
-    { seq: [0,1,2,0,1],       answer: 2 }, // ABC AB → C
-    { seq: [0,0,1,0,0],       answer: 1 }, // AAB AA → B
-    { seq: [0,1,2,0,1,2,0],   answer: 1 }, // ABC ABC A → B
+    { seq: [0,1,0,1],     answer: 0 }, // ABAB → A
+    { seq: [0,1,0,1,0],   answer: 1 }, // ABABA → B
+    { seq: [0,1,0,1,0,1], answer: 0 }, // ABABAB → A
   ];
 
   let score = 0;

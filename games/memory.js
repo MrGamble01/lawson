@@ -6,26 +6,30 @@
 (function () {
   const L = window.Lawson;
 
+  // Four items per set = four pairs = eight cards. Twelve cards
+  // (six pairs) overtaxed working memory at 3; eight is the sweet
+  // spot — challenging enough to feel like a win, doable enough to
+  // not frustrate.
   const SETS = [
     [
       { e: "🐶", n: "dog" }, { e: "🐱", n: "cat" }, { e: "🐮", n: "cow" },
-      { e: "🦁", n: "lion" }, { e: "🐸", n: "frog" }, { e: "🐝", n: "bee" },
+      { e: "🐝", n: "bee" },
     ],
     [
       { e: "🍎", n: "apple" }, { e: "🍌", n: "banana" }, { e: "🍓", n: "strawberry" },
-      { e: "🍇", n: "grapes" }, { e: "🍉", n: "watermelon" }, { e: "🍪", n: "cookie" },
+      { e: "🍪", n: "cookie" },
     ],
     [
       { e: "🚗", n: "car" }, { e: "🚂", n: "train" }, { e: "✈️", n: "plane" },
-      { e: "🚀", n: "rocket" }, { e: "⛵", n: "boat" }, { e: "🚒", n: "fire truck" },
+      { e: "🚀", n: "rocket" },
     ],
     [
       { e: "⭐", n: "star" }, { e: "❤️", n: "heart" }, { e: "🌈", n: "rainbow" },
-      { e: "☀️", n: "sun" }, { e: "🌙", n: "moon" }, { e: "🎈", n: "balloon" },
+      { e: "🎈", n: "balloon" },
     ],
     [
       { e: "🦖", n: "T-Rex" }, { e: "🦕", n: "brontosaurus" }, { e: "🐢", n: "turtle" },
-      { e: "🐊", n: "crocodile" }, { e: "🦎", n: "lizard" }, { e: "🐍", n: "snake" },
+      { e: "🐍", n: "snake" },
     ],
   ];
 
