@@ -22,6 +22,23 @@
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <!-- Splash screen: shown on app load, fades after ~1.3s. -->
+  <div id="splash" class="splash" aria-hidden="true">
+    <div class="splash-icon">
+      <svg viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <ellipse cx="50" cy="55" rx="42" ry="50" fill="#fff"/>
+        <ellipse cx="36" cy="38" rx="10" ry="16" fill="rgba(255,255,255,0.7)"/>
+        <circle cx="40" cy="50" r="4" fill="#3a1f5a"/>
+        <circle cx="60" cy="50" r="4" fill="#3a1f5a"/>
+        <path d="M40 70 Q 50 80 60 70" stroke="#3a1f5a" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <polygon points="46,104 54,104 50,112" fill="#fff"/>
+        <path d="M50 112 Q 56 124 48 134 Q 42 140 50 140" stroke="#fff" stroke-width="2.5" fill="none"/>
+      </svg>
+    </div>
+    <div class="splash-title">Lawson's Playground</div>
+    <div class="splash-sub">Tap, learn, play</div>
+  </div>
+
   <header>
     <h1>Lawson's Playground</h1>
     <button id="settingsBtn" class="settings-btn" aria-label="Settings">⚙️</button>
@@ -125,9 +142,6 @@
         <div class="menu-tiles">
           <button class="tile" data-go="piano" style="--c:#845ef7">
             <span class="emoji">🎹</span><span class="label">Piano</span>
-          </button>
-          <button class="tile" data-go="drums" style="--c:#e8590c">
-            <span class="emoji">🥁</span><span class="label">Drums</span>
           </button>
           <button class="tile" data-go="doodle" style="--c:#22b8cf">
             <span class="emoji">🎨</span><span class="label">Doodle</span>
@@ -287,12 +301,6 @@
       <div id="findStage" class="find-stage"></div>
     </section>
 
-    <!-- Drum Kit -->
-    <section id="drumsGame" class="screen">
-      <button class="home-btn" data-home>🏠</button>
-      <div id="drumPads" class="drum-pads"></div>
-    </section>
-
     <!-- Pattern -->
     <section id="patternGame" class="screen">
       <button class="home-btn" data-home>🏠</button>
@@ -440,7 +448,6 @@
   <script src="games/dots.js"></script>
   <script src="games/listen.js"></script>
   <script src="games/spell.js"></script>
-  <script src="games/drums.js"></script>
   <script src="games/pattern.js"></script>
   <script src="games/find.js"></script>
   <script src="games/story.js"></script>

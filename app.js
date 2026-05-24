@@ -27,6 +27,33 @@ function isDarkMode() {
 // Apply saved dark-mode preference as early as possible.
 setDarkMode(isDarkMode());
 
+// Dismiss the splash screen after a short beat. Long enough that the
+// brand registers, short enough that a toddler doesn't get bored.
+(function dismissSplash() {
+  const start = performance.now();
+  const MIN_VISIBLE = 1100; // ms
+  function hide() {
+    const splash = document.getElementById("splash");
+    if (!splash) return;
+    splash.classList.add("hide");
+    setTimeout(() => splash.remove(), 600);
+  }
+  function dismissNow() {
+    const remaining = Math.max(0, MIN_VISIBLE - (performance.now() - start));
+    setTimeout(hide, remaining);
+  }
+  // Tap-to-skip after a short cushion so the toddler doesn't blast past
+  // it before the brand registers.
+  setTimeout(() => {
+    document.getElementById("splash")
+      ?.addEventListener("touchstart", dismissNow, { passive: true });
+    document.getElementById("splash")
+      ?.addEventListener("click", dismissNow);
+  }, 400);
+  // Auto-dismiss on a timer regardless of taps.
+  setTimeout(dismissNow, MIN_VISIBLE);
+})();
+
 const CHEER_PHRASES = [
   "Yay {name}!",
   "Way to go {name}!",

@@ -44,7 +44,6 @@ hear the name and see a big colorful display.
 **Create** — open-ended creative play.
 
 - **Piano** — rainbow keys, twelve playable songs
-- **Drums** — four synthesized drum pads (kick/snare/hi-hat/tom)
 - **Doodle** — rainbow or solid-color brushes, eraser, three sizes,
   save the drawing as a PNG
 - **Coloring** — ten outline pages with a color palette
