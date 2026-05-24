@@ -571,6 +571,7 @@ function navChime(up) {
     beep(659.25, 0.07, "triangle", 0);    // E5
     beep(523.25, 0.09, "triangle", 0.05); // C5
   }
+  haptic(8);
 }
 
 document.querySelectorAll("[data-go]").forEach((btn) => {
