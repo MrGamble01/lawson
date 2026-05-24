@@ -129,6 +129,10 @@ function show(id) {
   const target = document.getElementById(id);
   const title = target && target.dataset && target.dataset.title;
   if (title) showGameBanner(title);
+  // Music plays only on the menu so the gameplay sound design stays
+  // clean. Cheap to start/stop — it's just a Web Audio interval.
+  if (id === "menu" && isMusicEnabled()) startMusic();
+  else stopMusic();
 }
 document.body.classList.add("on-menu");
 
@@ -567,8 +571,9 @@ window.Lawson = {
   audioCtx, unlockAudio,
   getHighScore, setHighScore, bumpHighScore, tryNewHighScore,
   setVoiceMuted, setSoundMuted, isVoiceMuted, isSoundMuted,
+  setMusicEnabled, isMusicEnabled, startMusic, stopMusic,
   earnSticker, isStickerEarned, listStickers, resetStickers,
-  KID_NAME, cheer, shuffled, celebrateNewHigh,
+  KID_NAME, cheer, shuffled, celebrateNewHigh, confettiRain,
   games: {}, // each game adds { screen, start, stop } here
 };
 
@@ -792,6 +797,7 @@ document.addEventListener("touchmove", (e) => {
   const nameInput  = document.getElementById("settingsName");
   const voiceTgl   = document.getElementById("settingsVoice");
   const soundTgl   = document.getElementById("settingsSound");
+  const musicTgl   = document.getElementById("settingsMusic");
   const darkTgl    = document.getElementById("settingsDark");
   const closeBtn   = document.getElementById("settingsClose");
   const resetBtn   = document.getElementById("settingsReset");
@@ -803,6 +809,11 @@ document.addEventListener("touchmove", (e) => {
     setSoundMuted(!soundTgl.checked);
     if (soundTgl.checked) beep(500, 0.08); // little chirp when re-enabling
   });
+  if (musicTgl) musicTgl.addEventListener("change", () => {
+    setMusicEnabled(musicTgl.checked);
+    // If the kid is on the menu and just turned music on, start now.
+    if (musicTgl.checked && document.body.classList.contains("on-menu")) startMusic();
+  });
   if (darkTgl) darkTgl.addEventListener("change", () => setDarkMode(darkTgl.checked));
 
   function open(opts) {
@@ -810,6 +821,7 @@ document.addEventListener("touchmove", (e) => {
     nameInput.value = isFirstRun() ? "" : KID_NAME;
     voiceTgl.checked = !isVoiceMuted();
     soundTgl.checked = !isSoundMuted();
+    if (musicTgl) musicTgl.checked = isMusicEnabled();
     if (darkTgl) darkTgl.checked = isDarkMode();
     resetBtn.textContent = "🧹 Reset scores";
     resetBtn.classList.remove("confirming");
