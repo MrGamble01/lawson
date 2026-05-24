@@ -144,6 +144,53 @@ html.dark .streak-badge {
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+/* ---------- Mascot (Bobo the balloon) ---------- */
+.mascot {
+  position: fixed;
+  bottom: max(env(safe-area-inset-bottom, 0px), 16px);
+  right: max(env(safe-area-inset-right, 0px), 16px);
+  width: clamp(64px, 12vw, 96px);
+  height: clamp(90px, 17vw, 134px);
+  z-index: 80;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  filter: drop-shadow(0 8px 14px rgba(0,0,0,0.25));
+  animation: mascotBob 3.4s ease-in-out infinite;
+  display: none; /* shown only on the menu screen, see selector below */
+}
+.mascot svg { width: 100%; height: 100%; pointer-events: none; }
+.mascot:active { transform: scale(0.92); }
+/* Show the mascot only when the home menu is the active screen. */
+body.on-menu .mascot { display: block; }
+@keyframes mascotBob {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50%      { transform: translateY(-10px) rotate(3deg); }
+}
+
+/* ---------- Confetti rain ---------- */
+.confetti {
+  position: fixed;
+  top: -40px;
+  z-index: 250;
+  pointer-events: none;
+  border-radius: 2px;
+  animation: confettiFall linear forwards;
+  will-change: transform, opacity;
+}
+@keyframes confettiFall {
+  from {
+    transform: translate(0, 0) rotate(0);
+    opacity: 1;
+  }
+  to {
+    transform: translate(var(--drift, 0), 110vh) rotate(var(--spin, 540deg));
+    opacity: 0.55;
+  }
+}
+
 /* ---------- Splash screen ---------- */
 .splash {
   position: fixed;

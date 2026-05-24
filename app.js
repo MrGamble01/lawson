@@ -121,7 +121,11 @@ function shuffled(arr) {
 const screens = document.querySelectorAll(".screen");
 function show(id) {
   screens.forEach((s) => s.classList.toggle("active", s.id === id));
+  // Track menu-mode on body so the mascot (and other menu-only chrome)
+  // can be toggled via a simple class selector — no :has() required.
+  document.body.classList.toggle("on-menu", id === "menu");
 }
+document.body.classList.add("on-menu");
 
 // ---------- Helpers ----------
 // Sparkle burst: scatter glyphs in a circle around (x, y) with varied
@@ -484,9 +488,39 @@ function buildFlashcards(name) {
 // Shared big-bang moment for any game when a new personal best is set.
 // Uses a fixed-position overlay so it works on top of any screen, not
 // just the flashcard activity that owns #bigDisplay.
+// Confetti rain — proper falling particles across the whole viewport,
+// not the small clustered sparkleAt burst. Used for big moments: new
+// personal best, all-stickers finale. ~30 pieces with randomized size,
+// rotation, color, and fall speed.
+function confettiRain(count = 32) {
+  const colors  = ["#ff4081", "#fab005", "#37b24d", "#4dabf7", "#7950f2", "#ff922b", "#20c997", "#e64980"];
+  const glyphs  = ["🎉", "🎊", "🌟", "⭐", "💖", "🎈", "✨"];
+  for (let i = 0; i < count; i++) {
+    const piece = document.createElement("div");
+    piece.className = "confetti";
+    // Mix glyph particles and solid colored squares for variety.
+    if (Math.random() < 0.6) {
+      piece.textContent = glyphs[Math.floor(Math.random() * glyphs.length)];
+      piece.style.fontSize = (16 + Math.random() * 26) + "px";
+    } else {
+      piece.style.width = (8 + Math.random() * 8) + "px";
+      piece.style.height = (12 + Math.random() * 14) + "px";
+      piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    }
+    piece.style.left = (Math.random() * 100) + "vw";
+    piece.style.animationDuration = (2.4 + Math.random() * 2.2) + "s";
+    piece.style.animationDelay = (Math.random() * 0.6) + "s";
+    piece.style.setProperty("--drift", ((Math.random() - 0.5) * 240) + "px");
+    piece.style.setProperty("--spin", (360 + Math.random() * 720) + "deg");
+    document.body.appendChild(piece);
+    setTimeout(() => piece.remove(), 5500);
+  }
+}
+
 function celebrateNewHigh(value) {
   happySound();
   haptic([15, 30, 15, 30, 25]);
+  confettiRain(28);
   if (typeof earnSticker === "function") earnSticker("firstHigh");
   setTimeout(() => say(`New best! ${value}!`), 220);
   const overlay = document.getElementById("bestOverlay");
@@ -675,6 +709,32 @@ document.querySelectorAll("[data-home]").forEach((btn) => {
     navChime(false);
   });
 });
+
+// Tap Bobo for a greeting + sparkle. Random short phrases so it stays
+// fresh across taps. Toddlers love poking the mascot — it's also the
+// excuse for them to hear the personalized cheer line.
+(function setupMascot() {
+  const mascot = document.getElementById("mascot");
+  if (!mascot) return;
+  const phrases = [
+    () => `Hi ${KID_NAME}!`,
+    () => `Hello ${KID_NAME}!`,
+    () => `${L_cheerSafe()}`,
+    () => `Hey there!`,
+    () => `Boop!`,
+    () => `Let's play!`,
+  ];
+  function L_cheerSafe() { try { return cheer(); } catch (_) { return "Yay!"; } }
+  let i = 0;
+  onTap(mascot, () => {
+    unlockAudio();
+    unlockSpeech();
+    say(phrases[i++ % phrases.length]());
+    haptic(10);
+    const r = mascot.getBoundingClientRect();
+    sparkleAt(r.left + r.width / 2, r.top + r.height / 2);
+  });
+})();
 
 // Prevent multi-touch pinch-zoom gestures on iOS (belt-and-braces with viewport meta)
 document.addEventListener("gesturestart", (e) => e.preventDefault());
