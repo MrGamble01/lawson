@@ -96,6 +96,33 @@ header h1 {
   -webkit-tap-highlight-color: transparent;
 }
 .settings-btn:active { transform: translateY(calc(-50% + 2px)); box-shadow: 0 1px 0 rgba(0,0,0,0.1); }
+.streak-badge {
+  position: absolute;
+  top: 50%;
+  right: 70px;
+  transform: translateY(-50%);
+  background: linear-gradient(180deg, #ffe066, #ff922b);
+  color: #4a2a00;
+  border: 3px solid #fff;
+  border-radius: var(--radius-pill);
+  padding: 4px 12px 4px 8px;
+  font-size: clamp(14px, 2.2vw, 18px);
+  font-weight: 900;
+  box-shadow: 0 3px 0 rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  letter-spacing: 0.5px;
+  animation: streakPulse 2.4s ease-in-out infinite;
+}
+@keyframes streakPulse {
+  0%, 100% { transform: translateY(-50%) scale(1); }
+  50%      { transform: translateY(-50%) scale(1.06); }
+}
+html.dark .streak-badge {
+  border-color: rgba(255,255,255,0.85);
+  color: #fff;
+}
 
 #app {
   height: calc(100% - 60px);

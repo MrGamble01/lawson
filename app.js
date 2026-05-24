@@ -558,6 +558,23 @@ function bumpDailyStreak() {
   } catch (_) { return 1; }
 }
 
+// Render the streak badge in the header. Hidden when the streak is 0
+// or 1 — a "🔥 1" badge isn't really a streak yet, and showing it
+// makes a fresh install look noisier than it should.
+function renderStreakBadge() {
+  const badge = document.getElementById("streakBadge");
+  const val = document.getElementById("streakBadgeVal");
+  if (!badge || !val) return;
+  let streak = 0;
+  try { streak = parseInt(localStorage.getItem("lawson:streak") || "0", 10) || 0; } catch (_) {}
+  if (streak >= 2) {
+    val.textContent = streak;
+    badge.hidden = false;
+  } else {
+    badge.hidden = true;
+  }
+}
+
 // Time-of-day greeting shown as a top-of-screen toast on app load.
 // Visual only — speaking it would collide with game intros and feel
 // awkward, since some games speak the moment you enter them.
@@ -571,6 +588,7 @@ function bumpDailyStreak() {
   else              prefix = "🌙 Hello";
 
   const streak = bumpDailyStreak();
+  renderStreakBadge();
   const streakBit = streak >= 2 ? `  ·  🔥 Day ${streak}` : "";
 
   const el = document.createElement("div");
