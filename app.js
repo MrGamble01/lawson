@@ -840,6 +840,45 @@ document.querySelectorAll("[data-home]").forEach((btn) => {
   });
 })();
 
+// Section titles on the menu are tappable — Bobo speaks the section
+// name as a friendly invitation. Pure quality-of-presence: gives the
+// kid one more thing to poke that responds.
+(function setupSectionTitles() {
+  const phrases = {
+    "📚 Learn": "Learn time!",
+    "🎮 Play": "Let's play!",
+    "🎨 Create": "Make something!",
+    "🌟 Collection": "Your stickers!",
+  };
+  document.querySelectorAll(".menu-section-title").forEach((title) => {
+    title.style.cursor = "pointer";
+    onTap(title, () => {
+      const text = (title.textContent || "").trim();
+      const phrase = phrases[text] || text;
+      say(phrase);
+      haptic(8);
+      title.classList.remove("bump");
+      void title.offsetWidth;
+      title.classList.add("bump");
+    });
+  });
+})();
+
+// Every score / best badge is tappable — speaks the current value.
+// Helps a pre-reader hear what the number is without parental help.
+(function setupBadgeTaps() {
+  document.querySelectorAll(".badge").forEach((badge) => {
+    onTap(badge, (e) => {
+      if (e.stopPropagation) e.stopPropagation();
+      const valEl = badge.querySelector("span");
+      if (!valEl) return;
+      const v = parseInt(valEl.textContent, 10);
+      if (!isNaN(v)) say(String(v), 1.0);
+      haptic(6);
+    });
+  });
+})();
+
 // Tappable menu bubbles. Each one is a button you can pop for a
 // satisfying sound + sparkle. Doesn't navigate anywhere — purely
 // ambient micro-interaction so there's always something to tap.
