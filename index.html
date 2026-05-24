@@ -45,6 +45,16 @@
     <button id="settingsBtn" class="settings-btn" aria-label="Settings">⚙️</button>
   </header>
 
+  <!-- Soft background atmosphere for the menu: small balloons drifting
+       up. Hidden on game screens so they never compete with gameplay. -->
+  <div class="menu-bubbles" aria-hidden="true">
+    <span class="bubble" style="--c:#ff8ab0; --x:8%;  --delay:0s;  --dur:15s; --drift:30px;"></span>
+    <span class="bubble" style="--c:#74c0fc; --x:88%; --delay:3s;  --dur:18s; --drift:-40px;"></span>
+    <span class="bubble" style="--c:#ffd43b; --x:30%; --delay:7s;  --dur:14s; --drift:-20px;"></span>
+    <span class="bubble" style="--c:#69db7c; --x:70%; --delay:11s; --dur:17s; --drift:25px;"></span>
+    <span class="bubble" style="--c:#da77f2; --x:50%; --delay:5s;  --dur:16s; --drift:-15px;"></span>
+  </div>
+
   <!-- Bobo the balloon mascot. Floats in the bottom-right of the menu;
        hidden via CSS when the menu screen isn't active. -->
   <button id="mascot" class="mascot" aria-label="Say hi to Bobo">
@@ -209,7 +219,7 @@
     </section>
 
     <!-- Balloon popping -->
-    <section id="popGame" class="screen">
+    <section id="popGame" class="screen" data-title="🎈 Pop!">
       <button class="home-btn" data-home>🏠</button>
       <div id="popScore" class="badge">🎈 <span id="popScoreVal">0</span></div>
       <div id="popStreak" class="badge badge--streak">🔥 <span id="popStreakVal">0</span></div>
@@ -218,14 +228,14 @@
     </section>
 
     <!-- Piano -->
-    <section id="pianoGame" class="screen">
+    <section id="pianoGame" class="screen" data-title="🎹 Piano">
       <button class="home-btn" data-home>🏠</button>
       <button id="pianoSong" class="piano-song-btn">🎵 Song</button>
       <div id="pianoBoard" class="piano-board"></div>
     </section>
 
     <!-- Whack-a-Mole -->
-    <section id="whackGame" class="screen">
+    <section id="whackGame" class="screen" data-title="🐹 Whack!">
       <button class="home-btn" data-home>🏠</button>
       <div id="whackScore" class="badge">🔨 <span id="whackScoreVal">0</span></div>
       <div id="whackBest" class="badge badge--best">🏆 <span id="whackBestVal">0</span></div>
@@ -233,7 +243,7 @@
     </section>
 
     <!-- Doodle -->
-    <section id="doodleGame" class="screen">
+    <section id="doodleGame" class="screen" data-title="🎨 Doodle">
       <button class="home-btn" data-home>🏠</button>
       <div class="doodle-tools">
         <button id="doodleStamp" class="doodle-tool">✨ Stamp</button>
@@ -246,7 +256,7 @@
     </section>
 
     <!-- Counting -->
-    <section id="countGame" class="screen">
+    <section id="countGame" class="screen" data-title="🔢 Count">
       <button class="home-btn" data-home>🏠</button>
       <div id="countScore" class="badge">🔢 <span id="countScoreVal">0</span></div>
       <div id="countBest" class="badge badge--best">🏆 <span id="countBestVal">0</span></div>
@@ -255,7 +265,7 @@
     </section>
 
     <!-- Coloring Pages -->
-    <section id="colorGame" class="screen">
+    <section id="colorGame" class="screen" data-title="🖍️ Coloring">
       <button class="home-btn" data-home>🏠</button>
       <div class="color-tools">
         <button id="colorNext" class="color-tool">📄 Next</button>
@@ -266,7 +276,7 @@
     </section>
 
     <!-- Matching game -->
-    <section id="matchGame" class="screen">
+    <section id="matchGame" class="screen" data-title="🧩 Match">
       <button class="home-btn" data-home>🏠</button>
       <div id="matchScore" class="badge">⭐ <span id="matchScoreVal">0</span></div>
       <div id="matchBest" class="badge badge--best">🏆 <span id="matchBestVal">0</span></div>
@@ -278,7 +288,7 @@
     </section>
 
     <!-- Memory Match (concentration) -->
-    <section id="memoryGame" class="screen">
+    <section id="memoryGame" class="screen" data-title="🃏 Memory">
       <button class="home-btn" data-home>🏠</button>
       <div id="memoryScore" class="badge">🃏 <span id="memoryScoreVal">0</span></div>
       <div id="memoryBest" class="badge badge--best">🏆 <span id="memoryBestVal">0</span></div>
@@ -286,7 +296,7 @@
     </section>
 
     <!-- Connect the Dots -->
-    <section id="dotsGame" class="screen">
+    <section id="dotsGame" class="screen" data-title="🔗 Dots">
       <button class="home-btn" data-home>🏠</button>
       <div id="dotsScore" class="badge">🔗 <span id="dotsScoreVal">0</span></div>
       <div id="dotsBest" class="badge badge--best">🏆 <span id="dotsBestVal">0</span></div>
@@ -294,7 +304,7 @@
     </section>
 
     <!-- Listen & Find -->
-    <section id="listenGame" class="screen">
+    <section id="listenGame" class="screen" data-title="👂 Listen">
       <button class="home-btn" data-home>🏠</button>
       <div id="listenScore" class="badge">👂 <span id="listenScoreVal">0</span></div>
       <div id="listenBest" class="badge badge--best">🏆 <span id="listenBestVal">0</span></div>
@@ -306,7 +316,7 @@
     </section>
 
     <!-- How Many? -->
-    <section id="howmanyGame" class="screen">
+    <section id="howmanyGame" class="screen" data-title="🧮 How Many?">
       <button class="home-btn" data-home>🏠</button>
       <div id="howmanyScore" class="badge">🧮 <span id="howmanyScoreVal">0</span></div>
       <div id="howmanyBest" class="badge badge--best">🏆 <span id="howmanyBestVal">0</span></div>
@@ -318,7 +328,7 @@
     </section>
 
     <!-- Find It! -->
-    <section id="findGame" class="screen">
+    <section id="findGame" class="screen" data-title="🔍 Find It!">
       <button class="home-btn" data-home>🏠</button>
       <div id="findScore" class="badge">🔍 <span id="findScoreVal">0</span></div>
       <div id="findBest" class="badge badge--best">🏆 <span id="findBestVal">0</span></div>
@@ -327,7 +337,7 @@
     </section>
 
     <!-- Pattern -->
-    <section id="patternGame" class="screen">
+    <section id="patternGame" class="screen" data-title="🧠 Pattern">
       <button class="home-btn" data-home>🏠</button>
       <div id="patternScore" class="badge">🧠 <span id="patternScoreVal">0</span></div>
       <div id="patternBest" class="badge badge--best">🏆 <span id="patternBestVal">0</span></div>
@@ -339,7 +349,7 @@
     </section>
 
     <!-- Color Mix -->
-    <section id="mixGame" class="screen">
+    <section id="mixGame" class="screen" data-title="🧪 Color Mix">
       <button class="home-btn" data-home>🏠</button>
       <div id="mixScore" class="badge">🧪 <span id="mixScoreVal">0</span></div>
       <div id="mixBest" class="badge badge--best">🏆 <span id="mixBestVal">0</span></div>
@@ -354,7 +364,7 @@
     </section>
 
     <!-- Story Time -->
-    <section id="storyGame" class="screen">
+    <section id="storyGame" class="screen" data-title="📖 Story">
       <button class="home-btn" data-home>🏠</button>
       <div id="storyCounter" class="story-counter">1 / 4</div>
       <div id="storyStage" class="story-stage"></div>
@@ -365,7 +375,7 @@
     </section>
 
     <!-- Sticker collection -->
-    <section id="stickersGame" class="screen">
+    <section id="stickersGame" class="screen" data-title="🌟 Stickers">
       <button class="home-btn" data-home>🏠</button>
       <div class="stickers-header">
         <h2>🌟 Sticker Book</h2>

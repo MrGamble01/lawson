@@ -124,8 +124,23 @@ function show(id) {
   // Track menu-mode on body so the mascot (and other menu-only chrome)
   // can be toggled via a simple class selector — no :has() required.
   document.body.classList.toggle("on-menu", id === "menu");
+  // Brief title card on screens that opt in via data-title. Makes
+  // each game feel like its own destination instead of a hard cut.
+  const target = document.getElementById(id);
+  const title = target && target.dataset && target.dataset.title;
+  if (title) showGameBanner(title);
 }
 document.body.classList.add("on-menu");
+
+function showGameBanner(text) {
+  const existing = document.querySelector(".game-banner");
+  if (existing) existing.remove();
+  const b = document.createElement("div");
+  b.className = "game-banner";
+  b.textContent = text;
+  document.body.appendChild(b);
+  setTimeout(() => b.remove(), 1000);
+}
 
 // ---------- Helpers ----------
 // Sparkle burst: scatter glyphs in a circle around (x, y) with varied

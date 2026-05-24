@@ -144,6 +144,38 @@ html.dark .streak-badge {
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+/* ---------- Menu atmosphere (background bubbles) ---------- */
+.menu-bubbles {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  display: none;
+}
+body.on-menu .menu-bubbles { display: block; }
+.bubble {
+  position: absolute;
+  bottom: -120px;
+  left: var(--x, 50%);
+  width: clamp(40px, 7vw, 70px);
+  height: clamp(54px, 9vw, 96px);
+  background: radial-gradient(circle at 32% 32%, rgba(255,255,255,0.7), var(--c, #ff8ab0));
+  border-radius: 50% 50% 50% 50% / 55% 55% 45% 45%;
+  opacity: 0.22;
+  animation: bubbleFloat linear infinite;
+  animation-duration: var(--dur, 16s);
+  animation-delay: var(--delay, 0s);
+  filter: blur(0.3px);
+}
+html.dark .bubble { opacity: 0.16; }
+@keyframes bubbleFloat {
+  0%   { transform: translate(0, 0) scale(0.9); opacity: 0; }
+  10%  { opacity: 0.22; }
+  90%  { opacity: 0.22; }
+  100% { transform: translate(var(--drift, 20px), -120vh) scale(1.05); opacity: 0; }
+}
+
 /* ---------- Mascot (Bobo the balloon) ---------- */
 .mascot {
   position: fixed;
@@ -168,6 +200,32 @@ body.on-menu .mascot { display: block; }
 @keyframes mascotBob {
   0%, 100% { transform: translateY(0) rotate(-3deg); }
   50%      { transform: translateY(-10px) rotate(3deg); }
+}
+
+/* ---------- Game intro banner ---------- */
+.game-banner {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  font-size: clamp(40px, 9vw, 80px);
+  font-weight: 900;
+  color: #fff;
+  text-shadow:
+    0 6px 24px rgba(0,0,0,0.55),
+    0 0 4px rgba(0,0,0,0.7),
+    0 2px 0 rgba(255,255,255,0.15);
+  pointer-events: none;
+  z-index: 90;
+  white-space: nowrap;
+  letter-spacing: 1.5px;
+  animation: bannerPop 1s ease-out forwards;
+  transform: translate(-50%, -50%);
+}
+@keyframes bannerPop {
+  0%   { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+  18%  { transform: translate(-50%, -50%) scale(1.12); opacity: 1; }
+  55%  { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1.04); opacity: 0; }
 }
 
 /* ---------- Confetti rain ---------- */
