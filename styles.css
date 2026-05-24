@@ -286,6 +286,18 @@ html.dark .streak-badge {
   box-shadow: 0 2px 4px rgba(0,0,0,0.18);
   letter-spacing: 0.5px;
   z-index: 1;
+  transition: background 0.2s ease;
+}
+.tile .tile-counter.bump {
+  animation: counterBump 0.7s var(--ease-spring);
+}
+@keyframes counterBump {
+  0%, 100% { transform: scale(1); background: rgba(255,255,255,0.9); }
+  50%      {
+    transform: scale(1.35);
+    background: var(--c-best-soft);
+    box-shadow: 0 0 14px rgba(255,212,59,0.8);
+  }
 }
 
 /* ---------- Home button ---------- */
