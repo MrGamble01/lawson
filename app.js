@@ -577,11 +577,15 @@ function bumpDailyStreak() {
   el.className = "welcome-toast";
   el.textContent = `${prefix}, ${KID_NAME}!${streakBit}`;
   document.body.appendChild(el);
-  setTimeout(() => el.classList.add("show"), 60);
+  // Delay the slide-in so the toast emerges just as the splash fades —
+  // a smooth handoff rather than two overlapping moments.
+  const ENTRY_DELAY = 1200;
+  const VISIBLE_DURATION = 2800;
+  setTimeout(() => el.classList.add("show"), ENTRY_DELAY);
   setTimeout(() => {
     el.classList.remove("show");
     setTimeout(() => el.remove(), 500);
-  }, 3400);
+  }, ENTRY_DELAY + VISIBLE_DURATION);
 })();
 
 // Tiny two-note chime for navigation: ascending when going into a game,
