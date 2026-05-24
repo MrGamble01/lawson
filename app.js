@@ -679,9 +679,13 @@ function navChime(up) {
   haptic(8);
 }
 
-// Hub tiles open a sub-menu screen (e.g. Numbers, Words, Explore). No
-// game state is started — the hub is just a category page; its child
-// tiles use the normal data-go flow.
+// Hub tiles open a sub-menu screen (e.g. Numbers, Explore). No game
+// state is started — the hub is just a category page; its child tiles
+// use the normal data-go flow.
+const HUB_INTROS = {
+  numbersHub: "Let's count!",
+  exploreHub: "Let's explore!",
+};
 document.querySelectorAll("[data-hub]").forEach((btn) => {
   onTap(btn, () => {
     unlockAudio();
@@ -689,6 +693,8 @@ document.querySelectorAll("[data-hub]").forEach((btn) => {
     navChime(true);
     leaveActiveGame();
     show(btn.dataset.hub);
+    const intro = HUB_INTROS[btn.dataset.hub];
+    if (intro) setTimeout(() => say(intro), 380);
   });
 });
 
@@ -748,7 +754,25 @@ document.querySelectorAll("[data-home]").forEach((btn) => {
     haptic(10);
     const r = mascot.getBoundingClientRect();
     sparkleAt(r.left + r.width / 2, r.top + r.height / 2);
+    resetIdle();
   });
+
+  // Idle wave: if the menu sits untouched for 8s, Bobo does a quick
+  // wave to invite interaction. Restarts on any tap anywhere.
+  let idleTimer = null;
+  function resetIdle() {
+    if (idleTimer) clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => {
+      if (document.body.classList.contains("on-menu")) {
+        mascot.classList.add("waving");
+        setTimeout(() => mascot.classList.remove("waving"), 1400);
+      }
+      resetIdle(); // chain — keep nudging every 8s while idle
+    }, 8000);
+  }
+  document.addEventListener("touchstart", resetIdle, { passive: true });
+  document.addEventListener("click", resetIdle);
+  resetIdle();
 })();
 
 // Prevent multi-touch pinch-zoom gestures on iOS (belt-and-braces with viewport meta)

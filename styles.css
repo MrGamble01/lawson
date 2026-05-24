@@ -201,6 +201,16 @@ body.on-menu .mascot { display: block; }
   0%, 100% { transform: translateY(0) rotate(-3deg); }
   50%      { transform: translateY(-10px) rotate(3deg); }
 }
+/* Quick excited shimmy when the menu has been idle — overrides bob. */
+.mascot.waving { animation: mascotWave 1.4s ease-in-out; }
+@keyframes mascotWave {
+  0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
+  15%      { transform: translateY(-12px) rotate(-14deg) scale(1.08); }
+  30%      { transform: translateY(-10px) rotate(14deg) scale(1.08); }
+  45%      { transform: translateY(-12px) rotate(-12deg) scale(1.08); }
+  60%      { transform: translateY(-10px) rotate(12deg) scale(1.08); }
+  75%      { transform: translateY(-8px)  rotate(-6deg) scale(1.05); }
+}
 
 /* ---------- Game intro banner ---------- */
 .game-banner {
