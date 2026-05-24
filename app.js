@@ -27,6 +27,12 @@ function isDarkMode() {
 // Apply saved dark-mode preference as early as possible.
 setDarkMode(isDarkMode());
 
+// First-run check — used after splash to decide whether to auto-open
+// the Settings panel for a quick name capture.
+function isFirstRun() {
+  try { return !localStorage.getItem("lawson:kidName"); } catch (_) { return false; }
+}
+
 // Dismiss the splash screen after a short beat. Long enough that the
 // brand registers, short enough that a toddler doesn't get bored.
 (function dismissSplash() {
@@ -36,7 +42,15 @@ setDarkMode(isDarkMode());
     const splash = document.getElementById("splash");
     if (!splash) return;
     splash.classList.add("hide");
-    setTimeout(() => splash.remove(), 600);
+    setTimeout(() => {
+      splash.remove();
+      // First visit? Pop the settings panel so a parent can set the
+      // kid's name. We use the existing UI rather than a one-shot
+      // dialog — fewer special cases, same outcome.
+      if (isFirstRun() && typeof window.__openSettings === "function") {
+        setTimeout(() => window.__openSettings({ onboarding: true }), 300);
+      }
+    }, 600);
   }
   function dismissNow() {
     const remaining = Math.max(0, MIN_VISIBLE - (performance.now() - start));
@@ -596,21 +610,25 @@ document.addEventListener("touchmove", (e) => {
   });
   if (darkTgl) darkTgl.addEventListener("change", () => setDarkMode(darkTgl.checked));
 
-  function open() {
-    nameInput.value = KID_NAME;
+  function open(opts) {
+    nameInput.value = isFirstRun() ? "" : KID_NAME;
     voiceTgl.checked = !isVoiceMuted();
     soundTgl.checked = !isSoundMuted();
     if (darkTgl) darkTgl.checked = isDarkMode();
     resetBtn.textContent = "🧹 Reset scores";
     resetBtn.classList.remove("confirming");
+    overlay.classList.toggle("onboarding", !!(opts && opts.onboarding));
     overlay.classList.add("open");
     setTimeout(() => nameInput.focus({ preventScroll: true }), 50);
   }
   function close() {
     setKidName(nameInput.value);
     overlay.classList.remove("open");
+    overlay.classList.remove("onboarding");
     beep(500, 0.08);
   }
+  // Expose open() so first-run onboarding can trigger it.
+  window.__openSettings = open;
   onTap(openBtn, (e) => { if (e.stopPropagation) e.stopPropagation(); open(); });
   onTap(closeBtn, close);
   // Tapping the dimmed backdrop closes too, but only if you tap outside the panel.

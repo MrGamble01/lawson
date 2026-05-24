@@ -15,6 +15,18 @@
     const all = L.listStickers ? L.listStickers() : [];
     let earned = 0;
 
+    // Empty-state banner shown before any sticker has been earned.
+    // Speaks to the kid, not the parent — "Play to find stickers!"
+    if (!all.some((s) => L.isStickerEarned && L.isStickerEarned(s.id))) {
+      const empty = document.createElement("div");
+      empty.className = "sticker-empty";
+      empty.innerHTML = `
+        <div class="sticker-empty-icon">🎁</div>
+        <div class="sticker-empty-title">Your sticker book is empty!</div>
+        <div class="sticker-empty-sub">Play any game to find your first sticker.</div>`;
+      grid.appendChild(empty);
+    }
+
     all.forEach((s) => {
       const has = L.isStickerEarned && L.isStickerEarned(s.id);
       if (has) earned += 1;

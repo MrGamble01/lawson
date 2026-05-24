@@ -1042,10 +1042,25 @@ header h1 {
   to   { transform: scale(1); opacity: 1; }
 }
 .settings-panel h2 {
-  color: #ff4081;
+  color: var(--c-brand);
   margin-bottom: 14px;
   font-size: 26px;
 }
+/* Onboarding state — first-run welcome with a hint above the name field. */
+.settings-overlay.onboarding .settings-panel::before {
+  content: "👋 Welcome! What should we call your kid?";
+  display: block;
+  background: linear-gradient(135deg, var(--c-best-soft), var(--c-best));
+  color: #4a2a00;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: bold;
+  margin: -8px 0 14px;
+  text-align: center;
+  line-height: 1.35;
+}
+.settings-overlay.onboarding .settings-reset { display: none; }
 .settings-field {
   display: flex;
   flex-direction: column;
@@ -1402,6 +1417,37 @@ header h1 {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   flex: 1;
+}
+.sticker-empty {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 24px;
+  background: var(--c-paper);
+  border: 4px dashed var(--c-best);
+  border-radius: var(--radius-card);
+  margin: 8px 4px 16px;
+}
+.sticker-empty-icon {
+  font-size: clamp(60px, 14vw, 100px);
+  animation: emptyBob 1.6s ease-in-out infinite;
+}
+@keyframes emptyBob {
+  0%, 100% { transform: translateY(0) rotate(-4deg); }
+  50%      { transform: translateY(-8px) rotate(4deg); }
+}
+.sticker-empty-title {
+  font-size: clamp(20px, 3vw, 26px);
+  color: #b45a00;
+  font-weight: bold;
+  text-align: center;
+}
+.sticker-empty-sub {
+  font-size: clamp(15px, 2.4vw, 18px);
+  color: var(--c-ink-soft);
+  text-align: center;
 }
 .sticker-card {
   background: #fff;
