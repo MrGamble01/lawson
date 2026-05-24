@@ -913,6 +913,39 @@ document.querySelectorAll("[data-home]").forEach((btn) => {
   });
 })();
 
+// Touch anywhere on the menu background → tiny sparkle at the finger.
+// Skipped if the tap landed on something that already has its own
+// feedback (tile, mascot, bubble, etc.). Turns the whole screen into
+// a responsive surface — nothing feels dead.
+(function setupAmbientTouch() {
+  function ambientAt(x, y, target) {
+    if (!document.body.classList.contains("on-menu")) return;
+    if (!target || !target.closest) return;
+    if (target.closest("button, [data-go], [data-hub], .bubble, .mascot, .sunny, .menu-cloud, .menu-section-title, .badge")) return;
+    const s = document.createElement("div");
+    s.className = "sparkle";
+    s.textContent = "✨";
+    s.style.left = x + "px";
+    s.style.top  = y + "px";
+    s.style.fontSize = "22px";
+    s.style.setProperty("--dx", "0px");
+    s.style.setProperty("--dy", "-30px");
+    s.style.setProperty("--scale", "0.6");
+    s.style.setProperty("--rot", "0deg");
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 800);
+  }
+  document.addEventListener("touchstart", (e) => {
+    const t = e.touches && e.touches[0];
+    if (!t) return;
+    ambientAt(t.clientX, t.clientY, e.target);
+  }, { passive: true });
+  document.addEventListener("click", (e) => {
+    if (e.detail === 0) return; // ignore synthetic clicks from touch
+    ambientAt(e.clientX, e.clientY, e.target);
+  });
+})();
+
 // Tappable menu bubbles. Each one is a button you can pop for a
 // satisfying sound + sparkle. Doesn't navigate anywhere — purely
 // ambient micro-interaction so there's always something to tap.
