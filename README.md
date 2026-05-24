@@ -13,32 +13,24 @@ home screen" support, serve over HTTP (e.g. `python3 -m http.server`).
 
 Tiles are grouped on the home screen into four sections.
 
-**Learn** — flashcards built from a shared activity pipeline. Tap to
-hear the name and see a big colorful display.
+**Learn** — five tiles, two are hubs that open sub-menus.
 
-- ABC (uppercase + lowercase together)
-- 123 (1–20)
-- Colors, Shapes
-- Animals, Vehicles, Dinos
-- Weather, Food, Family
+- **ABC** (uppercase + lowercase together)
+- **123** (1–20)
+- **Numbers** hub — Count, How Many?, Add It Up
+- **Words** hub — Spell, Read, Listen
+- **Explore** hub — Colors, Shapes, Animals, Vehicles, Dinos, Weather,
+  Food, Family
 
 **Play** — games with scores and personal bests.
 
-- **Count** — tap each item, voice counts along
-- **How Many?** — pick the right number for the items shown
-- **Add It Up** — visual addition with three number choices
 - **Pop!** — pop floating balloons, streak bonuses, rare rainbow
 - **Match** — find the matching emoji
 - **Memory** — 4×3 concentration board, six themed sets
 - **Dots** — Connect the Dots, seven puzzles with reveal emoji
-- **Listen** — hear the clue, find the emoji (audio-only)
-- **Spell** — fill the missing letter in a 3-letter word
-- **Read** — pick the word that matches the picture
 - **Pattern** — what comes next?
 - **Find It!** — find the named item among 16 scattered emoji
 - **Mix** — combine two paint drops to make the target color
-- **Body Parts** — tap the nose / eyes / mouth on a cartoon face
-- **Big/Small** — pick the bigger (or smaller) of two
 - **Whack!** — whack the critters before they duck back down
 
 **Create** — open-ended creative play.

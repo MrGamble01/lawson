@@ -630,6 +630,19 @@ function navChime(up) {
   haptic(8);
 }
 
+// Hub tiles open a sub-menu screen (e.g. Numbers, Words, Explore). No
+// game state is started — the hub is just a category page; its child
+// tiles use the normal data-go flow.
+document.querySelectorAll("[data-hub]").forEach((btn) => {
+  onTap(btn, () => {
+    unlockAudio();
+    unlockSpeech();
+    navChime(true);
+    leaveActiveGame();
+    show(btn.dataset.hub);
+  });
+});
+
 document.querySelectorAll("[data-go]").forEach((btn) => {
   onTap(btn, () => {
     unlockAudio();

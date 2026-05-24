@@ -57,29 +57,17 @@
           <button class="tile" data-go="numbers" style="--c:#4dabf7">
             <span class="emoji">🔢</span><span class="label">123</span>
           </button>
-          <button class="tile" data-go="colors" style="--c:#ffd43b">
-            <span class="emoji">🎨</span><span class="label">Colors</span>
+          <button class="tile" data-hub="numbersHub" style="--c:#5c7cfa">
+            <span class="emoji">🧮</span><span class="label">Numbers</span>
+            <span class="tile-counter">3 games</span>
           </button>
-          <button class="tile" data-go="shapes" style="--c:#69db7c">
-            <span class="emoji">⭐</span><span class="label">Shapes</span>
+          <button class="tile" data-hub="wordsHub" style="--c:#e64980">
+            <span class="emoji">🔡</span><span class="label">Words</span>
+            <span class="tile-counter">3 games</span>
           </button>
-          <button class="tile" data-go="animals" style="--c:#da77f2">
-            <span class="emoji">🐶</span><span class="label">Animals</span>
-          </button>
-          <button class="tile" data-go="vehicles" style="--c:#fab005">
-            <span class="emoji">🚗</span><span class="label">Vehicles</span>
-          </button>
-          <button class="tile" data-go="dinosaurs" style="--c:#37b24d">
-            <span class="emoji">🦖</span><span class="label">Dinos</span>
-          </button>
-          <button class="tile" data-go="weather" style="--c:#74c0fc">
-            <span class="emoji">🌤️</span><span class="label">Weather</span>
-          </button>
-          <button class="tile" data-go="food" style="--c:#ff8787">
-            <span class="emoji">🍎</span><span class="label">Food</span>
-          </button>
-          <button class="tile" data-go="family" style="--c:#e599f7">
-            <span class="emoji">👪</span><span class="label">Family</span>
+          <button class="tile" data-hub="exploreHub" style="--c:#da77f2">
+            <span class="emoji">🌍</span><span class="label">Explore</span>
+            <span class="tile-counter">8 topics</span>
           </button>
         </div>
       </div>
@@ -87,15 +75,6 @@
       <div class="menu-section">
         <div class="menu-section-title">🎮 Play</div>
         <div class="menu-tiles">
-          <button class="tile" data-go="count" style="--c:#5c7cfa">
-            <span class="emoji">🔢</span><span class="label">Count</span>
-          </button>
-          <button class="tile" data-go="howmany" style="--c:#228be6">
-            <span class="emoji">🧮</span><span class="label">How Many?</span>
-          </button>
-          <button class="tile" data-go="add" style="--c:#1c7ed6">
-            <span class="emoji">➕</span><span class="label">Add It Up</span>
-          </button>
           <button class="tile" data-go="pop" style="--c:#ff922b">
             <span class="emoji">🎈</span><span class="label">Pop!</span>
           </button>
@@ -108,15 +87,6 @@
           <button class="tile" data-go="dots" style="--c:#15aabf">
             <span class="emoji">🔗</span><span class="label">Dots</span>
           </button>
-          <button class="tile" data-go="listen" style="--c:#3b82f6">
-            <span class="emoji">👂</span><span class="label">Listen</span>
-          </button>
-          <button class="tile" data-go="spell" style="--c:#e64980">
-            <span class="emoji">🔡</span><span class="label">Spell</span>
-          </button>
-          <button class="tile" data-go="read" style="--c:#d6336c">
-            <span class="emoji">📚</span><span class="label">Read</span>
-          </button>
           <button class="tile" data-go="pattern" style="--c:#7950f2">
             <span class="emoji">🧠</span><span class="label">Pattern</span>
           </button>
@@ -125,12 +95,6 @@
           </button>
           <button class="tile" data-go="mix" style="--c:#f76707">
             <span class="emoji">🧪</span><span class="label">Mix</span>
-          </button>
-          <button class="tile" data-go="body" style="--c:#fcc419">
-            <span class="emoji">👀</span><span class="label">Body Parts</span>
-          </button>
-          <button class="tile" data-go="size" style="--c:#94d82d">
-            <span class="emoji">📏</span><span class="label">Big/Small</span>
           </button>
           <button class="tile" data-go="whack" style="--c:#f06595">
             <span class="emoji">🐹</span><span class="label">Whack!</span>
@@ -164,6 +128,72 @@
             <span id="stickerTileCount" class="tile-counter">0/0</span>
           </button>
         </div>
+      </div>
+    </section>
+
+    <!-- Numbers hub: counting games -->
+    <section id="numbersHub" class="screen hub-screen">
+      <button class="home-btn" data-home>🏠</button>
+      <h2 class="hub-title">🧮 Numbers</h2>
+      <div class="hub-tiles">
+        <button class="tile" data-go="count" style="--c:#5c7cfa">
+          <span class="emoji">🔢</span><span class="label">Count</span>
+        </button>
+        <button class="tile" data-go="howmany" style="--c:#228be6">
+          <span class="emoji">🧮</span><span class="label">How Many?</span>
+        </button>
+        <button class="tile" data-go="add" style="--c:#1c7ed6">
+          <span class="emoji">➕</span><span class="label">Add It Up</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Words hub: reading + spelling games -->
+    <section id="wordsHub" class="screen hub-screen">
+      <button class="home-btn" data-home>🏠</button>
+      <h2 class="hub-title">🔡 Words</h2>
+      <div class="hub-tiles">
+        <button class="tile" data-go="spell" style="--c:#e64980">
+          <span class="emoji">🔡</span><span class="label">Spell</span>
+        </button>
+        <button class="tile" data-go="read" style="--c:#d6336c">
+          <span class="emoji">📚</span><span class="label">Read</span>
+        </button>
+        <button class="tile" data-go="listen" style="--c:#3b82f6">
+          <span class="emoji">👂</span><span class="label">Listen</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Explore hub: themed flashcard topics -->
+    <section id="exploreHub" class="screen hub-screen">
+      <button class="home-btn" data-home>🏠</button>
+      <h2 class="hub-title">🌍 Explore</h2>
+      <div class="hub-tiles">
+        <button class="tile" data-go="colors" style="--c:#ffd43b">
+          <span class="emoji">🎨</span><span class="label">Colors</span>
+        </button>
+        <button class="tile" data-go="shapes" style="--c:#69db7c">
+          <span class="emoji">⭐</span><span class="label">Shapes</span>
+        </button>
+        <button class="tile" data-go="animals" style="--c:#da77f2">
+          <span class="emoji">🐶</span><span class="label">Animals</span>
+        </button>
+        <button class="tile" data-go="vehicles" style="--c:#fab005">
+          <span class="emoji">🚗</span><span class="label">Vehicles</span>
+        </button>
+        <button class="tile" data-go="dinosaurs" style="--c:#37b24d">
+          <span class="emoji">🦖</span><span class="label">Dinos</span>
+        </button>
+        <button class="tile" data-go="weather" style="--c:#74c0fc">
+          <span class="emoji">🌤️</span><span class="label">Weather</span>
+        </button>
+        <button class="tile" data-go="food" style="--c:#ff8787">
+          <span class="emoji">🍎</span><span class="label">Food</span>
+        </button>
+        <button class="tile" data-go="family" style="--c:#e599f7">
+          <span class="emoji">👪</span><span class="label">Family</span>
+        </button>
       </div>
     </section>
 
@@ -315,24 +345,6 @@
       </div>
     </section>
 
-    <!-- Big / Small -->
-    <section id="sizeGame" class="screen">
-      <button class="home-btn" data-home>🏠</button>
-      <div id="sizeScore" class="badge">📏 <span id="sizeScoreVal">0</span></div>
-      <div id="sizeBest" class="badge badge--best">🏆 <span id="sizeBestVal">0</span></div>
-      <div id="sizePrompt" class="size-prompt">Tap the BIGGER one!</div>
-      <div id="sizeStage" class="size-stage"></div>
-    </section>
-
-    <!-- Body Parts -->
-    <section id="bodyGame" class="screen">
-      <button class="home-btn" data-home>🏠</button>
-      <div id="bodyScore" class="badge">👀 <span id="bodyScoreVal">0</span></div>
-      <div id="bodyBest" class="badge badge--best">🏆 <span id="bodyBestVal">0</span></div>
-      <div id="bodyPrompt" class="body-prompt">Tap the nose!</div>
-      <div id="bodyFace" class="body-face-wrap"></div>
-    </section>
-
     <!-- Color Mix -->
     <section id="mixGame" class="screen">
       <button class="home-btn" data-home>🏠</button>
@@ -456,9 +468,7 @@
   <script src="games/howmany.js"></script>
   <script src="games/mix.js"></script>
   <script src="games/add.js"></script>
-  <script src="games/body.js"></script>
   <script src="games/read.js"></script>
-  <script src="games/size.js"></script>
   <script src="games/stickers.js"></script>
 </body>
 </html>
