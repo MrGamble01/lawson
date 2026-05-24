@@ -13,6 +13,11 @@ function setKidName(name) {
   KID_NAME = (name && name.trim()) || DEFAULT_KID_NAME;
   try { localStorage.setItem("lawson:kidName", KID_NAME); } catch (_) {}
   if (window.Lawson) window.Lawson.KID_NAME = KID_NAME;
+  // Live-update branding (splash is gone by now, but header + tab title
+  // reflect the new name without a reload).
+  const header = document.querySelector("header h1");
+  if (header) header.textContent = `${KID_NAME}'s Playground`;
+  document.title = `${KID_NAME}'s Playground`;
 }
 
 // Dark mode: a `dark` class on <html> swaps the background gradients
@@ -26,6 +31,25 @@ function isDarkMode() {
 }
 // Apply saved dark-mode preference as early as possible.
 setDarkMode(isDarkMode());
+
+// Personalize branding with the saved kid name. Default-named runs are
+// unchanged (still "Lawson's"). Once a parent sets a different name in
+// Settings, the splash, header, and tab title all reflect it on the
+// next launch.
+(function personalize() {
+  function apply() {
+    const title = document.querySelector(".splash-title");
+    if (title) title.textContent = `${KID_NAME}'s Playground`;
+    const header = document.querySelector("header h1");
+    if (header) header.textContent = `${KID_NAME}'s Playground`;
+    document.title = `${KID_NAME}'s Playground`;
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", apply);
+  } else {
+    apply();
+  }
+})();
 
 // First-run check — used after splash to decide whether to auto-open
 // the Settings panel for a quick name capture.
