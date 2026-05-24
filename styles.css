@@ -489,17 +489,23 @@ header h1 {
   75%      { transform: translateX(10px); }
 }
 
-/* Confetti sparkle on correct answer */
+/* Confetti sparkle on correct answer. Vars: --dx --dy --scale --rot.
+   Slight gravity-ish curve so particles arc instead of going perfectly
+   straight, courtesy of the easing function. */
 .sparkle {
   position: fixed;
-  font-size: 40px;
   pointer-events: none;
-  animation: sparkle 1s ease-out forwards;
+  animation: sparkle 1.1s cubic-bezier(.2,.7,.4,1) forwards;
   z-index: 100;
+  font-size: 36px;
 }
 @keyframes sparkle {
-  0%   { transform: translate(0, 0) scale(0); opacity: 1; }
-  100% { transform: translate(var(--dx), var(--dy)) scale(1.5); opacity: 0; }
+  0%   { transform: translate(0, 0) scale(0) rotate(0); opacity: 1; }
+  60%  { opacity: 1; }
+  100% {
+    transform: translate(var(--dx), var(--dy)) scale(var(--scale, 1.4)) rotate(var(--rot, 0));
+    opacity: 0;
+  }
 }
 
 /* ---------- Score badge variants ---------- */

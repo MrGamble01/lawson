@@ -100,19 +100,31 @@ function show(id) {
 }
 
 // ---------- Helpers ----------
+// Sparkle burst: scatter glyphs in a circle around (x, y) with varied
+// size, distance, and rotation so each celebration feels organic rather
+// than a perfect ring.
 function sparkleAt(x, y) {
-  const emojis = ["✨", "⭐", "🎉", "💖", "🌟"];
-  for (let i = 0; i < 8; i++) {
+  const emojis = ["✨", "⭐", "🎉", "💖", "🌟", "💫", "🎊"];
+  const count = 10;
+  for (let i = 0; i < count; i++) {
     const s = document.createElement("div");
     s.className = "sparkle";
     s.textContent = emojis[Math.floor(Math.random() * emojis.length)];
     s.style.left = x + "px";
     s.style.top = y + "px";
-    const angle = (Math.PI * 2 * i) / 8;
-    s.style.setProperty("--dx", Math.cos(angle) * 120 + "px");
-    s.style.setProperty("--dy", Math.sin(angle) * 120 + "px");
+    // Even angular distribution + small random jitter so the burst
+    // isn't a rigid clock face.
+    const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.4;
+    const dist = 90 + Math.random() * 60;
+    const scale = 0.7 + Math.random() * 1.2;
+    const rot = (Math.random() - 0.5) * 120;
+    s.style.setProperty("--dx", Math.cos(angle) * dist + "px");
+    s.style.setProperty("--dy", Math.sin(angle) * dist + "px");
+    s.style.setProperty("--scale", scale);
+    s.style.setProperty("--rot", rot + "deg");
+    s.style.fontSize = (28 + scale * 14) + "px";
     document.body.appendChild(s);
-    setTimeout(() => s.remove(), 1000);
+    setTimeout(() => s.remove(), 1100);
   }
 }
 
@@ -611,13 +623,15 @@ document.addEventListener("touchmove", (e) => {
   if (darkTgl) darkTgl.addEventListener("change", () => setDarkMode(darkTgl.checked));
 
   function open(opts) {
+    const onboarding = !!(opts && opts.onboarding);
     nameInput.value = isFirstRun() ? "" : KID_NAME;
     voiceTgl.checked = !isVoiceMuted();
     soundTgl.checked = !isSoundMuted();
     if (darkTgl) darkTgl.checked = isDarkMode();
     resetBtn.textContent = "🧹 Reset scores";
     resetBtn.classList.remove("confirming");
-    overlay.classList.toggle("onboarding", !!(opts && opts.onboarding));
+    closeBtn.textContent = onboarding ? "✨ Let's play!" : "✅ Done";
+    overlay.classList.toggle("onboarding", onboarding);
     overlay.classList.add("open");
     setTimeout(() => nameInput.focus({ preventScroll: true }), 50);
   }
