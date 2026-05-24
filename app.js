@@ -560,12 +560,25 @@ function bumpDailyStreak() {
   }, 3400);
 })();
 
+// Tiny two-note chime for navigation: ascending when going into a game,
+// descending when returning home. Reads as a "step forward / step back"
+// musical cue without being a full jingle.
+function navChime(up) {
+  if (up) {
+    beep(523.25, 0.07, "triangle", 0);    // C5
+    beep(659.25, 0.09, "triangle", 0.05); // E5
+  } else {
+    beep(659.25, 0.07, "triangle", 0);    // E5
+    beep(523.25, 0.09, "triangle", 0.05); // C5
+  }
+}
+
 document.querySelectorAll("[data-go]").forEach((btn) => {
   onTap(btn, () => {
     unlockAudio();
     unlockSpeech();
     const where = btn.dataset.go;
-    beep(600, 0.1);
+    navChime(true);
 
     leaveActiveGame();
 
@@ -589,7 +602,7 @@ document.querySelectorAll("[data-home]").forEach((btn) => {
     leaveActiveGame();
     if (synth) synth.cancel();
     show("menu");
-    beep(400, 0.1);
+    navChime(false);
   });
 });
 
