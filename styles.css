@@ -195,6 +195,32 @@ html.dark .bubble { opacity: 0.16; }
   100% { transform: scale(2.6); opacity: 0; }
 }
 
+/* ---------- Drifting cloud across the menu ---------- */
+.menu-cloud {
+  position: fixed;
+  top: clamp(90px, 14vh, 130px);
+  left: -160px;
+  width: clamp(80px, 14vw, 130px);
+  height: clamp(45px, 8vw, 75px);
+  z-index: 2;
+  display: none;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.1));
+  animation: cloudDrift 32s linear infinite;
+}
+.menu-cloud svg { width: 100%; height: 100%; pointer-events: none; }
+body.on-menu .menu-cloud { display: block; }
+@keyframes cloudDrift {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(calc(100vw + 200px)); }
+}
+.menu-cloud:active svg { transform: scale(0.92); }
+html.dark .menu-cloud { opacity: 0.55; }
+
 /* ---------- Sunny the sun (second mascot, top-left of menu) ---------- */
 .sunny {
   position: fixed;
@@ -1851,6 +1877,31 @@ html.dark .hub-title {
   0%   { transform: scale(0.4); }
   60%  { transform: scale(1.25); }
   100% { transform: scale(1); }
+}
+
+/* Stagger-entry animation for game choice tiles — gives each round a
+   moment of "the new options are arriving" instead of a hard cut. */
+.match-choice,
+.listen-choice,
+.howmany-choice,
+.pattern-choice {
+  animation: choiceEnter 0.34s var(--ease-spring) backwards;
+}
+.match-choices  > :nth-child(1),
+.listen-choices > :nth-child(1),
+.howmany-choices > :nth-child(1),
+.pattern-choices > :nth-child(1) { animation-delay: 0.04s; }
+.match-choices  > :nth-child(2),
+.listen-choices > :nth-child(2),
+.howmany-choices > :nth-child(2),
+.pattern-choices > :nth-child(2) { animation-delay: 0.10s; }
+.match-choices  > :nth-child(3),
+.listen-choices > :nth-child(3),
+.howmany-choices > :nth-child(3),
+.pattern-choices > :nth-child(3) { animation-delay: 0.16s; }
+@keyframes choiceEnter {
+  from { transform: scale(0.4) translateY(15px); opacity: 0; }
+  to   { transform: scale(1) translateY(0); opacity: 1; }
 }
 
 /* ---------- Pattern game ---------- */

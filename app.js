@@ -763,9 +763,22 @@ document.querySelectorAll("[data-home]").forEach((btn) => {
   function L_cheerSafe() { try { return cheer(); } catch (_) { return "Yay!"; } }
   let i = 0;
   let recentTaps = [];
+  let totalTaps = 0; // session counter, drives the 10-tap easter egg
   onTap(mascot, () => {
     unlockAudio();
     unlockSpeech();
+    totalTaps += 1;
+    // 10-tap easter egg: full confetti party, distinct from the
+    // triple-tap flip. Only fires once per 10 taps so a kid spamming
+    // doesn't get a constant party.
+    if (totalTaps % 10 === 0) {
+      confettiRain(40);
+      say(`Bobo dance party!`);
+      happySound();
+      mascot.classList.add("flipping");
+      setTimeout(() => mascot.classList.remove("flipping"), 800);
+      return;
+    }
     // Detect rapid triple-tap for a special reaction. Drop any tap
     // older than the window so the counter is sliding, not sticky.
     const now = Date.now();
@@ -811,6 +824,27 @@ document.querySelectorAll("[data-home]").forEach((btn) => {
   document.addEventListener("touchstart", resetIdle, { passive: true });
   document.addEventListener("click", resetIdle);
   resetIdle();
+})();
+
+// Drifting cloud across the menu. Pure environmental atmosphere —
+// constant motion across the top of the screen, no user attention
+// required. Tap to make it rain sparkles for a delightful surprise.
+(function setupCloud() {
+  const cloud = document.getElementById("menuCloud");
+  if (!cloud) return;
+  onTap(cloud, (e) => {
+    if (e.stopPropagation) e.stopPropagation();
+    say("Bloop!", 1.1);
+    haptic(8);
+    const r = cloud.getBoundingClientRect();
+    // Sparkle rain below the cloud
+    for (let k = 0; k < 5; k++) {
+      setTimeout(() => sparkleAt(
+        r.left + Math.random() * r.width,
+        r.top + r.height + Math.random() * 40,
+      ), k * 80);
+    }
+  });
 })();
 
 // Sunny the sun — second mascot, top-left corner of the menu. Cheerful
