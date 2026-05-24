@@ -46,14 +46,38 @@
   </header>
 
   <!-- Soft background atmosphere for the menu: small balloons drifting
-       up. Hidden on game screens so they never compete with gameplay. -->
+       up. Tap one to pop it — gives the kid something to do anywhere
+       on the menu, not just on the tiles. -->
   <div class="menu-bubbles" aria-hidden="true">
-    <span class="bubble" style="--c:#ff8ab0; --x:8%;  --delay:0s;  --dur:15s; --drift:30px;"></span>
-    <span class="bubble" style="--c:#74c0fc; --x:88%; --delay:3s;  --dur:18s; --drift:-40px;"></span>
-    <span class="bubble" style="--c:#ffd43b; --x:30%; --delay:7s;  --dur:14s; --drift:-20px;"></span>
-    <span class="bubble" style="--c:#69db7c; --x:70%; --delay:11s; --dur:17s; --drift:25px;"></span>
-    <span class="bubble" style="--c:#da77f2; --x:50%; --delay:5s;  --dur:16s; --drift:-15px;"></span>
+    <button class="bubble" aria-label="Pop the bubble" style="--c:#ff8ab0; --x:8%;  --delay:0s;  --dur:15s; --drift:30px;"></button>
+    <button class="bubble" aria-label="Pop the bubble" style="--c:#74c0fc; --x:88%; --delay:3s;  --dur:18s; --drift:-40px;"></button>
+    <button class="bubble" aria-label="Pop the bubble" style="--c:#ffd43b; --x:30%; --delay:7s;  --dur:14s; --drift:-20px;"></button>
+    <button class="bubble" aria-label="Pop the bubble" style="--c:#69db7c; --x:70%; --delay:11s; --dur:17s; --drift:25px;"></button>
+    <button class="bubble" aria-label="Pop the bubble" style="--c:#da77f2; --x:50%; --delay:5s;  --dur:16s; --drift:-15px;"></button>
   </div>
+
+  <!-- Sunny the sun mascot — second character, top-left of the menu.
+       Smaller than Bobo. Tap for a cheerful greeting. -->
+  <button id="sunny" class="sunny" aria-label="Say hi to Sunny">
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <g class="sunny-rays" stroke="#f59f00" stroke-width="5" stroke-linecap="round">
+        <line x1="50" y1="4"  x2="50" y2="16"/>
+        <line x1="50" y1="84" x2="50" y2="96"/>
+        <line x1="4"  y1="50" x2="16" y2="50"/>
+        <line x1="84" y1="50" x2="96" y2="50"/>
+        <line x1="18" y1="18" x2="27" y2="27"/>
+        <line x1="73" y1="73" x2="82" y2="82"/>
+        <line x1="82" y1="18" x2="73" y2="27"/>
+        <line x1="27" y1="73" x2="18" y2="82"/>
+      </g>
+      <circle cx="50" cy="50" r="28" fill="#ffd43b" stroke="#f59f00" stroke-width="3"/>
+      <circle cx="42" cy="46" r="3" fill="#5c3700"/>
+      <circle cx="58" cy="46" r="3" fill="#5c3700"/>
+      <path d="M40 58 Q 50 66 60 58" stroke="#5c3700" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <circle cx="37" cy="56" r="3" fill="#ff8ab0" opacity="0.6"/>
+      <circle cx="63" cy="56" r="3" fill="#ff8ab0" opacity="0.6"/>
+    </svg>
+  </button>
 
   <!-- Bobo the balloon mascot. Floats in the bottom-right of the menu;
        hidden via CSS when the menu screen isn't active. -->

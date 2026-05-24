@@ -175,6 +175,55 @@ html.dark .bubble { opacity: 0.16; }
   90%  { opacity: 0.22; }
   100% { transform: translate(var(--drift, 20px), -120vh) scale(1.05); opacity: 0; }
 }
+/* The bubbles container ignores pointer events so tiles + tap zones
+   underneath stay accessible; individual bubble buttons opt back in. */
+.menu-bubbles { pointer-events: none; }
+.bubble {
+  pointer-events: auto;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.bubble.popped {
+  animation: bubblePop 0.5s ease-out forwards !important;
+  pointer-events: none;
+}
+@keyframes bubblePop {
+  0%   { transform: scale(1); opacity: 0.22; }
+  50%  { transform: scale(1.6); opacity: 0.4; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+
+/* ---------- Sunny the sun (second mascot, top-left of menu) ---------- */
+.sunny {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 70px);
+  left: max(env(safe-area-inset-left, 0px), 14px);
+  width: clamp(54px, 9vw, 76px);
+  height: clamp(54px, 9vw, 76px);
+  z-index: 80;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.18));
+  animation: sunnyBob 3.8s ease-in-out infinite;
+  display: none;
+}
+.sunny svg { width: 100%; height: 100%; pointer-events: none; }
+.sunny:active { transform: scale(0.9); }
+body.on-menu .sunny { display: block; }
+@keyframes sunnyBob {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-6px) rotate(8deg); }
+}
+.sunny.spinning .sunny-rays { animation: sunnySpin 0.9s ease; transform-origin: 50px 50px; }
+@keyframes sunnySpin {
+  from { transform: rotate(0); }
+  to   { transform: rotate(360deg); }
+}
 
 /* ---------- Mascot (Bobo the balloon) ---------- */
 .mascot {
@@ -210,6 +259,14 @@ body.on-menu .mascot { display: block; }
   45%      { transform: translateY(-12px) rotate(-12deg) scale(1.08); }
   60%      { transform: translateY(-10px) rotate(12deg) scale(1.08); }
   75%      { transform: translateY(-8px)  rotate(-6deg) scale(1.05); }
+}
+/* Triple-tap easter egg — full backflip. */
+.mascot.flipping { animation: mascotFlip 0.8s cubic-bezier(.5,.05,.5,.95); }
+@keyframes mascotFlip {
+  0%   { transform: translateY(0) rotate(0); }
+  35%  { transform: translateY(-50px) rotate(180deg); }
+  70%  { transform: translateY(-25px) rotate(340deg); }
+  100% { transform: translateY(0) rotate(360deg); }
 }
 
 /* ---------- Game intro banner ---------- */

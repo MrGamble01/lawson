@@ -710,6 +710,15 @@ document.querySelectorAll("[data-go]").forEach((btn) => {
     const where = btn.dataset.go;
     navChime(true);
 
+    // Quick wave from Bobo before leaving (only fires from the menu).
+    if (document.body.classList.contains("on-menu")) {
+      const mascot = document.getElementById("mascot");
+      if (mascot) {
+        mascot.classList.add("waving");
+        setTimeout(() => mascot.classList.remove("waving"), 600);
+      }
+    }
+
     leaveActiveGame();
 
     const game = window.Lawson.games[where];
@@ -750,11 +759,35 @@ document.querySelectorAll("[data-home]").forEach((btn) => {
     () => `Boop!`,
     () => `Let's play!`,
   ];
+  const TRIPLE_TAP_WINDOW = 1400; // ms
   function L_cheerSafe() { try { return cheer(); } catch (_) { return "Yay!"; } }
   let i = 0;
+  let recentTaps = [];
   onTap(mascot, () => {
     unlockAudio();
     unlockSpeech();
+    // Detect rapid triple-tap for a special reaction. Drop any tap
+    // older than the window so the counter is sliding, not sticky.
+    const now = Date.now();
+    recentTaps.push(now);
+    recentTaps = recentTaps.filter((t) => now - t < TRIPLE_TAP_WINDOW);
+    if (recentTaps.length >= 3) {
+      recentTaps = [];
+      mascot.classList.add("flipping");
+      setTimeout(() => mascot.classList.remove("flipping"), 800);
+      say("Tickly!");
+      happySound();
+      haptic([10, 30, 10, 30, 20]);
+      const r = mascot.getBoundingClientRect();
+      for (let k = 0; k < 6; k++) {
+        setTimeout(() => sparkleAt(
+          r.left + r.width / 2 + (Math.random() - 0.5) * 80,
+          r.top + r.height / 2 + (Math.random() - 0.5) * 80,
+        ), k * 60);
+      }
+      resetIdle();
+      return;
+    }
     say(phrases[i++ % phrases.length]());
     haptic(10);
     const r = mascot.getBoundingClientRect();
@@ -778,6 +811,57 @@ document.querySelectorAll("[data-home]").forEach((btn) => {
   document.addEventListener("touchstart", resetIdle, { passive: true });
   document.addEventListener("click", resetIdle);
   resetIdle();
+})();
+
+// Sunny the sun — second mascot, top-left corner of the menu. Cheerful
+// shorter phrases since she's a "pal" character, not the host.
+(function setupSunny() {
+  const sunny = document.getElementById("sunny");
+  if (!sunny) return;
+  const phrases = [
+    "Sunny says hi!",
+    "What a bright day!",
+    "Shine on!",
+    "Hello sunshine!",
+    "Sparkle!",
+  ];
+  let i = 0;
+  onTap(sunny, () => {
+    unlockAudio();
+    unlockSpeech();
+    say(phrases[i++ % phrases.length]);
+    haptic(10);
+    sunny.classList.remove("spinning");
+    void sunny.offsetWidth;
+    sunny.classList.add("spinning");
+    setTimeout(() => sunny.classList.remove("spinning"), 900);
+    const r = sunny.getBoundingClientRect();
+    sparkleAt(r.left + r.width / 2, r.top + r.height / 2);
+  });
+})();
+
+// Tappable menu bubbles. Each one is a button you can pop for a
+// satisfying sound + sparkle. Doesn't navigate anywhere — purely
+// ambient micro-interaction so there's always something to tap.
+(function setupBubbles() {
+  document.querySelectorAll(".menu-bubbles .bubble").forEach((bubble) => {
+    onTap(bubble, (e) => {
+      if (e.stopPropagation) e.stopPropagation();
+      if (bubble.classList.contains("popped")) return;
+      bubble.classList.add("popped");
+      beep(280 + Math.random() * 400, 0.1, "triangle");
+      haptic(8);
+      const r = bubble.getBoundingClientRect();
+      sparkleAt(r.left + r.width / 2, r.top + r.height / 2);
+      // Respawn — restart the float animation from the bottom.
+      setTimeout(() => {
+        bubble.classList.remove("popped");
+        bubble.style.animation = "none";
+        void bubble.offsetWidth;
+        bubble.style.animation = "";
+      }, 700);
+    });
+  });
 })();
 
 // Prevent multi-touch pinch-zoom gestures on iOS (belt-and-braces with viewport meta)
