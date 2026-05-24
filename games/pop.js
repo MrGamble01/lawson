@@ -148,6 +148,7 @@
     streak = 0;
     updateBadges();
 
+    L.say("Pop the balloons!");
     spawn(area); spawn(area); spawn(area);
     spawnTimer = setInterval(() => spawn(area), 1100);
   }

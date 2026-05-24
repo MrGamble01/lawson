@@ -570,6 +570,16 @@ function renderStreakBadge() {
   if (streak >= 2) {
     val.textContent = streak;
     badge.hidden = false;
+    // Tap-to-celebrate. Each tap speaks the count and a brief cheer
+    // so the kid hears the achievement reinforced.
+    if (!badge.__lawsonTap) {
+      badge.__lawsonTap = true;
+      onTap(badge, () => {
+        say(`${streak} days in a row! Keep it going!`);
+        sparkleAt(badge.getBoundingClientRect().left + 20,
+                  badge.getBoundingClientRect().top + 20);
+      });
+    }
   } else {
     badge.hidden = true;
   }
