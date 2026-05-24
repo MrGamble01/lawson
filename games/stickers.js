@@ -16,14 +16,32 @@
     let earned = 0;
 
     // Empty-state banner shown before any sticker has been earned.
-    // Speaks to the kid, not the parent — "Play to find stickers!"
+    // Bobo himself hosts the empty book — gives the screen a host
+    // instead of a generic gift emoji.
     if (!all.some((s) => L.isStickerEarned && L.isStickerEarned(s.id))) {
       const empty = document.createElement("div");
       empty.className = "sticker-empty";
       empty.innerHTML = `
-        <div class="sticker-empty-icon">🎁</div>
-        <div class="sticker-empty-title">Your sticker book is empty!</div>
-        <div class="sticker-empty-sub">Play any game to find your first sticker.</div>`;
+        <div class="sticker-empty-icon">
+          <svg viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <radialGradient id="emptybobo" cx="38%" cy="38%" r="60%">
+                <stop offset="0%" stop-color="#ffd6e7"/>
+                <stop offset="60%" stop-color="#ff8ab0"/>
+                <stop offset="100%" stop-color="#e64980"/>
+              </radialGradient>
+            </defs>
+            <ellipse cx="50" cy="55" rx="42" ry="50" fill="url(#emptybobo)"/>
+            <ellipse cx="36" cy="38" rx="10" ry="16" fill="#fff" opacity="0.55"/>
+            <circle cx="40" cy="55" r="4" fill="#3a1f5a"/>
+            <circle cx="60" cy="55" r="4" fill="#3a1f5a"/>
+            <path d="M40 70 Q 50 80 60 70" stroke="#3a1f5a" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+            <polygon points="46,104 54,104 50,112" fill="#e64980"/>
+            <path d="M50 112 Q 56 124 48 134 Q 42 140 50 140" stroke="#5a3030" stroke-width="2" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="sticker-empty-title">Let's find some stickers!</div>
+        <div class="sticker-empty-sub">Play any game and Bobo will pop one in for you.</div>`;
       grid.appendChild(empty);
     }
 

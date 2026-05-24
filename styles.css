@@ -1742,9 +1742,12 @@ html.dark .hub-title {
   margin: 8px 4px 16px;
 }
 .sticker-empty-icon {
-  font-size: clamp(60px, 14vw, 100px);
-  animation: emptyBob 1.6s ease-in-out infinite;
+  width: clamp(80px, 18vw, 130px);
+  height: clamp(112px, 25vw, 182px);
+  animation: emptyBob 1.8s ease-in-out infinite;
+  filter: drop-shadow(0 8px 14px rgba(0,0,0,0.18));
 }
+.sticker-empty-icon svg { width: 100%; height: 100%; }
 @keyframes emptyBob {
   0%, 100% { transform: translateY(0) rotate(-4deg); }
   50%      { transform: translateY(-8px) rotate(4deg); }
