@@ -568,6 +568,50 @@ function celebrateNewHigh(value) {
   }
 }
 
+// Bobo peeks up from the bottom-left to cheer on milestone moments
+// inside a game (e.g. every Nth correct answer). Lazy-built on first
+// use so games that never call it cost nothing. Auto-hides after ~1.6s.
+function boboCheer() {
+  let el = document.getElementById("boboCheer");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "boboCheer";
+    el.className = "bobo-cheer";
+    el.innerHTML = `
+      <svg viewBox="0 0 120 140" aria-hidden="true">
+        <defs>
+          <radialGradient id="bcBody" cx="35%" cy="32%" r="65%">
+            <stop offset="0%" stop-color="#fffafc"/>
+            <stop offset="30%" stop-color="#ffd6e7"/>
+            <stop offset="70%" stop-color="#ff6b9d"/>
+            <stop offset="100%" stop-color="#c2255c"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="60" cy="62" rx="46" ry="54" fill="url(#bcBody)"/>
+        <ellipse cx="44" cy="40" rx="11" ry="16" fill="#fff" opacity="0.7"/>
+        <circle cx="46" cy="58" r="6" fill="#fff"/>
+        <circle cx="46" cy="59" r="4.5" fill="#2a1140"/>
+        <circle cx="47" cy="57" r="1.8" fill="#fff"/>
+        <circle cx="74" cy="58" r="6" fill="#fff"/>
+        <circle cx="74" cy="59" r="4.5" fill="#2a1140"/>
+        <circle cx="75" cy="57" r="1.8" fill="#fff"/>
+        <path d="M42 76 Q 60 96 78 76 Q 60 92 42 76 Z" fill="#2a1140"/>
+        <ellipse cx="34" cy="74" rx="6" ry="3.6" fill="#ff6b9d" opacity="0.55"/>
+        <ellipse cx="86" cy="74" rx="6" ry="3.6" fill="#ff6b9d" opacity="0.55"/>
+        <polygon points="54,114 66,114 60,124" fill="#c2255c"/>
+      </svg>
+      <div class="bobo-cheer__bubble">Yay!</div>
+    `;
+    document.body.appendChild(el);
+  }
+  // Restart by toggling — handles rapid re-fires without stacking.
+  el.classList.remove("show");
+  void el.offsetWidth;
+  el.classList.add("show");
+  clearTimeout(boboCheer._t);
+  boboCheer._t = setTimeout(() => el.classList.remove("show"), 1600);
+}
+
 // ---------- Shared namespace for game modules ----------
 // Each game file in /games registers itself on window.Lawson.games and uses
 // the utilities below. Keeping each game self-contained makes it easy to
@@ -579,7 +623,7 @@ window.Lawson = {
   setVoiceMuted, setSoundMuted, isVoiceMuted, isSoundMuted,
   setMusicEnabled, isMusicEnabled, startMusic, stopMusic,
   earnSticker, isStickerEarned, listStickers, resetStickers,
-  KID_NAME, cheer, shuffled, celebrateNewHigh, confettiRain,
+  KID_NAME, cheer, shuffled, celebrateNewHigh, confettiRain, boboCheer,
   games: {}, // each game adds { screen, start, stop } here
 };
 

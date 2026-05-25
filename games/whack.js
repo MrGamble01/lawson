@@ -48,6 +48,7 @@
         score += pts;
         if (current.gold) L.earnSticker && L.earnSticker("whackGold");
         if (score >= 20) L.earnSticker && L.earnSticker("whack20");
+        if (score > 0 && score % 10 === 0) L.boboCheer && L.boboCheer();
         L.bumpBadge("whackScoreVal", score);
         const best = L.tryNewHighScore("whackBest", score, (next) => {
           const el = document.getElementById("whackBestVal");

@@ -101,6 +101,8 @@
       streak += 1;
       if (rainbow) L.earnSticker && L.earnSticker("popRainbow");
       if (streak >= 10) L.earnSticker && L.earnSticker("popStreak10");
+      // Bobo cheers on milestone streaks — keeps long runs exciting.
+      if (streak > 0 && streak % 10 === 0) L.boboCheer && L.boboCheer();
 
       L.beep(300 + Math.random() * 400, 0.15, "triangle");
       L.say(c.name);

@@ -78,6 +78,8 @@
           L.happySound();
           score += 1;
           if (score >= 10) L.earnSticker && L.earnSticker("match10");
+          // Bobo peeks up to cheer every 5 correct.
+          if (score > 0 && score % 5 === 0) L.boboCheer && L.boboCheer();
           L.bumpBadge("matchScoreVal", score);
           const best = L.tryNewHighScore("matchBest", score, (next) => {
             document.getElementById("matchBestVal").textContent = next;

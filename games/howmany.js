@@ -82,6 +82,7 @@
           score += 1;
           L.bumpBadge("howmanyScoreVal", score);
           if (score >= 10) L.earnSticker && L.earnSticker("mathStar");
+          if (score > 0 && score % 5 === 0) L.boboCheer && L.boboCheer();
           L.tryNewHighScore("howmanyBest", score, (next) => {
             document.getElementById("howmanyBestVal").textContent = next;
             setTimeout(() => L.celebrateNewHigh(next), 800);
