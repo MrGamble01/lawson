@@ -1,27 +1,74 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <radialGradient id="bg" cx="50%" cy="40%" r="65%">
-      <stop offset="0%" stop-color="#ff8ab0"/>
-      <stop offset="100%" stop-color="#ff4081"/>
-    </radialGradient>
-    <radialGradient id="balloon" cx="38%" cy="38%" r="60%">
-      <stop offset="0%" stop-color="#ffd6e7"/>
-      <stop offset="60%" stop-color="#ff8ab0"/>
-      <stop offset="100%" stop-color="#e64980"/>
+    <!-- Vibrant sunset sky: orange → pink → purple. Reads bolder than
+         pure pink at small sizes and gives the icon real depth. -->
+    <linearGradient id="sky" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%"  stop-color="#ff922b"/>
+      <stop offset="42%" stop-color="#ff4081"/>
+      <stop offset="100%" stop-color="#7048e8"/>
+    </linearGradient>
+    <!-- Balloon body with cream highlight fading to deep magenta. -->
+    <radialGradient id="balloon" cx="36%" cy="32%" r="65%">
+      <stop offset="0%"  stop-color="#fffafc"/>
+      <stop offset="30%" stop-color="#ffd6e7"/>
+      <stop offset="70%" stop-color="#ff6b9d"/>
+      <stop offset="100%" stop-color="#c2255c"/>
     </radialGradient>
   </defs>
-  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
-  <g transform="translate(0,12)">
-    <ellipse cx="256" cy="232" rx="142" ry="168" fill="url(#balloon)"/>
-    <ellipse cx="206" cy="174" rx="34" ry="50" fill="#fff" opacity="0.55"/>
-    <circle cx="218" cy="218" r="14" fill="#3a1f5a"/>
-    <circle cx="294" cy="218" r="14" fill="#3a1f5a"/>
-    <circle cx="222" cy="214" r="4" fill="#fff"/>
-    <circle cx="298" cy="214" r="4" fill="#fff"/>
-    <path d="M212 270 Q 256 320 300 270" stroke="#3a1f5a" stroke-width="10" fill="none" stroke-linecap="round"/>
-    <circle cx="180" cy="260" r="14" fill="#ff6b9d" opacity="0.55"/>
-    <circle cx="332" cy="260" r="14" fill="#ff6b9d" opacity="0.55"/>
-    <polygon points="240,396 272,396 256,420" fill="#e64980"/>
-    <path d="M256 420 Q 290 472 240 488 Q 220 504 256 504" stroke="#5a3030" stroke-width="6" fill="none" stroke-linecap="round"/>
+
+  <!-- Background with iOS-friendly corner radius. -->
+  <rect width="512" height="512" rx="112" fill="url(#sky)"/>
+
+  <!-- Soft glow halo behind Bobo so he reads against the sunset. -->
+  <ellipse cx="256" cy="246" rx="172" ry="196" fill="#fff" opacity="0.13"/>
+
+  <!-- Scattered star sparkles around the edges — adds "magic" without
+       crowding the silhouette. -->
+  <g fill="#fff" opacity="0.78">
+    <circle cx="78"  cy="92"  r="6"/>
+    <circle cx="438" cy="118" r="9"/>
+    <circle cx="68"  cy="380" r="7"/>
+    <circle cx="450" cy="412" r="6"/>
+    <circle cx="130" cy="58"  r="4"/>
+    <circle cx="392" cy="62"  r="5"/>
+    <circle cx="42"  cy="220" r="3"/>
+    <circle cx="478" cy="262" r="4"/>
+    <circle cx="56"  cy="468" r="4"/>
+    <circle cx="456" cy="60"  r="3"/>
   </g>
+  <!-- Two 4-point sparkle stars for variety. -->
+  <g fill="#fff" opacity="0.92">
+    <path d="M398 196 L404 214 L422 220 L404 226 L398 244 L392 226 L374 220 L392 214 Z"/>
+    <path d="M102 296 L107 309 L120 314 L107 319 L102 332 L97 319 L84 314 L97 309 Z"/>
+  </g>
+
+  <!-- Balloon body -->
+  <ellipse cx="256" cy="240" rx="150" ry="174" fill="url(#balloon)"/>
+
+  <!-- Main highlight shine on upper-left -->
+  <ellipse cx="200" cy="172" rx="38" ry="58" fill="#fff" opacity="0.65"/>
+  <ellipse cx="195" cy="158" rx="14" ry="22" fill="#fff" opacity="0.92"/>
+
+  <!-- Eyes — bigger, with white sclera + dark pupil + catchlight -->
+  <circle cx="218" cy="234" r="18" fill="#fff"/>
+  <circle cx="218" cy="236" r="14" fill="#2a1140"/>
+  <circle cx="223" cy="231" r="6"  fill="#fff"/>
+  <circle cx="294" cy="234" r="18" fill="#fff"/>
+  <circle cx="294" cy="236" r="14" fill="#2a1140"/>
+  <circle cx="299" cy="231" r="6"  fill="#fff"/>
+
+  <!-- Big open smile with a hint of pink tongue inside -->
+  <path d="M196 282 Q 256 342 316 282 Q 256 334 196 282 Z" fill="#2a1140"/>
+  <path d="M222 306 Q 256 322 290 306 Q 256 320 222 306 Z" fill="#ff8ab0"/>
+
+  <!-- Blush cheeks -->
+  <ellipse cx="172" cy="282" rx="20" ry="12" fill="#ff6b9d" opacity="0.6"/>
+  <ellipse cx="340" cy="282" rx="20" ry="12" fill="#ff6b9d" opacity="0.6"/>
+
+  <!-- Knot at the bottom of the balloon -->
+  <polygon points="238,410 274,410 256,440" fill="#c2255c"/>
+
+  <!-- Curly string trailing down — kept inside the 512×512 frame. -->
+  <path d="M256 440 Q 300 478 240 494 Q 218 502 256 510"
+        stroke="#3a1f5a" stroke-width="6" fill="none" stroke-linecap="round"/>
 </svg>
