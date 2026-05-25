@@ -7,6 +7,29 @@
 
   const STAMPS = ["⭐", "❤️", "🌈", "🌸", "🐶", "🐱", "🐸", "🎈", "🚗", "🍎", "🌟", "🦋"];
 
+  // null = rainbow auto-cycle (the original behavior); anything else is
+  // a solid-color brush. Listed in order so taps map left-to-right.
+  const BRUSHES = [
+    { name: "Rainbow", hex: null,      label: "🌈" },
+    { name: "Red",     hex: "#ff3b30", label: "" },
+    { name: "Orange",  hex: "#ff9500", label: "" },
+    { name: "Yellow",  hex: "#ffd60a", label: "" },
+    { name: "Green",   hex: "#34c759", label: "" },
+    { name: "Blue",    hex: "#007aff", label: "" },
+    { name: "Purple",  hex: "#af52de", label: "" },
+    { name: "Pink",    hex: "#ff2d92", label: "" },
+    { name: "Black",   hex: "#222222", label: "" },
+    { name: "Eraser",  hex: null, erase: true, label: "🧼" },
+  ];
+
+  // Brush stroke sizes selectable from the bottom-row picker. Eraser is
+  // always larger than paint so wipes feel deliberate.
+  const SIZES = [
+    { name: "Small",  paint: 8,  erase: 22 },
+    { name: "Medium", paint: 14, erase: 36 },
+    { name: "Large",  paint: 22, erase: 56 },
+  ];
+
   let canvas, ctx;
   let drawing = false;
   let last = null;
@@ -14,6 +37,9 @@
   let mode = "paint"; // "paint" | "stamp"
   let stampTimeout = null;
   let unlisten = null;
+  let lastStampAt = 0; // throttle continuous stamping while dragging
+  let brush = BRUSHES[0]; // current brush; null hex => rainbow
+  let size = SIZES[1];   // current stroke size
 
   function resize() {
     if (!canvas) return;
@@ -38,23 +64,53 @@
     return { x: src.clientX - rect.left, y: src.clientY - rect.top };
   }
 
+  function strokeColor(offset = 0) {
+    if (brush.hex) return brush.hex;
+    return `hsl(${(hue + offset) % 360}, 90%, 55%)`;
+  }
+
+  // Switches the canvas into erase mode (transparent pixels) while the
+  // eraser brush is active, then restores normal compositing.
+  function withBrushMode(fn) {
+    if (brush.erase) {
+      const prev = ctx.globalCompositeOperation;
+      ctx.globalCompositeOperation = "destination-out";
+      try { fn(); } finally { ctx.globalCompositeOperation = prev; }
+    } else {
+      fn();
+    }
+  }
+
   function dot(p, r) {
-    ctx.fillStyle = `hsl(${hue}, 90%, 55%)`;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
-    ctx.fill();
+    withBrushMode(() => {
+      ctx.fillStyle = brush.erase ? "#000" : strokeColor();
+      const radius = brush.erase ? size.erase * 0.7 : (r || size.paint * 0.6);
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+      ctx.fill();
+    });
   }
 
   function line(a, b) {
-    const grad = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
-    grad.addColorStop(0, `hsl(${hue}, 90%, 55%)`);
-    grad.addColorStop(1, `hsl(${(hue + 20) % 360}, 90%, 55%)`);
-    ctx.strokeStyle = grad;
-    ctx.lineWidth = 14;
-    ctx.beginPath();
-    ctx.moveTo(a.x, a.y);
-    ctx.lineTo(b.x, b.y);
-    ctx.stroke();
+    withBrushMode(() => {
+      if (brush.erase) {
+        ctx.strokeStyle = "#000";
+        ctx.lineWidth = size.erase;
+      } else if (brush.hex) {
+        ctx.strokeStyle = brush.hex;
+        ctx.lineWidth = size.paint;
+      } else {
+        const grad = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+        grad.addColorStop(0, strokeColor(0));
+        grad.addColorStop(1, strokeColor(20));
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = size.paint;
+      }
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.stroke();
+    });
   }
 
   function stampAt(p) {
@@ -74,10 +130,10 @@
     last = pointIn(e);
     if (mode === "stamp") {
       stampAt(last);
-      drawing = false;
+      lastStampAt = Date.now();
       return;
     }
-    dot(last, 8);
+    dot(last, size.paint * 0.6);
     L.beep(300 + (hue / 360) * 400, 0.06, "sine");
   }
 
@@ -85,9 +141,76 @@
     if (!drawing) return;
     e.preventDefault();
     const p = pointIn(e);
+    if (mode === "stamp") {
+      // Throttle so finger drags lay down a row of stamps, not a smear.
+      const now = Date.now();
+      const dx = p.x - last.x, dy = p.y - last.y;
+      if (now - lastStampAt > 160 && (dx * dx + dy * dy) > 1600) {
+        stampAt(p);
+        lastStampAt = now;
+        last = p;
+      }
+      return;
+    }
     line(last, p);
     last = p;
-    hue = (hue + 4) % 360;
+    if (!brush.hex) hue = (hue + 4) % 360; // only rainbow mode cycles
+  }
+
+  function renderSizes() {
+    const row = document.getElementById("doodleSizes");
+    if (!row) return;
+    row.innerHTML = "";
+    SIZES.forEach((s) => {
+      const sw = document.createElement("button");
+      sw.className = "doodle-size";
+      sw.title = s.name;
+      sw.innerHTML = `<span class="doodle-size-dot" style="--d:${Math.round(s.paint * 1.4)}px"></span>`;
+      if (s.name === size.name) sw.classList.add("active");
+      L.onTap(sw, (e) => {
+        if (e.stopPropagation) e.stopPropagation();
+        size = s;
+        row.querySelectorAll(".doodle-size").forEach((x) => x.classList.remove("active"));
+        sw.classList.add("active");
+        L.beep(380 + Math.random() * 120, 0.08, "sine");
+        L.say(s.name);
+      });
+      row.appendChild(sw);
+    });
+  }
+
+  function renderBrushes() {
+    const row = document.getElementById("doodleBrushes");
+    if (!row) return;
+    row.innerHTML = "";
+    BRUSHES.forEach((b) => {
+      const sw = document.createElement("button");
+      sw.className = "doodle-brush";
+      sw.dataset.name = b.name;
+      sw.title = b.name;
+      if (b.hex) {
+        sw.style.background = b.hex;
+      } else if (b.erase) {
+        // White swatch with the eraser glyph so it reads as "wipe".
+        sw.style.background = "#fff";
+        sw.style.color = "#444";
+        sw.textContent = b.label;
+      } else {
+        // Rainbow gradient swatch
+        sw.style.background = "conic-gradient(from 0deg, #ff3b30, #ff9500, #ffd60a, #34c759, #007aff, #af52de, #ff3b30)";
+        sw.textContent = b.label;
+      }
+      if (b.name === brush.name) sw.classList.add("active");
+      L.onTap(sw, (e) => {
+        if (e.stopPropagation) e.stopPropagation();
+        brush = b;
+        row.querySelectorAll(".doodle-brush").forEach((x) => x.classList.remove("active"));
+        sw.classList.add("active");
+        L.beep(450 + Math.random() * 200, 0.08, "sine");
+        L.say(b.name);
+      });
+      row.appendChild(sw);
+    });
   }
 
   function onUp(e) {
@@ -101,6 +224,36 @@
     ctx.clearRect(0, 0, rect.width, rect.height);
     L.happySound();
     L.say("Clean slate!");
+    L.earnSticker && L.earnSticker("doodleClear");
+  }
+
+  // Export the current canvas as a PNG download. We composite the
+  // strokes over a white background so the saved file looks like what
+  // the kid sees on screen (the grid background is CSS-only).
+  function save() {
+    if (!canvas) return;
+    const out = document.createElement("canvas");
+    out.width = canvas.width;
+    out.height = canvas.height;
+    const octx = out.getContext("2d");
+    octx.fillStyle = "#fffdf5";
+    octx.fillRect(0, 0, out.width, out.height);
+    octx.drawImage(canvas, 0, 0);
+    out.toBlob((blob) => {
+      if (!blob) return;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const d = new Date();
+      const z = (n) => String(n).padStart(2, "0");
+      a.href = url;
+      a.download = `${(window.Lawson && window.Lawson.KID_NAME) || "lawson"}-doodle-${d.getFullYear()}${z(d.getMonth()+1)}${z(d.getDate())}-${z(d.getHours())}${z(d.getMinutes())}.png`;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { a.remove(); URL.revokeObjectURL(url); }, 1500);
+      L.happySound();
+      L.say("Saved!");
+      L.earnSticker && L.earnSticker("doodleSave");
+    }, "image/png");
   }
 
   function toggleStamp(btn) {
@@ -133,10 +286,10 @@
 
     const clearBtn = document.getElementById("doodleClear");
     const stampBtn = document.getElementById("doodleStamp");
-    const cb = () => clear();
-    const sb = () => toggleStamp(stampBtn);
-    L.onTap(clearBtn, cb);
-    L.onTap(stampBtn, sb);
+    const saveBtn  = document.getElementById("doodleSave");
+    L.onTapOnce(clearBtn, () => clear());
+    L.onTapOnce(stampBtn, () => toggleStamp(stampBtn));
+    L.onTapOnce(saveBtn,  () => save());
 
     unlisten = () => {
       window.removeEventListener("resize", resize);
@@ -150,7 +303,11 @@
     };
 
     mode = "paint";
+    brush = BRUSHES[0];
+    size = SIZES[1];
     stampBtn.classList.remove("active");
+    renderBrushes();
+    renderSizes();
     L.say("Draw with your finger!");
   }
 

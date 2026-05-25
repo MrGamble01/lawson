@@ -63,7 +63,12 @@
         L.beep(400 + tappedSoFar * 80, 0.12, "triangle");
         L.say(NUMBER_WORDS[tappedSoFar] || String(tappedSoFar));
         L.bumpBadge("countScoreVal", total);
-        const best = L.bumpHighScore("countBest", total);
+        if (total >= 25) L.earnSticker && L.earnSticker("count25");
+        const best = L.tryNewHighScore("countBest", total, (next) => {
+          document.getElementById("countBestVal").textContent = next;
+          // Fire after the round-end happy fanfare so we don't trample it.
+          setTimeout(() => L.celebrateNewHigh(next), 900);
+        });
         document.getElementById("countBestVal").textContent = best;
 
         if (tappedSoFar === n) {

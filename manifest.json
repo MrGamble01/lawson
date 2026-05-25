@@ -1,0 +1,19 @@
+{
+  "name": "Lawson's Learning Playground",
+  "short_name": "Lawson",
+  "description": "A colorful learning playground for toddlers",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#ffe0f0",
+  "theme_color": "#ff4081",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

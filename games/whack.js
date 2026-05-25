@@ -46,12 +46,23 @@
         if (!current) return;
         const pts = current.gold ? 3 : 1;
         score += pts;
+        if (current.gold) L.earnSticker && L.earnSticker("whackGold");
+        if (score >= 20) L.earnSticker && L.earnSticker("whack20");
         L.bumpBadge("whackScoreVal", score);
-        const best = L.bumpHighScore("whackBest", score);
+        const best = L.tryNewHighScore("whackBest", score, (next) => {
+          const el = document.getElementById("whackBestVal");
+          if (el) el.textContent = next;
+          // Stagger so the celebration doesn't fight the per-hit cheer.
+          setTimeout(() => L.celebrateNewHigh(next), 600);
+        });
         const bestEl = document.getElementById("whackBestVal");
         if (bestEl) bestEl.textContent = best;
         L.happySound();
         L.say(current.gold ? `Gold ${current.critter.name}!` : L.cheer());
+
+        // Burst of sparkles at the critter so the hit feels solid.
+        const r = critter.getBoundingClientRect();
+        L.sparkleAt(r.left + r.width / 2, r.top + r.height / 2);
 
         critter.classList.add("bonk");
         setTimeout(() => critter.classList.remove("bonk"), 300);

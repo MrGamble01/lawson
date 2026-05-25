@@ -99,7 +99,8 @@
       const pts = rainbow ? 3 : 1;
       score += pts;
       streak += 1;
-      L.bumpHighScore("popBest", streak);
+      if (rainbow) L.earnSticker && L.earnSticker("popRainbow");
+      if (streak >= 10) L.earnSticker && L.earnSticker("popStreak10");
 
       L.beep(300 + Math.random() * 400, 0.15, "triangle");
       L.say(c.name);
@@ -124,9 +125,15 @@
 
     area.appendChild(b);
 
-    // If it floats off the top un-popped, reset streak and remove.
+    // If it floats off the top un-popped, the streak ends. That's the
+    // moment to crown a new personal best — celebrating mid-streak would
+    // fire every time he popped one more than last time, which is too
+    // much. Now it's a real "you finished and beat your record" moment.
     setTimeout(() => {
       if (b.parentNode && !popped) {
+        if (streak > 0) {
+          L.tryNewHighScore("popBest", streak, (next) => L.celebrateNewHigh(next));
+        }
         streak = 0;
         updateBadges();
         b.remove();
@@ -141,11 +148,15 @@
     streak = 0;
     updateBadges();
 
+    L.say("Pop the balloons!");
     spawn(area); spawn(area); spawn(area);
     spawnTimer = setInterval(() => spawn(area), 1100);
   }
 
   function stop() {
+    // If he taps home mid-streak, save the score silently (no
+    // celebration — that would be weird as the screen changes).
+    if (streak > 0) L.bumpHighScore("popBest", streak);
     clearInterval(spawnTimer);
     spawnTimer = null;
     const area = document.getElementById("popArea");

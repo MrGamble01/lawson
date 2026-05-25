@@ -92,6 +92,86 @@
         {w:0,d:1},{w:4,d:1},{w:0,d:2},
       ],
     },
+    {
+      name: "Happy Birthday",
+      bpm: 110,
+      notes: [
+        {w:0,d:1},{w:0,d:1},{w:1,d:2},{w:0,d:2},{w:3,d:2},{w:2,d:4},
+        {w:0,d:1},{w:0,d:1},{w:1,d:2},{w:0,d:2},{w:4,d:2},{w:3,d:4},
+        {w:0,d:1},{w:0,d:1},{w:7,d:2},{w:5,d:2},{w:3,d:2},{w:2,d:2},{w:1,d:2},
+        {w:6,d:1},{w:6,d:1},{w:5,d:2},{w:3,d:2},{w:4,d:2},{w:3,d:4},
+      ],
+    },
+    {
+      name: "Itsy Bitsy Spider",
+      bpm: 120,
+      notes: [
+        {w:0,d:1},{w:0,d:1},{w:0,d:1},{w:1,d:1},{w:2,d:1},
+        {w:2,d:1},{w:1,d:1},{w:0,d:1},{w:1,d:1},{w:2,d:2},{w:0,d:2},
+        {w:2,d:1},{w:2,d:1},{w:3,d:1},{w:4,d:2},
+        {w:4,d:1},{w:3,d:1},{w:2,d:1},{w:3,d:1},{w:4,d:2},{w:2,d:2},
+        {w:4,d:1},{w:4,d:1},{w:5,d:1},{w:7,d:2},
+        {w:5,d:1},{w:4,d:1},{w:2,d:1},{w:0,d:2},
+        {w:0,d:1},{w:0,d:1},{w:0,d:1},{w:1,d:1},{w:2,d:1},
+        {w:2,d:1},{w:1,d:1},{w:0,d:1},{w:1,d:1},{w:2,d:2},{w:0,d:2},
+      ],
+    },
+    {
+      name: "Wheels on the Bus",
+      bpm: 120,
+      notes: [
+        {w:0,d:1},{w:3,d:1},{w:5,d:1},{w:3,d:1},{w:0,d:1},{w:0,d:1},{w:0,d:2},
+        {w:1,d:1},{w:2,d:1},{w:1,d:2},
+        {w:1,d:1},{w:2,d:1},{w:3,d:1},{w:4,d:1},{w:4,d:2},
+        {w:0,d:1},{w:3,d:1},{w:5,d:1},{w:3,d:1},{w:5,d:1},{w:3,d:1},{w:0,d:2},
+        {w:2,d:1},{w:1,d:1},{w:0,d:4},
+      ],
+    },
+    {
+      name: "Jingle Bells",
+      bpm: 130,
+      notes: [
+        {w:2,d:1},{w:2,d:1},{w:2,d:2},
+        {w:2,d:1},{w:2,d:1},{w:2,d:2},
+        {w:2,d:1},{w:4,d:1},{w:0,d:1},{w:1,d:1},{w:2,d:4},
+        {w:3,d:1},{w:3,d:1},{w:3,d:1},{w:3,d:1},
+        {w:3,d:1},{w:2,d:1},{w:2,d:1},{w:2,d:1},
+        {w:2,d:1},{w:1,d:1},{w:1,d:1},{w:2,d:1},{w:1,d:2},{w:4,d:2},
+      ],
+    },
+    {
+      name: "The ABC Song",
+      bpm: 120,
+      notes: [
+        {w:0,d:1},{w:0,d:1},{w:4,d:1},{w:4,d:1},{w:5,d:1},{w:5,d:1},{w:4,d:2},
+        {w:3,d:1},{w:3,d:1},{w:2,d:1},{w:2,d:1},{w:1,d:1},{w:1,d:1},{w:0,d:2},
+        {w:4,d:1},{w:4,d:1},{w:3,d:1},{w:3,d:1},{w:2,d:1},{w:2,d:1},{w:1,d:2},
+        {w:4,d:1},{w:4,d:1},{w:3,d:1},{w:3,d:1},{w:2,d:1},{w:2,d:1},{w:1,d:2},
+        {w:0,d:1},{w:0,d:1},{w:4,d:1},{w:4,d:1},{w:5,d:1},{w:5,d:1},{w:4,d:2},
+        {w:3,d:1},{w:3,d:1},{w:2,d:1},{w:2,d:1},{w:1,d:1},{w:1,d:1},{w:0,d:2},
+      ],
+    },
+    {
+      name: "London Bridge",
+      bpm: 120,
+      notes: [
+        {w:4,d:1},{w:5,d:1},{w:4,d:1},{w:3,d:1},{w:2,d:1},{w:3,d:1},{w:4,d:2},
+        {w:1,d:1},{w:2,d:1},{w:3,d:2},
+        {w:2,d:1},{w:3,d:1},{w:4,d:2},
+        {w:4,d:1},{w:5,d:1},{w:4,d:1},{w:3,d:1},{w:2,d:1},{w:3,d:1},{w:4,d:2},
+        {w:1,d:2},{w:4,d:1},{w:2,d:1},{w:0,d:4},
+      ],
+    },
+    {
+      name: "This Old Man",
+      bpm: 130,
+      notes: [
+        {w:2,d:1},{w:0,d:1},{w:2,d:2},{w:2,d:1},{w:0,d:1},{w:2,d:2},
+        {w:3,d:1},{w:2,d:1},{w:1,d:1},{w:1,d:1},{w:2,d:1},{w:3,d:1},{w:4,d:2},
+        {w:0,d:1},{w:0,d:1},{w:0,d:2},
+        {w:4,d:1},{w:3,d:1},{w:2,d:1},{w:1,d:1},{w:0,d:4},
+      ],
+    },
   ];
 
   let songIndex = 0;
@@ -101,6 +181,7 @@
 
   // Nicer piano-ish tone: triangle fundamental + soft sine harmonic + envelope.
   function playNote(freq, dur = 0.5) {
+    if (L.isSoundMuted && L.isSoundMuted()) return;
     try {
       const ac = L.audioCtx;
       if (ac.state === "suspended") ac.resume();
@@ -198,6 +279,7 @@
 
   function playSong() {
     stopSong();
+    L.earnSticker && L.earnSticker("pianoSong");
     const song = SONGS[songIndex % SONGS.length];
     songIndex += 1;
     const beat = 60 / song.bpm; // seconds per beat
@@ -222,7 +304,7 @@
   function start() {
     build();
     const songBtn = document.getElementById("pianoSong");
-    L.onTap(songBtn, () => {
+    L.onTapOnce(songBtn, () => {
       if (songBtn.classList.contains("playing")) stopSong();
       else playSong();
     });
