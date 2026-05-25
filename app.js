@@ -121,9 +121,14 @@ function shuffled(arr) {
 const screens = document.querySelectorAll(".screen");
 function show(id) {
   screens.forEach((s) => s.classList.toggle("active", s.id === id));
-  // Track menu-mode on body so the mascot (and other menu-only chrome)
-  // can be toggled via a simple class selector — no :has() required.
-  document.body.classList.toggle("on-menu", id === "menu");
+  // Track lobby-mode (menu + hubs) so the mascot and other ambient
+  // chrome can stay visible across the home / hub navigation, but
+  // hide on game screens where they'd compete with gameplay.
+  const isMenu = id === "menu";
+  const isHub = /Hub$/.test(id);
+  document.body.classList.toggle("on-menu", isMenu);
+  document.body.classList.toggle("on-hub", isHub);
+  document.body.classList.toggle("on-lobby", isMenu || isHub);
   // Brief title card on screens that opt in via data-title. Makes
   // each game feel like its own destination instead of a hard cut.
   const target = document.getElementById(id);
@@ -131,10 +136,11 @@ function show(id) {
   if (title) showGameBanner(title);
   // Music plays only on the menu so the gameplay sound design stays
   // clean. Cheap to start/stop — it's just a Web Audio interval.
-  if (id === "menu" && isMusicEnabled()) startMusic();
+  if (isMenu && isMusicEnabled()) startMusic();
   else stopMusic();
 }
 document.body.classList.add("on-menu");
+document.body.classList.add("on-lobby");
 
 function showGameBanner(text) {
   const existing = document.querySelector(".game-banner");
@@ -710,8 +716,9 @@ document.querySelectorAll("[data-go]").forEach((btn) => {
     const where = btn.dataset.go;
     navChime(true);
 
-    // Quick wave from Bobo before leaving (only fires from the menu).
-    if (document.body.classList.contains("on-menu")) {
+    // Quick wave from Bobo before leaving — fires from menu or hubs,
+    // anywhere he's visible.
+    if (document.body.classList.contains("on-lobby")) {
       const mascot = document.getElementById("mascot");
       if (mascot) {
         mascot.classList.add("waving");
@@ -814,7 +821,7 @@ document.querySelectorAll("[data-home]").forEach((btn) => {
   function resetIdle() {
     if (idleTimer) clearTimeout(idleTimer);
     idleTimer = setTimeout(() => {
-      if (document.body.classList.contains("on-menu")) {
+      if (document.body.classList.contains("on-lobby")) {
         mascot.classList.add("waving");
         setTimeout(() => mascot.classList.remove("waving"), 1400);
       }
@@ -919,7 +926,7 @@ document.querySelectorAll("[data-home]").forEach((btn) => {
 // a responsive surface — nothing feels dead.
 (function setupAmbientTouch() {
   function ambientAt(x, y, target) {
-    if (!document.body.classList.contains("on-menu")) return;
+    if (!document.body.classList.contains("on-lobby")) return;
     if (!target || !target.closest) return;
     if (target.closest("button, [data-go], [data-hub], .bubble, .mascot, .sunny, .menu-cloud, .menu-section-title, .badge")) return;
     const s = document.createElement("div");
