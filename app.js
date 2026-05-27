@@ -739,7 +739,12 @@ function navChime(up) {
 // use the normal data-go flow.
 const HUB_INTROS = {
   numbersHub: "Let's count!",
-  exploreHub: "Let's explore!",
+  exploreHub: "Wonder World!",
+  artHub: "Welcome to the Art Studio!",
+  musicHub: "Music time!",
+  playgroundHub: "Playground!",
+  brainHub: "Brain games!",
+  libraryHub: "Welcome to the library!",
 };
 document.querySelectorAll("[data-hub]").forEach((btn) => {
   onTap(btn, () => {
