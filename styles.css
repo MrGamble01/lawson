@@ -34,6 +34,7 @@
   *, *::before, *::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
+    animation-delay: 0s !important;
     transition-duration: 0.001ms !important;
   }
 }
@@ -414,34 +415,6 @@ body.on-lobby .mascot { display: block; }
   scrollbar-width: none;
 }
 #menu::-webkit-scrollbar { display: none; }
-.menu-section {
-  margin-bottom: 16px;
-  display: flex;
-  flex-direction: column;
-}
-.menu-section-title {
-  font-size: clamp(16px, 2.4vw, 22px);
-  font-weight: bold;
-  color: #ff4081;
-  text-shadow: 2px 2px 0 #fff, 3px 3px 0 rgba(0,0,0,0.06);
-  letter-spacing: 1px;
-  margin: 4px 12px 10px;
-  -webkit-tap-highlight-color: transparent;
-  transition: transform 0.15s ease;
-  align-self: flex-start;
-}
-.menu-section-title.bump { animation: titleBump 0.4s ease; }
-@keyframes titleBump {
-  0%, 100% { transform: scale(1); }
-  50%      { transform: scale(1.08); }
-}
-.menu-tiles {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 14px;
-}
-
 /* ---------- Themed "places" — the new home menu ---------- */
 /* Each card is a "doorway" into a hub. Bigger, more illustrated, and
    more deliberate than the old uniform tile grid — closer to how
@@ -476,7 +449,6 @@ body.on-lobby .mascot { display: block; }
   gap: 6px;
   color: #fff;
   cursor: pointer;
-  box-shadow: 0 9px 0 rgba(0,0,0,0.18), 0 14px 22px rgba(0,0,0,0.16);
   overflow: hidden;
   transition: transform var(--dur-fast) var(--ease-snap), box-shadow var(--dur-fast) ease;
   animation: tileEntry 0.55s var(--ease-spring) backwards;
@@ -502,9 +474,19 @@ body.on-lobby .mascot { display: block; }
   grid-column: 1 / -1;
   flex-direction: row;
   justify-content: center;
+  gap: 16px;
   min-height: clamp(110px, 18vw, 160px);
 }
 .place--wide .place-art { width: clamp(70px, 12vw, 110px); }
+/* Wrapper that re-stacks label and count vertically inside the wide
+   library card, restoring the same visual hierarchy as the other six
+   cards (label on top, count chip beneath). */
+.place-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
 .place-art {
   width: clamp(90px, 18vw, 150px);
   height: auto;
@@ -515,7 +497,12 @@ body.on-lobby .mascot { display: block; }
   font-size: clamp(18px, 3.2vw, 28px);
   font-weight: 900;
   letter-spacing: 0.5px;
-  text-shadow: 0 2px 0 rgba(0,0,0,0.18);
+  /* Heavier dark text-shadow lifts white labels off the lighter card
+     backgrounds (yellow Art, peach Library) where white-on-color
+     alone fails WCAG contrast. Reads cleanly on dark cards too. */
+  text-shadow: 0 1px 0 rgba(0,0,0,0.45),
+               0 2px 4px rgba(0,0,0,0.35),
+               0 0 2px rgba(0,0,0,0.4);
   text-align: center;
   line-height: 1.1;
 }
@@ -536,6 +523,20 @@ body.on-lobby .mascot { display: block; }
 .menu-places .place:nth-child(6) { animation-delay: 0.36s; }
 .menu-places .place:nth-child(7) { animation-delay: 0.42s; }
 
+/* Stagger hub tiles too. The old .menu-tiles selector no longer
+   matches anything (home menu uses .menu-places now), so without this
+   rule hub tiles all entered in lockstep. */
+.hub-tiles .tile:nth-child(1)  { animation-delay: 0.04s; }
+.hub-tiles .tile:nth-child(2)  { animation-delay: 0.08s; }
+.hub-tiles .tile:nth-child(3)  { animation-delay: 0.12s; }
+.hub-tiles .tile:nth-child(4)  { animation-delay: 0.16s; }
+.hub-tiles .tile:nth-child(5)  { animation-delay: 0.20s; }
+.hub-tiles .tile:nth-child(6)  { animation-delay: 0.24s; }
+.hub-tiles .tile:nth-child(7)  { animation-delay: 0.28s; }
+.hub-tiles .tile:nth-child(8)  { animation-delay: 0.32s; }
+.hub-tiles .tile:nth-child(9)  { animation-delay: 0.36s; }
+.hub-tiles .tile:nth-child(10) { animation-delay: 0.40s; }
+
 /* ---------- Themed hub backgrounds ---------- */
 /* Each hub gets atmosphere matching its place card. Subtle radial
    tints — busy enough to feel like a "place", quiet enough to keep
@@ -547,6 +548,16 @@ body.on-lobby .mascot { display: block; }
 .hub-screen[data-hub-theme="numbers"] { background: radial-gradient(ellipse at top, #d0ebff 0%, #74c0fc 55%, #4dabf7 100%); }
 .hub-screen[data-hub-theme="explore"] { background: radial-gradient(ellipse at top, #f3d9fa 0%, #e599f7 55%, #da77f2 100%); }
 .hub-screen[data-hub-theme="library"] { background: radial-gradient(ellipse at top, #fff3bf 0%, #ffe8a1 55%, #ffc078 100%); }
+
+/* Themed hubs swap the pink hub-title (which clashed on purple/orange
+   backgrounds) for white-on-dark-shadow, which reads cleanly on every
+   theme. The dark-mode rule below overrides this back for night use. */
+.hub-screen[data-hub-theme] .hub-title {
+  color: #fff;
+  text-shadow: 0 2px 0 rgba(0,0,0,0.35),
+               0 4px 12px rgba(0,0,0,0.25),
+               0 0 3px rgba(0,0,0,0.4);
+}
 
 /* ---------- Hub screens (Numbers / Words / Explore) ---------- */
 .hub-screen {
@@ -565,6 +576,13 @@ body.on-lobby .mascot { display: block; }
   margin: 70px 0 18px;
   text-align: center;
   font-weight: 900;
+  -webkit-tap-highlight-color: transparent;
+}
+/* Tap-feedback pulse for hub titles (Bobo speaks the hub name). */
+.hub-title.bump { animation: titleBump 0.4s ease; }
+@keyframes titleBump {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.08); }
 }
 .hub-tiles {
   display: flex;
@@ -612,19 +630,6 @@ html.dark .hub-title {
   transform: scale(0.94) translateY(4px);
   box-shadow: var(--shadow-tile-pressed);
 }
-/* Stagger tiles within a section so they pop in like popcorn. */
-.menu-tiles .tile:nth-child(1)  { animation-delay: 0.04s; }
-.menu-tiles .tile:nth-child(2)  { animation-delay: 0.08s; }
-.menu-tiles .tile:nth-child(3)  { animation-delay: 0.12s; }
-.menu-tiles .tile:nth-child(4)  { animation-delay: 0.16s; }
-.menu-tiles .tile:nth-child(5)  { animation-delay: 0.20s; }
-.menu-tiles .tile:nth-child(6)  { animation-delay: 0.24s; }
-.menu-tiles .tile:nth-child(7)  { animation-delay: 0.28s; }
-.menu-tiles .tile:nth-child(8)  { animation-delay: 0.32s; }
-.menu-tiles .tile:nth-child(9)  { animation-delay: 0.36s; }
-.menu-tiles .tile:nth-child(10) { animation-delay: 0.40s; }
-.menu-tiles .tile:nth-child(11) { animation-delay: 0.44s; }
-.menu-tiles .tile:nth-child(12) { animation-delay: 0.48s; }
 @keyframes tileEntry {
   from { transform: scale(0.4) translateY(20px); opacity: 0; }
   to   { transform: scale(1) translateY(0); opacity: 1; }
@@ -2512,10 +2517,29 @@ html.dark .tile {
   border-color: rgba(255,255,255,0.85);
   box-shadow: 0 8px 0 rgba(0,0,0,0.45), 0 12px 25px rgba(0,0,0,0.55);
 }
-html.dark .menu-section-title {
-  color: #ffc9d6;
-  text-shadow: 1px 1px 0 #0d1226, 2px 2px 0 rgba(0,0,0,0.3);
+/* Place cards in dark mode — softer borders + heavier shadow to keep
+   them readable against the dark sky background. The bright --c
+   colours stay (they're how kids recognise each place at a glance). */
+html.dark .place {
+  border-color: rgba(255,255,255,0.7);
+  box-shadow: inset 0 -90px 60px -60px rgba(0,0,0,0.45),
+              0 8px 0 rgba(0,0,0,0.5),
+              0 14px 24px rgba(0,0,0,0.55);
 }
+html.dark .place:active {
+  box-shadow: inset 0 -90px 60px -60px rgba(0,0,0,0.45),
+              0 4px 0 rgba(0,0,0,0.5),
+              0 6px 14px rgba(0,0,0,0.55);
+}
+/* Themed hub backgrounds replace the bright daytime radial-gradients
+   with dark equivalents — same hue family, much lower brightness. */
+html.dark .hub-screen[data-hub-theme="art"]     { background: radial-gradient(ellipse at top, #4a3a0a 0%, #2c2208 50%, #1a1305 100%); }
+html.dark .hub-screen[data-hub-theme="music"]   { background: radial-gradient(ellipse at top, #2e1b5b 0%, #1c1138 50%, #0f0921 100%); }
+html.dark .hub-screen[data-hub-theme="play"]    { background: radial-gradient(ellipse at top, #4d2a08 0%, #2d1804 50%, #1a0d02 100%); }
+html.dark .hub-screen[data-hub-theme="brain"]   { background: radial-gradient(ellipse at top, #0b3942 0%, #062229 50%, #03141a 100%); }
+html.dark .hub-screen[data-hub-theme="numbers"] { background: radial-gradient(ellipse at top, #133b66 0%, #0c2541 50%, #061427 100%); }
+html.dark .hub-screen[data-hub-theme="explore"] { background: radial-gradient(ellipse at top, #4a1b5e 0%, #2b1037 50%, #170820 100%); }
+html.dark .hub-screen[data-hub-theme="library"] { background: radial-gradient(ellipse at top, #4d2f08 0%, #2c1b04 50%, #1a1002 100%); }
 /* Welcome toast adapts to dark mode automatically via this rule. */
 html.dark .welcome-toast {
   background: rgba(30, 30, 50, 0.95);

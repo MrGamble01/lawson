@@ -208,11 +208,15 @@
         <button class="place" data-hub="numbersHub" style="--c:#4dabf7">
           <svg class="place-art" viewBox="0 0 120 120" aria-hidden="true">
             <rect x="14" y="22" width="92" height="68" rx="5" fill="#2b4d2b" stroke="#5c3d00" stroke-width="4"/>
-            <text x="60" y="68" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="34" fill="#fff" letter-spacing="6">123</text>
+            <!-- Per-digit tspans with explicit x — Safari's text-anchor
+                 with letter-spacing miscalculates the centre. -->
+            <text y="68" font-family="Arial Black, sans-serif" font-size="34" fill="#fff" text-anchor="middle">
+              <tspan x="36">1</tspan><tspan x="60">2</tspan><tspan x="84">3</tspan>
+            </text>
             <rect x="42" y="92" width="36" height="6" rx="2" fill="#8a5a00"/>
           </svg>
           <span class="place-label">Numbers</span>
-          <span class="place-count">2 games</span>
+          <span class="place-count">3 games</span>
         </button>
 
         <button class="place" data-hub="exploreHub" style="--c:#da77f2">
@@ -221,8 +225,10 @@
             <path d="M20 50 Q 40 40 56 56 Q 68 70 92 60 Q 100 56 100 60" fill="#51cf66"/>
             <path d="M30 80 Q 50 75 70 85 Q 84 90 96 82" fill="#51cf66"/>
             <circle cx="60" cy="60" r="44" fill="none" stroke="#3a1f5a" stroke-width="3"/>
-            <text x="100" y="22" font-size="18">⭐</text>
-            <text x="14" y="100" font-size="14">✨</text>
+            <!-- Pure-SVG stars instead of emoji so they always render in
+                 colour on iOS Safari (SVG <text> can fall back to mono). -->
+            <polygon points="100,12 103,21 112,21 105,27 108,36 100,30 92,36 95,27 88,21 97,21" fill="#ffd43b"/>
+            <polygon points="18,96 20,104 28,104 22,109 24,117 18,112 12,117 14,109 8,104 16,104" fill="#fff"/>
           </svg>
           <span class="place-label">Wonder World</span>
           <span class="place-count">9 topics</span>
@@ -234,12 +240,16 @@
             <path d="M104 30 Q 60 22 60 30 L 60 96 Q 60 88 104 96 Z" fill="#fff" stroke="#8a5a00" stroke-width="3"/>
             <line x1="60" y1="30" x2="60" y2="96" stroke="#8a5a00" stroke-width="3"/>
             <text x="36" y="60" font-size="14" fill="#5c3d00" text-anchor="middle">Once</text>
-            <text x="36" y="78" font-size="14" fill="#5c3d00" text-anchor="middle">upon...</text>
-            <text x="84" y="60" font-size="20">⭐</text>
-            <text x="80" y="84" font-size="16">✨</text>
+            <text x="36" y="78" font-size="14" fill="#5c3d00" text-anchor="middle">upon</text>
+            <!-- Pure-SVG decorations to avoid emoji-in-SVG fallback issues. -->
+            <polygon points="82,52 86,62 96,62 88,68 91,78 82,72 73,78 76,68 68,62 78,62" fill="#fab005"/>
+            <circle cx="92" cy="84" r="3" fill="#ff922b"/>
+            <circle cx="80" cy="92" r="2" fill="#ff922b"/>
           </svg>
-          <span class="place-label">Library</span>
-          <span class="place-count">Story &amp; Stickers</span>
+          <span class="place-text">
+            <span class="place-label">Library</span>
+            <span class="place-count">Story &amp; Stickers</span>
+          </span>
         </button>
       </div>
     </section>
@@ -336,7 +346,7 @@
           <span class="emoji">🔢</span><span class="label">1 2 3</span>
         </button>
         <button class="tile" data-go="count" style="--c:#5c7cfa">
-          <span class="emoji">🐶</span><span class="label">Count</span>
+          <span class="emoji">🍎</span><span class="label">Count</span>
         </button>
         <button class="tile" data-go="howmany" style="--c:#228be6">
           <span class="emoji">🧮</span><span class="label">How Many?</span>

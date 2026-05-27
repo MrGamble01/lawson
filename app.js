@@ -930,22 +930,15 @@ document.querySelectorAll("[data-home]").forEach((btn) => {
   });
 })();
 
-// Section titles on the menu are tappable — Bobo speaks the section
-// name as a friendly invitation. Pure quality-of-presence: gives the
-// kid one more thing to poke that responds.
-(function setupSectionTitles() {
-  const phrases = {
-    "📚 Learn": "Learn time!",
-    "🎮 Play": "Let's play!",
-    "🎨 Create": "Make something!",
-    "🌟 Collection": "Your stickers!",
-  };
-  document.querySelectorAll(".menu-section-title").forEach((title) => {
+// Hub titles on the hub screens are tappable — Bobo speaks the hub
+// name as a friendly invitation. Replaces the old section-title
+// tap on the home menu after the restructure.
+(function setupHubTitles() {
+  document.querySelectorAll(".hub-title").forEach((title) => {
     title.style.cursor = "pointer";
     onTap(title, () => {
       const text = (title.textContent || "").trim();
-      const phrase = phrases[text] || text;
-      say(phrase);
+      say(text);
       haptic(8);
       title.classList.remove("bump");
       void title.offsetWidth;
@@ -977,7 +970,7 @@ document.querySelectorAll("[data-home]").forEach((btn) => {
   function ambientAt(x, y, target) {
     if (!document.body.classList.contains("on-lobby")) return;
     if (!target || !target.closest) return;
-    if (target.closest("button, [data-go], [data-hub], .bubble, .mascot, .sunny, .menu-cloud, .menu-section-title, .badge")) return;
+    if (target.closest("button, [data-go], [data-hub], .bubble, .mascot, .sunny, .menu-cloud, .hub-title, .badge")) return;
     const s = document.createElement("div");
     s.className = "sparkle";
     s.textContent = "✨";
