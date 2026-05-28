@@ -1,72 +1,284 @@
 // ---------- Story Time ----------
-// Short narrated picture stories. Each story has 4 pages; each page is
-// a giant emoji scene + a sentence the app speaks. Tap to advance early,
-// or wait — the page auto-advances once the line is read.
+// Short narrated picture stories. Each story has 4 pages. Each page is
+// a scene of one or more tappable characters that say their own sound
+// or word when poked, plus a narrated sentence. The page auto-advances
+// once the line has been read; tapping the background also advances.
+// Tapping a character plays its sound and wiggles it, but does NOT
+// advance — so the kid can poke around and explore the scene.
 (function () {
   const L = window.Lawson;
 
+  // Each scene character: e=emoji, x/y in percent of stage, sound (or
+  // word) the app speaks when tapped. Positions are arranged so two
+  // or three characters don't overlap on phone-width screens.
   const STORIES = [
     {
       title: "The Little Duck",
       pages: [
-        { scene: "🦆🌊",  text: "Once upon a time, a little duck swam in the pond.",   bg: "linear-gradient(180deg,#a5d8ff,#d0ebff)" },
-        { scene: "🦆🍞",  text: "She saw some yummy bread floating on the water.",    bg: "linear-gradient(180deg,#ffd8a8,#ffe8cc)" },
-        { scene: "🦆😋",  text: "She nibbled and nibbled until it was all gone!",     bg: "linear-gradient(180deg,#d8f5a2,#e7fad6)" },
-        { scene: "🦆💤",  text: "Then she said quack quack and went to sleep.",       bg: "linear-gradient(180deg,#bac8ff,#dbe4ff)" },
+        {
+          text: "Once upon a time, a little duck swam in the pond.",
+          bg: "linear-gradient(180deg,#a5d8ff,#d0ebff)",
+          scene: [
+            { e: "🦆", sound: "Quack quack!",    x: 32, y: 50 },
+            { e: "🌊", sound: "Splash splash!",  x: 70, y: 65 },
+          ],
+        },
+        {
+          text: "She saw some yummy bread floating on the water.",
+          bg: "linear-gradient(180deg,#ffd8a8,#ffe8cc)",
+          scene: [
+            { e: "🦆", sound: "Quack!",          x: 28, y: 55 },
+            { e: "🍞", sound: "Yummy bread!",    x: 70, y: 50 },
+          ],
+        },
+        {
+          text: "She nibbled and nibbled until it was all gone!",
+          bg: "linear-gradient(180deg,#d8f5a2,#e7fad6)",
+          scene: [
+            { e: "🦆", sound: "Nibble nibble!",  x: 35, y: 50 },
+            { e: "😋", sound: "Mmm yummy!",      x: 70, y: 55 },
+          ],
+        },
+        {
+          text: "Then she said quack quack and went to sleep.",
+          bg: "linear-gradient(180deg,#bac8ff,#dbe4ff)",
+          scene: [
+            { e: "🦆", sound: "Quack quack!",    x: 35, y: 55 },
+            { e: "💤", sound: "Sleepy time...",  x: 68, y: 45 },
+          ],
+        },
       ],
     },
     {
       title: "The Brave Bear",
       pages: [
-        { scene: "🐻🍯",  text: "Bear was hungry and found a big pot of honey.",       bg: "linear-gradient(180deg,#fff3bf,#ffec99)" },
-        { scene: "🐝🐝",  text: "But the buzzy bees were not happy!",                  bg: "linear-gradient(180deg,#ffe066,#ffd43b)" },
-        { scene: "🐻🏃",  text: "Bear ran and ran all the way to the river.",         bg: "linear-gradient(180deg,#b8edff,#c5f6fa)" },
-        { scene: "🐻🌈",  text: "He laughed and said, what a sweet adventure!",       bg: "linear-gradient(180deg,#ffd6e7,#fcc2d7)" },
+        {
+          text: "Bear was hungry and found a big pot of honey.",
+          bg: "linear-gradient(180deg,#fff3bf,#ffec99)",
+          scene: [
+            { e: "🐻", sound: "Grrr! I'm hungry!", x: 32, y: 55 },
+            { e: "🍯", sound: "Sticky honey!",     x: 70, y: 50 },
+          ],
+        },
+        {
+          text: "But the buzzy bees were not happy!",
+          bg: "linear-gradient(180deg,#ffe066,#ffd43b)",
+          scene: [
+            { e: "🐝", sound: "Buzz buzz!",        x: 30, y: 45 },
+            { e: "🐝", sound: "Bzzzz!",            x: 70, y: 55 },
+          ],
+        },
+        {
+          text: "Bear ran and ran all the way to the river.",
+          bg: "linear-gradient(180deg,#b8edff,#c5f6fa)",
+          scene: [
+            { e: "🐻", sound: "Run run!",          x: 30, y: 55 },
+            { e: "🏃", sound: "Whoosh!",           x: 60, y: 50 },
+            { e: "🌊", sound: "Splash!",           x: 82, y: 65 },
+          ],
+        },
+        {
+          text: "He laughed and said, what a sweet adventure!",
+          bg: "linear-gradient(180deg,#ffd6e7,#fcc2d7)",
+          scene: [
+            { e: "🐻", sound: "Hehehe!",           x: 35, y: 55 },
+            { e: "🌈", sound: "Pretty rainbow!",   x: 70, y: 45 },
+          ],
+        },
       ],
     },
     {
       title: "The Sleepy Star",
       pages: [
-        { scene: "⭐🌙",  text: "High in the sky, a little star was getting sleepy.",  bg: "linear-gradient(180deg,#3b3b6d,#1d1d44)", dark: true },
-        { scene: "⭐👋",  text: "She waved goodnight to all her star friends.",        bg: "linear-gradient(180deg,#2c2c5a,#16163a)", dark: true },
-        { scene: "⭐☁️",  text: "She floated down into a fluffy cloud bed.",           bg: "linear-gradient(180deg,#9a9adb,#bcbce6)", dark: true },
-        { scene: "💫💤",  text: "And dreamed sweet dreams all night long.",            bg: "linear-gradient(180deg,#1a1a3a,#0d0d22)", dark: true },
+        {
+          text: "High in the sky, a little star was getting sleepy.",
+          bg: "linear-gradient(180deg,#3b3b6d,#1d1d44)",
+          dark: true,
+          scene: [
+            { e: "⭐", sound: "Twinkle twinkle!",  x: 35, y: 45 },
+            { e: "🌙", sound: "Goodnight moon!",   x: 70, y: 35 },
+          ],
+        },
+        {
+          text: "She waved goodnight to all her star friends.",
+          bg: "linear-gradient(180deg,#2c2c5a,#16163a)",
+          dark: true,
+          scene: [
+            { e: "⭐", sound: "Twinkle!",          x: 30, y: 50 },
+            { e: "✨", sound: "Sparkle!",          x: 55, y: 35 },
+            { e: "⭐", sound: "Goodnight!",        x: 75, y: 55 },
+          ],
+        },
+        {
+          text: "She floated down into a fluffy cloud bed.",
+          bg: "linear-gradient(180deg,#9a9adb,#bcbce6)",
+          dark: true,
+          scene: [
+            { e: "⭐", sound: "So sleepy...",      x: 35, y: 40 },
+            { e: "☁️", sound: "Soft cloud!",       x: 68, y: 60 },
+          ],
+        },
+        {
+          text: "And dreamed sweet dreams all night long.",
+          bg: "linear-gradient(180deg,#1a1a3a,#0d0d22)",
+          dark: true,
+          scene: [
+            { e: "💫", sound: "Sweet dreams!",     x: 35, y: 50 },
+            { e: "💤", sound: "Zzz...",            x: 70, y: 45 },
+          ],
+        },
       ],
     },
     {
       title: "The Hungry Caterpillar",
       pages: [
-        { scene: "🐛🍃",  text: "A tiny caterpillar wiggled out of his leaf.",         bg: "linear-gradient(180deg,#d8f5a2,#b2f2bb)" },
-        { scene: "🐛🍎",  text: "On Monday he ate one big red apple.",                 bg: "linear-gradient(180deg,#ffd6d6,#ffc9c9)" },
-        { scene: "🐛🍓🍌", text: "He kept munching, growing bigger and rounder.",      bg: "linear-gradient(180deg,#fff3bf,#ffe066)" },
-        { scene: "🦋🌈",  text: "Until pop! He spread his wings as a butterfly!",      bg: "linear-gradient(180deg,#d0bfff,#c5f6fa)" },
+        {
+          text: "A tiny caterpillar wiggled out of his leaf.",
+          bg: "linear-gradient(180deg,#d8f5a2,#b2f2bb)",
+          scene: [
+            { e: "🐛", sound: "Wiggle wiggle!",    x: 35, y: 60 },
+            { e: "🍃", sound: "Crunchy leaf!",     x: 70, y: 50 },
+          ],
+        },
+        {
+          text: "On Monday he ate one big red apple.",
+          bg: "linear-gradient(180deg,#ffd6d6,#ffc9c9)",
+          scene: [
+            { e: "🐛", sound: "Munch munch!",      x: 32, y: 55 },
+            { e: "🍎", sound: "Crunch! Apple!",    x: 68, y: 50 },
+          ],
+        },
+        {
+          text: "He kept munching, growing bigger and rounder.",
+          bg: "linear-gradient(180deg,#fff3bf,#ffe066)",
+          scene: [
+            { e: "🐛", sound: "Yum!",              x: 28, y: 55 },
+            { e: "🍓", sound: "Sweet strawberry!", x: 55, y: 45 },
+            { e: "🍌", sound: "Banana!",           x: 80, y: 55 },
+          ],
+        },
+        {
+          text: "Until pop! He spread his wings as a butterfly!",
+          bg: "linear-gradient(180deg,#d0bfff,#c5f6fa)",
+          scene: [
+            { e: "🦋", sound: "Flutter flutter!",  x: 38, y: 45 },
+            { e: "🌈", sound: "Pretty rainbow!",   x: 72, y: 50 },
+          ],
+        },
       ],
     },
     {
       title: "Choo-Choo Train",
       pages: [
-        { scene: "🚂💨",  text: "Choo choo! The little train left the station.",      bg: "linear-gradient(180deg,#c5f6fa,#a5d8ff)" },
-        { scene: "🚂⛰️",  text: "It chugged up and over a tall green mountain.",      bg: "linear-gradient(180deg,#d8f5a2,#a9e34b)" },
-        { scene: "🚂🌑",  text: "Whoosh! It zoomed through a dark tunnel.",           bg: "linear-gradient(180deg,#495057,#212529)", dark: true },
-        { scene: "🚂🌅",  text: "Finally it pulled into the sunny station. Hooray!",  bg: "linear-gradient(180deg,#ffd8a8,#ffe8cc)" },
+        {
+          text: "Choo choo! The little train left the station.",
+          bg: "linear-gradient(180deg,#c5f6fa,#a5d8ff)",
+          scene: [
+            { e: "🚂", sound: "Choo choo!",        x: 35, y: 55 },
+            { e: "💨", sound: "Whoosh!",           x: 70, y: 60 },
+          ],
+        },
+        {
+          text: "It chugged up and over a tall green mountain.",
+          bg: "linear-gradient(180deg,#d8f5a2,#a9e34b)",
+          scene: [
+            { e: "🚂", sound: "Chug chug!",        x: 30, y: 60 },
+            { e: "⛰️", sound: "Big mountain!",     x: 70, y: 45 },
+          ],
+        },
+        {
+          text: "Whoosh! It zoomed through a dark tunnel.",
+          bg: "linear-gradient(180deg,#495057,#212529)",
+          dark: true,
+          scene: [
+            { e: "🚂", sound: "Whoosh!",           x: 35, y: 55 },
+            { e: "🌑", sound: "Dark tunnel!",      x: 70, y: 50 },
+          ],
+        },
+        {
+          text: "Finally it pulled into the sunny station. Hooray!",
+          bg: "linear-gradient(180deg,#ffd8a8,#ffe8cc)",
+          scene: [
+            { e: "🚂", sound: "Choo choo!",        x: 32, y: 55 },
+            { e: "🌅", sound: "Sunny sunset!",     x: 70, y: 45 },
+          ],
+        },
       ],
     },
     {
       title: "The Helpful Bee",
       pages: [
-        { scene: "🐝🌸",  text: "A friendly bee buzzed from flower to flower.",        bg: "linear-gradient(180deg,#fff3bf,#ffe066)" },
-        { scene: "🐝🍯",  text: "She tickled each petal and gathered sweet pollen.",   bg: "linear-gradient(180deg,#fff0a3,#ffc078)" },
-        { scene: "🐝🏠",  text: "She flew home to the hive to share with her friends.", bg: "linear-gradient(180deg,#ffe066,#fab005)" },
-        { scene: "🍯😋",  text: "Together they made the sweetest honey in town!",       bg: "linear-gradient(180deg,#ffd8a8,#ffe8cc)" },
+        {
+          text: "A friendly bee buzzed from flower to flower.",
+          bg: "linear-gradient(180deg,#fff3bf,#ffe066)",
+          scene: [
+            { e: "🐝", sound: "Buzz buzz!",        x: 32, y: 50 },
+            { e: "🌸", sound: "Pretty flower!",    x: 70, y: 55 },
+          ],
+        },
+        {
+          text: "She tickled each petal and gathered sweet pollen.",
+          bg: "linear-gradient(180deg,#fff0a3,#ffc078)",
+          scene: [
+            { e: "🐝", sound: "Bzzz!",             x: 30, y: 50 },
+            { e: "🌸", sound: "Tickle tickle!",    x: 55, y: 60 },
+            { e: "🌺", sound: "So pretty!",        x: 80, y: 45 },
+          ],
+        },
+        {
+          text: "She flew home to the hive to share with her friends.",
+          bg: "linear-gradient(180deg,#ffe066,#fab005)",
+          scene: [
+            { e: "🐝", sound: "Buzz home!",        x: 32, y: 55 },
+            { e: "🏠", sound: "Sweet home!",       x: 70, y: 50 },
+          ],
+        },
+        {
+          text: "Together they made the sweetest honey in town!",
+          bg: "linear-gradient(180deg,#ffd8a8,#ffe8cc)",
+          scene: [
+            { e: "🍯", sound: "Yummy honey!",      x: 35, y: 55 },
+            { e: "😋", sound: "Mmm sweet!",        x: 70, y: 45 },
+          ],
+        },
       ],
     },
     {
       title: "The Lost Puppy",
       pages: [
-        { scene: "🐶🌧️",  text: "A little puppy got lost in the rainy park.",          bg: "linear-gradient(180deg,#a5d8ff,#74c0fc)" },
-        { scene: "🐶🐦",  text: "A kind bird showed him the way back home.",            bg: "linear-gradient(180deg,#d0ebff,#bac8ff)" },
-        { scene: "🐶🏃",  text: "He ran fast, faster, fastest through the puddles.",     bg: "linear-gradient(180deg,#c5f6fa,#99e9f2)" },
-        { scene: "🐶🏠",  text: "Home at last! Mom gave him the warmest hug.",          bg: "linear-gradient(180deg,#ffd6d6,#ffc9c9)" },
+        {
+          text: "A little puppy got lost in the rainy park.",
+          bg: "linear-gradient(180deg,#a5d8ff,#74c0fc)",
+          scene: [
+            { e: "🐶", sound: "Woof woof!",        x: 35, y: 55 },
+            { e: "🌧️", sound: "Pitter patter!",   x: 70, y: 45 },
+          ],
+        },
+        {
+          text: "A kind bird showed him the way back home.",
+          bg: "linear-gradient(180deg,#d0ebff,#bac8ff)",
+          scene: [
+            { e: "🐶", sound: "Where am I?",       x: 32, y: 55 },
+            { e: "🐦", sound: "Tweet tweet!",      x: 70, y: 45 },
+          ],
+        },
+        {
+          text: "He ran fast, faster, fastest through the puddles.",
+          bg: "linear-gradient(180deg,#c5f6fa,#99e9f2)",
+          scene: [
+            { e: "🐶", sound: "Run run!",          x: 32, y: 55 },
+            { e: "🏃", sound: "Whoosh!",           x: 60, y: 50 },
+            { e: "💦", sound: "Splash!",           x: 82, y: 60 },
+          ],
+        },
+        {
+          text: "Home at last! Mom gave him the warmest hug.",
+          bg: "linear-gradient(180deg,#ffd6d6,#ffc9c9)",
+          scene: [
+            { e: "🐶", sound: "Happy puppy!",      x: 32, y: 55 },
+            { e: "🏠", sound: "Home sweet home!",  x: 70, y: 50 },
+          ],
+        },
       ],
     },
   ];
@@ -87,20 +299,40 @@
     if (game) game.style.background = page.bg;
     if (game) game.classList.toggle("story-dark", !!page.dark);
     stage.innerHTML = "";
-    const scene = document.createElement("div");
-    scene.className = "story-scene";
-    scene.textContent = page.scene;
-    stage.appendChild(scene);
+
+    // Render each character as an absolutely positioned tappable
+    // button. Tapping plays its sound + wiggles it — but doesn't
+    // advance the page (that's reserved for the background tap or
+    // the auto-advance timer).
+    page.scene.forEach((ch, i) => {
+      const btn = document.createElement("button");
+      btn.className = "story-character";
+      btn.textContent = ch.e;
+      btn.style.left = ch.x + "%";
+      btn.style.top  = ch.y + "%";
+      btn.style.animationDelay = (i * 110) + "ms";
+      btn.setAttribute("aria-label", ch.sound || ch.e);
+      L.onTap(btn, (e) => {
+        if (e.stopPropagation) e.stopPropagation();
+        L.beep(420 + Math.random() * 280, 0.1, "triangle");
+        L.haptic(8);
+        if (ch.sound) L.say(ch.sound, 0.95);
+        btn.classList.remove("wiggle");
+        void btn.offsetWidth;
+        btn.classList.add("wiggle");
+      });
+      stage.appendChild(btn);
+    });
 
     txt.textContent = page.text;
     counter.textContent = `${pageIdx + 1} / ${story.pages.length}`;
 
     L.say(page.text, 0.9);
 
-    // Auto-advance based on text length (~70 wpm). Caps so a single short
-    // line still has time to be enjoyed.
+    // Auto-advance based on text length (~70 wpm) but give the kid an
+    // extra beat to poke around at the scene after the line ends.
     const words = page.text.split(/\s+/).length;
-    const ms = Math.max(2800, words * 380);
+    const ms = Math.max(3800, words * 380 + 1200);
     clearTimeout(advanceTimer);
     advanceTimer = setTimeout(advance, ms);
   }
@@ -139,10 +371,13 @@
     pageIdx = 0;
     const screen = document.getElementById("storyGame");
     if (screen && !tapAttached) {
-      // Tap anywhere on the screen (other than the home button) to advance.
-      // Guarded so re-entering the game doesn't stack listeners.
+      // Tap the background to advance. Tapping a story-character
+      // stopPropagation()s, so the screen handler never fires for
+      // character pokes — those just play the character's sound.
       L.onTap(screen, (e) => {
-        if (e.target && e.target.closest && e.target.closest(".home-btn")) return;
+        if (!e.target || !e.target.closest) return;
+        if (e.target.closest(".home-btn")) return;
+        if (e.target.closest(".story-character")) return;
         advance();
       });
       tapAttached = true;
