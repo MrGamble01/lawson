@@ -802,6 +802,59 @@ html.dark .hub-title {
   height: 100%;
   overflow: hidden;
 }
+/* Mode tabs (Free / ABC / 123), centered below the corner badges. */
+.pop-modes {
+  position: absolute;
+  top: 58px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 6;
+}
+.pop-mode {
+  font-size: clamp(13px, 2.2vw, 18px);
+  font-weight: 800;
+  color: #c2255c;
+  background: rgba(255, 255, 255, 0.92);
+  border: 3px solid #ffa8c5;
+  border-radius: 999px;
+  padding: 6px 14px;
+  cursor: pointer;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.12);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--dur-fast, 0.15s) ease, background 0.2s ease, border-color 0.2s ease;
+}
+.pop-mode:active { transform: scale(0.94) translateY(2px); }
+.pop-mode.active {
+  color: #fff;
+  background: #ff4081;
+  border-color: #fff;
+}
+/* "Pop the B!" target bar — only shown in ABC / 123 modes. */
+.pop-prompt {
+  position: absolute;
+  top: 106px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 6;
+  font-size: clamp(22px, 4.6vw, 38px);
+  font-weight: 900;
+  color: #fff;
+  background: rgba(255, 64, 129, 0.95);
+  border: 4px solid #fff;
+  border-radius: 999px;
+  padding: 6px 24px;
+  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.15);
+  white-space: nowrap;
+  pointer-events: none;
+  animation: popPromptIn 0.4s var(--ease-spring, cubic-bezier(.34,1.56,.64,1));
+}
+.pop-prompt[hidden] { display: none; }
+@keyframes popPromptIn {
+  from { opacity: 0; transform: translate(-50%, -8px) scale(0.85); }
+  to   { opacity: 1; transform: translateX(-50%) scale(1); }
+}
 .balloon {
   position: absolute;
   width: clamp(80px, 14vw, 160px);
