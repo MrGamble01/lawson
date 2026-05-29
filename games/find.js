@@ -1,39 +1,104 @@
 // ---------- Find It! ----------
-// Hidden-picture game. ~16 items scatter across the screen at random
-// positions and rotations. Voice says "Find the apple!" and the kid
-// taps it. Five finds per scene, then everything reshuffles with a
-// fresh mix of items.
+// Hidden-picture search. Three modes share one scattered scene:
+//   Free  — themed scenes (farm, ocean, park, sky); "Find the duck!"
+//   ABC   — scattered letters; "Find the A!"
+//   123   — scattered numbers; "Find the 3!"
+// Free mode now uses coherent themed scenes instead of a random emoji
+// soup, and letters/numbers turn the same hunt into reading practice.
 (function () {
   const L = window.Lawson;
 
-  const POOL = [
-    { e: "🍎", n: "apple"  },  { e: "🍌", n: "banana"     },
-    { e: "🍓", n: "strawberry" }, { e: "🍇", n: "grapes"   },
-    { e: "🍉", n: "watermelon"}, { e: "🐶", n: "dog"       },
-    { e: "🐱", n: "cat"    },   { e: "🐮", n: "cow"        },
-    { e: "🦆", n: "duck"   },   { e: "🐝", n: "bee"        },
-    { e: "🐸", n: "frog"   },   { e: "🦁", n: "lion"       },
-    { e: "⭐", n: "star"   },   { e: "❤️", n: "heart"      },
-    { e: "🌈", n: "rainbow"},   { e: "☀️", n: "sun"        },
-    { e: "🌙", n: "moon"   },   { e: "🎈", n: "balloon"    },
-    { e: "🚗", n: "car"    },   { e: "🚂", n: "train"      },
-    { e: "✈️", n: "plane"  },   { e: "🚀", n: "rocket"     },
-    { e: "🌸", n: "flower" },   { e: "🌳", n: "tree"       },
-    { e: "🍄", n: "mushroom"},  { e: "🐢", n: "turtle"     },
-    { e: "🦋", n: "butterfly"}, { e: "🐌", n: "snail"      },
+  const THEMES = [
+    { name: "farm", bg: "linear-gradient(180deg,#d8f5a2,#b2f2bb)", items: [
+      { e: "🐮", n: "cow" }, { e: "🐷", n: "pig" }, { e: "🐔", n: "chicken" },
+      { e: "🐴", n: "horse" }, { e: "🐑", n: "sheep" }, { e: "🦆", n: "duck" },
+      { e: "🐐", n: "goat" }, { e: "🐶", n: "dog" }, { e: "🐱", n: "cat" },
+      { e: "🌻", n: "sunflower" }, { e: "🚜", n: "tractor" }, { e: "🐰", n: "bunny" },
+      { e: "🐭", n: "mouse" }, { e: "🌾", n: "wheat" },
+    ] },
+    { name: "ocean", bg: "linear-gradient(180deg,#a5d8ff,#74c0fc)", items: [
+      { e: "🐟", n: "fish" }, { e: "🐠", n: "clownfish" }, { e: "🐙", n: "octopus" },
+      { e: "🦀", n: "crab" }, { e: "🐬", n: "dolphin" }, { e: "🐳", n: "whale" },
+      { e: "🦈", n: "shark" }, { e: "🐚", n: "shell" }, { e: "⛵", n: "boat" },
+      { e: "🐢", n: "turtle" }, { e: "🦑", n: "squid" }, { e: "🐡", n: "pufferfish" },
+      { e: "🌊", n: "wave" }, { e: "🦭", n: "seal" },
+    ] },
+    { name: "park", bg: "linear-gradient(180deg,#d3f9d8,#b2f2bb)", items: [
+      { e: "🌳", n: "tree" }, { e: "🌸", n: "blossom" }, { e: "🦋", n: "butterfly" },
+      { e: "🐝", n: "bee" }, { e: "🐦", n: "bird" }, { e: "🌻", n: "sunflower" },
+      { e: "⚽", n: "ball" }, { e: "🪁", n: "kite" }, { e: "🐶", n: "dog" },
+      { e: "🌷", n: "tulip" }, { e: "🍦", n: "ice cream" }, { e: "🐿️", n: "squirrel" },
+      { e: "🌼", n: "daisy" }, { e: "🐌", n: "snail" },
+    ] },
+    { name: "sky", bg: "linear-gradient(180deg,#bac8ff,#a5d8ff)", items: [
+      { e: "⭐", n: "star" }, { e: "🌙", n: "moon" }, { e: "☁️", n: "cloud" },
+      { e: "🌈", n: "rainbow" }, { e: "☀️", n: "sun" }, { e: "🚀", n: "rocket" },
+      { e: "🛸", n: "spaceship" }, { e: "✈️", n: "plane" }, { e: "🪐", n: "planet" },
+      { e: "🎈", n: "balloon" }, { e: "🌟", n: "sparkle" }, { e: "🦅", n: "eagle" },
+      { e: "🪁", n: "kite" }, { e: "🌤️", n: "sunshine" },
+    ] },
   ];
 
-  const FINDS_PER_SCENE = 5;
-  const SCENE_SIZE = 16;
+  const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+  const NUMBERS = Array.from({ length: 10 }, (_, i) => String(i + 1));
+  const GLYPH_COLORS = ["#ff3b30", "#ff9500", "#34c759", "#007aff",
+    "#af52de", "#ff2d92", "#1aa3b5", "#e8590c", "#5f3dc4"];
+  const LETTER_SAY = {
+    A: "ay", B: "bee", C: "see", D: "dee", E: "ee", F: "eff", G: "jee",
+    H: "aitch", I: "eye", J: "jay", K: "kay", L: "el", M: "em", N: "en",
+    O: "oh", P: "pee", Q: "cue", R: "are", S: "ess", T: "tee", U: "you",
+    V: "vee", W: "double you", X: "ex", Y: "why", Z: "zee",
+  };
+  const NUMBER_SAY = ["", "one", "two", "three", "four", "five",
+    "six", "seven", "eight", "nine", "ten"];
 
+  const FINDS_PER_SCENE = 5;
+  const LEARNING_COUNT = 12;     // distinct glyphs scattered in ABC/123
+
+  let mode = "free";
+  let themeIdx = -1;
   let score = 0;
   let targets = [];
-  let currentTarget = null;
+  let currentTarget = null;      // { e, n } in free; { glyph } in learning
   let activeTimer = null;
   let busy = false;
+  let bestKey = "findBest";
+  let bestAtStart = 0;
+  let celebrated = false;
+
+  function sayGlyph(g) {
+    if (mode === "numbers") return NUMBER_SAY[+g] || g;
+    return LETTER_SAY[g] || g;
+  }
+
+  function updateBest() {
+    const el = document.getElementById("findBestVal");
+    if (el) el.textContent = L.getHighScore(bestKey);
+  }
+  function maybeCelebrateRecord(value) {
+    if (value > bestAtStart && !celebrated) {
+      celebrated = true;
+      setTimeout(() => L.celebrateNewHigh(value), 800);
+    }
+    L.bumpHighScore(bestKey, value);
+  }
 
   function speakTarget() {
-    if (currentTarget) L.say(`Find the ${currentTarget.n}!`);
+    if (!currentTarget) return;
+    if (mode === "free") L.say(`Find the ${currentTarget.n}!`);
+    else L.say(`Find the ${sayGlyph(currentTarget.glyph)}!`);
+  }
+
+  function showPrompt() {
+    const prompt = document.getElementById("findPrompt");
+    if (!prompt || !currentTarget) return;
+    if (mode === "free") {
+      prompt.innerHTML =
+        `Find the <span class="find-target">${currentTarget.e}</span> ` +
+        `<span class="find-target-name">${currentTarget.n}</span>!`;
+    } else {
+      prompt.innerHTML = `Find the <span class="find-target">${currentTarget.glyph}</span>!`;
+    }
   }
 
   function nextTarget() {
@@ -42,78 +107,126 @@
     if (!currentTarget) {
       L.happySound();
       L.say(`${L.cheer()} You found them all!`);
-      activeTimer = setTimeout(newScene, 1800);
+      activeTimer = setTimeout(newScene, 1700);
       return;
     }
-    const prompt = document.getElementById("findPrompt");
-    if (prompt) {
-      prompt.innerHTML = `Find the <span class="find-target">${currentTarget.e}</span> <span class="find-target-name">${currentTarget.n}</span>!`;
-    }
+    showPrompt();
     speakTarget();
+  }
+
+  function placeItem(el) {
+    el.style.left = (6 + Math.random() * 84) + "%";
+    el.style.top  = (4 + Math.random() * 84) + "%";
+    el.style.transform = `translate(-50%, -50%) rotate(${(Math.random() - 0.5) * 24}deg)`;
+    el.style.zIndex = String(Math.floor(Math.random() * 10));
   }
 
   function newScene() {
     const stage = document.getElementById("findStage");
+    const game = document.getElementById("findGame");
     if (!stage) return;
     stage.innerHTML = "";
+    busy = false;
 
-    const scene = L.shuffled(POOL).slice(0, SCENE_SIZE);
-    scene.forEach((item) => {
-      const el = document.createElement("button");
-      el.className = "find-item";
-      el.textContent = item.e;
-      el.dataset.name = item.n;
-      el.dataset.emoji = item.e;
-      // Random placement within a 90×85% box so items stay clear of
-      // the score badges and prompt bar.
-      el.style.left = (4 + Math.random() * 88) + "%";
-      el.style.top  = (4 + Math.random() * 84) + "%";
-      el.style.transform = `translate(-50%, -50%) rotate(${(Math.random() - 0.5) * 24}deg)`;
-      el.style.fontSize = `clamp(40px, ${6 + Math.random() * 3}vw, 90px)`;
-      el.style.zIndex = String(Math.floor(Math.random() * 10));
-      L.onTap(el, (e) => onTap(item, el, e));
-      stage.appendChild(el);
-    });
+    let sceneItems;
+    if (mode === "free") {
+      themeIdx = (themeIdx + 1) % THEMES.length;
+      const theme = THEMES[themeIdx];
+      if (game) game.style.background = theme.bg;
+      sceneItems = L.shuffled(theme.items);
+      sceneItems.forEach((item) => {
+        const el = document.createElement("button");
+        el.className = "find-item";
+        el.textContent = item.e;
+        el.style.fontSize = `clamp(40px, ${6 + Math.random() * 3}vw, 88px)`;
+        placeItem(el);
+        L.onTap(el, (e) => onTapItem(item, el, e));
+        stage.appendChild(el);
+      });
+    } else {
+      if (game) game.style.background = "linear-gradient(180deg,#fff3bf,#ffec99)";
+      const pool = mode === "numbers" ? NUMBERS : LETTERS;
+      const count = mode === "numbers" ? NUMBERS.length : LEARNING_COUNT;
+      sceneItems = L.shuffled(pool).slice(0, count).map((g) => ({ glyph: g }));
+      sceneItems.forEach((item, i) => {
+        const el = document.createElement("button");
+        el.className = "find-item find-item--glyph";
+        el.textContent = item.glyph;
+        el.style.background = GLYPH_COLORS[i % GLYPH_COLORS.length];
+        el.style.fontSize = `clamp(34px, ${5 + Math.random() * 2}vw, 72px)`;
+        placeItem(el);
+        L.onTap(el, (e) => onTapItem(item, el, e));
+        stage.appendChild(el);
+      });
+    }
 
-    // Choose 5 targets from items actually on screen.
-    targets = L.shuffled(scene.slice()).slice(0, FINDS_PER_SCENE);
+    targets = L.shuffled(sceneItems.slice()).slice(0, FINDS_PER_SCENE);
     activeTimer = setTimeout(nextTarget, 600);
   }
 
-  function onTap(item, el, e) {
+  function matches(item) {
+    return mode === "free"
+      ? item.e === currentTarget.e
+      : item.glyph === currentTarget.glyph;
+  }
+
+  function onTapItem(item, el, e) {
     if (e && e.stopPropagation) e.stopPropagation();
     if (busy || !currentTarget) return;
-    if (item.e === currentTarget.e) {
+    if (matches(item)) {
       busy = true;
       L.happySound();
       score += 1;
       L.bumpBadge("findScoreVal", score);
-      if (score >= 20) L.earnSticker && L.earnSticker("finder");
-      L.tryNewHighScore("findBest", score, (next) => {
-        document.getElementById("findBestVal").textContent = next;
-        setTimeout(() => L.celebrateNewHigh(next), 800);
-      });
-      document.getElementById("findBestVal").textContent = L.getHighScore("findBest");
+      if (mode === "free" && score >= 20) L.earnSticker && L.earnSticker("finder");
+      maybeCelebrateRecord(score);
+      updateBest();
       el.classList.add("found");
       const p = L.pointOf(e);
       L.sparkleAt(p.x, p.y);
-      L.say(`${L.cheer()} ${currentTarget.n}!`);
+      const said = mode === "free" ? currentTarget.n : sayGlyph(currentTarget.glyph);
+      L.say(`${L.cheer()} ${said}!`);
       activeTimer = setTimeout(nextTarget, 1100);
     } else {
       L.buzzSound();
       el.classList.add("wrong");
       setTimeout(() => el.classList.remove("wrong"), 400);
-      speakTarget();
+      // Name what they tapped (reinforces learning), then repeat the goal.
+      if (mode === "free") L.say(item.n);
+      else L.say(`That's ${sayGlyph(item.glyph)}.`);
+      setTimeout(speakTarget, 700);
     }
   }
 
-  function start() {
+  function setMode(m) {
+    mode = m;
     score = 0;
-    busy = false;
+    themeIdx = -1;
+    celebrated = false;
+    bestKey = m === "letters" ? "findLettersBest"
+            : m === "numbers" ? "findNumbersBest" : "findBest";
+    bestAtStart = L.getHighScore(bestKey);
+
+    document.querySelectorAll("#findGame .mode-tab").forEach((btn) =>
+      btn.classList.toggle("active", btn.dataset.mode === m));
+
     L.bumpBadge("findScoreVal", 0);
-    document.getElementById("findBestVal").textContent = L.getHighScore("findBest");
+    updateBest();
+    clearTimeout(activeTimer);
     newScene();
   }
+
+  function start() {
+    document.querySelectorAll("#findGame .mode-tab").forEach((btn) => {
+      L.onTapOnce(btn, (e) => {
+        if (e.stopPropagation) e.stopPropagation();
+        L.beep(560, 0.07, "triangle");
+        setMode(btn.dataset.mode);
+      });
+    });
+    setMode("free");
+  }
+
   function stop() {
     clearTimeout(activeTimer);
     activeTimer = null;

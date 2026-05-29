@@ -2239,7 +2239,7 @@ html.dark .hub-title {
 }
 .find-prompt {
   position: absolute;
-  top: 90px;
+  top: 104px;
   left: 50%;
   transform: translateX(-50%);
   background: #fff;
@@ -2280,6 +2280,22 @@ html.dark .hub-title {
 }
 .find-item:active {
   filter: drop-shadow(0 4px 4px rgba(0,0,0,0.25)) brightness(1.2);
+}
+/* Letters/numbers ride as bold white glyphs on a colored chip so they
+   stay readable and finger-sized against any scene. */
+.find-item--glyph {
+  padding: 0;
+  width: 1.7em;
+  height: 1.7em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: #fff;
+  font-weight: 900;
+  font-family: "Arial Black", Arial, sans-serif;
+  text-shadow: 0 2px 3px rgba(0, 0, 0, 0.4);
+  border: 3px solid rgba(255, 255, 255, 0.85);
 }
 .find-item.found {
   animation: foundFly 0.7s cubic-bezier(.34,1.56,.64,1) forwards;
