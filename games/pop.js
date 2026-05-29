@@ -220,7 +220,7 @@
             : m === "numbers" ? "popNumbersBest" : "popBest";
     bestAtStart = L.getHighScore(bestKey);
 
-    document.querySelectorAll(".pop-mode").forEach((btn) =>
+    document.querySelectorAll("#popGame .mode-tab").forEach((btn) =>
       btn.classList.toggle("active", btn.dataset.mode === m));
     const prompt = document.getElementById("popPrompt");
     const streakBadge = document.getElementById("popStreak");
@@ -243,7 +243,7 @@
     const area = document.getElementById("popArea");
     area.innerHTML = "";
 
-    document.querySelectorAll(".pop-mode").forEach((btn) => {
+    document.querySelectorAll("#popGame .mode-tab").forEach((btn) => {
       L.onTapOnce(btn, (e) => {
         if (e.stopPropagation) e.stopPropagation();
         L.beep(560, 0.07, "triangle");

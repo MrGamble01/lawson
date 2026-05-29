@@ -802,8 +802,9 @@ html.dark .hub-title {
   height: 100%;
   overflow: hidden;
 }
-/* Mode tabs (Free / ABC / 123), centered below the corner badges. */
-.pop-modes {
+/* Shared game-mode tabs + target banner (Pop / Whack / Find It).
+   Free vs ABC vs 123, plus a "Pop the B!" / "Whack the 3!" prompt. */
+.mode-tabs {
   position: absolute;
   top: 58px;
   left: 50%;
@@ -812,7 +813,7 @@ html.dark .hub-title {
   gap: 8px;
   z-index: 6;
 }
-.pop-mode {
+.mode-tab {
   font-size: clamp(13px, 2.2vw, 18px);
   font-weight: 800;
   color: #c2255c;
@@ -825,14 +826,13 @@ html.dark .hub-title {
   -webkit-tap-highlight-color: transparent;
   transition: transform var(--dur-fast, 0.15s) ease, background 0.2s ease, border-color 0.2s ease;
 }
-.pop-mode:active { transform: scale(0.94) translateY(2px); }
-.pop-mode.active {
+.mode-tab:active { transform: scale(0.94) translateY(2px); }
+.mode-tab.active {
   color: #fff;
   background: #ff4081;
   border-color: #fff;
 }
-/* "Pop the B!" target bar — only shown in ABC / 123 modes. */
-.pop-prompt {
+.target-banner {
   position: absolute;
   top: 106px;
   left: 50%;
@@ -848,10 +848,10 @@ html.dark .hub-title {
   box-shadow: 0 5px 0 rgba(0, 0, 0, 0.15);
   white-space: nowrap;
   pointer-events: none;
-  animation: popPromptIn 0.4s var(--ease-spring, cubic-bezier(.34,1.56,.64,1));
+  animation: targetBannerIn 0.4s var(--ease-spring, cubic-bezier(.34,1.56,.64,1));
 }
-.pop-prompt[hidden] { display: none; }
-@keyframes popPromptIn {
+.target-banner[hidden] { display: none; }
+@keyframes targetBannerIn {
   from { opacity: 0; transform: translate(-50%, -8px) scale(0.85); }
   to   { opacity: 1; transform: translateX(-50%) scale(1); }
 }
@@ -1130,8 +1130,17 @@ html.dark .hub-title {
   gap: clamp(18px, 3vw, 40px);
   width: 100%;
   max-width: 900px;
-  margin-top: 70px;
+  margin-top: 150px;
   padding: 16px;
+}
+/* Letters/numbers ride out of the hole as a bold white glyph — reads
+   cleanly against the dark hole interior. */
+.whack-critter--glyph {
+  font-size: clamp(46px, 9vw, 92px);
+  font-weight: 900;
+  font-family: "Arial Black", Arial, sans-serif;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 2px rgba(0, 0, 0, 0.8);
 }
 .whack-hole {
   position: relative;
