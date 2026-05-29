@@ -140,8 +140,33 @@
     <!-- Home menu — six themed "places" Bobo can visit. Each card opens
          a hub screen with that place's activities. App-Store style: fewer
          choices per screen, clearer hierarchy, every tap is curated. -->
+    <!-- Home: the three games Lawson plays, each with Free / ABC / 123. -->
     <section id="menu" class="screen active">
-      <div class="menu-places">
+      <div class="menu-places menu-home3">
+        <button class="place place--game" data-go="pop" style="--c:#ff922b">
+          <span class="place-emoji">🎈</span>
+          <span class="place-text"><span class="place-label">Pop!</span><span class="place-count">Free · ABC · 123</span></span>
+        </button>
+        <button class="place place--game" data-go="whack" style="--c:#f06595">
+          <span class="place-emoji">🔨</span>
+          <span class="place-text"><span class="place-label">Whack!</span><span class="place-count">Free · ABC · 123</span></span>
+        </button>
+        <button class="place place--game" data-go="find" style="--c:#12b886">
+          <span class="place-emoji">🔍</span>
+          <span class="place-text"><span class="place-label">Find It!</span><span class="place-count">Free · ABC · 123</span></span>
+        </button>
+        <button class="place place--game place--more" data-hub="moreHub" style="--c:#845ef7">
+          <span class="place-emoji">✨</span>
+          <span class="place-text"><span class="place-label">More</span><span class="place-count">Stories, music, art &amp; games</span></span>
+        </button>
+      </div>
+    </section>
+
+    <!-- More: the rest of the activities, one tap off the home screen. -->
+    <section id="moreHub" class="screen hub-screen" data-hub-theme="explore">
+      <button class="home-btn" data-home>🏠</button>
+      <h2 class="hub-title">✨ More to Explore</h2>
+      <div class="menu-places more-places">
         <button class="place" data-hub="artHub" style="--c:#fab005">
           <svg class="place-art" viewBox="0 0 120 120" aria-hidden="true">
             <rect x="20" y="34" width="80" height="56" rx="8" fill="#fff8e1" stroke="#5c3d00" stroke-width="3"/>
@@ -179,30 +204,13 @@
           <span class="place-count">2 games</span>
         </button>
 
-        <button class="place" data-hub="playgroundHub" style="--c:#ff922b">
-          <svg class="place-art" viewBox="0 0 120 120" aria-hidden="true">
-            <ellipse cx="60" cy="100" rx="56" ry="10" fill="#69db7c"/>
-            <ellipse cx="34" cy="46" rx="18" ry="22" fill="#ff6b9d"/>
-            <ellipse cx="28" cy="38" rx="5" ry="8" fill="#fff" opacity="0.7"/>
-            <line x1="34" y1="68" x2="34" y2="92" stroke="#5a3030" stroke-width="2"/>
-            <ellipse cx="78" cy="38" rx="16" ry="20" fill="#4dabf7"/>
-            <ellipse cx="72" cy="32" rx="4" ry="7" fill="#fff" opacity="0.7"/>
-            <line x1="78" y1="58" x2="78" y2="92" stroke="#5a3030" stroke-width="2"/>
-            <ellipse cx="100" cy="58" rx="14" ry="18" fill="#ffd43b"/>
-            <ellipse cx="95" cy="52" rx="3" ry="6" fill="#fff" opacity="0.7"/>
-            <line x1="100" y1="76" x2="100" y2="94" stroke="#5a3030" stroke-width="2"/>
-          </svg>
-          <span class="place-label">Playground</span>
-          <span class="place-count">2 games</span>
-        </button>
-
         <button class="place" data-hub="brainHub" style="--c:#15aabf">
           <svg class="place-art" viewBox="0 0 120 120" aria-hidden="true">
             <path d="M30 30 h 26 v 14 a 8 8 0 0 0 16 0 v -14 h 18 v 26 h -14 a 8 8 0 0 1 0 16 h 14 v 22 h -26 v -14 a 8 8 0 0 0 -16 0 v 14 h -18 v -22 h 14 a 8 8 0 0 0 0 -16 h -14 z" fill="#ffd43b" stroke="#5c3d00" stroke-width="3" stroke-linejoin="round"/>
             <circle cx="60" cy="62" r="6" fill="#fff"/>
           </svg>
           <span class="place-label">Brain Games</span>
-          <span class="place-count">5 games</span>
+          <span class="place-count">4 games</span>
         </button>
 
         <button class="place" data-hub="numbersHub" style="--c:#4dabf7">
@@ -315,9 +323,6 @@
         </button>
         <button class="tile" data-go="dots" style="--c:#15aabf">
           <span class="emoji">🔗</span><span class="label">Dots</span>
-        </button>
-        <button class="tile" data-go="find" style="--c:#12b886">
-          <span class="emoji">🔍</span><span class="label">Find It!</span>
         </button>
       </div>
     </section>

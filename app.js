@@ -738,6 +738,7 @@ function navChime(up) {
 // state is started — the hub is just a category page; its child tiles
 // use the normal data-go flow.
 const HUB_INTROS = {
+  moreHub: "Lots more to explore!",
   numbersHub: "Let's count!",
   exploreHub: "Wonder World!",
   artHub: "Welcome to the Art Studio!",

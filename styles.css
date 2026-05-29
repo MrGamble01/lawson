@@ -523,6 +523,50 @@ body.on-lobby .mascot { display: block; }
 .menu-places .place:nth-child(6) { animation-delay: 0.36s; }
 .menu-places .place:nth-child(7) { animation-delay: 0.42s; }
 
+/* ---------- Lean home: three games + a wide "More" card ---------- */
+.menu-home3 {
+  grid-template-columns: 1fr;
+  max-width: 600px;
+  gap: 16px;
+  padding-top: 90px;
+}
+.place--game {
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap: clamp(14px, 4vw, 28px);
+  min-height: clamp(104px, 22vw, 150px);
+  padding: 14px clamp(18px, 6vw, 36px);
+}
+.place-emoji {
+  font-size: clamp(56px, 14vw, 104px);
+  line-height: 1;
+  flex-shrink: 0;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.25));
+}
+.place--game .place-text { align-items: flex-start; }
+.place--game .place-label { text-align: left; font-size: clamp(26px, 6vw, 40px); }
+.place--game .place-count { text-align: left; }
+.place--more .place-emoji { font-size: clamp(44px, 10vw, 80px); }
+@media (min-width: 720px) {
+  .menu-home3 { grid-template-columns: repeat(3, 1fr); max-width: 860px; }
+  .menu-home3 .place--game {
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 20px 14px;
+    min-height: clamp(190px, 26vw, 250px);
+  }
+  .menu-home3 .place--game .place-text { align-items: center; }
+  .menu-home3 .place--game .place-label { text-align: center; }
+  .menu-home3 .place--more { grid-column: 1 / -1; flex-direction: row; }
+}
+/* "More" drawer reuses the place-card grid without the tall top
+   padding — the hub title already provides the top spacing. */
+.more-places {
+  padding-top: 8px;
+  padding-bottom: 40px;
+}
+
 /* Stagger hub tiles too. The old .menu-tiles selector no longer
    matches anything (home menu uses .menu-places now), so without this
    rule hub tiles all entered in lockstep. */
