@@ -114,11 +114,33 @@
     speakTarget();
   }
 
-  function placeItem(el) {
-    el.style.left = (6 + Math.random() * 84) + "%";
-    el.style.top  = (4 + Math.random() * 84) + "%";
-    el.style.transform = `translate(-50%, -50%) rotate(${(Math.random() - 0.5) * 24}deg)`;
-    el.style.zIndex = String(Math.floor(Math.random() * 10));
+  // Lay items out on a coarse grid so they can't stack on top of each
+  // other. One item per cell + a small random jitter inside the cell
+  // keeps the scene from looking grid-aligned.
+  function placeOnGrid(els) {
+    const n = els.length;
+    const cols = n <= 9 ? 3 : 4;
+    const rows = Math.max(4, Math.ceil(n / cols));
+    const cells = [];
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) cells.push({ r, c });
+    }
+    const order = L.shuffled(cells);
+    const cellW = 100 / cols;
+    const cellH = 100 / rows;
+    els.forEach((el, i) => {
+      const cell = order[i];
+      // Stay well inside the cell (±15% of cell size) so neighboring
+      // items don't bleed into each other after rotation.
+      const jitterX = (Math.random() - 0.5) * cellW * 0.3;
+      const jitterY = (Math.random() - 0.5) * cellH * 0.3;
+      const cx = (cell.c + 0.5) * cellW + jitterX;
+      const cy = (cell.r + 0.5) * cellH + jitterY;
+      el.style.left = Math.max(6, Math.min(94, cx)) + "%";
+      el.style.top  = Math.max(6, Math.min(94, cy)) + "%";
+      el.style.transform = `translate(-50%, -50%) rotate(${(Math.random() - 0.5) * 16}deg)`;
+      el.style.zIndex = String(Math.floor(Math.random() * 5));
+    });
   }
 
   function newScene() {
@@ -129,6 +151,7 @@
     busy = false;
 
     let sceneItems;
+    const els = [];
     if (mode === "free") {
       themeIdx = (themeIdx + 1) % THEMES.length;
       const theme = THEMES[themeIdx];
@@ -138,10 +161,10 @@
         const el = document.createElement("button");
         el.className = "find-item";
         el.textContent = item.e;
-        el.style.fontSize = `clamp(40px, ${6 + Math.random() * 3}vw, 88px)`;
-        placeItem(el);
+        el.style.fontSize = `clamp(38px, ${5.5 + Math.random() * 2}vw, 76px)`;
         L.onTap(el, (e) => onTapItem(item, el, e));
         stage.appendChild(el);
+        els.push(el);
       });
     } else {
       if (game) game.style.background = "linear-gradient(180deg,#fff3bf,#ffec99)";
@@ -153,12 +176,13 @@
         el.className = "find-item find-item--glyph";
         el.textContent = item.glyph;
         el.style.background = GLYPH_COLORS[i % GLYPH_COLORS.length];
-        el.style.fontSize = `clamp(34px, ${5 + Math.random() * 2}vw, 72px)`;
-        placeItem(el);
+        el.style.fontSize = `clamp(34px, ${5 + Math.random() * 2}vw, 68px)`;
         L.onTap(el, (e) => onTapItem(item, el, e));
         stage.appendChild(el);
+        els.push(el);
       });
     }
+    placeOnGrid(els);
 
     targets = L.shuffled(sceneItems.slice()).slice(0, FINDS_PER_SCENE);
     activeTimer = setTimeout(nextTarget, 600);
