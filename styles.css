@@ -2373,17 +2373,43 @@ html.dark .hub-title {
 .dino-stage {
   position: relative;
   width: clamp(280px, 82vw, 460px);
-  aspect-ratio: 1;
   margin-top: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(8px, 2vw, 14px);
+}
+.dino-face-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
 }
 .dino-face {
   width: 100%;
   height: 100%;
   position: relative;
-  transition: transform 0.4s ease;
   filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.22));
+  animation: dinoBreathe 3.6s ease-in-out infinite;
+  transform-origin: 50% 60%;
+}
+@keyframes dinoBreathe {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.02); }
 }
 .dino-face svg { width: 100%; height: 100%; display: block; }
+/* Periodic blink. Each eye part squashes vertically around its own
+   center via transform-box: fill-box. */
+.dino-face svg .dino-eye-white,
+.dino-face svg .dino-eye-iris,
+.dino-face svg .dino-eye-shine {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: dinoBlink 4.5s ease-in-out infinite;
+}
+@keyframes dinoBlink {
+  0%, 93%, 100% { transform: scaleY(1); }
+  95%, 97%      { transform: scaleY(0.08); }
+}
 .dino-mouth-happy { display: none; }
 .dino-face.happy .dino-mouth-sad { display: none; }
 .dino-face.happy .dino-mouth-happy { display: block; }
@@ -2414,6 +2440,7 @@ html.dark .hub-title {
 .dino-ailment svg { width: 100%; height: 100%; display: block; }
 .dino-ailment--tear   { width: clamp(24px, 7vw, 38px); height: clamp(40px, 12vw, 64px); }
 .dino-ailment--bubble { width: clamp(30px, 9vw, 48px); height: clamp(30px, 9vw, 48px); }
+.dino-ailment--owie   { width: clamp(36px, 10vw, 54px); height: clamp(34px, 9vw, 50px); }
 .dino-ailment:active { transform: translate(-50%, -50%) scale(0.85); }
 @keyframes dinoAilEnter {
   from { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
@@ -2426,6 +2453,126 @@ html.dark .hub-title {
 @keyframes dinoWipe {
   0%   { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0); }
   100% { opacity: 0; transform: translate(-50%, -50%) scale(0.2) rotate(40deg); }
+}
+/* Swipe overlay flashed over the face when a tool is tapped. */
+.dino-swipe {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: dinoSwipeAnim 0.7s ease-out forwards;
+  mix-blend-mode: screen;
+}
+@keyframes dinoSwipeAnim {
+  0%   { opacity: 0; clip-path: circle(0% at 50% 50%); }
+  40%  { opacity: 0.85; }
+  100% { opacity: 0; clip-path: circle(110% at 50% 50%); }
+}
+/* "He's hungry!" thought bubble that floats above the head. */
+.dino-hungry {
+  position: absolute;
+  top: -6%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: clamp(36px, 9vw, 58px);
+  background: #fff;
+  border: 4px solid #ffa94d;
+  border-radius: 50%;
+  width: clamp(68px, 17vw, 100px);
+  height: clamp(68px, 17vw, 100px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.15);
+  animation: dinoHungryPop 0.6s cubic-bezier(.34, 1.56, .64, 1),
+             dinoHungryWiggle 1.8s ease-in-out 0.6s infinite;
+  z-index: 4;
+}
+.dino-hungry::after {
+  content: "";
+  position: absolute;
+  bottom: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  border: 4px solid #ffa94d;
+  border-top: none;
+  border-left: none;
+  border-radius: 0 0 50% 0;
+  rotate: 45deg;
+  border-radius: 50%;
+  width: 16px; height: 16px;
+}
+@keyframes dinoHungryPop {
+  from { opacity: 0; transform: translate(-50%, 20px) scale(0.3); }
+  to   { opacity: 1; transform: translateX(-50%) scale(1); }
+}
+@keyframes dinoHungryWiggle {
+  0%, 100% { transform: translateX(-50%) rotate(-3deg); }
+  50%      { transform: translateX(-50%) rotate(3deg); }
+}
+/* Bottle floating to the dino's mouth during the feed animation. */
+.dino-feed-bottle {
+  position: absolute;
+  left: 50%;
+  bottom: 18%;
+  font-size: clamp(56px, 14vw, 84px);
+  pointer-events: none;
+  z-index: 5;
+  animation: dinoFeedAnim 0.9s ease-out forwards;
+}
+@keyframes dinoFeedAnim {
+  0%   { opacity: 0; transform: translate(-50%, -120%) scale(0.6) rotate(-20deg); }
+  40%  { opacity: 1; transform: translate(-50%, -30%)  scale(1.1) rotate(-10deg); }
+  100% { opacity: 1; transform: translate(-50%, 0)     scale(1)   rotate(0); }
+}
+/* Tool rack below the face. */
+.dino-tools {
+  display: flex;
+  gap: clamp(8px, 2vw, 14px);
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 4px 8px;
+}
+.dino-tool {
+  font-size: clamp(34px, 8vw, 50px);
+  line-height: 1;
+  background: rgba(255, 255, 255, 0.96);
+  border: 4px solid #69db7c;
+  border-radius: 18px;
+  padding: 6px 12px;
+  cursor: pointer;
+  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.18);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.3s ease, opacity 0.3s ease, filter 0.3s ease;
+}
+.dino-tool:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.18);
+}
+.dino-tool.dim {
+  opacity: 0.55;
+  filter: grayscale(0.5);
+}
+.dino-tool.ready {
+  border-color: #f59f00;
+  animation: dinoToolGlow 1.4s ease-in-out infinite alternate;
+  opacity: 1;
+  filter: none;
+}
+@keyframes dinoToolGlow {
+  from { transform: scale(1);    box-shadow: 0 5px 0 rgba(0, 0, 0, 0.18); }
+  to   { transform: scale(1.08); box-shadow: 0 5px 0 rgba(0, 0, 0, 0.18), 0 0 18px rgba(255, 200, 80, 0.75); }
+}
+.dino-tool.used {
+  animation: dinoToolUse 0.5s ease-out;
+}
+@keyframes dinoToolUse {
+  0%   { transform: scale(1) rotate(0); }
+  35%  { transform: scale(1.35) rotate(-18deg); }
+  100% { transform: scale(1) rotate(0); }
 }
 .dino-heart {
   position: fixed;
