@@ -155,6 +155,10 @@
           <span class="place-emoji">🔍</span>
           <span class="place-text"><span class="place-label">Find It!</span><span class="place-count">Free · ABC · 123</span></span>
         </button>
+        <button class="place place--game" data-go="cook" style="--c:#fab005">
+          <span class="place-emoji">🥞</span>
+          <span class="place-text"><span class="place-label">Cook!</span><span class="place-count">Pour, flip, stack</span></span>
+        </button>
         <button class="place place--game place--more" data-hub="moreHub" style="--c:#845ef7">
           <span class="place-emoji">✨</span>
           <span class="place-text"><span class="place-label">More</span><span class="place-count">Stories, music, art &amp; games</span></span>
@@ -575,6 +579,14 @@
       </div>
     </section>
 
+    <!-- Cook! pancakes -->
+    <section id="cookGame" class="screen" data-title="🥞 Cook!">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="cookScore" class="badge">🥞 <span id="cookScoreVal">0</span></div>
+      <div id="cookBest" class="badge badge--best">🏆 <span id="cookBestVal">0</span></div>
+      <div id="cookStage" class="cook-stage"></div>
+    </section>
+
     <!-- Sticker collection -->
     <section id="stickersGame" class="screen" data-title="🌟 Stickers">
       <button class="home-btn" data-home>🏠</button>
@@ -651,6 +663,7 @@
   <script src="games/story.js"></script>
   <script src="games/howmany.js"></script>
   <script src="games/mix.js"></script>
+  <script src="games/cook.js"></script>
   <script src="games/stickers.js"></script>
 </body>
 </html>

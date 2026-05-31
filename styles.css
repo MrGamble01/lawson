@@ -549,12 +549,13 @@ body.on-lobby .mascot { display: block; }
 .place--game .place-count { text-align: left; }
 .place--more .place-emoji { font-size: clamp(44px, 10vw, 80px); }
 @media (min-width: 720px) {
-  .menu-home3 { grid-template-columns: repeat(3, 1fr); max-width: 860px; }
+  /* 2x2 grid for the four games, wide More card spanning the row. */
+  .menu-home3 { grid-template-columns: repeat(2, 1fr); max-width: 760px; }
   .menu-home3 .place--game {
     flex-direction: column;
     justify-content: flex-end;
     padding: 20px 14px;
-    min-height: clamp(190px, 26vw, 250px);
+    min-height: clamp(180px, 24vw, 230px);
   }
   .menu-home3 .place--game .place-text { align-items: center; }
   .menu-home3 .place--game .place-label { text-align: center; }
@@ -2352,6 +2353,202 @@ html.dark .hub-title {
 }
 .find-item.wrong {
   animation: findShake 0.4s ease;
+}
+
+/* ---------- Cook! (pancakes) ---------- */
+#cookGame {
+  flex-direction: column;
+  background: linear-gradient(180deg, #ffe8cc 0%, #ffd8a8 60%, #ffc078 100%);
+}
+.cook-stage {
+  position: relative;
+  width: 100%;
+  max-width: 720px;
+  flex: 1;
+  margin-top: 60px;
+}
+.cook-tools {
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  z-index: 4;
+}
+.cook-tool {
+  background: rgba(255, 255, 255, 0.94);
+  border: 4px solid #fab005;
+  border-radius: 20px;
+  padding: 6px;
+  width: clamp(70px, 16vw, 96px);
+  height: clamp(86px, 19vw, 116px);
+  cursor: pointer;
+  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.18);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.2s ease;
+}
+.cook-tool:active,
+.cook-tool.pouring {
+  transform: translateY(3px) rotate(-12deg);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.18);
+}
+.cook-tool.flipping {
+  animation: cookSpatulaSwing 0.45s ease;
+}
+@keyframes cookSpatulaSwing {
+  0%   { transform: rotate(0) translateY(0); }
+  50%  { transform: rotate(-22deg) translateY(-6px); }
+  100% { transform: rotate(0) translateY(0); }
+}
+.cook-tool[disabled] {
+  opacity: 0.45;
+  cursor: default;
+  filter: grayscale(0.4);
+}
+.cook-tool.ready {
+  animation: cookToolReady 1.4s ease-in-out infinite;
+  border-color: #f59f00;
+}
+@keyframes cookToolReady {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.07); }
+}
+.cook-tool svg { width: 100%; height: 100%; display: block; }
+
+.cook-pan {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-44%);
+  width: clamp(240px, 64vw, 380px);
+  height: clamp(170px, 46vw, 270px);
+}
+.cook-pan svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+/* Pancake on the pan, centered on the cooking surface (which sits a
+   touch above the pan's geometric center). */
+.cook-pancake {
+  position: absolute;
+  left: 43%;
+  top: 38%;
+  width: 55%;
+  height: 45%;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+.cook-pancake--pouring {
+  opacity: 1;
+  background: radial-gradient(ellipse at 45% 35%, #fff4cc 0%, #f5e0a0 70%, #d8c080 100%);
+  animation: cookPour 0.95s ease-out;
+}
+@keyframes cookPour {
+  0%   { transform: translate(-50%, -50%) scale(0.05); opacity: 0; }
+  35%  { transform: translate(-50%, -50%) scale(0.4);  opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1);    opacity: 1; }
+}
+.cook-pancake--raw {
+  opacity: 1;
+  pointer-events: auto;
+  background: radial-gradient(ellipse at 45% 35%, #fff4cc 0%, #f5e0a0 70%, #d8c080 100%);
+  animation: cookSizzle 1.6s ease-in-out infinite alternate;
+}
+@keyframes cookSizzle {
+  from { transform: translate(-50%, -50%) scale(1);    filter: brightness(1); }
+  to   { transform: translate(-50%, -50%) scale(1.02); filter: brightness(1.04); }
+}
+.cook-pancake--flipping {
+  opacity: 1;
+  background: radial-gradient(ellipse at 45% 35%, #fff4cc 0%, #f5e0a0 70%, #d8c080 100%);
+  animation: cookFlip 0.78s cubic-bezier(.34, 1.56, .64, 1);
+}
+@keyframes cookFlip {
+  0%   { transform: translate(-50%, -50%) translateY(0)   scale(1)   rotate(0); }
+  45%  { transform: translate(-50%, -50%) translateY(-90px) scale(1.05) rotate(180deg); background: radial-gradient(ellipse at 45% 35%, #f0c070 0%, #c8893a 75%, #8a5a20 100%); }
+  100% { transform: translate(-50%, -50%) translateY(0)   scale(1)   rotate(360deg); background: radial-gradient(ellipse at 45% 35%, #f0c070 0%, #c8893a 75%, #8a5a20 100%); }
+}
+.cook-pancake--cooked {
+  opacity: 1;
+  pointer-events: auto;
+  background: radial-gradient(ellipse at 45% 35%, #f0c070 0%, #c8893a 75%, #8a5a20 100%);
+  cursor: pointer;
+  animation: cookReadyPulse 1.6s ease-in-out infinite;
+}
+@keyframes cookReadyPulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); filter: drop-shadow(0 0 0 transparent); }
+  50%      { transform: translate(-50%, -50%) scale(1.04); filter: drop-shadow(0 0 6px rgba(255,200,80,0.6)); }
+}
+.cook-pancake--plating {
+  opacity: 1;
+  background: radial-gradient(ellipse at 45% 35%, #f0c070 0%, #c8893a 75%, #8a5a20 100%);
+  animation: cookPlate 0.5s ease-in forwards;
+}
+@keyframes cookPlate {
+  0%   { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0); }
+  100% { opacity: 0; transform: translate(170%, 170%) scale(0.45) rotate(-25deg); }
+}
+
+.cook-bubbles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.cook-bubble {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.95) 0%, rgba(255, 245, 200, 0.7) 60%, rgba(220, 190, 120, 0.6) 100%);
+  box-shadow: inset -2px -2px 1px rgba(0, 0, 0, 0.08);
+  animation: cookBubble 1.7s ease-in-out forwards;
+  transform: translate(-50%, -50%);
+}
+@keyframes cookBubble {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0); }
+  35%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.6); }
+}
+
+.cook-plate-area {
+  position: absolute;
+  bottom: 14px;
+  right: 12px;
+  width: clamp(180px, 38vw, 260px);
+  height: clamp(120px, 28vw, 180px);
+}
+.cook-plate {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+.cook-plate svg { width: 100%; display: block; }
+.cook-stack {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  width: 1px;
+  height: 0;
+  z-index: 2;
+}
+.cook-stack-pancake {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: clamp(96px, 22vw, 144px);
+  height: 18px;
+  margin-left: 0;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 40% 30%, #f5cd80 0%, #c8893a 70%, #8a5a20 100%);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.18);
+  animation: cookStackDrop 0.55s cubic-bezier(.34, 1.56, .64, 1) backwards;
+}
+@keyframes cookStackDrop {
+  from { opacity: 0; transform: translateX(calc(-50%)) translateY(-90px) scale(1.15); }
+  to   { opacity: 1; }
 }
 
 /* ---------- Story Time ---------- */
