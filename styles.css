@@ -559,7 +559,15 @@ body.on-lobby .mascot { display: block; }
   }
   .menu-home3 .place--game .place-text { align-items: center; }
   .menu-home3 .place--game .place-label { text-align: center; }
-  .menu-home3 .place--more { grid-column: 1 / -1; flex-direction: row; }
+  .menu-home3 .place--more,
+  .menu-home3 .place--featured {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    justify-content: center;
+    min-height: clamp(110px, 18vw, 160px);
+  }
+  .menu-home3 .place--featured .place-text { align-items: flex-start; }
+  .menu-home3 .place--featured .place-label { text-align: left; }
 }
 /* "More" drawer reuses the place-card grid without the tall top
    padding — the hub title already provides the top spacing. */
@@ -2353,6 +2361,83 @@ html.dark .hub-title {
 }
 .find-item.wrong {
   animation: findShake 0.4s ease;
+}
+
+/* ---------- Baby Dino: make him better ---------- */
+#dinoGame {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #d3f9d8 0%, #b2f2bb 60%, #8ce99a 100%);
+}
+.dino-stage {
+  position: relative;
+  width: clamp(280px, 82vw, 460px);
+  aspect-ratio: 1;
+  margin-top: 60px;
+}
+.dino-face {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transition: transform 0.4s ease;
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.22));
+}
+.dino-face svg { width: 100%; height: 100%; display: block; }
+.dino-mouth-happy { display: none; }
+.dino-face.happy .dino-mouth-sad { display: none; }
+.dino-face.happy .dino-mouth-happy { display: block; }
+.dino-face.happy { animation: dinoBounce 0.7s cubic-bezier(.34, 1.56, .64, 1); }
+@keyframes dinoBounce {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.07); }
+}
+.dino-ailments {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.dino-ailment {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: clamp(38px, 11vw, 60px);
+  height: clamp(38px, 11vw, 60px);
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
+  animation: dinoAilEnter 0.35s ease-out backwards;
+}
+.dino-ailment svg { width: 100%; height: 100%; display: block; }
+.dino-ailment--tear   { width: clamp(24px, 7vw, 38px); height: clamp(40px, 12vw, 64px); }
+.dino-ailment--bubble { width: clamp(30px, 9vw, 48px); height: clamp(30px, 9vw, 48px); }
+.dino-ailment:active { transform: translate(-50%, -50%) scale(0.85); }
+@keyframes dinoAilEnter {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+.dino-ailment.cleaned {
+  animation: dinoWipe 0.4s ease-out forwards;
+  pointer-events: none;
+}
+@keyframes dinoWipe {
+  0%   { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(0.2) rotate(40deg); }
+}
+.dino-heart {
+  position: fixed;
+  font-size: clamp(28px, 6vw, 44px);
+  pointer-events: none;
+  z-index: 50;
+  animation: dinoHeartFly 1.8s ease-out forwards;
+}
+@keyframes dinoHeartFly {
+  0%   { opacity: 0; transform: translateY(0)    scale(0.4); }
+  20%  { opacity: 1; transform: translateY(-30px) scale(1.1); }
+  100% { opacity: 0; transform: translateY(-280px) scale(0.7); }
 }
 
 /* ---------- Cook! (pancakes) ---------- */

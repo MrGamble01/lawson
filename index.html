@@ -159,6 +159,10 @@
           <span class="place-emoji">🥞</span>
           <span class="place-text"><span class="place-label">Cook!</span><span class="place-count">Pour, flip, stack</span></span>
         </button>
+        <button class="place place--game place--featured" data-go="dino" style="--c:#ff922b">
+          <span class="place-emoji">🦖</span>
+          <span class="place-text"><span class="place-label">Baby Dino</span><span class="place-count">Make him better</span></span>
+        </button>
         <button class="place place--game place--more" data-hub="moreHub" style="--c:#845ef7">
           <span class="place-emoji">✨</span>
           <span class="place-text"><span class="place-label">More</span><span class="place-count">Stories, music, art &amp; games</span></span>
@@ -579,6 +583,14 @@
       </div>
     </section>
 
+    <!-- Baby Dino: make him better -->
+    <section id="dinoGame" class="screen" data-title="🦖 Baby Dino">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="dinoScore" class="badge">💖 <span id="dinoScoreVal">0</span></div>
+      <div id="dinoBest" class="badge badge--best">🏆 <span id="dinoBestVal">0</span></div>
+      <div id="dinoStage" class="dino-stage"></div>
+    </section>
+
     <!-- Cook! pancakes -->
     <section id="cookGame" class="screen" data-title="🥞 Cook!">
       <button class="home-btn" data-home>🏠</button>
@@ -664,6 +676,7 @@
   <script src="games/howmany.js"></script>
   <script src="games/mix.js"></script>
   <script src="games/cook.js"></script>
+  <script src="games/dino.js"></script>
   <script src="games/stickers.js"></script>
 </body>
 </html>
