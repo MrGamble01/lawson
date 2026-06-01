@@ -159,9 +159,13 @@
           <span class="place-emoji">🥞</span>
           <span class="place-text"><span class="place-label">Cook!</span><span class="place-count">Pour, flip, stack</span></span>
         </button>
-        <button class="place place--game place--featured" data-go="dino" style="--c:#ff922b">
+        <button class="place place--game" data-go="dino" style="--c:#ff922b">
           <span class="place-emoji">🦖</span>
-          <span class="place-text"><span class="place-label">Baby Dino</span><span class="place-count">Make him better</span></span>
+          <span class="place-text"><span class="place-label">Baby Dino</span><span class="place-count">Bath time!</span></span>
+        </button>
+        <button class="place place--game" data-go="garden" style="--c:#37b24d">
+          <span class="place-emoji">🌱</span>
+          <span class="place-text"><span class="place-label">Garden!</span><span class="place-count">Plant, water, pick</span></span>
         </button>
         <button class="place place--game place--more" data-hub="moreHub" style="--c:#845ef7">
           <span class="place-emoji">✨</span>
@@ -188,7 +192,7 @@
             <line x1="90" y1="92" x2="90" y2="108" stroke="#5c3d00" stroke-width="3"/>
           </svg>
           <span class="place-label">Art Studio</span>
-          <span class="place-count">3 games</span>
+          <span class="place-count">4 games</span>
         </button>
 
         <button class="place" data-hub="musicHub" style="--c:#845ef7">
@@ -283,6 +287,9 @@
         </button>
         <button class="tile" data-go="mix" style="--c:#f76707">
           <span class="emoji">🧪</span><span class="label">Mix</span>
+        </button>
+        <button class="tile" data-go="scene" style="--c:#845ef7">
+          <span class="emoji">🖼️</span><span class="label">Scene</span>
         </button>
       </div>
     </section>
@@ -583,6 +590,20 @@
       </div>
     </section>
 
+    <!-- Sticker Scene! drag stickers onto themed backgrounds -->
+    <section id="sceneGame" class="screen" data-title="🖼️ Sticker Scene!">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="sceneStage" class="scene-stage"></div>
+    </section>
+
+    <!-- Garden! plant, water, harvest -->
+    <section id="gardenGame" class="screen" data-title="🌱 Garden!">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="gardenScore" class="badge">🍓 <span id="gardenScoreVal">0</span></div>
+      <div id="gardenBest" class="badge badge--best">🏆 <span id="gardenBestVal">0</span></div>
+      <div id="gardenStage" class="garden-stage"></div>
+    </section>
+
     <!-- Baby Dino: make him better -->
     <section id="dinoGame" class="screen" data-title="🦖 Baby Dino">
       <button class="home-btn" data-home>🏠</button>
@@ -659,6 +680,7 @@
   <script src="lib/audio.js"></script>
   <script src="lib/storage.js"></script>
   <script src="lib/achievements.js"></script>
+  <script src="lib/tutorial.js"></script>
   <script src="app.js"></script>
   <script src="games/pop.js"></script>
   <script src="games/piano.js"></script>
@@ -677,6 +699,8 @@
   <script src="games/mix.js"></script>
   <script src="games/cook.js"></script>
   <script src="games/dino.js"></script>
+  <script src="games/garden.js"></script>
+  <script src="games/scene.js"></script>
   <script src="games/stickers.js"></script>
 </body>
 </html>

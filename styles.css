@@ -2363,6 +2363,684 @@ html.dark .hub-title {
   animation: findShake 0.4s ease;
 }
 
+/* ---------- Tutorial overlay ---------- */
+.tutorial-overlay {
+  position: fixed;
+  left: 50%;
+  bottom: 32px;
+  transform: translate(-50%, 40px);
+  opacity: 0;
+  z-index: 220;
+  pointer-events: auto;
+  transition: opacity 0.36s ease, transform 0.36s cubic-bezier(.34, 1.56, .64, 1);
+  cursor: pointer;
+}
+.tutorial-overlay.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+.tutorial-pill {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 22px 12px 16px;
+  background: rgba(255, 255, 255, 0.97);
+  border: 4px solid #ff4081;
+  border-radius: 999px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+  max-width: min(92vw, 460px);
+}
+.tutorial-emoji {
+  font-size: 36px;
+  line-height: 1;
+}
+.tutorial-text {
+  font-weight: 800;
+  color: #c2255c;
+  font-size: clamp(16px, 3vw, 22px);
+}
+
+/* ---------- Sticker Scene! ---------- */
+#sceneGame {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: stretch;
+  padding: 0;
+  overflow: hidden;
+}
+.scene-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.scene-bg {
+  position: absolute;
+  inset: 0;
+  transition: background 0.6s ease;
+  z-index: 1;
+}
+/* Per-scene decorative SVG-y overlays via background-image so each
+   scene reads as a place, not just a color gradient. */
+.scene-bg[data-scene="park"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 18% 92%, #2f9e44 0%, transparent 30%),
+    radial-gradient(ellipse at 82% 90%, #51cf66 0%, transparent 30%),
+    radial-gradient(circle at 12% 30%, rgba(255,255,255,0.25) 0%, transparent 10%),
+    radial-gradient(circle at 84% 22%, rgba(255,255,255,0.18) 0%, transparent 10%);
+  pointer-events: none;
+}
+.scene-bg[data-scene="beach"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, transparent 60%, #ffe5a3 60%, #ffd180 100%);
+  pointer-events: none;
+}
+.scene-bg[data-scene="jungle"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 60%, rgba(43, 138, 62, 0.5) 0%, transparent 24%),
+    radial-gradient(ellipse at 76% 64%, rgba(26, 93, 42, 0.5) 0%, transparent 24%),
+    radial-gradient(ellipse at 42% 78%, rgba(43, 138, 62, 0.5) 0%, transparent 22%);
+  pointer-events: none;
+}
+.scene-bg[data-scene="ocean"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(180deg,
+      rgba(255,255,255,0) 0px,
+      rgba(255,255,255,0.05) 30px,
+      rgba(255,255,255,0) 60px);
+  pointer-events: none;
+}
+.scene-bg[data-scene="space"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 12% 18%, #fff 0%, transparent 2%),
+    radial-gradient(circle at 26% 60%, #fff 0%, transparent 1.5%),
+    radial-gradient(circle at 70% 22%, #fff 0%, transparent 2%),
+    radial-gradient(circle at 86% 70%, #fff 0%, transparent 2%),
+    radial-gradient(circle at 44% 38%, #fff 0%, transparent 1.5%),
+    radial-gradient(circle at 58% 84%, #fff 0%, transparent 2%);
+  pointer-events: none;
+}
+.scene-bg[data-scene="snow"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255,255,255,0.7) 0%, transparent 2%),
+    radial-gradient(circle at 50% 70%, rgba(255,255,255,0.7) 0%, transparent 2%),
+    radial-gradient(circle at 78% 28%, rgba(255,255,255,0.7) 0%, transparent 2%),
+    radial-gradient(circle at 32% 88%, rgba(255,255,255,0.7) 0%, transparent 2%),
+    radial-gradient(circle at 70% 62%, rgba(255,255,255,0.7) 0%, transparent 2%);
+  pointer-events: none;
+}
+.scene-placed {
+  position: absolute;
+  inset: 0 0 130px 0;
+  pointer-events: none;
+  z-index: 3;
+}
+.scene-placed-sticker {
+  position: absolute;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  pointer-events: auto;
+  transform: translate(-50%, -50%) rotate(var(--rot, 0deg));
+  -webkit-tap-highlight-color: transparent;
+  filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.32));
+  line-height: 1;
+  animation: scenePlace 0.45s cubic-bezier(.34, 1.56, .64, 1) backwards;
+}
+@keyframes scenePlace {
+  0%   { opacity: 0; transform: translate(-50%, -50%) rotate(var(--rot, 0deg)) scale(0.3); }
+  60%  { opacity: 1; transform: translate(-50%, -50%) rotate(var(--rot, 0deg)) scale(1.18); }
+  100% { opacity: 1; transform: translate(-50%, -50%) rotate(var(--rot, 0deg)) scale(1); }
+}
+.scene-placed-sticker.scene-clearing {
+  animation: sceneClear 0.32s ease-in forwards;
+  pointer-events: none;
+}
+@keyframes sceneClear {
+  to { opacity: 0; transform: translate(-50%, -50%) rotate(var(--rot, 0deg)) scale(0.2); }
+}
+.scene-placed-sticker.scene-wiggle {
+  animation: sceneWiggle 0.5s cubic-bezier(.34, 1.56, .64, 1);
+}
+@keyframes sceneWiggle {
+  0%, 100% { transform: translate(-50%, -50%) rotate(var(--rot, 0deg)) scale(1); }
+  30%      { transform: translate(-50%, -50%) rotate(calc(var(--rot, 0deg) - 12deg)) scale(1.15); }
+  60%      { transform: translate(-50%, -50%) rotate(calc(var(--rot, 0deg) + 8deg)) scale(1.08); }
+}
+.scene-switch,
+.scene-clear {
+  position: absolute;
+  top: 70px;
+  z-index: 9;
+  background: rgba(255, 255, 255, 0.95);
+  border: 4px solid #845ef7;
+  border-radius: 999px;
+  padding: 6px 16px;
+  font-weight: 800;
+  color: #5f3dc4;
+  cursor: pointer;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.18);
+  -webkit-tap-highlight-color: transparent;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: clamp(14px, 2.4vw, 18px);
+}
+.scene-switch { right: 14px; }
+.scene-clear  { left: 90px; border-color: #f06595; color: #c2255c; }
+.scene-switch:active,
+.scene-clear:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0, 0, 0, 0.18); }
+.scene-tray {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 120px;
+  background: rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 8;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-top: 4px solid rgba(255, 255, 255, 0.6);
+  touch-action: pan-x;
+}
+.scene-tray-inner {
+  display: flex;
+  gap: 10px;
+  padding: 14px 14px;
+  align-items: center;
+  height: 100%;
+}
+.scene-sticker-source {
+  background: rgba(255, 255, 255, 0.96);
+  border: 3px solid #845ef7;
+  border-radius: 16px;
+  padding: 6px 10px;
+  cursor: grab;
+  font-size: clamp(36px, 9vw, 52px);
+  line-height: 1;
+  flex-shrink: 0;
+  width: 78px;
+  height: 78px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.18);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+  transition: transform 0.15s ease;
+}
+.scene-sticker-source.grabbed { opacity: 0.35; transform: scale(0.92); cursor: grabbing; }
+.scene-sticker-source:active { transform: translateY(2px); }
+.scene-sticker-ghost {
+  position: fixed;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 50px;
+  pointer-events: none;
+  z-index: 200;
+  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.35));
+  animation: sceneGhostPop 0.18s ease-out;
+}
+@keyframes sceneGhostPop {
+  from { transform: scale(0.7); }
+  to   { transform: scale(1.2); }
+}
+
+/* ---------- Garden! ---------- */
+#gardenGame {
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0;
+  overflow: hidden;
+  background: linear-gradient(180deg, #a5d8ff 0%, #ffe066 100%);
+}
+.garden-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  margin-top: 0;
+}
+.garden-sky {
+  position: absolute;
+  inset: 0 0 38% 0;
+  background: linear-gradient(180deg, #a5d8ff 0%, #ffe066 100%);
+  transition: background 4s ease;
+  pointer-events: none;
+  overflow: hidden;
+}
+.garden-ground {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 38%;
+  background:
+    radial-gradient(ellipse at 50% 100%, #74c0fc 0%, transparent 60%) no-repeat,
+    linear-gradient(180deg, #51cf66 0%, #2f9e44 65%, #2b8a3e 100%);
+  pointer-events: none;
+  overflow: hidden;
+}
+.garden-ground::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 18% 70%, rgba(255, 255, 255, 0.18) 0%, transparent 16%),
+    radial-gradient(circle at 78% 82%, rgba(255, 255, 255, 0.12) 0%, transparent 16%),
+    radial-gradient(circle at 50% 92%, rgba(0, 0, 0, 0.10) 0%, transparent 12%);
+  pointer-events: none;
+}
+/* The sun sits in the upper-left of the sky and slowly drifts as the
+   day cycle changes the gradient behind it. */
+.garden-sun {
+  position: absolute;
+  top: 6%;
+  right: 6%;
+  width: clamp(60px, 14vw, 100px);
+  height: clamp(60px, 14vw, 100px);
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  z-index: 5;
+  filter: drop-shadow(0 0 18px rgba(255, 212, 59, 0.7));
+  -webkit-tap-highlight-color: transparent;
+  animation: gardenSunBob 5s ease-in-out infinite;
+}
+.garden-sun svg { width: 100%; height: 100%; }
+.garden-sun.spinning { animation: gardenSunSpin 0.9s ease; }
+@keyframes gardenSunBob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+@keyframes gardenSunSpin {
+  from { transform: rotate(0); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Drifting clouds in the sky band. Each has its own delay + duration. */
+.garden-cloud {
+  position: absolute;
+  width: clamp(80px, 22vw, 160px);
+  height: auto;
+  top: var(--y, 14%);
+  left: -20%;
+  pointer-events: auto;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  z-index: 4;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.15));
+  animation: gardenCloudDrift var(--dur, 36s) linear infinite var(--delay, 0s);
+}
+.garden-cloud svg { width: 100%; height: auto; display: block; }
+.garden-cloud--1 { --y: 10%; --dur: 36s; --delay: 0s; }
+.garden-cloud--2 { --y: 22%; --dur: 48s; --delay: 12s; }
+.garden-cloud--3 { --y: 6%;  --dur: 42s; --delay: 24s; }
+@keyframes gardenCloudDrift {
+  from { transform: translateX(0); }
+  to   { transform: translateX(140vw); }
+}
+
+/* Pots are laid out in a 3-column grid sitting on the green ground. */
+.garden-pots {
+  position: absolute;
+  left: 50%;
+  bottom: 4%;
+  transform: translateX(-50%);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(8px, 2.5vw, 22px);
+  width: min(96vw, 720px);
+  z-index: 6;
+}
+.garden-pot-wrap {
+  position: relative;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: clamp(140px, 28vw, 220px);
+}
+.garden-pot {
+  position: relative;
+  width: 100%;
+  pointer-events: none;
+  filter: drop-shadow(0 6px 4px rgba(0, 0, 0, 0.2));
+}
+.garden-pot svg { width: 100%; height: auto; display: block; }
+.garden-plant {
+  position: relative;
+  width: 100%;
+  pointer-events: none;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: 0;
+  transition: height 0.35s cubic-bezier(.34, 1.56, .64, 1);
+  z-index: 2;
+}
+.garden-plant svg {
+  width: clamp(60px, 16vw, 130px);
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.25));
+}
+.garden-plant.stage-seeded  { height: clamp(22px, 5vw, 36px);  animation: gardenSeedDrop 0.45s ease-out backwards; }
+.garden-plant.stage-sprout  { height: clamp(50px, 13vw, 90px); animation: gardenStageGrow 0.55s cubic-bezier(.34, 1.56, .64, 1); }
+.garden-plant.stage-young   { height: clamp(80px, 22vw, 140px); animation: gardenStageGrow 0.55s cubic-bezier(.34, 1.56, .64, 1); }
+.garden-plant.stage-mature  {
+  height: clamp(120px, 30vw, 200px);
+  animation: gardenStageMature 0.7s cubic-bezier(.34, 1.56, .64, 1);
+}
+@keyframes gardenSeedDrop {
+  from { opacity: 0; transform: translateY(-30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes gardenStageGrow {
+  0%   { transform: translateY(8px) scaleY(0.7); }
+  60%  { transform: translateY(-4px) scaleY(1.1); }
+  100% { transform: translateY(0)    scaleY(1); }
+}
+@keyframes gardenStageMature {
+  0%   { transform: translateY(8px) scale(0.85); }
+  40%  { transform: translateY(-12px) scale(1.12); }
+  70%  { transform: translateY(0) scale(1.04); }
+  100% { transform: translateY(0) scale(1); }
+}
+.garden-plant.harvesting {
+  animation: gardenHarvest 0.7s ease-in forwards;
+}
+@keyframes gardenHarvest {
+  0%   { opacity: 1; transform: scale(1); }
+  40%  { opacity: 1; transform: scale(1.18) translateY(-12px); }
+  100% { opacity: 0; transform: scale(0.4) translateY(-60px) rotate(20deg); }
+}
+/* Glow ring under a ready-to-pick mature pot. */
+.garden-glow {
+  position: absolute;
+  inset: auto 0 -8px 0;
+  height: 30%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(255, 215, 0, 0.55) 0%, transparent 60%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+  z-index: 1;
+}
+.garden-glow.active {
+  opacity: 1;
+  animation: gardenGlowPulse 1.6s ease-in-out infinite alternate;
+}
+@keyframes gardenGlowPulse {
+  from { transform: scale(1);    opacity: 0.55; }
+  to   { transform: scale(1.15); opacity: 1;    }
+}
+.garden-pot-wrap[data-state="mature"] {
+  animation: gardenPotReady 1.8s ease-in-out infinite alternate;
+}
+@keyframes gardenPotReady {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-3px); }
+}
+
+/* Tool rack — currently just the watering can in the bottom-left. */
+.garden-tools {
+  position: absolute;
+  bottom: clamp(14px, 4vw, 28px);
+  left: clamp(8px, 3vw, 18px);
+  z-index: 8;
+}
+.garden-tool {
+  background: rgba(255, 255, 255, 0.94);
+  border: 4px solid #1c7ed6;
+  border-radius: 18px;
+  padding: 6px 8px;
+  cursor: grab;
+  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.18);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+  width: clamp(74px, 18vw, 110px);
+  height: clamp(58px, 14vw, 88px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.garden-tool svg { width: 100%; height: auto; display: block; }
+.garden-tool:active { transform: translateY(2px); }
+.garden-tool.grabbed {
+  cursor: grabbing;
+  z-index: 20;
+  transition: none;
+  box-shadow: 0 10px 16px rgba(0, 0, 0, 0.3);
+  transform: rotate(-12deg);
+}
+.garden-tool--water {
+  animation: gardenCanBeckon 1.8s ease-in-out infinite alternate;
+}
+@keyframes gardenCanBeckon {
+  from { transform: scale(1);    box-shadow: 0 5px 0 rgba(0, 0, 0, 0.18); }
+  to   { transform: scale(1.04); box-shadow: 0 5px 0 rgba(0, 0, 0, 0.18), 0 0 18px rgba(116, 192, 252, 0.7); }
+}
+.garden-tool--water.grabbed {
+  animation: none;
+}
+
+/* Water drops trailing the watering can. */
+.garden-water-drops {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 19;
+}
+.garden-water-drop {
+  position: fixed;
+  font-size: clamp(18px, 4vw, 26px);
+  pointer-events: none;
+  z-index: 19;
+  animation: gardenWaterDropFall 0.85s ease-in forwards;
+}
+@keyframes gardenWaterDropFall {
+  0%   { opacity: 0; transform: translateY(0) scale(0.5); }
+  20%  { opacity: 1; transform: translateY(8px) scale(1); }
+  100% { opacity: 0; transform: translateY(60px) scale(0.4); }
+}
+
+/* Harvested fruit flies up out of the pot. */
+.garden-fly-fruit {
+  position: fixed;
+  font-size: clamp(36px, 9vw, 60px);
+  pointer-events: none;
+  z-index: 50;
+  animation: gardenFlyFruit 1.4s cubic-bezier(.34, 1.56, .64, 1) forwards;
+  transform: translate(-50%, -50%);
+}
+@keyframes gardenFlyFruit {
+  0%   { opacity: 1; transform: translate(-50%, -50%) scale(0.8) rotate(0); }
+  40%  { opacity: 1; transform: translate(-50%, -160%) scale(1.6) rotate(-12deg); }
+  100% { opacity: 0; transform: translate(-50%, -260%) scale(0.8) rotate(-30deg); }
+}
+
+/* Insects (bees, butterflies, snail). All free-flying buttons whose
+   --dur / --delay come from JS so each one drifts on its own clock. */
+.garden-insects {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 7;
+}
+.garden-insect {
+  position: absolute;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+}
+.garden-insect svg { display: block; }
+.garden-bee {
+  width: clamp(36px, 8vw, 56px);
+  top: 25%;
+  left: 0;
+  animation: gardenBeePath var(--dur, 12s) linear var(--delay, 0s) infinite,
+             gardenBeeFlap 0.2s linear infinite;
+  transform-origin: center;
+}
+.garden-bee svg { width: 100%; height: auto; }
+.garden-bee.startled {
+  animation: gardenBeeStartle 0.6s ease;
+}
+@keyframes gardenBeePath {
+  0%   { transform: translate(0, 0) rotate(8deg); }
+  25%  { transform: translate(40vw, -8vh) rotate(-6deg); }
+  50%  { transform: translate(70vw, 4vh)  rotate(6deg); }
+  75%  { transform: translate(40vw, 12vh) rotate(-4deg); }
+  100% { transform: translate(0, 0) rotate(8deg); }
+}
+@keyframes gardenBeeFlap {
+  0%, 100% { filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.2)); }
+  50%      { filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.3)); }
+}
+@keyframes gardenBeeStartle {
+  0%   { transform: scale(1) rotate(0); }
+  40%  { transform: scale(1.3) rotate(-20deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+.garden-butterfly {
+  width: clamp(38px, 9vw, 64px);
+  top: 18%;
+  right: 0;
+  animation: gardenButterflyPath var(--dur, 14s) ease-in-out var(--delay, 2s) infinite;
+  transform-origin: center;
+}
+.garden-butterfly svg { width: 100%; height: auto; }
+@keyframes gardenButterflyPath {
+  0%   { transform: translate(0,    0)   rotate(-8deg); }
+  20%  { transform: translate(-30vw, 6vh) rotate(6deg); }
+  40%  { transform: translate(-55vw, -4vh) rotate(-8deg); }
+  60%  { transform: translate(-70vw, 8vh) rotate(8deg); }
+  80%  { transform: translate(-40vw, -2vh) rotate(-6deg); }
+  100% { transform: translate(0,    0)   rotate(-8deg); }
+}
+.garden-snail {
+  width: clamp(44px, 11vw, 78px);
+  bottom: 6%;
+  left: -10%;
+  animation: gardenSnailCrawl 22s linear forwards;
+}
+.garden-snail svg { width: 100%; height: auto; }
+.garden-snail.startled {
+  animation: gardenSnailHide 0.7s ease-in forwards;
+}
+@keyframes gardenSnailCrawl {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(120vw); }
+}
+@keyframes gardenSnailHide {
+  to { opacity: 0; transform: scale(0.5) translateY(-30px); }
+}
+
+/* Bird visitor — flies across the sky in a gentle arc. */
+.garden-bird {
+  width: clamp(40px, 9vw, 60px);
+  top: 12%;
+  left: -10%;
+  animation: gardenBirdFlight 12s linear forwards,
+             gardenBirdFlap   0.25s linear infinite;
+}
+.garden-bird svg { width: 100%; height: auto; }
+.garden-bird.startled {
+  animation: gardenBirdHide 0.7s ease-in forwards;
+}
+@keyframes gardenBirdFlight {
+  0%   { transform: translateX(0)    translateY(0); }
+  30%  { transform: translateX(40vw) translateY(-3vh); }
+  60%  { transform: translateX(70vw) translateY(2vh); }
+  100% { transform: translateX(115vw) translateY(-2vh); }
+}
+@keyframes gardenBirdFlap {
+  0%, 100% { filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.25)); }
+  50%      { filter: drop-shadow(0 5px 4px rgba(0, 0, 0, 0.35)); }
+}
+@keyframes gardenBirdHide {
+  to { opacity: 0; transform: translateY(-40px) scale(0.5); }
+}
+
+/* Autumn leaves drifting down on a gentle wind path. */
+.garden-leaf {
+  position: absolute;
+  top: -8%;
+  width: clamp(20px, 4vw, 32px);
+  height: clamp(20px, 4vw, 32px);
+  pointer-events: none;
+  z-index: 7;
+  animation: gardenLeafFall var(--dur, 6s) linear forwards;
+}
+.garden-leaf svg { width: 100%; height: auto; display: block; }
+@keyframes gardenLeafFall {
+  0%   { transform: translate(0, 0) rotate(0); opacity: 0; }
+  10%  { opacity: 1; }
+  50%  { transform: translate(calc(var(--drift, 0) * 0.5), 50vh) rotate(180deg); }
+  100% { transform: translate(var(--drift, 0), 110vh) rotate(540deg); opacity: 0; }
+}
+
+/* Rain shower: vertical streaks falling from the top of the sky. */
+.garden-rain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 6;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.garden-rain.on { opacity: 1; }
+.garden-rain-drop {
+  position: absolute;
+  top: -10%;
+  width: 3px;
+  height: 22px;
+  background: linear-gradient(180deg, rgba(116, 192, 252, 0) 0%, #74c0fc 60%, #1c7ed6 100%);
+  border-radius: 2px;
+  animation: gardenRainFall linear infinite;
+}
+@keyframes gardenRainFall {
+  from { transform: translateY(0);    opacity: 0; }
+  10%  { opacity: 1; }
+  to   { transform: translateY(110vh); opacity: 0.5; }
+}
+
 /* ---------- Baby Dino: bath time ---------- */
 #dinoGame {
   flex-direction: column;
