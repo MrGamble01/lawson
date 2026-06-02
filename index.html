@@ -254,6 +254,34 @@
           <span class="place-count">9 topics</span>
         </button>
 
+        <button class="place" data-go="farm" style="--c:#fa5252">
+          <svg class="place-art" viewBox="0 0 120 120" aria-hidden="true">
+            <rect x="14" y="48" width="92" height="60" fill="#c2255c"/>
+            <path d="M10 50 L 60 14 L 110 50 Z" fill="#a8083e"/>
+            <rect x="28" y="70" width="22" height="38" fill="#fff" stroke="#5c0e2c" stroke-width="2"/>
+            <rect x="70" y="70" width="22" height="38" fill="#fff" stroke="#5c0e2c" stroke-width="2"/>
+            <circle cx="60" cy="36" r="5" fill="#ffd43b"/>
+            <ellipse cx="60" cy="112" rx="50" ry="4" fill="rgba(0,0,0,0.2)"/>
+          </svg>
+          <span class="place-label">Farm</span>
+          <span class="place-count">Care for the animals</span>
+        </button>
+
+        <button class="place" data-go="icecream" style="--c:#ff8ab0">
+          <svg class="place-art" viewBox="0 0 120 120" aria-hidden="true">
+            <path d="M30 56 L 90 56 L 60 108 Z" fill="#d4a060" stroke="#8b6230" stroke-width="3"/>
+            <line x1="38" y1="68" x2="82" y2="68" stroke="#8b6230" stroke-width="1.5"/>
+            <line x1="44" y1="80" x2="76" y2="80" stroke="#8b6230" stroke-width="1.5"/>
+            <line x1="50" y1="92" x2="70" y2="92" stroke="#8b6230" stroke-width="1.5"/>
+            <ellipse cx="60" cy="46" rx="32" ry="22" fill="#ff8ab0"/>
+            <ellipse cx="60" cy="30" rx="26" ry="18" fill="#fff8e1"/>
+            <ellipse cx="60" cy="16" rx="20" ry="14" fill="#7a4a20"/>
+            <circle cx="60" cy="6" r="4" fill="#fa5252"/>
+          </svg>
+          <span class="place-label">Ice Cream</span>
+          <span class="place-count">Make a sundae</span>
+        </button>
+
         <button class="place place--wide" data-hub="libraryHub" style="--c:#ffc078">
           <svg class="place-art" viewBox="0 0 120 120" aria-hidden="true">
             <path d="M16 30 Q 60 22 60 30 L 60 96 Q 60 88 16 96 Z" fill="#fff" stroke="#8a5a00" stroke-width="3"/>
@@ -596,6 +624,22 @@
       <div id="sceneStage" class="scene-stage"></div>
     </section>
 
+    <!-- Farm! sandbox -->
+    <section id="farmGame" class="screen" data-title="🏡 Farm!">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="farmScore" class="badge">⭐ <span id="farmScoreVal">0</span></div>
+      <div id="farmBest" class="badge badge--best">🏆 <span id="farmBestVal">0</span></div>
+      <div id="farmStage" class="farm-stage"></div>
+    </section>
+
+    <!-- Ice Cream! make a sundae -->
+    <section id="icecreamGame" class="screen" data-title="🍦 Ice Cream!">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="icecreamScore" class="badge">🍦 <span id="icecreamScoreVal">0</span></div>
+      <div id="icecreamBest" class="badge badge--best">🏆 <span id="icecreamBestVal">0</span></div>
+      <div id="icecreamStage" class="icecream-stage"></div>
+    </section>
+
     <!-- Garden! plant, water, harvest -->
     <section id="gardenGame" class="screen" data-title="🌱 Garden!">
       <button class="home-btn" data-home>🏠</button>
@@ -701,6 +745,8 @@
   <script src="games/dino.js"></script>
   <script src="games/garden.js"></script>
   <script src="games/scene.js"></script>
+  <script src="games/farm.js"></script>
+  <script src="games/icecream.js"></script>
   <script src="games/stickers.js"></script>
 </body>
 </html>
