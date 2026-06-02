@@ -2363,6 +2363,336 @@ html.dark .hub-title {
   animation: findShake 0.4s ease;
 }
 
+/* ---------- Train! ---------- */
+#trainGame {
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0;
+  overflow: hidden;
+  background: #a5d8ff;
+}
+.train-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.train-sky {
+  position: absolute;
+  inset: 0 0 36% 0;
+  background: linear-gradient(180deg, #a5d8ff 0%, #ffe066 80%, #fff3bf 100%);
+  transition: background 6s ease;
+  z-index: 1;
+}
+.train-sun {
+  position: absolute;
+  top: 6%;
+  right: 8%;
+  width: clamp(60px, 14vw, 96px);
+  height: clamp(60px, 14vw, 96px);
+  z-index: 5;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  filter: drop-shadow(0 0 18px rgba(255, 212, 59, 0.7));
+  animation: trainSunBob 5s ease-in-out infinite;
+  -webkit-tap-highlight-color: transparent;
+}
+.train-sun svg { width: 100%; height: 100%; }
+.train-sun.spinning { animation: trainSunSpin 0.9s ease; }
+@keyframes trainSunBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes trainSunSpin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+.train-cloud {
+  position: absolute;
+  width: clamp(70px, 20vw, 140px);
+  height: clamp(34px, 10vw, 64px);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.95);
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.15));
+  z-index: 4;
+  cursor: pointer;
+  border: none;
+}
+.train-cloud--1 { top: 10%; left: -20%;  animation: trainCloudDrift 50s linear infinite; }
+.train-cloud--2 { top: 18%; left: -50%;  animation: trainCloudDrift 60s linear 15s infinite; }
+.train-cloud--3 { top: 6%;  left: -30%;  animation: trainCloudDrift 70s linear 30s infinite; }
+@keyframes trainCloudDrift { from { transform: translateX(0); } to { transform: translateX(140vw); } }
+
+.train-hills {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 30%;
+  height: 22%;
+  background: linear-gradient(180deg, #51cf66 0%, #2f9e44 100%);
+  clip-path: ellipse(140% 100% at 50% 100%);
+  z-index: 2;
+  pointer-events: none;
+}
+.train-ground {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 30%;
+  background: linear-gradient(180deg, #51cf66 0%, #2f9e44 60%, #2b8a3e 100%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.train-stations {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 28%;
+  height: 18%;
+  z-index: 6;
+  pointer-events: none;
+}
+.train-station {
+  position: absolute;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: clamp(54px, 12vw, 90px);
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+}
+.train-station svg { width: 100%; height: auto; display: block; }
+
+.train-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 18%;
+  height: 4%;
+  z-index: 7;
+  pointer-events: none;
+}
+.train-track svg { width: 100%; height: 100%; display: block; }
+
+.train-convoy {
+  position: absolute;
+  left: 0%;
+  bottom: 19%;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: flex-end;
+  gap: 6px;
+  z-index: 8;
+  transition: none;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+.train-engine {
+  width: clamp(110px, 24vw, 180px);
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.3));
+}
+.train-engine svg { width: 100%; height: auto; display: block; }
+.train-engine.train-react { animation: trainEngineBump 0.4s ease; }
+@keyframes trainEngineBump {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.12) translateY(-4px); }
+  100% { transform: scale(1); }
+}
+.train-car {
+  width: clamp(80px, 18vw, 140px);
+  position: relative;
+  pointer-events: none;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.3));
+}
+.train-car svg { width: 100%; height: auto; display: block; }
+.train-pass {
+  position: absolute;
+  inset: 0 0 30% 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(20px, 5vw, 32px);
+  pointer-events: none;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4));
+}
+
+.train-smoke {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.train-puff {
+  position: absolute;
+  width: 36px;
+  height: 36px;
+  pointer-events: none;
+  animation: trainPuffRise 1.5s ease-out forwards;
+}
+.train-puff svg { width: 100%; height: 100%; display: block; }
+@keyframes trainPuffRise {
+  0%   { opacity: 0; transform: translateY(0) scale(0.4); }
+  20%  { opacity: 1; transform: translateY(-12px) scale(1); }
+  100% { opacity: 0; transform: translateY(-80px) scale(1.6); }
+}
+
+.train-controls {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  z-index: 12;
+}
+.train-ctl {
+  width: clamp(56px, 14vw, 84px);
+  height: clamp(56px, 14vw, 84px);
+  background: rgba(255, 255, 255, 0.96);
+  border: 4px solid #1c7ed6;
+  border-radius: 999px;
+  font-size: clamp(28px, 6vw, 40px);
+  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.train-ctl:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2); }
+
+/* ---------- Music Studio ---------- */
+#musicGame {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 70px 12px 16px;
+  background: linear-gradient(180deg, #fff3bf 0%, #ffd6e7 50%, #d0bfff 100%);
+  gap: 12px;
+  overflow: hidden;
+}
+.music-row {
+  width: 100%;
+  max-width: 720px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 3px solid rgba(255, 255, 255, 0.85);
+  border-radius: 22px;
+  padding: 10px 14px;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.12);
+}
+.music-row-label {
+  font-weight: 800;
+  font-size: clamp(13px, 2.4vw, 18px);
+  color: #5c0e2c;
+  margin-bottom: 6px;
+}
+.music-drums {
+  display: flex;
+  gap: 10px;
+  justify-content: space-evenly;
+}
+.music-drum {
+  width: clamp(52px, 13vw, 84px);
+  height: clamp(52px, 13vw, 84px);
+  border-radius: 50%;
+  background: linear-gradient(160deg, #d0d0d0 0%, #888 100%);
+  border: 4px solid #555;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 -6px 8px rgba(0, 0, 0, 0.25), 0 4px 0 rgba(0, 0, 0, 0.2);
+  -webkit-tap-highlight-color: transparent;
+}
+.music-drum-emoji { font-size: clamp(24px, 6vw, 36px); }
+.music-drum:active { transform: translateY(2px); }
+.music-drum--kick  { background: linear-gradient(160deg, #f76707 0%, #a8501c 100%); border-color: #6a3010; }
+.music-drum--snare { background: linear-gradient(160deg, #fab005 0%, #c98a00 100%); border-color: #6a4900; }
+.music-drum--hat   { background: linear-gradient(160deg, #ffd43b 0%, #f59f00 100%); border-color: #7a5000; }
+.music-drum--tom   { background: linear-gradient(160deg, #74c0fc 0%, #1c7ed6 100%); border-color: #0c4f8a; }
+.music-drum--cymb  { background: linear-gradient(160deg, #ffd43b 0%, #f59f00 100%); border-color: #7a5000; }
+.music-drum.hit { animation: musicDrumHit 0.22s ease; }
+@keyframes musicDrumHit {
+  0%   { transform: scale(1); box-shadow: inset 0 -6px 8px rgba(0, 0, 0, 0.25), 0 4px 0 rgba(0, 0, 0, 0.2); }
+  40%  { transform: scale(0.92); box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(0, 0, 0, 0.2); }
+  100% { transform: scale(1); box-shadow: inset 0 -6px 8px rgba(0, 0, 0, 0.25), 0 4px 0 rgba(0, 0, 0, 0.2); }
+}
+
+.music-xylo {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-evenly;
+  gap: 4px;
+  height: 140px;
+}
+.music-xylo-bar {
+  flex: 1;
+  border: 3px solid rgba(0, 0, 0, 0.45);
+  border-radius: 6px 6px 12px 12px;
+  cursor: pointer;
+  color: rgba(0, 0, 0, 0.55);
+  font-weight: 900;
+  font-size: clamp(12px, 2.6vw, 18px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 6px;
+  box-shadow: inset 0 -6px 6px rgba(0, 0, 0, 0.2);
+  -webkit-tap-highlight-color: transparent;
+}
+.music-xylo-bar:active { transform: translateY(3px); }
+.music-xylo-bar.hit { animation: musicXyloHit 0.32s ease; }
+@keyframes musicXyloHit {
+  0%   { transform: translateY(0)   scale(1); filter: brightness(1); }
+  30%  { transform: translateY(-8px) scale(1.04); filter: brightness(1.2); }
+  100% { transform: translateY(0)   scale(1); filter: brightness(1); }
+}
+
+.music-bells {
+  display: flex;
+  gap: 12px;
+  justify-content: space-evenly;
+}
+.music-bell {
+  width: clamp(54px, 13vw, 80px);
+  height: clamp(54px, 13vw, 80px);
+  border-radius: 50%;
+  border: 4px solid #5a3700;
+  font-size: clamp(28px, 7vw, 40px);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 -6px 8px rgba(0, 0, 0, 0.25), 0 4px 0 rgba(0, 0, 0, 0.2);
+  -webkit-tap-highlight-color: transparent;
+}
+.music-bell:active { transform: translateY(2px); }
+.music-bell.ringing { animation: musicBellRing 0.45s ease; }
+@keyframes musicBellRing {
+  0%, 100% { transform: rotate(0); }
+  25%      { transform: rotate(-22deg); }
+  75%      { transform: rotate(22deg); }
+}
+
+.music-song-btn {
+  background: #fa5252;
+  color: #fff;
+  border: 4px solid #fff;
+  border-radius: 999px;
+  padding: 10px 24px;
+  font-size: clamp(16px, 3vw, 22px);
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.2);
+  -webkit-tap-highlight-color: transparent;
+}
+.music-song-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2); }
+.music-song-btn.playing { background: #2f9e44; }
+
 /* ---------- Ice Cream! ---------- */
 #icecreamGame {
   flex-direction: column;

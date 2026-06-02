@@ -254,6 +254,38 @@
           <span class="place-count">9 topics</span>
         </button>
 
+        <button class="place" data-go="train" style="--c:#1c7ed6">
+          <svg class="place-art" viewBox="0 0 120 120" aria-hidden="true">
+            <rect x="14" y="46" width="92" height="44" rx="6" fill="#fa5252" stroke="#a51111" stroke-width="3"/>
+            <rect x="14" y="46" width="92" height="6" fill="#fff"/>
+            <rect x="78" y="22" width="14" height="24" rx="2" fill="#3a1f00"/>
+            <circle cx="26" cy="92" r="10" fill="#3a1f00"/>
+            <circle cx="56" cy="92" r="10" fill="#3a1f00"/>
+            <circle cx="86" cy="92" r="10" fill="#3a1f00"/>
+            <circle cx="26" cy="92" r="4"  fill="#fff"/>
+            <circle cx="56" cy="92" r="4"  fill="#fff"/>
+            <circle cx="86" cy="92" r="4"  fill="#fff"/>
+            <rect x="40" y="58" width="14" height="14" fill="#a5d8ff"/>
+            <rect x="64" y="58" width="14" height="14" fill="#a5d8ff"/>
+          </svg>
+          <span class="place-label">Train</span>
+          <span class="place-count">Drive the choo-choo!</span>
+        </button>
+
+        <button class="place" data-go="music" style="--c:#f06595">
+          <svg class="place-art" viewBox="0 0 120 120" aria-hidden="true">
+            <rect x="14" y="38" width="92" height="64" rx="6" fill="#fff" stroke="#5a3700" stroke-width="3"/>
+            <rect x="22" y="46" width="10" height="44" fill="#fa5252"/>
+            <rect x="36" y="46" width="10" height="44" fill="#fd7e14"/>
+            <rect x="50" y="46" width="10" height="44" fill="#ffd43b"/>
+            <rect x="64" y="46" width="10" height="44" fill="#51cf66"/>
+            <rect x="78" y="46" width="10" height="44" fill="#339af0"/>
+            <text x="60" y="30" font-size="14" font-weight="bold" text-anchor="middle" fill="#5a3700">♫ Music</text>
+          </svg>
+          <span class="place-label">Music</span>
+          <span class="place-count">Drums &amp; bells &amp; xylophone</span>
+        </button>
+
         <button class="place" data-go="farm" style="--c:#fa5252">
           <svg class="place-art" viewBox="0 0 120 120" aria-hidden="true">
             <rect x="14" y="48" width="92" height="60" fill="#c2255c"/>
@@ -624,6 +656,22 @@
       <div id="sceneStage" class="scene-stage"></div>
     </section>
 
+    <!-- Train! drive the choo-choo -->
+    <section id="trainGame" class="screen" data-title="🚂 Train!">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="trainScore" class="badge">🚉 <span id="trainScoreVal">0</span></div>
+      <div id="trainBest" class="badge badge--best">🏆 <span id="trainBestVal">0</span></div>
+      <div id="trainStage" class="train-stage"></div>
+    </section>
+
+    <!-- Music Studio -->
+    <section id="musicGame" class="screen" data-title="🎵 Music Studio">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="musicScore" class="badge">🎶 <span id="musicScoreVal">0</span></div>
+      <div id="musicBest" class="badge badge--best">🏆 <span id="musicBestVal">0</span></div>
+      <div id="musicStage" class="music-stage"></div>
+    </section>
+
     <!-- Farm! sandbox -->
     <section id="farmGame" class="screen" data-title="🏡 Farm!">
       <button class="home-btn" data-home>🏠</button>
@@ -747,6 +795,8 @@
   <script src="games/scene.js"></script>
   <script src="games/farm.js"></script>
   <script src="games/icecream.js"></script>
+  <script src="games/train.js"></script>
+  <script src="games/music.js"></script>
   <script src="games/stickers.js"></script>
 </body>
 </html>
