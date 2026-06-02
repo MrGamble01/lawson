@@ -2363,6 +2363,815 @@ html.dark .hub-title {
   animation: findShake 0.4s ease;
 }
 
+/* ---------- Ice Cream! ---------- */
+#icecreamGame {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: stretch;
+  padding: 0;
+  overflow: hidden;
+  background: linear-gradient(180deg, #ffd6e7 0%, #ff8ab0 50%, #c2255c 100%);
+}
+.icecream-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.icecream-counter {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 30%;
+  height: 10%;
+  background: linear-gradient(180deg, #8b4513, #5a3a1a);
+  border-top: 6px solid #c98a4a;
+  z-index: 2;
+}
+.icecream-counter::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(90deg,
+      transparent 0px,
+      transparent 26px,
+      rgba(0, 0, 0, 0.18) 26px,
+      rgba(0, 0, 0, 0.18) 28px);
+}
+.icecream-shelf {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 70px;
+  height: 22%;
+  z-index: 3;
+}
+.icecream-freezer {
+  position: absolute;
+  inset: 0 8% 0 8%;
+}
+.icecream-freezer svg { width: 100%; height: 100%; display: block; }
+.icecream-tubs {
+  position: absolute;
+  inset: 12% 10% 0 10%;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: flex-end;
+  gap: 6px;
+}
+.icecream-tub {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: grab;
+  width: clamp(50px, 12vw, 86px);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+  transition: transform 0.18s ease;
+}
+.icecream-tub svg { width: 100%; height: auto; display: block; }
+.icecream-tub:active { transform: translateY(2px); }
+.icecream-tub.grabbed { opacity: 0.35; }
+.icecream-stand {
+  position: absolute;
+  left: 50%;
+  bottom: 30%;
+  transform: translateX(-50%);
+  z-index: 4;
+  width: clamp(120px, 30vw, 200px);
+}
+.icecream-cone {
+  position: relative;
+  width: 100%;
+  pointer-events: auto;
+  cursor: pointer;
+  filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.25));
+}
+.icecream-cone svg { width: 100%; height: auto; display: block; }
+.icecream-stack {
+  position: absolute;
+  bottom: 60%;
+  left: 0;
+  right: 0;
+  height: 280px;
+  pointer-events: auto;
+  cursor: pointer;
+  z-index: 5;
+}
+.icecream-stack.icecream-wobble {
+  animation: icecreamWobble 0.5s cubic-bezier(.34, 1.56, .64, 1);
+}
+@keyframes icecreamWobble {
+  0%   { transform: translateY(8px) scale(0.94); }
+  60%  { transform: translateY(-6px) scale(1.06); }
+  100% { transform: translateY(0)   scale(1);    }
+}
+.icecream-scoop {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 92%;
+  animation: icecreamScoopPlop 0.35s cubic-bezier(.34, 1.56, .64, 1) backwards;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.3));
+}
+.icecream-scoop svg { width: 100%; height: auto; display: block; }
+@keyframes icecreamScoopPlop {
+  from { opacity: 0; transform: translate(-50%, -60px) scale(0.6); }
+  to   { opacity: 1; transform: translate(-50%, 0)     scale(1);   }
+}
+.icecream-toppings-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 6;
+}
+.icecream-placed-topping {
+  position: absolute;
+  font-size: clamp(26px, 6vw, 38px);
+  pointer-events: none;
+  transform: translate(-50%, -50%) rotate(var(--rot, 0deg));
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
+  animation: icecreamToppingDrop 0.4s cubic-bezier(.34, 1.56, .64, 1) backwards;
+}
+@keyframes icecreamToppingDrop {
+  from { opacity: 0; transform: translate(-50%, -110%) rotate(var(--rot, 0deg)) scale(0.4); }
+  to   { opacity: 1; transform: translate(-50%, -50%)  rotate(var(--rot, 0deg)) scale(1);   }
+}
+.icecream-placed-topping.icecream-eaten {
+  animation: icecreamEatTopping 0.28s ease-in forwards;
+}
+@keyframes icecreamEatTopping {
+  to { opacity: 0; transform: translate(-50%, -50%) rotate(var(--rot, 0deg)) scale(0.2); }
+}
+.icecream-eat {
+  position: absolute;
+  bottom: 14%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fab005;
+  border: 4px solid #fff;
+  border-radius: 999px;
+  color: #fff;
+  font-weight: 900;
+  font-size: clamp(20px, 4vw, 28px);
+  padding: 10px 26px;
+  cursor: pointer;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.22);
+  z-index: 10;
+  -webkit-tap-highlight-color: transparent;
+}
+.icecream-eat:disabled {
+  opacity: 0.45;
+  filter: grayscale(0.6);
+  cursor: default;
+}
+.icecream-eat:not(:disabled) {
+  animation: icecreamEatPulse 1.4s ease-in-out infinite alternate;
+}
+@keyframes icecreamEatPulse {
+  from { transform: translateX(-50%) scale(1); }
+  to   { transform: translateX(-50%) scale(1.08); }
+}
+.icecream-toppings-tray {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100px;
+  background: rgba(0, 0, 0, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 6px 12px;
+  overflow-x: auto;
+  z-index: 11;
+  border-top: 4px solid #fff;
+}
+.icecream-topping-source {
+  background: rgba(255, 255, 255, 0.95);
+  border: 3px solid #c2255c;
+  border-radius: 14px;
+  width: 64px;
+  height: 64px;
+  font-size: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.18);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+  flex-shrink: 0;
+}
+.icecream-topping-source:active { transform: translateY(2px); }
+.icecream-topping-source.grabbed { opacity: 0.35; cursor: grabbing; }
+.icecream-scoop-ghost {
+  position: fixed;
+  width: 100px;
+  pointer-events: none;
+  z-index: 200;
+  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.35));
+}
+.icecream-scoop-ghost svg { width: 100%; height: auto; display: block; }
+.icecream-topping-ghost {
+  position: fixed;
+  width: 56px;
+  height: 56px;
+  font-size: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 200;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.35));
+}
+
+/* ---------- Farm! ---------- */
+#farmGame {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: stretch;
+  padding: 0;
+  overflow: hidden;
+  background: #a5d8ff;
+}
+.farm-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.farm-sky {
+  position: absolute;
+  inset: 0 0 38% 0;
+  background: linear-gradient(180deg, #a5d8ff 0%, #ffe066 80%, #fff3bf 100%);
+  transition: background 6s ease;
+  overflow: hidden;
+  z-index: 1;
+}
+.farm-mountain {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 36%;
+  height: 22%;
+  background:
+    linear-gradient(180deg, transparent 0%, transparent 30%, #495057 30%, #2b2f33 100%);
+  clip-path: polygon(0 100%, 14% 60%, 26% 78%, 42% 30%, 60% 70%, 76% 28%, 92% 64%, 100% 100%);
+  z-index: 2;
+  pointer-events: none;
+}
+.farm-mountain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, transparent 50%, rgba(255, 255, 255, 0.4) 50%, transparent 56%);
+  clip-path: polygon(0 100%, 14% 60%, 26% 78%, 42% 30%, 60% 70%, 76% 28%, 92% 64%, 100% 100%);
+  pointer-events: none;
+}
+.farm-hills {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 30%;
+  height: 16%;
+  background: linear-gradient(180deg, #51cf66 0%, #2f9e44 100%);
+  clip-path: ellipse(140% 100% at 50% 100%);
+  z-index: 3;
+  pointer-events: none;
+}
+.farm-grass {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 38%;
+  background: linear-gradient(180deg, #51cf66 0%, #2f9e44 60%, #2b8a3e 100%);
+  z-index: 3;
+  pointer-events: none;
+}
+.farm-grass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 10% 80%, rgba(255, 255, 255, 0.18) 0%, transparent 6%),
+    radial-gradient(circle at 30% 88%, rgba(255, 255, 255, 0.18) 0%, transparent 6%),
+    radial-gradient(circle at 55% 76%, rgba(255, 255, 255, 0.18) 0%, transparent 6%),
+    radial-gradient(circle at 80% 92%, rgba(255, 255, 255, 0.18) 0%, transparent 6%);
+  pointer-events: none;
+}
+
+.farm-sun {
+  position: absolute;
+  top: 4%;
+  right: 6%;
+  width: clamp(60px, 14vw, 90px);
+  height: clamp(60px, 14vw, 90px);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  z-index: 8;
+  filter: drop-shadow(0 0 18px rgba(255, 212, 59, 0.7));
+  animation: farmSunBob 5s ease-in-out infinite;
+  -webkit-tap-highlight-color: transparent;
+}
+.farm-sun svg { width: 100%; height: 100%; }
+.farm-sun.spinning { animation: farmSunSpin 0.9s ease; }
+@keyframes farmSunBob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+@keyframes farmSunSpin {
+  from { transform: rotate(0); }
+  to   { transform: rotate(360deg); }
+}
+.farm-stars {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.farm-star {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
+  animation: farmStarTwinkle 2.6s ease-in-out infinite;
+}
+@keyframes farmStarTwinkle {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.4); }
+}
+
+.farm-cloud {
+  position: absolute;
+  width: clamp(80px, 22vw, 160px);
+  top: var(--y, 14%);
+  left: -20%;
+  background: transparent;
+  border: none;
+  z-index: 7;
+  cursor: pointer;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.15));
+  animation: farmCloudDrift var(--dur, 42s) linear infinite var(--delay, 0s);
+}
+.farm-cloud svg { width: 100%; height: auto; display: block; }
+.farm-cloud--1 { --y: 8%;  --dur: 48s; --delay: 0s; }
+.farm-cloud--2 { --y: 18%; --dur: 56s; --delay: 18s; }
+@keyframes farmCloudDrift {
+  from { transform: translateX(0); }
+  to   { transform: translateX(140vw); }
+}
+
+/* Scene elements (barn, coop, tree, pond, fences). */
+.farm-barn {
+  position: absolute;
+  left: 4%;
+  bottom: 30%;
+  width: clamp(120px, 26vw, 200px);
+  z-index: 4;
+  pointer-events: none;
+}
+.farm-barn svg { width: 100%; height: auto; display: block; }
+.farm-coop {
+  position: absolute;
+  right: 28%;
+  bottom: 36%;
+  width: clamp(90px, 20vw, 150px);
+  z-index: 4;
+  pointer-events: none;
+}
+.farm-coop svg { width: 100%; height: auto; display: block; }
+.farm-eggs {
+  position: absolute;
+  inset: 60% 8% 4% 8%;
+  pointer-events: none;
+}
+.farm-egg {
+  position: absolute;
+  width: clamp(26px, 6vw, 36px);
+  height: clamp(32px, 7vw, 44px);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+  animation: farmEggAppear 0.35s cubic-bezier(.34, 1.56, .64, 1) backwards;
+}
+.farm-egg svg { width: 100%; height: auto; display: block; }
+@keyframes farmEggAppear {
+  from { opacity: 0; transform: scale(0.4); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.farm-egg-collected {
+  animation: farmEggCollect 0.36s ease-in forwards;
+  pointer-events: none;
+}
+@keyframes farmEggCollect {
+  to { opacity: 0; transform: translateY(-30px) scale(0.5) rotate(35deg); }
+}
+.farm-tree {
+  position: absolute;
+  right: 6%;
+  bottom: 28%;
+  width: clamp(120px, 26vw, 200px);
+  z-index: 4;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+}
+.farm-tree svg { width: 100%; height: auto; display: block; }
+.farm-apples {
+  position: absolute;
+  inset: 0 6% 40% 6%;
+  pointer-events: none;
+}
+.farm-apple {
+  position: absolute;
+  width: clamp(26px, 6vw, 36px);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+  transform: translate(-50%, -50%);
+  animation: farmAppleAppear 0.35s cubic-bezier(.34, 1.56, .64, 1) backwards;
+}
+.farm-apple svg { width: 100%; height: auto; display: block; }
+@keyframes farmAppleAppear {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.4); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+.farm-apple-fall {
+  animation: farmAppleFall 0.8s ease-in forwards;
+  pointer-events: none;
+}
+@keyframes farmAppleFall {
+  0%   { transform: translate(-50%, -50%) scale(1) rotate(0); }
+  100% { transform: translate(-50%, 180%) scale(1.1) rotate(60deg); opacity: 0; }
+}
+.farm-pond {
+  position: absolute;
+  right: 4%;
+  bottom: 6%;
+  width: clamp(180px, 36vw, 280px);
+  z-index: 5;
+}
+.farm-pond svg { width: 100%; height: auto; display: block; }
+.farm-lily {
+  position: absolute;
+  left: 16%;
+  bottom: 12%;
+  width: 30%;
+}
+.farm-lily svg { width: 100%; height: auto; display: block; }
+.farm-pond-fish {
+  position: absolute;
+  right: 4%;
+  bottom: 6%;
+  width: clamp(180px, 36vw, 280px);
+  height: clamp(70px, 18vw, 110px);
+  pointer-events: none;
+  z-index: 6;
+}
+.farm-fish {
+  position: absolute;
+  width: clamp(36px, 8vw, 60px);
+  left: -10%;
+  top: var(--top, 30%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+  animation: farmFishSwim 7s linear var(--delay, 0s) infinite;
+}
+.farm-fish svg { width: 100%; height: auto; display: block; }
+@keyframes farmFishSwim {
+  0%   { transform: translateX(0)    scaleX(1); }
+  48%  { transform: translateX(80%)  scaleX(1); }
+  50%  { transform: translateX(80%)  scaleX(-1); }
+  98%  { transform: translateX(0)    scaleX(-1); }
+  100% { transform: translateX(0)    scaleX(1); }
+}
+.farm-fence {
+  position: absolute;
+  left: 26%;
+  width: 36%;
+  pointer-events: none;
+  z-index: 4;
+}
+.farm-fence svg { width: 100%; height: auto; display: block; }
+.farm-fence--top { bottom: 36%; }
+.farm-fence--bot { bottom: 22%; }
+
+/* Animals. */
+.farm-cow {
+  position: absolute;
+  left: 8%;
+  bottom: 16%;
+  width: clamp(110px, 24vw, 180px);
+  z-index: 6;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  animation: farmAnimalBob 4s ease-in-out infinite;
+}
+.farm-cow svg { width: 100%; height: auto; display: block; }
+.farm-horse {
+  position: absolute;
+  left: 32%;
+  bottom: 12%;
+  width: clamp(110px, 24vw, 180px);
+  z-index: 6;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  animation: farmAnimalBob 4.4s ease-in-out infinite;
+}
+.farm-horse svg { width: 100%; height: auto; display: block; }
+.farm-sheep {
+  position: absolute;
+  left: 18%;
+  bottom: 4%;
+  width: clamp(90px, 20vw, 150px);
+  z-index: 7;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  animation: farmAnimalBob 3.6s ease-in-out infinite;
+}
+.farm-sheep svg { width: 100%; height: auto; display: block; }
+.farm-pig {
+  position: absolute;
+  left: 50%;
+  bottom: 4%;
+  transform: translateX(-50%);
+  width: clamp(100px, 22vw, 160px);
+  z-index: 7;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  animation: farmAnimalBobX 4s ease-in-out infinite;
+}
+.farm-pig svg { width: 100%; height: auto; display: block; }
+.farm-dog {
+  position: absolute;
+  left: 4%;
+  bottom: 2%;
+  width: clamp(80px, 18vw, 130px);
+  z-index: 8;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  animation: farmAnimalBob 3s ease-in-out infinite;
+}
+.farm-dog svg { width: 100%; height: auto; display: block; }
+.farm-dog.farm-fetch {
+  animation: farmDogFetch 1.3s ease-in-out;
+}
+@keyframes farmDogFetch {
+  0%   { transform: translateX(0); }
+  40%  { transform: translateX(60vw); }
+  60%  { transform: translateX(60vw); }
+  100% { transform: translateX(0); }
+}
+@keyframes farmAnimalBob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+@keyframes farmAnimalBobX {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50%      { transform: translateX(-50%) translateY(-4px); }
+}
+.farm-react {
+  animation: farmReact 0.4s ease;
+}
+@keyframes farmReact {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.15) rotate(-3deg); }
+  100% { transform: scale(1); }
+}
+
+/* Chickens roaming around the coop. */
+.farm-chickens {
+  position: absolute;
+  right: 22%;
+  bottom: 22%;
+  width: clamp(180px, 40vw, 300px);
+  height: clamp(60px, 16vw, 100px);
+  pointer-events: none;
+  z-index: 6;
+}
+.farm-chicken {
+  position: absolute;
+  width: clamp(30px, 7vw, 56px);
+  bottom: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+  animation: farmChickenRoam 14s ease-in-out var(--delay, 0s) infinite;
+}
+.farm-chicken svg { width: 100%; height: auto; display: block; }
+.farm-chicken:nth-child(1) { left: 4%;  }
+.farm-chicken:nth-child(2) { left: 36%; }
+.farm-chicken:nth-child(3) { left: 70%; }
+@keyframes farmChickenRoam {
+  0%, 100% { transform: translateX(0)     scaleX(1); }
+  25%      { transform: translateX(30%)   scaleX(1); }
+  50%      { transform: translateX(30%)   scaleX(-1); }
+  75%      { transform: translateX(-10%)  scaleX(-1); }
+}
+
+/* Ducks paddling around the pond. */
+.farm-ducks {
+  position: absolute;
+  right: 8%;
+  bottom: 14%;
+  width: clamp(140px, 30vw, 220px);
+  height: clamp(50px, 14vw, 90px);
+  z-index: 6;
+  pointer-events: none;
+}
+.farm-duck {
+  position: absolute;
+  width: clamp(40px, 9vw, 70px);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+  animation: farmDuckPaddle 10s ease-in-out var(--delay, 0s) infinite;
+}
+.farm-duck svg { width: 100%; height: auto; display: block; }
+.farm-duck:nth-child(1) { left: 4%;  top: 10%; }
+.farm-duck:nth-child(2) { left: 50%; top: 40%; }
+@keyframes farmDuckPaddle {
+  0%, 100% { transform: translateX(0)   translateY(0)   rotate(-3deg); }
+  25%      { transform: translateX(20%) translateY(2px) rotate(3deg); }
+  50%      { transform: translateX(20%) translateY(0)   rotate(-3deg) scaleX(-1); }
+  75%      { transform: translateX(-8%) translateY(2px) rotate(3deg)  scaleX(-1); }
+}
+
+/* Tractor — sits parked, drives across when tapped. */
+.farm-tractor {
+  position: absolute;
+  left: 60%;
+  bottom: 2%;
+  width: clamp(110px, 24vw, 180px);
+  z-index: 8;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.farm-tractor svg { width: 100%; height: auto; display: block; }
+.farm-tractor.farm-tractor-driving {
+  animation: farmTractorDrive 4.5s ease-in-out;
+}
+@keyframes farmTractorDrive {
+  0%   { transform: translateX(0); }
+  50%  { transform: translateX(-60vw); }
+  100% { transform: translateX(0); }
+}
+
+/* Tools rack across the bottom. */
+.farm-tools {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 12;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 16px;
+  backdrop-filter: blur(4px);
+}
+.farm-tool {
+  width: clamp(48px, 12vw, 78px);
+  height: clamp(48px, 12vw, 78px);
+  background: rgba(255, 255, 255, 0.96);
+  border: 3px solid #f59f00;
+  border-radius: 14px;
+  padding: 4px;
+  cursor: grab;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.18);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.farm-tool svg { width: 100%; height: 100%; display: block; }
+.farm-tool:active { transform: translateY(2px); }
+.farm-tool.grabbed {
+  cursor: grabbing;
+  z-index: 30;
+  box-shadow: 0 10px 16px rgba(0, 0, 0, 0.3);
+  transform: rotate(-10deg);
+}
+
+/* Feedback particles (slop drop, wool puff, splash, caught fish). */
+.farm-slop-drop {
+  position: fixed;
+  width: 16px;
+  height: 16px;
+  background: radial-gradient(circle, #8b4513 30%, #5a3a1a 100%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 200;
+  animation: farmSlopFall 0.7s ease-out forwards;
+}
+@keyframes farmSlopFall {
+  0%   { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(30px) scale(0.4); }
+}
+.farm-wool {
+  position: fixed;
+  font-size: 32px;
+  pointer-events: none;
+  z-index: 200;
+  animation: farmWoolRise 1.4s ease-out forwards;
+}
+@keyframes farmWoolRise {
+  0%   { opacity: 0; transform: translateY(0) scale(0.5); }
+  20%  { opacity: 1; transform: translateY(-20px) scale(1.1); }
+  100% { opacity: 0; transform: translateY(-120px) scale(0.6); }
+}
+.farm-splash {
+  position: fixed;
+  font-size: 28px;
+  pointer-events: none;
+  z-index: 200;
+  animation: farmSplashAnim 0.6s ease-out forwards;
+}
+@keyframes farmSplashAnim {
+  0%   { opacity: 0; transform: translateY(0) scale(0.5); }
+  20%  { opacity: 1; transform: translateY(-16px) scale(1.2); }
+  100% { opacity: 0; transform: translateY(8px) scale(0.6); }
+}
+.farm-caught-fish {
+  position: fixed;
+  width: 80px;
+  pointer-events: none;
+  z-index: 200;
+  animation: farmCaughtFish 1.4s cubic-bezier(.34, 1.56, .64, 1) forwards;
+}
+.farm-caught-fish svg { width: 100%; height: auto; display: block; }
+@keyframes farmCaughtFish {
+  0%   { opacity: 1; transform: translateY(0) scale(0.6) rotate(0); }
+  50%  { opacity: 1; transform: translateY(-180px) scale(1.4) rotate(20deg); }
+  100% { opacity: 0; transform: translateY(-280px) scale(1) rotate(40deg); }
+}
+
+/* Rain. */
+.farm-rain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.farm-rain.on { opacity: 1; }
+.farm-rain-drop {
+  position: absolute;
+  top: -10%;
+  width: 3px;
+  height: 22px;
+  background: linear-gradient(180deg, rgba(116, 192, 252, 0) 0%, #74c0fc 60%, #1c7ed6 100%);
+  border-radius: 2px;
+  animation: farmRainFall linear infinite;
+}
+@keyframes farmRainFall {
+  from { transform: translateY(0);     opacity: 0; }
+  10%  { opacity: 1; }
+  to   { transform: translateY(110vh); opacity: 0.5; }
+}
+
 /* ---------- Tutorial overlay ---------- */
 .tutorial-overlay {
   position: fixed;
