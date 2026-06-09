@@ -41,6 +41,39 @@
   let brush = BRUSHES[0]; // current brush; null hex => rainbow
   let size = SIZES[1];   // current stroke size
 
+  // Undo stack — one snapshot per "intent" (a single stroke or a single
+  // stamp drop). 5 levels is plenty for a 3yo and keeps the memory
+  // budget reasonable on a 12.9" iPad Pro (~22MB per raw snapshot).
+  const UNDO_LIMIT = 5;
+  let undoStack = [];
+
+  function snapshot() {
+    if (!ctx || !canvas || !canvas.width || !canvas.height) return;
+    try {
+      undoStack.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+      if (undoStack.length > UNDO_LIMIT) undoStack.shift();
+      updateUndoBtn();
+    } catch (_) {
+      // Canvas might be tainted in some weird state — fail silently.
+    }
+  }
+
+  function undo() {
+    if (!undoStack.length) return;
+    const snap = undoStack.pop();
+    // putImageData ignores the current transform, so this restores the
+    // raw pixel buffer to the state before the most recent stroke.
+    ctx.putImageData(snap, 0, 0);
+    L.beep(420, 0.08, "sine");
+    L.say("Undo!");
+    updateUndoBtn();
+  }
+
+  function updateUndoBtn() {
+    const btn = document.getElementById("doodleUndo");
+    if (btn) btn.disabled = undoStack.length === 0;
+  }
+
   function resize() {
     if (!canvas) return;
     const dpr = window.devicePixelRatio || 1;
@@ -56,6 +89,9 @@
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
     ctx.drawImage(prev, 0, 0, rect.width, rect.height);
+    // Buffer dimensions just changed — old snapshots no longer match.
+    undoStack = [];
+    updateUndoBtn();
   }
 
   function pointIn(e) {
@@ -126,6 +162,9 @@
 
   function onDown(e) {
     e.preventDefault();
+    // Snapshot before each new intent so undo restores pre-stroke state.
+    // One snapshot per pointer-down — the whole drag is one undo unit.
+    snapshot();
     drawing = true;
     last = pointIn(e);
     if (mode === "stamp") {
@@ -220,6 +259,9 @@
   }
 
   function clear() {
+    // Snapshot first so Clear is itself undoable — a tap that wipes
+    // everything should never be a one-way trip.
+    snapshot();
     const rect = canvas.getBoundingClientRect();
     ctx.clearRect(0, 0, rect.width, rect.height);
     L.happySound();
@@ -287,9 +329,11 @@
     const clearBtn = document.getElementById("doodleClear");
     const stampBtn = document.getElementById("doodleStamp");
     const saveBtn  = document.getElementById("doodleSave");
+    const undoBtn  = document.getElementById("doodleUndo");
     L.onTapOnce(clearBtn, () => clear());
     L.onTapOnce(stampBtn, () => toggleStamp(stampBtn));
     L.onTapOnce(saveBtn,  () => save());
+    L.onTapOnce(undoBtn,  () => undo());
 
     unlisten = () => {
       window.removeEventListener("resize", resize);
@@ -306,6 +350,8 @@
     brush = BRUSHES[0];
     size = SIZES[1];
     stampBtn.classList.remove("active");
+    undoStack = [];
+    updateUndoBtn();
     renderBrushes();
     renderSizes();
     L.say("Draw with your finger!");
@@ -316,6 +362,7 @@
     unlisten = null;
     clearTimeout(stampTimeout);
     stampTimeout = null;
+    undoStack = [];
     if (ctx && canvas) {
       const rect = canvas.getBoundingClientRect();
       ctx.clearRect(0, 0, rect.width, rect.height);

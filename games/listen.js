@@ -62,6 +62,7 @@
           score += 1;
           L.bumpBadge("listenScoreVal", score);
           if (score >= 10) L.earnSticker && L.earnSticker("listen10");
+          if (score > 0 && score % 5 === 0) L.boboCheer && L.boboCheer();
           L.tryNewHighScore("listenBest", score, (next) => {
             document.getElementById("listenBestVal").textContent = next;
             L.earnSticker && L.earnSticker("firstHigh");

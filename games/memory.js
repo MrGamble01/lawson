@@ -79,6 +79,9 @@
         b.classList.add("matched");
         L.happySound();
         matchedCount += 2;
+        // Bobo cheers on every successful pair — short games, fewer
+        // milestones, so each match deserves a celebration.
+        L.boboCheer && L.boboCheer();
         lock = false;
         if (matchedCount === board.children.length) winRound();
       }, 320);

@@ -15,8 +15,8 @@
 <!-- PWA manifest (installable + offline via sw.js) -->
 <link rel="manifest" href="manifest.json" />
 
-<!-- Inline SVG favicon / home screen icon (no file needed) -->
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%88%3C/text%3E%3C/svg%3E" />
+<!-- Favicon + iOS home-screen icon — single source of truth in icon.svg -->
+<link rel="icon" href="icon.svg" />
 <link rel="apple-touch-icon" href="icon.svg" />
 
 <link rel="stylesheet" href="styles.css" />
@@ -137,97 +137,296 @@
   </button>
 
   <main id="app">
-    <!-- Home menu -->
+    <!-- Home menu — six themed "places" Bobo can visit. Each card opens
+         a hub screen with that place's activities. App-Store style: fewer
+         choices per screen, clearer hierarchy, every tap is curated. -->
+    <!-- Home: the three games Lawson plays, each with Free / ABC / 123. -->
     <section id="menu" class="screen active">
-      <div class="menu-section">
-        <div class="menu-section-title">📚 Learn</div>
-        <div class="menu-tiles">
-          <button class="tile" data-go="letters" style="--c:#ff6b6b">
-            <span class="emoji">🔤</span><span class="label">ABC</span>
-          </button>
-          <button class="tile" data-go="numbers" style="--c:#4dabf7">
-            <span class="emoji">🔢</span><span class="label">123</span>
-          </button>
-          <button class="tile" data-hub="numbersHub" style="--c:#5c7cfa">
-            <span class="emoji">🧮</span><span class="label">Numbers</span>
-            <span class="tile-counter">2 games</span>
-          </button>
-          <button class="tile" data-hub="exploreHub" style="--c:#da77f2">
-            <span class="emoji">🌍</span><span class="label">Explore</span>
-            <span class="tile-counter">8 topics</span>
-          </button>
-        </div>
+      <div class="menu-places menu-home3">
+        <button class="place place--game" data-go="pop" style="--c:#ff922b">
+          <span class="place-emoji">🎈</span>
+          <span class="place-text"><span class="place-label">Pop!</span><span class="place-count">Free · ABC · 123</span></span>
+        </button>
+        <button class="place place--game" data-go="whack" style="--c:#f06595">
+          <span class="place-emoji">🔨</span>
+          <span class="place-text"><span class="place-label">Whack!</span><span class="place-count">Free · ABC · 123</span></span>
+        </button>
+        <button class="place place--game" data-go="find" style="--c:#12b886">
+          <span class="place-emoji">🔍</span>
+          <span class="place-text"><span class="place-label">Find It!</span><span class="place-count">Free · ABC · 123</span></span>
+        </button>
+        <button class="place place--game" data-go="cook" style="--c:#fab005">
+          <span class="place-emoji">🥞</span>
+          <span class="place-text"><span class="place-label">Cook!</span><span class="place-count">Pour, flip, stack</span></span>
+        </button>
+        <button class="place place--game" data-go="dino" style="--c:#ff922b">
+          <span class="place-emoji">🦖</span>
+          <span class="place-text"><span class="place-label">Baby Dino</span><span class="place-count">Bath time!</span></span>
+        </button>
+        <button class="place place--game" data-go="garden" style="--c:#37b24d">
+          <span class="place-emoji">🌱</span>
+          <span class="place-text"><span class="place-label">Garden!</span><span class="place-count">Plant, water, pick</span></span>
+        </button>
+        <button class="place place--game place--more" data-hub="moreHub" style="--c:#845ef7">
+          <span class="place-emoji">✨</span>
+          <span class="place-text"><span class="place-label">More</span><span class="place-count">Stories, music, art &amp; games</span></span>
+        </button>
       </div>
+    </section>
 
-      <div class="menu-section">
-        <div class="menu-section-title">🎮 Play</div>
-        <div class="menu-tiles">
-          <button class="tile" data-go="pop" style="--c:#ff922b">
-            <span class="emoji">🎈</span><span class="label">Pop!</span>
-          </button>
-          <button class="tile" data-go="match" style="--c:#20c997">
-            <span class="emoji">🧩</span><span class="label">Match</span>
-          </button>
-          <button class="tile" data-go="memory" style="--c:#cc5de8">
-            <span class="emoji">🃏</span><span class="label">Memory</span>
-          </button>
-          <button class="tile" data-go="dots" style="--c:#15aabf">
-            <span class="emoji">🔗</span><span class="label">Dots</span>
-          </button>
-          <button class="tile" data-go="pattern" style="--c:#7950f2">
-            <span class="emoji">🧠</span><span class="label">Pattern</span>
-          </button>
-          <button class="tile" data-go="find" style="--c:#12b886">
-            <span class="emoji">🔍</span><span class="label">Find It!</span>
-          </button>
-          <button class="tile" data-go="mix" style="--c:#f76707">
-            <span class="emoji">🧪</span><span class="label">Mix</span>
-          </button>
-          <button class="tile" data-go="listen" style="--c:#3b82f6">
-            <span class="emoji">👂</span><span class="label">Listen</span>
-          </button>
-          <button class="tile" data-go="whack" style="--c:#f06595">
-            <span class="emoji">🐹</span><span class="label">Whack!</span>
-          </button>
-        </div>
+    <!-- More: the rest of the activities, one tap off the home screen. -->
+    <section id="moreHub" class="screen hub-screen" data-hub-theme="explore">
+      <button class="home-btn" data-home>🏠</button>
+      <h2 class="hub-title">✨ More to Explore</h2>
+      <div class="menu-places more-places">
+        <button class="place" data-hub="artHub" style="--c:#fab005">
+          <svg class="place-art" viewBox="0 0 120 120" aria-hidden="true">
+            <rect x="20" y="34" width="80" height="56" rx="8" fill="#fff8e1" stroke="#5c3d00" stroke-width="3"/>
+            <circle cx="40" cy="56" r="6" fill="#ff3b30"/>
+            <circle cx="62" cy="62" r="7" fill="#34c759"/>
+            <circle cx="82" cy="54" r="5" fill="#007aff"/>
+            <path d="M30 86 Q 50 74 70 86 T 100 86" stroke="#ff2d92" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <rect x="56" y="14" width="8" height="24" rx="3" fill="#8a5a00"/>
+            <polygon points="52,12 68,12 60,6" fill="#ffc078"/>
+            <line x1="30" y1="92" x2="30" y2="108" stroke="#5c3d00" stroke-width="3"/>
+            <line x1="90" y1="92" x2="90" y2="108" stroke="#5c3d00" stroke-width="3"/>
+          </svg>
+          <span class="place-label">Art Studio</span>
+          <span class="place-count">4 games</span>
+        </button>
+
+        <button class="place" data-hub="musicHub" style="--c:#845ef7">
+          <svg class="place-art" viewBox="0 0 120 120" aria-hidden="true">
+            <rect x="14" y="62" width="92" height="36" rx="4" fill="#fff" stroke="#3a1f5a" stroke-width="3"/>
+            <g fill="#3a1f5a">
+              <rect x="18" y="62" width="2" height="28"/>
+              <rect x="32" y="62" width="2" height="28"/>
+              <rect x="46" y="62" width="2" height="28"/>
+              <rect x="60" y="62" width="2" height="28"/>
+              <rect x="74" y="62" width="2" height="28"/>
+              <rect x="88" y="62" width="2" height="28"/>
+            </g>
+            <rect x="25" y="62" width="8" height="16" fill="#3a1f5a"/>
+            <rect x="53" y="62" width="8" height="16" fill="#3a1f5a"/>
+            <rect x="81" y="62" width="8" height="16" fill="#3a1f5a"/>
+            <text x="32" y="40" font-size="28" fill="#fff">♪</text>
+            <text x="68" y="32" font-size="24" fill="#fff">♫</text>
+          </svg>
+          <span class="place-label">Music</span>
+          <span class="place-count">2 games</span>
+        </button>
+
+        <button class="place" data-hub="brainHub" style="--c:#15aabf">
+          <svg class="place-art" viewBox="0 0 120 120" aria-hidden="true">
+            <path d="M30 30 h 26 v 14 a 8 8 0 0 0 16 0 v -14 h 18 v 26 h -14 a 8 8 0 0 1 0 16 h 14 v 22 h -26 v -14 a 8 8 0 0 0 -16 0 v 14 h -18 v -22 h 14 a 8 8 0 0 0 0 -16 h -14 z" fill="#ffd43b" stroke="#5c3d00" stroke-width="3" stroke-linejoin="round"/>
+            <circle cx="60" cy="62" r="6" fill="#fff"/>
+          </svg>
+          <span class="place-label">Brain Games</span>
+          <span class="place-count">4 games</span>
+        </button>
+
+        <button class="place" data-hub="numbersHub" style="--c:#4dabf7">
+          <svg class="place-art" viewBox="0 0 120 120" aria-hidden="true">
+            <rect x="14" y="22" width="92" height="68" rx="5" fill="#2b4d2b" stroke="#5c3d00" stroke-width="4"/>
+            <!-- Per-digit tspans with explicit x — Safari's text-anchor
+                 with letter-spacing miscalculates the centre. -->
+            <text y="68" font-family="Arial Black, sans-serif" font-size="34" fill="#fff" text-anchor="middle">
+              <tspan x="36">1</tspan><tspan x="60">2</tspan><tspan x="84">3</tspan>
+            </text>
+            <rect x="42" y="92" width="36" height="6" rx="2" fill="#8a5a00"/>
+          </svg>
+          <span class="place-label">Numbers</span>
+          <span class="place-count">3 games</span>
+        </button>
+
+        <button class="place" data-hub="exploreHub" style="--c:#da77f2">
+          <svg class="place-art" viewBox="0 0 120 120" aria-hidden="true">
+            <circle cx="60" cy="60" r="44" fill="#4dabf7"/>
+            <path d="M20 50 Q 40 40 56 56 Q 68 70 92 60 Q 100 56 100 60" fill="#51cf66"/>
+            <path d="M30 80 Q 50 75 70 85 Q 84 90 96 82" fill="#51cf66"/>
+            <circle cx="60" cy="60" r="44" fill="none" stroke="#3a1f5a" stroke-width="3"/>
+            <!-- Pure-SVG stars instead of emoji so they always render in
+                 colour on iOS Safari (SVG <text> can fall back to mono). -->
+            <polygon points="100,12 103,21 112,21 105,27 108,36 100,30 92,36 95,27 88,21 97,21" fill="#ffd43b"/>
+            <polygon points="18,96 20,104 28,104 22,109 24,117 18,112 12,117 14,109 8,104 16,104" fill="#fff"/>
+          </svg>
+          <span class="place-label">Wonder World</span>
+          <span class="place-count">9 topics</span>
+        </button>
+
+        <button class="place" data-go="train" style="--c:#1c7ed6">
+          <svg class="place-art" viewBox="0 0 120 120" aria-hidden="true">
+            <rect x="14" y="46" width="92" height="44" rx="6" fill="#fa5252" stroke="#a51111" stroke-width="3"/>
+            <rect x="14" y="46" width="92" height="6" fill="#fff"/>
+            <rect x="78" y="22" width="14" height="24" rx="2" fill="#3a1f00"/>
+            <circle cx="26" cy="92" r="10" fill="#3a1f00"/>
+            <circle cx="56" cy="92" r="10" fill="#3a1f00"/>
+            <circle cx="86" cy="92" r="10" fill="#3a1f00"/>
+            <circle cx="26" cy="92" r="4"  fill="#fff"/>
+            <circle cx="56" cy="92" r="4"  fill="#fff"/>
+            <circle cx="86" cy="92" r="4"  fill="#fff"/>
+            <rect x="40" y="58" width="14" height="14" fill="#a5d8ff"/>
+            <rect x="64" y="58" width="14" height="14" fill="#a5d8ff"/>
+          </svg>
+          <span class="place-label">Train</span>
+          <span class="place-count">Drive the choo-choo!</span>
+        </button>
+
+        <button class="place" data-go="music" style="--c:#f06595">
+          <svg class="place-art" viewBox="0 0 120 120" aria-hidden="true">
+            <rect x="14" y="38" width="92" height="64" rx="6" fill="#fff" stroke="#5a3700" stroke-width="3"/>
+            <rect x="22" y="46" width="10" height="44" fill="#fa5252"/>
+            <rect x="36" y="46" width="10" height="44" fill="#fd7e14"/>
+            <rect x="50" y="46" width="10" height="44" fill="#ffd43b"/>
+            <rect x="64" y="46" width="10" height="44" fill="#51cf66"/>
+            <rect x="78" y="46" width="10" height="44" fill="#339af0"/>
+            <text x="60" y="30" font-size="14" font-weight="bold" text-anchor="middle" fill="#5a3700">♫ Music</text>
+          </svg>
+          <span class="place-label">Music</span>
+          <span class="place-count">Drums &amp; bells &amp; xylophone</span>
+        </button>
+
+        <button class="place" data-go="farm" style="--c:#fa5252">
+          <svg class="place-art" viewBox="0 0 120 120" aria-hidden="true">
+            <rect x="14" y="48" width="92" height="60" fill="#c2255c"/>
+            <path d="M10 50 L 60 14 L 110 50 Z" fill="#a8083e"/>
+            <rect x="28" y="70" width="22" height="38" fill="#fff" stroke="#5c0e2c" stroke-width="2"/>
+            <rect x="70" y="70" width="22" height="38" fill="#fff" stroke="#5c0e2c" stroke-width="2"/>
+            <circle cx="60" cy="36" r="5" fill="#ffd43b"/>
+            <ellipse cx="60" cy="112" rx="50" ry="4" fill="rgba(0,0,0,0.2)"/>
+          </svg>
+          <span class="place-label">Farm</span>
+          <span class="place-count">Care for the animals</span>
+        </button>
+
+        <button class="place" data-go="icecream" style="--c:#ff8ab0">
+          <svg class="place-art" viewBox="0 0 120 120" aria-hidden="true">
+            <path d="M30 56 L 90 56 L 60 108 Z" fill="#d4a060" stroke="#8b6230" stroke-width="3"/>
+            <line x1="38" y1="68" x2="82" y2="68" stroke="#8b6230" stroke-width="1.5"/>
+            <line x1="44" y1="80" x2="76" y2="80" stroke="#8b6230" stroke-width="1.5"/>
+            <line x1="50" y1="92" x2="70" y2="92" stroke="#8b6230" stroke-width="1.5"/>
+            <ellipse cx="60" cy="46" rx="32" ry="22" fill="#ff8ab0"/>
+            <ellipse cx="60" cy="30" rx="26" ry="18" fill="#fff8e1"/>
+            <ellipse cx="60" cy="16" rx="20" ry="14" fill="#7a4a20"/>
+            <circle cx="60" cy="6" r="4" fill="#fa5252"/>
+          </svg>
+          <span class="place-label">Ice Cream</span>
+          <span class="place-count">Make a sundae</span>
+        </button>
+
+        <button class="place place--wide" data-hub="libraryHub" style="--c:#ffc078">
+          <svg class="place-art" viewBox="0 0 120 120" aria-hidden="true">
+            <path d="M16 30 Q 60 22 60 30 L 60 96 Q 60 88 16 96 Z" fill="#fff" stroke="#8a5a00" stroke-width="3"/>
+            <path d="M104 30 Q 60 22 60 30 L 60 96 Q 60 88 104 96 Z" fill="#fff" stroke="#8a5a00" stroke-width="3"/>
+            <line x1="60" y1="30" x2="60" y2="96" stroke="#8a5a00" stroke-width="3"/>
+            <text x="36" y="60" font-size="14" fill="#5c3d00" text-anchor="middle">Once</text>
+            <text x="36" y="78" font-size="14" fill="#5c3d00" text-anchor="middle">upon</text>
+            <!-- Pure-SVG decorations to avoid emoji-in-SVG fallback issues. -->
+            <polygon points="82,52 86,62 96,62 88,68 91,78 82,72 73,78 76,68 68,62 78,62" fill="#fab005"/>
+            <circle cx="92" cy="84" r="3" fill="#ff922b"/>
+            <circle cx="80" cy="92" r="2" fill="#ff922b"/>
+          </svg>
+          <span class="place-text">
+            <span class="place-label">Library</span>
+            <span class="place-count">Story &amp; Stickers</span>
+          </span>
+        </button>
       </div>
+    </section>
 
-      <div class="menu-section">
-        <div class="menu-section-title">🎨 Create</div>
-        <div class="menu-tiles">
-          <button class="tile" data-go="piano" style="--c:#845ef7">
-            <span class="emoji">🎹</span><span class="label">Piano</span>
-          </button>
-          <button class="tile" data-go="doodle" style="--c:#22b8cf">
-            <span class="emoji">🎨</span><span class="label">Doodle</span>
-          </button>
-          <button class="tile" data-go="color" style="--c:#fa5252">
-            <span class="emoji">🖍️</span><span class="label">Coloring</span>
-          </button>
-          <button class="tile" data-go="story" style="--c:#9775fa">
-            <span class="emoji">📖</span><span class="label">Story</span>
-          </button>
-        </div>
+    <!-- ===== Art Studio hub ===== -->
+    <section id="artHub" class="screen hub-screen" data-hub-theme="art">
+      <button class="home-btn" data-home>🏠</button>
+      <h2 class="hub-title">🎨 Art Studio</h2>
+      <div class="hub-tiles">
+        <button class="tile" data-go="doodle" style="--c:#22b8cf">
+          <span class="emoji">🎨</span><span class="label">Doodle</span>
+        </button>
+        <button class="tile" data-go="color" style="--c:#fa5252">
+          <span class="emoji">🖍️</span><span class="label">Coloring</span>
+        </button>
+        <button class="tile" data-go="mix" style="--c:#f76707">
+          <span class="emoji">🧪</span><span class="label">Mix</span>
+        </button>
+        <button class="tile" data-go="scene" style="--c:#845ef7">
+          <span class="emoji">🖼️</span><span class="label">Scene</span>
+        </button>
       </div>
+    </section>
 
-      <div class="menu-section">
-        <div class="menu-section-title">🌟 Collection</div>
-        <div class="menu-tiles">
-          <button class="tile" data-go="stickers" style="--c:#ffc078">
-            <span class="emoji">🌟</span><span class="label">Stickers</span>
-            <span id="stickerTileCount" class="tile-counter">0/0</span>
-          </button>
-        </div>
+    <!-- ===== Music hub ===== -->
+    <section id="musicHub" class="screen hub-screen" data-hub-theme="music">
+      <button class="home-btn" data-home>🏠</button>
+      <h2 class="hub-title">🎵 Music</h2>
+      <div class="hub-tiles">
+        <button class="tile" data-go="piano" style="--c:#845ef7">
+          <span class="emoji">🎹</span><span class="label">Piano</span>
+        </button>
+        <button class="tile" data-go="listen" style="--c:#3b82f6">
+          <span class="emoji">👂</span><span class="label">Listen</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== Playground hub ===== -->
+    <section id="playgroundHub" class="screen hub-screen" data-hub-theme="play">
+      <button class="home-btn" data-home>🏠</button>
+      <h2 class="hub-title">🎪 Playground</h2>
+      <div class="hub-tiles">
+        <button class="tile" data-go="pop" style="--c:#ff922b">
+          <span class="emoji">🎈</span><span class="label">Pop!</span>
+        </button>
+        <button class="tile" data-go="whack" style="--c:#f06595">
+          <span class="emoji">🐹</span><span class="label">Whack!</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== Brain Games hub ===== -->
+    <section id="brainHub" class="screen hub-screen" data-hub-theme="brain">
+      <button class="home-btn" data-home>🏠</button>
+      <h2 class="hub-title">🧩 Brain Games</h2>
+      <div class="hub-tiles">
+        <button class="tile" data-go="match" style="--c:#20c997">
+          <span class="emoji">🧩</span><span class="label">Match</span>
+        </button>
+        <button class="tile" data-go="memory" style="--c:#cc5de8">
+          <span class="emoji">🃏</span><span class="label">Memory</span>
+        </button>
+        <button class="tile" data-go="pattern" style="--c:#7950f2">
+          <span class="emoji">🧠</span><span class="label">Pattern</span>
+        </button>
+        <button class="tile" data-go="dots" style="--c:#15aabf">
+          <span class="emoji">🔗</span><span class="label">Dots</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== Library hub (Story + Stickers) ===== -->
+    <section id="libraryHub" class="screen hub-screen" data-hub-theme="library">
+      <button class="home-btn" data-home>🏠</button>
+      <h2 class="hub-title">📖 Library</h2>
+      <div class="hub-tiles">
+        <button class="tile" data-go="story" style="--c:#9775fa">
+          <span class="emoji">📖</span><span class="label">Story</span>
+        </button>
+        <button class="tile" data-go="stickers" style="--c:#ffc078">
+          <span class="emoji">🌟</span><span class="label">Stickers</span>
+          <span id="stickerTileCount" class="tile-counter">0/0</span>
+        </button>
       </div>
     </section>
 
     <!-- Numbers hub: counting games -->
-    <section id="numbersHub" class="screen hub-screen">
+    <section id="numbersHub" class="screen hub-screen" data-hub-theme="numbers">
       <button class="home-btn" data-home>🏠</button>
-      <h2 class="hub-title">🧮 Numbers</h2>
+      <h2 class="hub-title">🔢 Numbers</h2>
       <div class="hub-tiles">
+        <button class="tile" data-go="numbers" style="--c:#4dabf7">
+          <span class="emoji">🔢</span><span class="label">1 2 3</span>
+        </button>
         <button class="tile" data-go="count" style="--c:#5c7cfa">
-          <span class="emoji">🔢</span><span class="label">Count</span>
+          <span class="emoji">🍎</span><span class="label">Count</span>
         </button>
         <button class="tile" data-go="howmany" style="--c:#228be6">
           <span class="emoji">🧮</span><span class="label">How Many?</span>
@@ -235,11 +434,14 @@
       </div>
     </section>
 
-    <!-- Explore hub: themed flashcard topics -->
-    <section id="exploreHub" class="screen hub-screen">
+    <!-- Wonder World hub: alphabet + themed flashcard topics -->
+    <section id="exploreHub" class="screen hub-screen" data-hub-theme="explore">
       <button class="home-btn" data-home>🏠</button>
-      <h2 class="hub-title">🌍 Explore</h2>
+      <h2 class="hub-title">🌍 Wonder World</h2>
       <div class="hub-tiles">
+        <button class="tile" data-go="letters" style="--c:#ff6b6b">
+          <span class="emoji">🔤</span><span class="label">ABC</span>
+        </button>
         <button class="tile" data-go="colors" style="--c:#ffd43b">
           <span class="emoji">🎨</span><span class="label">Colors</span>
         </button>
@@ -280,6 +482,12 @@
       <div id="popScore" class="badge">🎈 <span id="popScoreVal">0</span></div>
       <div id="popStreak" class="badge badge--streak">🔥 <span id="popStreakVal">0</span></div>
       <div id="popBest" class="badge badge--best">🏆 <span id="popBestVal">0</span></div>
+      <div id="popModes" class="mode-tabs">
+        <button class="mode-tab active" data-mode="free">🎈 Free</button>
+        <button class="mode-tab" data-mode="letters">🔤 ABC</button>
+        <button class="mode-tab" data-mode="numbers">🔢 123</button>
+      </div>
+      <div id="popPrompt" class="target-banner" hidden></div>
       <div id="popArea" class="pop-area"></div>
     </section>
 
@@ -295,6 +503,12 @@
       <button class="home-btn" data-home>🏠</button>
       <div id="whackScore" class="badge">🔨 <span id="whackScoreVal">0</span></div>
       <div id="whackBest" class="badge badge--best">🏆 <span id="whackBestVal">0</span></div>
+      <div id="whackModes" class="mode-tabs">
+        <button class="mode-tab active" data-mode="free">🐹 Free</button>
+        <button class="mode-tab" data-mode="letters">🔤 ABC</button>
+        <button class="mode-tab" data-mode="numbers">🔢 123</button>
+      </div>
+      <div id="whackPrompt" class="target-banner" hidden></div>
       <div id="whackGrid" class="whack-grid"></div>
     </section>
 
@@ -303,6 +517,7 @@
       <button class="home-btn" data-home>🏠</button>
       <div class="doodle-tools">
         <button id="doodleStamp" class="doodle-tool">✨ Stamp</button>
+        <button id="doodleUndo" class="doodle-tool doodle-tool--undo" disabled>↶ Undo</button>
         <button id="doodleSave" class="doodle-tool doodle-tool--save">💾 Save</button>
         <button id="doodleClear" class="doodle-tool doodle-tool--clear">🧽 Clear</button>
       </div>
@@ -388,6 +603,11 @@
       <button class="home-btn" data-home>🏠</button>
       <div id="findScore" class="badge">🔍 <span id="findScoreVal">0</span></div>
       <div id="findBest" class="badge badge--best">🏆 <span id="findBestVal">0</span></div>
+      <div id="findModes" class="mode-tabs">
+        <button class="mode-tab active" data-mode="free">🔍 Free</button>
+        <button class="mode-tab" data-mode="letters">🔤 ABC</button>
+        <button class="mode-tab" data-mode="numbers">🔢 123</button>
+      </div>
       <div id="findPrompt" class="find-prompt">Find!</div>
       <div id="findStage" class="find-stage"></div>
     </section>
@@ -428,6 +648,68 @@
         <div id="storyText" class="story-text"></div>
         <div class="story-hint">Tap anywhere to keep going →</div>
       </div>
+    </section>
+
+    <!-- Sticker Scene! drag stickers onto themed backgrounds -->
+    <section id="sceneGame" class="screen" data-title="🖼️ Sticker Scene!">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="sceneStage" class="scene-stage"></div>
+    </section>
+
+    <!-- Train! drive the choo-choo -->
+    <section id="trainGame" class="screen" data-title="🚂 Train!">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="trainScore" class="badge">🚉 <span id="trainScoreVal">0</span></div>
+      <div id="trainBest" class="badge badge--best">🏆 <span id="trainBestVal">0</span></div>
+      <div id="trainStage" class="train-stage"></div>
+    </section>
+
+    <!-- Music Studio -->
+    <section id="musicGame" class="screen" data-title="🎵 Music Studio">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="musicScore" class="badge">🎶 <span id="musicScoreVal">0</span></div>
+      <div id="musicBest" class="badge badge--best">🏆 <span id="musicBestVal">0</span></div>
+      <div id="musicStage" class="music-stage"></div>
+    </section>
+
+    <!-- Farm! sandbox -->
+    <section id="farmGame" class="screen" data-title="🏡 Farm!">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="farmScore" class="badge">⭐ <span id="farmScoreVal">0</span></div>
+      <div id="farmBest" class="badge badge--best">🏆 <span id="farmBestVal">0</span></div>
+      <div id="farmStage" class="farm-stage"></div>
+    </section>
+
+    <!-- Ice Cream! make a sundae -->
+    <section id="icecreamGame" class="screen" data-title="🍦 Ice Cream!">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="icecreamScore" class="badge">🍦 <span id="icecreamScoreVal">0</span></div>
+      <div id="icecreamBest" class="badge badge--best">🏆 <span id="icecreamBestVal">0</span></div>
+      <div id="icecreamStage" class="icecream-stage"></div>
+    </section>
+
+    <!-- Garden! plant, water, harvest -->
+    <section id="gardenGame" class="screen" data-title="🌱 Garden!">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="gardenScore" class="badge">🍓 <span id="gardenScoreVal">0</span></div>
+      <div id="gardenBest" class="badge badge--best">🏆 <span id="gardenBestVal">0</span></div>
+      <div id="gardenStage" class="garden-stage"></div>
+    </section>
+
+    <!-- Baby Dino: make him better -->
+    <section id="dinoGame" class="screen" data-title="🦖 Baby Dino">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="dinoScore" class="badge">💖 <span id="dinoScoreVal">0</span></div>
+      <div id="dinoBest" class="badge badge--best">🏆 <span id="dinoBestVal">0</span></div>
+      <div id="dinoStage" class="dino-stage"></div>
+    </section>
+
+    <!-- Cook! pancakes -->
+    <section id="cookGame" class="screen" data-title="🥞 Cook!">
+      <button class="home-btn" data-home>🏠</button>
+      <div id="cookScore" class="badge">🥞 <span id="cookScoreVal">0</span></div>
+      <div id="cookBest" class="badge badge--best">🏆 <span id="cookBestVal">0</span></div>
+      <div id="cookStage" class="cook-stage"></div>
     </section>
 
     <!-- Sticker collection -->
@@ -490,6 +772,7 @@
   <script src="lib/audio.js"></script>
   <script src="lib/storage.js"></script>
   <script src="lib/achievements.js"></script>
+  <script src="lib/tutorial.js"></script>
   <script src="app.js"></script>
   <script src="games/pop.js"></script>
   <script src="games/piano.js"></script>
@@ -506,6 +789,14 @@
   <script src="games/story.js"></script>
   <script src="games/howmany.js"></script>
   <script src="games/mix.js"></script>
+  <script src="games/cook.js"></script>
+  <script src="games/dino.js"></script>
+  <script src="games/garden.js"></script>
+  <script src="games/scene.js"></script>
+  <script src="games/farm.js"></script>
+  <script src="games/icecream.js"></script>
+  <script src="games/train.js"></script>
+  <script src="games/music.js"></script>
   <script src="games/stickers.js"></script>
 </body>
 </html>
