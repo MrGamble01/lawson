@@ -2478,13 +2478,16 @@ html.dark .hub-title {
   left: 0%;
   bottom: 19%;
   display: flex;
-  flex-direction: row-reverse;
+  flex-direction: row;            /* engine (last DOM child) on the right, pulling cars */
   align-items: flex-end;
   gap: 6px;
   z-index: 8;
   transition: none;
   pointer-events: none;
-  transform: translateX(-50%);
+  /* Anchor the engine roughly at the train position: shift back by
+     ~the full convoy width minus half an engine, so the engine center
+     sits over left%. */
+  transform: translateX(calc(-100% + clamp(55px, 12vw, 90px)));
 }
 .train-engine {
   width: clamp(110px, 24vw, 180px);

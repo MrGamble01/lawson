@@ -35,7 +35,7 @@
   let dayTimer = null;
   let dayPhase = 0;
   let timers = [];
-  let trainPosPct = 0;           // 0..100 across the track
+  let trainPosPct = 22;          // 0..100 across the track; starts at station 1
   let cars = [];                 // [{ passenger or null }] for engine + 3 cars
   let trainMoveTimer = null;
 
@@ -418,8 +418,8 @@
   // ====================================================================
   function start() {
     running = false;
-    trainPosPct = 0;
-    currentStation = -1;
+    trainPosPct = 22;       // start parked at first station so it's visible
+    currentStation = 0;
     stationsVisited = 0;
     celebrated = false;
     dayPhase = 0;

@@ -74,8 +74,7 @@
         <rect x="68"  y="146" width="14" height="16" rx="3" fill="#3a2208"/>
         <rect x="118" y="146" width="14" height="16" rx="3" fill="#3a2208"/>
         <rect x="144" y="142" width="14" height="20" rx="3" fill="#3a2208"/>
-        <ellipse cx="56"  y="95"  rx="32" ry="24" fill="#fff"/>
-        <ellipse cx="56"  cy="95"  rx="32" ry="24" fill="#fff" stroke="#3a2208" stroke-width="2.5"/>
+        <ellipse cx="56"  cy="95" rx="32" ry="24" fill="#fff" stroke="#3a2208" stroke-width="2.5"/>
         <circle cx="46"  cy="85"  r="4"  fill="#3a2208"/>
         <circle cx="68"  cy="85"  r="4"  fill="#3a2208"/>
         <ellipse cx="56"  cy="110" rx="8"  ry="3"  fill="#ff8ab0"/>
