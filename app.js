@@ -743,7 +743,7 @@ const HUB_INTROS = {
   exploreHub: "Wonder World!",
   artHub: "Welcome to the Art Studio!",
   musicHub: "Music time!",
-  playgroundHub: "Playground!",
+  townHub: "Welcome to Town!",
   brainHub: "Brain games!",
   libraryHub: "Welcome to the library!",
 };
