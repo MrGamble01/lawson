@@ -26,6 +26,16 @@
 
   let total = 0;
   let activeTimer = null;
+  let bestAtStart = 0;
+  let celebrated = false;
+
+  function maybeCelebrateRecord(value) {
+    if (value > bestAtStart && !celebrated) {
+      celebrated = true;
+      setTimeout(() => L.celebrateNewHigh(value), 900);
+    }
+    L.bumpHighScore("countBest", value);
+  }
 
   function chooseRound(prevItem) {
     // Pick a different item from last round, count between 1 and 5.
@@ -64,12 +74,8 @@
         L.say(NUMBER_WORDS[tappedSoFar] || String(tappedSoFar));
         L.bumpBadge("countScoreVal", total);
         if (total >= 25) L.earnSticker && L.earnSticker("count25");
-        const best = L.tryNewHighScore("countBest", total, (next) => {
-          document.getElementById("countBestVal").textContent = next;
-          // Fire after the round-end happy fanfare so we don't trample it.
-          setTimeout(() => L.celebrateNewHigh(next), 900);
-        });
-        document.getElementById("countBestVal").textContent = best;
+        maybeCelebrateRecord(total);
+        document.getElementById("countBestVal").textContent = L.getHighScore("countBest");
 
         if (tappedSoFar === n) {
           // Wait for the spoken number, then announce the total + cheer.
@@ -100,8 +106,10 @@
 
   function start() {
     total = 0;
+    bestAtStart = L.getHighScore("countBest");
+    celebrated = false;
     L.bumpBadge("countScoreVal", 0);
-    document.getElementById("countBestVal").textContent = L.getHighScore("countBest");
+    document.getElementById("countBestVal").textContent = bestAtStart;
     startRound(null);
   }
 

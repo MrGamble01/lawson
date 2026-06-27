@@ -33,6 +33,16 @@
   let answer = 0;
   let lastItem = null;
   let lastN = 0;
+  let bestAtStart = 0;
+  let celebrated = false;
+
+  function maybeCelebrateRecord(value) {
+    if (value > bestAtStart && !celebrated) {
+      celebrated = true;
+      setTimeout(() => L.celebrateNewHigh(value), 800);
+    }
+    L.bumpHighScore("howmanyBest", value);
+  }
 
   function pickRound() {
     const pool = ITEMS.filter((x) => x !== lastItem);
@@ -83,10 +93,7 @@
           L.bumpBadge("howmanyScoreVal", score);
           if (score >= 10) L.earnSticker && L.earnSticker("mathStar");
           if (score > 0 && score % 5 === 0) L.boboCheer && L.boboCheer();
-          L.tryNewHighScore("howmanyBest", score, (next) => {
-            document.getElementById("howmanyBestVal").textContent = next;
-            setTimeout(() => L.celebrateNewHigh(next), 800);
-          });
+          maybeCelebrateRecord(score);
           document.getElementById("howmanyBestVal").textContent = L.getHighScore("howmanyBest");
           L.say(`${NUMBER_WORDS[n] || n}! ${L.cheer()}`);
           btn.classList.add("correct");
@@ -114,9 +121,11 @@
 
   function start() {
     score = 0;
+    bestAtStart = L.getHighScore("howmanyBest");
+    celebrated = false;
     lastItem = null; lastN = 0;
     L.bumpBadge("howmanyScoreVal", 0);
-    document.getElementById("howmanyBestVal").textContent = L.getHighScore("howmanyBest");
+    document.getElementById("howmanyBestVal").textContent = bestAtStart;
     newRound();
   }
   function stop() { clearTimeout(activeTimer); activeTimer = null; }

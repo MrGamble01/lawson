@@ -92,6 +92,16 @@
   let nextDot = 1;
   let solved = 0;
   let advanceTimer = null;
+  let bestAtStart = 0;
+  let celebrated = false;
+
+  function maybeCelebrateRecord(value) {
+    if (value > bestAtStart && !celebrated) {
+      celebrated = true;
+      setTimeout(() => L.celebrateNewHigh(value), 1200);
+    }
+    L.bumpHighScore("dotsBest", value);
+  }
 
   function svgEl(name, attrs) {
     const el = document.createElementNS(SVG_NS, name);
@@ -172,10 +182,7 @@
     solved += 1;
     if (solved >= 3) L.earnSticker && L.earnSticker("dots3");
     L.bumpBadge("dotsScoreVal", solved);
-    L.tryNewHighScore("dotsBest", solved, (next) => {
-      document.getElementById("dotsBestVal").textContent = next;
-      setTimeout(() => L.celebrateNewHigh(next), 1200);
-    });
+    maybeCelebrateRecord(solved);
     document.getElementById("dotsBestVal").textContent = L.getHighScore("dotsBest");
 
     setTimeout(() => L.say(`It's a ${p.name}! ${L.cheer()}`), 300);
@@ -206,9 +213,11 @@
     stage = document.getElementById("dotsStage");
     if (!stage) return;
     solved = 0;
+    bestAtStart = L.getHighScore("dotsBest");
+    celebrated = false;
     puzzleIndex = -1;
     L.bumpBadge("dotsScoreVal", 0);
-    document.getElementById("dotsBestVal").textContent = L.getHighScore("dotsBest");
+    document.getElementById("dotsBestVal").textContent = bestAtStart;
     setupPuzzle();
   }
 

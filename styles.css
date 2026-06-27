@@ -1180,7 +1180,7 @@ html.dark .hub-title {
   gap: clamp(18px, 3vw, 40px);
   width: 100%;
   max-width: 900px;
-  margin-top: 150px;
+  margin-top: 70px;
   padding: 16px;
 }
 /* Letters/numbers ride out of the hole as a bold white glyph — reads

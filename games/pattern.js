@@ -27,6 +27,16 @@
 
   let score = 0;
   let activeTimer = null;
+  let bestAtStart = 0;
+  let celebrated = false;
+
+  function maybeCelebrateRecord(value) {
+    if (value > bestAtStart && !celebrated) {
+      celebrated = true;
+      setTimeout(() => L.celebrateNewHigh(value), 800);
+    }
+    L.bumpHighScore("patternBest", value);
+  }
 
   function newRound() {
     const set = ITEM_SETS[Math.floor(Math.random() * ITEM_SETS.length)];
@@ -73,10 +83,7 @@
           score += 1;
           L.bumpBadge("patternScoreVal", score);
           if (score >= 10) L.earnSticker && L.earnSticker("patternPro");
-          L.tryNewHighScore("patternBest", score, (next) => {
-            document.getElementById("patternBestVal").textContent = next;
-            setTimeout(() => L.celebrateNewHigh(next), 800);
-          });
+          maybeCelebrateRecord(score);
           document.getElementById("patternBestVal").textContent = L.getHighScore("patternBest");
 
           q.textContent = it.e;
@@ -104,8 +111,10 @@
 
   function start() {
     score = 0;
+    bestAtStart = L.getHighScore("patternBest");
+    celebrated = false;
     L.bumpBadge("patternScoreVal", 0);
-    document.getElementById("patternBestVal").textContent = L.getHighScore("patternBest");
+    document.getElementById("patternBestVal").textContent = bestAtStart;
     newRound();
   }
   function stop() { clearTimeout(activeTimer); activeTimer = null; }
