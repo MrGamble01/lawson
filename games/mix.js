@@ -30,6 +30,16 @@
   let selected = [];
   let busy = false;
   let lastMixIdx = -1;
+  let bestAtStart = 0;
+  let celebrated = false;
+
+  function maybeCelebrateRecord(value) {
+    if (value > bestAtStart && !celebrated) {
+      celebrated = true;
+      setTimeout(() => L.celebrateNewHigh(value), 700);
+    }
+    L.bumpHighScore("mixBest", value);
+  }
 
   function pickMix() {
     let i;
@@ -107,10 +117,7 @@
       score += 1;
       L.bumpBadge("mixScoreVal", score);
       if (score >= 5) L.earnSticker && L.earnSticker("mixer");
-      L.tryNewHighScore("mixBest", score, (next) => {
-        document.getElementById("mixBestVal").textContent = next;
-        setTimeout(() => L.celebrateNewHigh(next), 700);
-      });
+      maybeCelebrateRecord(score);
       document.getElementById("mixBestVal").textContent = L.getHighScore("mixBest");
 
       bowl.classList.add("correct");
@@ -135,9 +142,11 @@
 
   function start() {
     score = 0;
+    bestAtStart = L.getHighScore("mixBest");
+    celebrated = false;
     lastMixIdx = -1;
     L.bumpBadge("mixScoreVal", 0);
-    document.getElementById("mixBestVal").textContent = L.getHighScore("mixBest");
+    document.getElementById("mixBestVal").textContent = bestAtStart;
     newRound();
   }
   function stop() {

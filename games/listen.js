@@ -30,6 +30,16 @@
   let score = 0;
   let answer = null;
   let activeTimer = null;
+  let bestAtStart = 0;
+  let celebrated = false;
+
+  function maybeCelebrateRecord(value) {
+    if (value > bestAtStart && !celebrated) {
+      celebrated = true;
+      setTimeout(() => L.celebrateNewHigh(value), 800);
+    }
+    L.bumpHighScore("listenBest", value);
+  }
 
   function pick3() {
     const c = POOL.slice();
@@ -63,11 +73,7 @@
           L.bumpBadge("listenScoreVal", score);
           if (score >= 10) L.earnSticker && L.earnSticker("listen10");
           if (score > 0 && score % 5 === 0) L.boboCheer && L.boboCheer();
-          L.tryNewHighScore("listenBest", score, (next) => {
-            document.getElementById("listenBestVal").textContent = next;
-            L.earnSticker && L.earnSticker("firstHigh");
-            setTimeout(() => L.celebrateNewHigh(next), 800);
-          });
+          maybeCelebrateRecord(score);
           document.getElementById("listenBestVal").textContent = L.getHighScore("listenBest");
 
           L.say(`${L.cheer()} It's a ${answer.n}!`);
@@ -96,8 +102,10 @@
 
   function start() {
     score = 0;
+    bestAtStart = L.getHighScore("listenBest");
+    celebrated = false;
     L.bumpBadge("listenScoreVal", 0);
-    document.getElementById("listenBestVal").textContent = L.getHighScore("listenBest");
+    document.getElementById("listenBestVal").textContent = bestAtStart;
     const replay = document.getElementById("listenReplay");
     if (replay) L.onTapOnce(replay, (e) => {
       if (e.stopPropagation) e.stopPropagation();

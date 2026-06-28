@@ -51,6 +51,16 @@
   }
 
   let score = 0;
+  let bestAtStart = 0;
+  let celebrated = false;
+
+  function maybeCelebrateRecord(value) {
+    if (value > bestAtStart && !celebrated) {
+      celebrated = true;
+      setTimeout(() => L.celebrateNewHigh(value), 700);
+    }
+    L.bumpHighScore("matchBest", value);
+  }
 
   function newRound(speakPrompt) {
     const target = document.getElementById("matchTarget");
@@ -81,11 +91,8 @@
           // Bobo peeks up to cheer every 5 correct.
           if (score > 0 && score % 5 === 0) L.boboCheer && L.boboCheer();
           L.bumpBadge("matchScoreVal", score);
-          const best = L.tryNewHighScore("matchBest", score, (next) => {
-            document.getElementById("matchBestVal").textContent = next;
-            setTimeout(() => L.celebrateNewHigh(next), 700);
-          });
-          document.getElementById("matchBestVal").textContent = best;
+          maybeCelebrateRecord(score);
+          document.getElementById("matchBestVal").textContent = L.getHighScore("matchBest");
 
           const c = L.cheer();
           if (score % 5 === 0) L.say(`${c} ${score} in a row!`);
@@ -108,8 +115,10 @@
 
   function start() {
     score = 0;
+    bestAtStart = L.getHighScore("matchBest");
+    celebrated = false;
     document.getElementById("matchScoreVal").textContent = "0";
-    document.getElementById("matchBestVal").textContent = L.getHighScore("matchBest");
+    document.getElementById("matchBestVal").textContent = bestAtStart;
     newRound(true);
   }
 

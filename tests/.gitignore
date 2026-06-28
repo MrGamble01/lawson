@@ -1,0 +1,4 @@
+# Ephemeral output from `node tests/smoke.js --baseline`. The committed
+# baseline lives in tests/baseline/; this dir is just the latest run's
+# screenshots for human review when something diffs.
+actual/

@@ -41,6 +41,16 @@
   let lock = false;
   let matchedCount = 0;
   let rounds = 0;
+  let bestAtStart = 0;
+  let celebrated = false;
+
+  function maybeCelebrateRecord(value) {
+    if (value > bestAtStart && !celebrated) {
+      celebrated = true;
+      L.celebrateNewHigh(value);
+    }
+    L.bumpHighScore("memoryBest", value);
+  }
 
   function makeCard(item, i) {
     const card = document.createElement("button");
@@ -102,10 +112,7 @@
     rounds += 1;
     if (rounds >= 3) L.earnSticker && L.earnSticker("memory3");
     L.bumpBadge("memoryScoreVal", rounds);
-    L.tryNewHighScore("memoryBest", rounds, (next) => {
-      document.getElementById("memoryBestVal").textContent = next;
-      L.celebrateNewHigh(next);
-    });
+    maybeCelebrateRecord(rounds);
     const bestEl = document.getElementById("memoryBestVal");
     if (bestEl) bestEl.textContent = L.getHighScore("memoryBest");
 
@@ -136,10 +143,12 @@
 
   function start() {
     rounds = 0;
+    bestAtStart = L.getHighScore("memoryBest");
+    celebrated = false;
     setIndex = -1;
     L.bumpBadge("memoryScoreVal", 0);
     const bestEl = document.getElementById("memoryBestVal");
-    if (bestEl) bestEl.textContent = L.getHighScore("memoryBest");
+    if (bestEl) bestEl.textContent = bestAtStart;
     setupRound();
     L.say("Find the matching pairs!");
   }
