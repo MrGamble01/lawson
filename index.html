@@ -715,6 +715,10 @@
         <span class="settings-toggle-track" aria-hidden="true"></span>
         <span class="settings-toggle-label">🔊 Sound effects</span>
       </label>
+      <label class="settings-slider">
+        <span class="settings-slider-label">🔉 Volume</span>
+        <input id="settingsVolume" type="range" min="0" max="100" step="5" value="100" aria-label="Volume" />
+      </label>
       <label class="settings-toggle">
         <input id="settingsMusic" type="checkbox" />
         <span class="settings-toggle-track" aria-hidden="true"></span>
@@ -726,6 +730,7 @@
         <span class="settings-toggle-label">🌙 Dark mode</span>
       </label>
 
+      <button id="settingsTips" class="settings-tips" type="button">💡 Show tips again</button>
       <button id="settingsReset" class="settings-reset" type="button">🧹 Reset scores</button>
       <button id="settingsClose" class="settings-close" type="button">✅ Done</button>
     </div>

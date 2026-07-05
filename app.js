@@ -618,7 +618,7 @@ function boboCheer() {
 // tweak one without touching the others.
 window.Lawson = {
   say, beep, happySound, buzzSound, haptic, sparkleAt, onTap, onTapOnce, pointOf, bumpBadge, show,
-  audioCtx, unlockAudio,
+  audioCtx, unlockAudio, masterGain, setVolume, getVolume,
   getHighScore, setHighScore, bumpHighScore, tryNewHighScore,
   setVoiceMuted, setSoundMuted, isVoiceMuted, isSoundMuted,
   setMusicEnabled, isMusicEnabled, startMusic, stopMusic,
@@ -1039,8 +1039,10 @@ document.addEventListener("touchmove", (e) => {
   const soundTgl   = document.getElementById("settingsSound");
   const musicTgl   = document.getElementById("settingsMusic");
   const darkTgl    = document.getElementById("settingsDark");
+  const volumeInput = document.getElementById("settingsVolume");
   const closeBtn   = document.getElementById("settingsClose");
   const resetBtn   = document.getElementById("settingsReset");
+  const tipsBtn    = document.getElementById("settingsTips");
 
   // Toggles are "on means enabled", so the checkbox value is the inverse
   // of the muted flag.
@@ -1049,6 +1051,15 @@ document.addEventListener("touchmove", (e) => {
     setSoundMuted(!soundTgl.checked);
     if (soundTgl.checked) beep(500, 0.08); // little chirp when re-enabling
   });
+  // Volume slider drives the shared master gain. Chirp on release so the
+  // parent hears the new level. `input` updates live; `change` chirps.
+  if (volumeInput) {
+    volumeInput.addEventListener("input", () => setVolume(volumeInput.value / 100));
+    volumeInput.addEventListener("change", () => {
+      setVolume(volumeInput.value / 100);
+      if (!isSoundMuted() && volumeInput.value > 0) beep(600, 0.1, "triangle");
+    });
+  }
   if (musicTgl) musicTgl.addEventListener("change", () => {
     setMusicEnabled(musicTgl.checked);
     // If the kid is on the menu and just turned music on, start now.
@@ -1063,8 +1074,10 @@ document.addEventListener("touchmove", (e) => {
     soundTgl.checked = !isSoundMuted();
     if (musicTgl) musicTgl.checked = isMusicEnabled();
     if (darkTgl) darkTgl.checked = isDarkMode();
+    if (volumeInput) volumeInput.value = Math.round(getVolume() * 100);
     resetBtn.textContent = "🧹 Reset scores";
     resetBtn.classList.remove("confirming");
+    if (tipsBtn) tipsBtn.textContent = "💡 Show tips again";
     closeBtn.textContent = onboarding ? "✨ Let's play!" : "✅ Done";
     overlay.classList.toggle("onboarding", onboarding);
     overlay.classList.add("open");
@@ -1104,6 +1117,19 @@ document.addEventListener("touchmove", (e) => {
         resetBtn.textContent = "🧹 Reset scores";
       }, 4000);
     }
+  });
+
+  // "Show tips again" re-arms the first-visit tutorial hints (they only
+  // fire once per game otherwise). Handy after a sibling takes over.
+  if (tipsBtn) onTap(tipsBtn, () => {
+    if (typeof window.__resetTutorials === "function") window.__resetTutorials();
+    tipsBtn.textContent = "✅ Tips on!";
+    tipsBtn.classList.add("done");
+    happySound();
+    setTimeout(() => {
+      tipsBtn.textContent = "💡 Show tips again";
+      tipsBtn.classList.remove("done");
+    }, 1400);
   });
 
   // Submit on Enter, in case a parent prefers the keyboard.

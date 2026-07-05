@@ -191,7 +191,9 @@
       master.gain.setValueAtTime(0.0001, t);
       master.gain.exponentialRampToValueAtTime(0.35, t + 0.015);
       master.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-      master.connect(ac.destination);
+      // Route through the shared master gain (Settings volume) when
+      // available, falling back to the raw destination.
+      master.connect(L.masterGain || ac.destination);
 
       const o1 = ac.createOscillator();
       o1.type = "triangle";
