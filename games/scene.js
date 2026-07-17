@@ -148,14 +148,14 @@
     setupSwitchers();
   }
 
-  function applyScene() {
+  function applyScene(silent) {
     const bg = $("sceneBg");
     const scene = SCENES[sceneIdx % SCENES.length];
     if (bg) {
       bg.style.background = scene.bg;
       bg.dataset.scene = scene.id;
     }
-    L.say(scene.say);
+    if (!silent) L.say(scene.say);
   }
 
   function setupSwitchers() {
@@ -165,6 +165,7 @@
       L.beep(580, 0.06, "sine");
       L.beep(720, 0.08, "sine", 0.06);
       L.haptic(6);
+      saveScene();
     });
     L.onTap($("sceneClear"), () => {
       clearScene();
@@ -180,6 +181,7 @@
       setT(360, () => p.el.remove());
     });
     placed = [];
+    saveScene();
   }
 
   function buildTray() {
@@ -272,16 +274,28 @@
     });
   }
 
+  // Interactive placement from a drag/tap: converts the drop point to a
+  // percentage, rolls a random size/rotation, then hands off to the core
+  // builder (shared with restore). `interactive` gates sound + save.
   function placeAt(sticker, clientX, clientY, sceneRect) {
-    if (placed.length >= MAX_PLACED) {
-      // Oldest gets recycled so the kid never runs out of room.
-      const old = placed.shift();
-      if (old) old.el.remove();
-    }
     const x = ((clientX - sceneRect.left) / sceneRect.width) * 100;
     const y = ((clientY - sceneRect.top) / sceneRect.height) * 100;
     const px = Math.max(2, Math.min(98, x));
     const py = Math.max(2, Math.min(98, y));
+    const scale = 0.85 + Math.random() * 0.5;
+    const rot = (Math.random() - 0.5) * 30;
+    addSticker(sticker, px, py, scale, rot, true);
+    saveScene();
+  }
+
+  // Core sticker builder. Used by placeAt (interactive) and loadScene
+  // (restore). Stores scale/rot on the record so the scene rebuilds
+  // pixel-identical after a reload.
+  function addSticker(sticker, px, py, scale, rot, interactive) {
+    if (placed.length >= MAX_PLACED) {
+      const old = placed.shift();
+      if (old) old.el.remove();
+    }
     const cont = $("scenePlaced");
     if (!cont) return;
     const el = document.createElement("button");
@@ -289,18 +303,17 @@
     el.textContent = sticker.e;
     el.style.left = px + "%";
     el.style.top  = py + "%";
-    // Random size/rotation for personality.
-    const scale = 0.85 + Math.random() * 0.5;
-    const rot = (Math.random() - 0.5) * 30;
     el.style.fontSize = `clamp(36px, calc(${8 * scale}vw), 96px)`;
     el.style.setProperty("--rot", rot + "deg");
     cont.appendChild(el);
-    placed.push({ el, sticker, x: px, y: py });
-    L.beep(650 + Math.random() * 250, 0.05, "triangle");
-    L.haptic(5);
-    L.say(sticker.s);
-    if (placed.length === 1) L.earnSticker && L.earnSticker("sceneArtist");
-    if (placed.length >= 12) L.earnSticker && L.earnSticker("sceneMaker");
+    placed.push({ el, sticker, x: px, y: py, scale, rot });
+    if (interactive) {
+      L.beep(650 + Math.random() * 250, 0.05, "triangle");
+      L.haptic(5);
+      L.say(sticker.s);
+      if (placed.length === 1) L.earnSticker && L.earnSticker("sceneArtist");
+      if (placed.length >= 12) L.earnSticker && L.earnSticker("sceneMaker");
+    }
     // Tap a placed sticker to hear it again, or long-press to remove.
     let pressTimer = null;
     let pressed = false;
@@ -313,6 +326,7 @@
           placed = placed.filter((p) => p.el !== el);
           L.beep(280, 0.06, "sine");
           L.haptic(8);
+          saveScene();
         }
       });
     });
@@ -334,6 +348,43 @@
   }
 
   // ====================================================================
+  //  Persistence — the kid's decorated scene survives leaving and
+  //  coming back (or a full reload). Stores sticker index + position +
+  //  size/rotation so it restores exactly.
+  // ====================================================================
+  const SAVE_KEY = "lawson:scene";
+  function saveScene() {
+    try {
+      const data = {
+        sceneIdx,
+        items: placed.map((p) => ({
+          i: STICKERS.indexOf(p.sticker),
+          x: Math.round(p.x * 10) / 10,
+          y: Math.round(p.y * 10) / 10,
+          s: Math.round(p.scale * 100) / 100,
+          r: Math.round(p.rot * 10) / 10,
+        })).filter((it) => it.i >= 0),
+      };
+      localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+    } catch (_) {}
+  }
+  function loadScene() {
+    try {
+      const raw = localStorage.getItem(SAVE_KEY);
+      if (!raw) return false;
+      const data = JSON.parse(raw);
+      if (!data || !Array.isArray(data.items)) return false;
+      sceneIdx = data.sceneIdx || 0;
+      applyScene(true);
+      data.items.forEach((it) => {
+        const sticker = STICKERS[it.i];
+        if (sticker) addSticker(sticker, it.x, it.y, it.s || 1, it.r || 0, false);
+      });
+      return placed.length > 0;
+    } catch (_) { return false; }
+  }
+
+  // ====================================================================
   //  Lifecycle
   // ====================================================================
   function start() {
@@ -341,7 +392,10 @@
     sceneIdx = 0;
     clearAll();
     build();
-    L.say("Drag stickers onto the picture!");
+    // Bring back the kid's saved scene if there is one; otherwise greet.
+    const restored = loadScene();
+    if (restored) L.say("Here's your picture!");
+    else L.say("Drag stickers onto the picture!");
   }
 
   function stop() {

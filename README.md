@@ -9,51 +9,69 @@ the home screen to play offline.
 Open `index.html` in any modern browser. For service-worker / "add to
 home screen" support, serve over HTTP (e.g. `python3 -m http.server`).
 
-## What's in here
+## Home screen
 
-Tiles are grouped on the home screen into four sections.
+Tuned for a 3-year-old: no reading required, small counting numbers,
+big tap targets. The home screen surfaces the six games he plays most,
+each opening straight into play. Everything else lives one tap away
+behind the **More** card.
 
-Tuned for a 3-year-old: no reading required, no abstract pattern
-recognition, small counting numbers only.
+**Six headline games:**
 
-**Learn** — four tiles, two are hubs that open sub-menus.
+- **Pop!** — pop floating balloons. Three modes: Free (streaks + rare
+  rainbow), ABC ("Pop the B!"), 123 ("Pop the 3!") — letters and
+  numbers ride on the balloons.
+- **Whack!** — whack critters as they pop out of six holes.
+- **Find It!** — hidden-object hunt across themed scenes (farm, ocean,
+  park, sky). Free / ABC / 123 modes.
+- **Cook!** — pancakes: pour batter, watch it bubble, flip, plate, stack.
+- **Baby Dino** — bath time: drag soap to lather, pull the shower to
+  rinse, drag the towel to dry. Hearts when he's clean.
+- **Garden!** — plant a seed, drag the watering can to grow it, harvest
+  the fruit. 12 plants; bees, butterflies, a bird, surprise rain, and a
+  slow day/night cycle.
 
-- **ABC** (uppercase + lowercase together)
-- **123** (1–20)
-- **Numbers** hub — Count, How Many? (max 5)
-- **Explore** hub — Colors, Shapes, Animals, Vehicles, Dinos, Weather,
-  Food, Family
+## More → hubs
 
-**Play** — games with scores and personal bests.
+The **More** drawer holds themed hub cards, each opening a small menu:
 
-- **Pop!** — pop floating balloons, streak bonuses, rare rainbow
-- **Match** — find the matching emoji
-- **Memory** — 4-pair concentration board (8 cards), five themed sets
-- **Dots** — Connect the Dots, seven puzzles with reveal emoji
-- **Pattern** — what comes next? (ABAB only)
-- **Find It!** — find the named item among 16 scattered emoji
-- **Mix** — combine two paint drops to make the target color
-- **Listen** — hear the clue, find the emoji (audio-only)
-- **Whack!** — whack the critters before they duck back down
+- **Art Studio** — Doodle, Coloring, Color Mix, Sticker Scene
+- **Music** — Piano, Music Studio (drums + xylophone + bells), Listen
+- **Brain Games** — Match, Memory, Pattern, Dots
+- **Numbers** — 1 2 3, Count, How Many?
+- **Wonder World** — ABC + 8 flashcard topics (Colors, Shapes, Animals,
+  Vehicles, Dinos, Weather, Food, Family)
+- **Town** — Train, Farm, Ice Cream (illustrated sandbox scenes)
+- **Library** — Story, Sticker book
 
-**Create** — open-ended creative play.
+**Sandboxes** (open-ended, no scoring):
 
-- **Piano** — rainbow keys, twelve playable songs
-- **Doodle** — rainbow or solid-color brushes, eraser, three sizes,
-  save the drawing as a PNG
-- **Coloring** — ten outline pages with a color palette
-- **Story** — seven narrated 4-page picture stories
+- **Sticker Scene** — drag stickers onto 12 themed backgrounds. Your
+  decorated scene is saved and restored between visits.
+- **Farm** — care for animals: milk the cow, shear the sheep, feed the
+  pig/horse, fetch with the dog, collect eggs, pick apples, fish, drive
+  the tractor. Day/night + weather.
+- **Ice Cream** — build a sundae: drag scoops onto a cone, add toppings,
+  tap Eat!
+- **Train** — drive a chuffing train between three stations; passengers
+  hop on and off.
+- **Music Studio** — drum kit, rainbow xylophone, jingle bells, plus a
+  Song button that plays familiar tunes.
+- **Doodle** — rainbow / solid brushes, eraser, sizes, save as PNG.
 
-**Collection**
+**Collection:**
 
-- **Stickers** — 24 unlockables across every game, with a progress bar
+- **Stickers** — 34 unlockables across every game, with a progress bar
   and an all-stickers finale when you find them all.
 
 ## Settings (gear icon in the header)
 
 - Edit the kid's name (used in cheers across every game)
 - Mute voice and/or sound effects independently
+- **Volume** — one master slider for all app audio
+- Music on the menu (on/off)
 - Dark mode
+- **Show tips again** — re-arms the first-visit hint for every game
 - Reset all high scores (two-tap confirm so toddlers can't fire it)
 
 ## Behind the scenes
@@ -62,16 +80,35 @@ recognition, small counting numbers only.
   playground keeps working when the iPad's offline.
 - **Welcome toast**: time-of-day greeting on app load with a daily
   streak counter once it's 2+ days in a row.
+- **Tutorials**: `lib/tutorial.js` shows a one-time hint the first time
+  the kid opens each game.
+- **Audio**: every sound routes through a single master gain node
+  (`lib/audio.js`) so the Settings volume slider is one knob for
+  the whole app.
 - **Architecture**: each game lives in `games/*.js` and registers on
   `window.Lawson.games`. Shared utilities — audio (`lib/audio.js`),
   high-score storage (`lib/storage.js`), sticker collection
-  (`lib/achievements.js`) — are kept in `lib/`.
+  (`lib/achievements.js`), tutorials (`lib/tutorial.js`) — are in `lib/`.
+
+## Tests
+
+Smoke + visual baseline checks for every game live in `tests/`.
+
+```bash
+node tests/smoke.js                # errors-free / renders / restart-safe
+node tests/smoke.js --baseline     # + diff every screen against tests/baseline/
+node tests/smoke.js --update-baseline   # accept new baselines after UI changes
+```
+
+See `tests/README.md` for details (needs Playwright + Chromium).
 
 ## Adding a new game
 
 1. Create `games/myname.js` with an IIFE that registers
    `window.Lawson.games.myname = { screen, start, stop }`.
 2. Add a `<section id="mynameGame" class="screen">` in `index.html`
-   and a tile in the home menu.
+   and a tile in the relevant hub (or the home menu).
 3. Drop the script tag at the bottom of `index.html` and add the path
    to `ASSETS` in `sw.js` (bump the cache version).
+4. Add a smoke entry in `tests/smoke.js` (`GAMES` array) and refresh
+   the baseline with `node tests/smoke.js --update-baseline`.

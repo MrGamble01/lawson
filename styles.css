@@ -1690,6 +1690,7 @@ html.dark .hub-title {
   margin: 6px 2px 14px;
 }
 .settings-reset,
+.settings-tips,
 .settings-close {
   width: 100%;
   font: inherit;
@@ -1701,6 +1702,34 @@ html.dark .hub-title {
   border: 4px solid;
   -webkit-tap-highlight-color: transparent;
   transition: transform 0.06s ease, box-shadow 0.06s ease, background 0.15s ease;
+}
+.settings-tips {
+  background: #fff;
+  color: #4dabf7;
+  border-color: #4dabf7;
+  margin-bottom: 10px;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.12);
+}
+.settings-tips:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.12); }
+.settings-tips.done { background: #4dabf7; color: #fff; }
+/* Hide destructive/utility buttons during first-run onboarding. */
+.settings-overlay.onboarding .settings-tips { display: none; }
+
+/* ---------- Settings volume slider ---------- */
+.settings-slider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 4px;
+  font-weight: bold;
+}
+.settings-slider-label { flex-shrink: 0; }
+.settings-slider input[type="range"] {
+  flex: 1;
+  height: 28px;
+  cursor: pointer;
+  accent-color: #ff4081;
+  -webkit-tap-highlight-color: transparent;
 }
 .settings-reset {
   background: #fff;
