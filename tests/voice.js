@@ -29,6 +29,15 @@ const document = { hidden: false,
 const timers = new Map();
 let timerId = 0;
 const fireTimers = () => { const due = [...timers.values()]; timers.clear(); due.forEach(t => t.fn()); };
+// say() defers speak() by 60 ms when it cuts off a line in flight, and arms
+// a start watchdog per utterance. fireDeferred() runs just the deferrals;
+// fireWatchdogs() just the watchdogs.
+const fireWhere = pred => { for (const [id, t] of [...timers]) if (pred(t)) { timers.delete(id); t.fn(); } };
+const fireDeferred = () => fireWhere(t => t.ms === 60);
+const fireWatchdogs = () => fireWhere(t => t.ms === 2500 || t.ms === 4000);
+// The common case: the line gets spoken (after any deferral) and starts.
+const speak = code => { const before = spoken.length; const r = run(code); fireDeferred();
+  if (spoken.length > before && spoken.at(-1).onstart) spoken.at(-1).onstart(); return r; };
 let clockNow = 0;   // virtual Date.now() for afterSpeech()'s floor arithmetic
 const timerDelays = () => [...timers.values()].map(t => t.ms);
 const context = vm.createContext({ window, document, Event, CustomEvent, Date: { now: () => clockNow },
@@ -38,7 +47,7 @@ const context = vm.createContext({ window, document, Event, CustomEvent, Date: {
   setTimeout: (fn, ms) => { timers.set(++timerId, { fn, ms }); return timerId; }, clearTimeout: id => timers.delete(id) });
 const run = s => vm.runInContext(s, context);
 run(source);
-run('say("Hello")');
+speak('say("Hello")');
 assert.equal(spoken.at(-1).lang, 'en-US');
 voices = [
   { name: 'French', lang: 'fr-FR', voiceURI: 'fr', localService: true },
@@ -48,22 +57,22 @@ voices = [
   { name: 'Karen', lang: 'en-AU', voiceURI: 'au', localService: true }
 ];
 events.dispatchEvent(new Event('voiceschanged'));
-run('say("Hello")');
+speak('say("Hello")');
 assert.equal(spoken.at(-1).voice.voiceURI, 'enhanced');
 assert.equal(spoken.at(-1).pitch, 1);
-run('setSpeechVoice("au"); setVolume(0.4); say("Hello")');
+speak('setSpeechVoice("au"); setVolume(0.4); say("Hello")');
 assert.equal(spoken.at(-1).lang, 'en-AU');
 assert.equal(spoken.at(-1).volume, 0.4);
 assert.equal(stored.get('lawson:voice'), 'au');
 voices = voices.filter(v => v.voiceURI !== 'au');
 events.dispatchEvent(new Event('voiceschanged'));
-run('say("Hello")');
+speak('say("Hello")');
 assert.equal(spoken.at(-1).voice.voiceURI, 'enhanced');
 assert.equal(stored.get('lawson:voice'), 'au'); // don't erase temporarily unavailable choice
 const count = spoken.length;
-run('setVoiceMuted(true); say("Quiet"); unlockSpeech()');
+speak('setVoiceMuted(true); say("Quiet"); unlockSpeech()');
 assert.equal(spoken.length, count);
-run('setVoiceMuted(false); setVolume(0); say("Quiet"); unlockSpeech()');
+speak('setVoiceMuted(false); setVolume(0); say("Quiet"); unlockSpeech()');
 assert.equal(spoken.length, count);
 assert.ok(canceled > 0);
 
@@ -71,15 +80,15 @@ assert.ok(canceled > 0);
 // region) before the mute check, so muted play still gets the words.
 const said = [];
 window.addEventListener('lawson:say', e => said.push(e.detail.text));
-run('setVoiceMuted(false); setVolume(1); say("Captioned")');
+speak('setVoiceMuted(false); setVolume(1); say("Captioned")');
 assert.deepEqual(said, ['Captioned']);
-run('setVoiceMuted(true); say("Muted but captioned")');
+speak('setVoiceMuted(true); say("Muted but captioned")');
 assert.equal(said.at(-1), 'Muted but captioned');
-run('setVoiceMuted(false); setVolume(0); say("Silent but captioned")');
+speak('setVoiceMuted(false); setVolume(0); say("Silent but captioned")');
 assert.equal(said.at(-1), 'Silent but captioned');
 run('setVolume(1)');
 // A pronunciation spelling for the engine ("en") is captioned as written ("N").
-run('say("Pop the en!", 0.95, "Pop the N!")');
+speak('say("Pop the en!", 0.95, "Pop the N!")');
 assert.equal(spoken.at(-1).text, 'Pop the en!');
 assert.equal(said.at(-1), 'Pop the N!');
 
@@ -92,12 +101,12 @@ assert.equal(said.at(-1), 'Pop the N!');
   run('setVolume(1)');
   // Nothing spoken (muted) still resolves, straight away.
   run('setVoiceMuted(true)');
-  track(run('say("Quiet")'), 'muted');
+  track(speak('say("Quiet")'), 'muted');
   await flush();
   assert.deepEqual(settled, ['muted']);
   run('setVoiceMuted(false)');
   // Pending until the engine says the line ended.
-  track(run('say("First line")'), 'first');
+  track(speak('say("First line")'), 'first');
   await flush();
   assert.deepEqual(settled, ['muted']);
   spoken.at(-1).onend();
@@ -105,9 +114,9 @@ assert.equal(said.at(-1), 'Pop the N!');
   assert.deepEqual(settled, ['muted', 'first']);
   // A later say() cuts the previous line short and releases its waiter,
   // even if the engine never fires end/error for the cancelled utterance.
-  track(run('say("Second line")'), 'second');
+  track(speak('say("Second line")'), 'second');
   const second = spoken.at(-1);
-  track(run('say("Third line")'), 'third');
+  track(speak('say("Third line")'), 'third');
   await flush();
   assert.deepEqual(settled, ['muted', 'first', 'second']);
   // A stale end event from the interrupted line must not settle the new one.
@@ -118,17 +127,17 @@ assert.equal(said.at(-1), 'Pop the N!');
   await flush();
   assert.deepEqual(settled, ['muted', 'first', 'second', 'third']);
   // Muting or silencing mid-line releases the waiter too.
-  track(run('say("Fourth line")'), 'fourth');
+  track(speak('say("Fourth line")'), 'fourth');
   run('setVoiceMuted(true)');
   await flush();
   assert.deepEqual(settled.at(-1), 'fourth');
   run('setVoiceMuted(false)');
-  track(run('say("Fifth line")'), 'fifth');
+  track(speak('say("Fifth line")'), 'fifth');
   run('setVolume(0)');
   await flush();
   assert.deepEqual(settled.at(-1), 'fifth');
   run('setVolume(1)');
-  track(run('say("Sixth line")'), 'sixth');
+  track(speak('say("Sixth line")'), 'sixth');
   run('cancelSpeech()');
   await flush();
   assert.deepEqual(settled.at(-1), 'sixth');
@@ -141,7 +150,7 @@ assert.equal(said.at(-1), 'Pop the N!');
   const musicBase = intervalsStarted; // audio.js also uses setInterval for the voice nudge
   run('setMusicEnabled(true); startMusic()');
   assert.equal(intervalsStarted, musicBase + 1, 'music loop running');
-  track(run('say("Once upon a time")'), 'story');
+  track(speak('say("Once upon a time")'), 'story');
   const before = { canceled, cleared: intervalsCleared, spokenCount: spoken.length };
   // Lock the screen: narration cut and its waiter released, music loop
   // stopped, listeners told.
@@ -157,7 +166,7 @@ assert.equal(said.at(-1), 'Pop the N!');
   window.dispatchEvent(new Event('pagehide'));
   assert.deepEqual(lifecycle, ['hidden']);
   // Nothing speaks or plays behind a locked screen.
-  track(run('say("Should not be heard")'), 'behind-lock');
+  track(speak('say("Should not be heard")'), 'behind-lock');
   await flush();
   assert.equal(spoken.length, before.spokenCount, 'no utterance while hidden');
   assert.notEqual(said.at(-1), 'Should not be heard', 'no caption while hidden');
@@ -186,7 +195,7 @@ assert.equal(said.at(-1), 'Pop the N!');
   // A stuck-paused engine is also recovered on the next say(), for
   // interruptions (Siri, phone call) that never hide the page.
   synth.paused = true;
-  run('say("After a phone call")');
+  speak('say("After a phone call")');
   assert.equal(resumedSynth, 2);
   assert.equal(spoken.at(-1).text, 'After a phone call');
   // A running context is left alone; a closed one is never resumed.
@@ -202,9 +211,9 @@ assert.equal(said.at(-1), 'Pop the N!');
   window.addEventListener('lawson:voiceschanged', () => voiceChanges.push(run('preferredVoice && preferredVoice.voiceURI')));
   // Cut-off errors never trigger a fallback.
   const local = spoken.length;
-  track(run('say("Local line")'), 'local');
+  track(speak('say("Local line")'), 'local');
   assert.equal(spoken.at(-1).voice.voiceURI, 'enhanced');
-  assert.equal(timers.size, 0, 'no start watchdog for a local voice');
+  assert.equal(timers.size, 0, 'local watchdog cleared once the line started');
   spoken.at(-1).onerror({ error: 'interrupted' });
   await flush();
   assert.equal(settled.at(-1), 'local');
@@ -213,6 +222,7 @@ assert.equal(said.at(-1), 'Pop the N!');
   // Parent chose the online voice; the iPad is offline: `network` error.
   run('setSpeechVoice("online")');
   track(run('say("Once upon a time")'), 'online-1');
+  fireDeferred();
   const first = spoken.at(-1);
   assert.equal(first.voice.voiceURI, 'online');
   assert.equal(timers.size, 1, 'start watchdog armed for an online voice');
@@ -222,6 +232,7 @@ assert.equal(said.at(-1), 'Pop the N!');
   first.onerror({ error: 'network' });
   await flush();
   assert.notEqual(settled.at(-1), 'online-1', 'line still pending while the fallback reads it');
+  fireDeferred();                 // the fallback speaks after a beat
   const retry = spoken.at(-1);
   assert.notEqual(retry, first);
   assert.equal(retry.text, 'Once upon a time');
@@ -235,23 +246,25 @@ assert.equal(said.at(-1), 'Pop the N!');
   await flush();
   assert.equal(settled.at(-1), 'online-1', 'resolved when the fallback finished');
   // Later lines go straight to the local voice; the choice itself is kept.
-  run('say("Next line")');
+  speak('say("Next line")');
   assert.equal(spoken.at(-1).voice.voiceURI, 'enhanced');
   assert.equal(timers.size, 0);
   assert.equal(stored.get('lawson:voice'), 'online', 'saved choice untouched');
   // Back online: the chosen voice is tried again.
   window.dispatchEvent(new Event('online'));
   assert.equal(run('speechFallback()'), null);
-  run('say("Reconnected")');
+  speak('say("Reconnected")');
   assert.equal(spoken.at(-1).voice.voiceURI, 'online');
   // ...but this time it silently never starts: the watchdog fires,
   // the hung utterance is cancelled, and its late "interrupted" error
   // must not end the line the fallback is now reading.
   const hung = spoken.at(-1);
   track(run('say("Hanging line")'), 'hung');
+  fireDeferred();
   const hung2 = spoken.at(-1);
   const cancelsBefore = canceled;
-  fireTimers();
+  fireWatchdogs();
+  fireDeferred();
   await flush();
   assert.ok(canceled > cancelsBefore, 'hung utterance cancelled');
   const retry2 = spoken.at(-1);
@@ -266,13 +279,14 @@ assert.equal(said.at(-1), 'Pop the N!');
   // Some engines echo "interrupted" synchronously from inside cancel();
   // that echo belongs to the failed attempt and must not end the line.
   window.dispatchEvent(new Event('online'));
-  track(run('say("Echo line")'), 'echo');
+  track(speak('say("Echo line")'), 'echo');
   const echo = spoken.at(-1);
   assert.equal(echo.voice.voiceURI, 'online');
   onCancel = () => echo.onerror({ error: 'interrupted' });
   echo.onerror({ error: 'network' });
   onCancel = null;
   await flush();
+  fireDeferred();
   const echoRetry = spoken.at(-1);
   assert.equal(echoRetry.voice.voiceURI, 'enhanced');
   assert.notEqual(settled.at(-1), 'echo', 'synchronous echo did not settle the line');
@@ -282,10 +296,10 @@ assert.equal(said.at(-1), 'Pop the N!');
   // A failure that arrives after a newer line cut this one off: no retry,
   // no mark against the voice.
   window.dispatchEvent(new Event('online'));
-  track(run('say("Cut off")'), 'cut');
+  track(speak('say("Cut off")'), 'cut');
   const cut = spoken.at(-1);
   assert.equal(cut.voice.voiceURI, 'online');
-  track(run('say("Newer")'), 'newer');
+  track(speak('say("Newer")'), 'newer');
   const newer = spoken.at(-1);
   await flush();
   assert.equal(settled.at(-1), 'cut');
@@ -305,7 +319,7 @@ assert.equal(said.at(-1), 'Pop the N!');
   // The only voice there is fails: settle, don't loop.
   voices = voices.filter(v => v.voiceURI === 'online');
   events.dispatchEvent(new Event('voiceschanged'));
-  track(run('say("Alone")'), 'alone');
+  track(speak('say("Alone")'), 'alone');
   const alone = spoken.at(-1);
   assert.equal(alone.voice.voiceURI, 'online');
   const before2 = spoken.length;
@@ -328,7 +342,7 @@ assert.equal(said.at(-1), 'Pop the N!');
   await flush();
   assert.equal(settled.at(-1), 'idle', 'resolved at once when nothing is in flight');
   run('setVoiceMuted(false)');
-  const sd = run('say("Sticker! Storyteller!")');
+  const sd = speak('say("Sticker! Storyteller!")');
   assert.strictEqual(run('speechDone()'), sd, 'speechDone() is the promise of the current line');
   track(run('speechDone()'), 'sticker-line');
   await flush();
@@ -355,7 +369,7 @@ assert.equal(said.at(-1), 'Pop the N!');
   assert.equal(fired, 1);
   // A cheer in flight that runs past the floor: fire one beat after it ends.
   fired = 0; clockNow = 0;
-  run('say("Great job, Lawson! It\'s a cow!")');
+  speak('say("Great job, Lawson! It\'s a cow!")');
   const cheerLine = spoken.at(-1);
   run('afterSpeech(next, { minMs: 1500, beatMs: 500 })');
   await flush();
@@ -368,7 +382,7 @@ assert.equal(said.at(-1), 'Pop the N!');
   assert.equal(fired, 1);
   // A cheer that ends before the floor: the floor still holds.
   fired = 0; clockNow = 0;
-  run('say("Yay!")');
+  speak('say("Yay!")');
   run('afterSpeech(next, { minMs: 1500, beatMs: 500 })');
   clockNow = 400;
   spoken.at(-1).onend();
@@ -378,10 +392,10 @@ assert.equal(said.at(-1), 'Pop the N!');
   assert.equal(fired, 1);
   // "New best!" starts while the cheer is being waited for: wait for it too.
   fired = 0; clockNow = 0;
-  run('say("Great job!")');
+  speak('say("Great job!")');
   run('afterSpeech(next, { minMs: 1000, beatMs: 500 })');
   await flush();
-  run('say("New best! 7!")');     // cuts the cheer, as celebrateNewHigh does
+  speak('say("New best! 7!")');     // cuts the cheer, as celebrateNewHigh does
   const best = spoken.at(-1);
   await flush();
   assert.deepEqual(timerDelays(), [6000], 'still waiting: a newer line is in flight');
@@ -393,7 +407,7 @@ assert.equal(said.at(-1), 'Pop the N!');
   assert.equal(fired, 1, 'fired once, after the newer line');
   // Engine goes quiet: the ceiling fires, and the late end changes nothing.
   fired = 0; clockNow = 0;
-  run('say("Hanging cheer")');
+  speak('say("Hanging cheer")');
   const hangingCheer = spoken.at(-1);
   run('afterSpeech(next, { minMs: 1000, beatMs: 500, maxMs: 6000 })');
   await flush();
@@ -406,7 +420,7 @@ assert.equal(said.at(-1), 'Pop the N!');
   assert.equal(fired, 1);
   // Cancelled (the game was left): never fires.
   fired = 0; clockNow = 0;
-  run('say("Cancelled cheer")');
+  speak('say("Cancelled cheer")');
   const cancelledCheer = spoken.at(-1);
   run('cancelNext = afterSpeech(next, { minMs: 1000 })');
   run('cancelNext()');
@@ -418,12 +432,103 @@ assert.equal(said.at(-1), 'Pop the N!');
   assert.equal(fired, 0);
   // Voice muted: say() resolves at once, so the floor is the whole wait.
   fired = 0; clockNow = 0;
-  run('setVoiceMuted(true); say("Muted cheer"); afterSpeech(next, { minMs: 1800, beatMs: 500 })');
+  speak('setVoiceMuted(true); say("Muted cheer"); afterSpeech(next, { minMs: 1800, beatMs: 500 })');
   await flush();
   assert.deepEqual(timerDelays(), [1800], 'muted: old fixed delay preserved');
   fireTimers();
   assert.equal(fired, 1);
   run('setVoiceMuted(false)');
 
-  console.log('PASS: delayed voices, natural pitch, local quality preference, saved choice, language, volume, mute, missing voice fallback, speech completion promise, caption event, hide/show lifecycle, unusable-voice fallback, speechDone, afterSpeech');
+  // ---- Swallowed utterances (speak() right after cancel()) ----
+  run('setSpeechVoice("enhanced")');
+  // A line spoken while another is in flight waits a beat before speak().
+  track(speak('say("In flight")'), 'inflight');
+  const n0 = spoken.length;
+  track(run('say("Right after a cut-off")'), 'after-cut');
+  await flush();
+  assert.equal(settled.at(-1), 'inflight', 'cut-off line released at once');
+  assert.equal(spoken.length, n0, 'speak() deferred after a cut-off');
+  assert.deepEqual(timerDelays(), [60]);
+  fireDeferred();
+  assert.equal(spoken.length, n0 + 1, 'spoken after the beat');
+  assert.deepEqual(timerDelays(), [2500], 'local start watchdog armed');
+  spoken.at(-1).onstart();
+  assert.deepEqual(timerDelays(), [], 'watchdog cleared on start');
+  spoken.at(-1).onend();
+  await flush();
+  assert.equal(settled.at(-1), 'after-cut');
+  // Idle engine: spoken at once, no beat.
+  const n1 = spoken.length;
+  run('say("Idle engine")');
+  assert.equal(spoken.length, n1 + 1, 'no deferral when nothing was cut off');
+  spoken.at(-1).onstart(); spoken.at(-1).onend();
+  await flush();
+  // A deferred line superseded before its beat never speaks; the newest does.
+  track(speak('say("A")'), 'A');
+  const n2 = spoken.length;
+  track(run('say("B")'), 'B');
+  track(run('say("C")'), 'C');
+  await flush();
+  assert.equal(settled.at(-1), 'B', 'B released before it was ever spoken');
+  fireDeferred();
+  assert.equal(spoken.length, n2 + 1, 'only C spoke');
+  assert.equal(spoken.at(-1).text, 'C');
+  spoken.at(-1).onstart(); spoken.at(-1).onend();
+  await flush();
+  assert.equal(settled.at(-1), 'C');
+  // The engine swallows a local line (no start, no error): read it again
+  // with the same voice, once, after a beat. The voice is not blamed.
+  const n3 = spoken.length;
+  track(run('say("Swallowed")'), 'swallowed');
+  const swallowed = spoken.at(-1);
+  assert.equal(swallowed.voice.voiceURI, 'enhanced');
+  const cancels = canceled;
+  fireWatchdogs();
+  assert.ok(canceled > cancels, 'swallowed utterance cleared');
+  assert.deepEqual(timerDelays(), [60], 'same-voice retry after a beat');
+  fireDeferred();
+  const again = spoken.at(-1);
+  assert.equal(spoken.length, n3 + 2);
+  assert.equal(again.text, 'Swallowed');
+  assert.equal(again.voice.voiceURI, 'enhanced', 'same voice, not a fallback');
+  assert.equal(run('speechFallback()'), null, 'voice not blamed');
+  swallowed.onerror({ error: 'interrupted' });   // late echo from the cancel
+  await flush();
+  assert.notEqual(settled.at(-1), 'swallowed', 'echo ignored');
+  again.onstart(); again.onend();
+  await flush();
+  assert.equal(settled.at(-1), 'swallowed');
+  // Swallowed twice: give the line up, don't loop, still don't blame the voice.
+  const n4 = spoken.length;
+  track(run('say("Twice")'), 'twice');
+  fireWatchdogs(); fireDeferred();
+  assert.equal(spoken.length, n4 + 2);
+  fireWatchdogs();
+  await flush();
+  assert.equal(settled.at(-1), 'twice', 'settled after the second miss');
+  assert.deepEqual(timerDelays(), [], 'no third attempt');
+  assert.equal(run('preferredVoice.voiceURI'), 'enhanced');
+  assert.equal(run('speechFallback()'), null);
+  // A cut-off during the retry's beat abandons the retry.
+  track(run('say("Dropped then cut")'), 'dtc');
+  fireWatchdogs();
+  const n5 = spoken.length;
+  run('cancelSpeech()');
+  await flush();
+  assert.equal(settled.at(-1), 'dtc');
+  fireDeferred();
+  assert.equal(spoken.length, n5, 'retry abandoned after the cut-off');
+  // A remote voice that never starts still goes straight to the fallback.
+  run('setSpeechVoice("online")');
+  track(run('say("Remote hang")'), 'remote-hang');
+  assert.equal(spoken.at(-1).voice.voiceURI, 'online');
+  fireWatchdogs(); fireDeferred();
+  assert.equal(spoken.at(-1).voice.voiceURI, 'enhanced', 'fallback voice, no same-voice retry for remote');
+  assert.equal(run('speechFallback().failed.voiceURI'), 'online');
+  spoken.at(-1).onstart(); spoken.at(-1).onend();
+  await flush();
+  assert.equal(settled.at(-1), 'remote-hang');
+  window.dispatchEvent(new Event('online'));
+
+  console.log('PASS: delayed voices, natural pitch, local quality preference, saved choice, language, volume, mute, missing voice fallback, speech completion promise, caption event, hide/show lifecycle, unusable-voice fallback, speechDone, afterSpeech, swallowed utterances');
 })().catch(e => { console.error(e); process.exit(1); });

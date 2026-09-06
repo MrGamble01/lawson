@@ -32,7 +32,9 @@ really ends (or is interrupted, muted, or silenced), that `afterSpeech()`
 runs a game's next step once the engine is idle plus a beat — bounded by a
 floor and a ceiling, cancellable — that a voice which
 can't speak (an online voice offline, one that never starts) is swapped
-for the best local voice and tried again when the network returns, that a screen lock or
+for the best local voice and tried again when the network returns, that a
+line the engine swallows after a cut-off is spoken again with the same
+voice (and the next line waits a beat after a cut-off), that a screen lock or
 app switch silences speech and music and that coming back wakes a paused
 speech engine and an interrupted audio context, and that story pages flip
 after the narration finishes — never before the word-count floor, never
