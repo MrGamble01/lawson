@@ -21,9 +21,12 @@
 //      each played through by single taps, and the drag path still works;
 //      keyboard play: every tap target is a focusable, named button,
 //      so Farm, Garden, Whack! and Pop! can be played with Tab + Enter;
-//      and the comfort settings: "Take it slow" halves the pace of Whack!
+//      the comfort settings: "Take it slow" halves the pace of Whack!
 //      and Pop! (WCAG 2.2.1), "Less motion" collapses animations and
-//      skips particle bursts without the OS setting (WCAG 2.2.2).
+//      skips particle bursts without the OS setting (WCAG 2.2.2); and back
+//      navigation: the browser Back button (Android Back, iOS swipe-back)
+//      and Escape step back inside the app — game → hub → menu, or close
+//      Settings — while Home unwinds the history it skips.
 //
 // Run:  node tests/a11y.js
 // Exit: 0 pass · 1 violations or failed checks · 99 runner crashed.
@@ -715,6 +718,73 @@ async function comfortSettings(page) {
   await page.emulateMedia({ reducedMotion: "reduce" });
 }
 
+// Back button / swipe-back / Escape step back inside the app.
+async function backNavigation(page) {
+  const where = "back navigation";
+  const active = () => page.evaluate(() => document.querySelector(".screen.active").id);
+  const settled = () => page.waitForTimeout(350);
+
+  // Menu → Pop! → Back → menu, with the game stopped.
+  await openScreen(page, { id: "menu", kind: "hub" });
+  await page.click('[data-go="pop"]'); await settled();
+  check((await active()) === "popGame", where, "clicking Pop! should open it");
+  await page.goBack(); await settled();
+  check((await active()) === "menu", where, `Back from a game should return to the menu, got ${await active()}`);
+  check(await page.evaluate(() => document.querySelectorAll("#popArea .balloon").length === 0 || !document.getElementById("popGame").classList.contains("active")), where, "the game screen should be inactive after Back");
+
+  // Menu → More → Art → Doodle, then Back steps: Art → More → menu.
+  await page.click('[data-hub="moreHub"]'); await settled();
+  await page.click('#moreHub [data-hub="artHub"]'); await settled();
+  await page.click('#artHub [data-go="doodle"]'); await settled();
+  check((await active()) === "doodleGame", where, "the three-hop path should end in Doodle");
+  await page.goBack(); await settled();
+  check((await active()) === "artHub", where, `Back from Doodle should return to Art Studio, got ${await active()}`);
+  await page.goBack(); await settled();
+  check((await active()) === "moreHub", where, `Back from Art Studio should return to More, got ${await active()}`);
+  await page.goBack(); await settled();
+  check((await active()) === "menu", where, `Back from More should return to the menu, got ${await active()}`);
+
+  // Home from three hops deep unwinds all of them: one more Back then
+  // leaves nothing of ours to pop (history is back at the entry state).
+  await page.click('[data-hub="moreHub"]'); await settled();
+  await page.click('#moreHub [data-hub="artHub"]'); await settled();
+  await page.click('#artHub [data-go="doodle"]'); await settled();
+  await page.click("#doodleGame .home-btn"); await settled();
+  check((await active()) === "menu", where, "Home should return to the menu");
+  check(await page.evaluate(() => (history.state && history.state.depth) === 0), where, `Home should unwind the history depth to 0, got ${await page.evaluate(() => JSON.stringify(history.state))}`);
+
+  // Flashcard activity (menu → More → Wonder World → ABC) round-trips
+  // through history too.
+  await page.click('[data-hub="moreHub"]'); await settled();
+  await page.click('#moreHub [data-hub="exploreHub"]'); await settled();
+  await page.click('#exploreHub [data-go="letters"]'); await settled();
+  check((await active()) === "activity", where, "the ABC flashcards should open");
+  await page.goBack(); await settled();
+  check((await active()) === "exploreHub", where, `Back from flashcards should return to Wonder World, got ${await active()}`);
+  await page.goBack(); await settled();
+  await page.goBack(); await settled();
+  check((await active()) === "menu", where, `two more Backs should reach the menu, got ${await active()}`);
+
+  // Back closes Settings; Done from Settings leaves history where it was.
+  await page.click("#settingsBtn"); await settled();
+  check(await page.$eval("#settingsOverlay", (el) => el.classList.contains("open")), where, "Settings should open");
+  await page.goBack(); await settled();
+  check(await page.$eval("#settingsOverlay", (el) => !el.classList.contains("open")), where, "Back should close Settings");
+  check((await active()) === "menu", where, "closing Settings with Back should leave the menu showing");
+  await page.click("#settingsBtn"); await settled();
+  await page.click("#settingsClose"); await settled();
+  check(await page.evaluate(() => !(history.state && history.state.settings)), where, "Done should unwind the Settings history entry");
+  check((await active()) === "menu", where, "the menu should still be showing after Done");
+
+  // Escape: goes Home from a game, but first puts a held tool down.
+  await page.click('[data-go="garden"]'); await settled();
+  await page.click("#gardenWaterCan"); await page.waitForTimeout(100);
+  await page.keyboard.press("Escape"); await settled();
+  check((await active()) === "gardenGame" && await page.$eval("#gardenWaterCan", (el) => !el.classList.contains("held")), where, "Escape with a tool held should only put the tool down");
+  await page.keyboard.press("Escape"); await settled();
+  check((await active()) === "menu", where, `Escape on a game screen should go Home, got ${await active()}`);
+}
+
 // ---- main -----------------------------------------------------------------
 
 async function main() {
@@ -757,6 +827,7 @@ async function main() {
   await dragAlternatives(first);
   await keyboardPlay(first);
   await comfortSettings(first);
+  await backNavigation(first);
 
   await browser.close();
   pageErrors.forEach((m) => fail("page", `uncaught error: ${m}`));
@@ -772,7 +843,7 @@ async function main() {
     failures.forEach((f) => console.log(`  FAIL  ${f.where.padEnd(34)} ${f.what}`));
     process.exit(1);
   }
-  console.log("  behaviour: keyboard nav, settings modal, captions, mode tabs, badges, reduced motion, overlays, tap-instead-of-drag, keyboard play, comfort settings — all pass");
+  console.log("  behaviour: keyboard nav, settings modal, captions, mode tabs, badges, reduced motion, overlays, tap-instead-of-drag, keyboard play, comfort settings, back navigation — all pass");
 }
 
 main().catch((e) => { console.error(e); process.exit(99); });

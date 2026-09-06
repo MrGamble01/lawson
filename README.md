@@ -116,11 +116,19 @@ The **More** drawer holds themed hub cards, each opening a small menu:
 - **Less motion** — turns off the wiggles, floating and sparkles without
   changing the iPad's own setting.
 - The panel is a real modal: Escape closes it, Tab stays inside it, and
-  focus returns to the gear when it closes.
+  focus returns to the gear when it closes. The Back button (or a
+  swipe-back) closes it too.
 - **Show tips again** — re-arms the first-visit hint for every game
 - Reset all high scores (two-tap confirm so toddlers can't fire it)
 
 ## Accessibility
+
+- **Back means back**: every hop into a hub or game is a history entry,
+  so the browser or Android Back button and the iOS swipe-back gesture
+  step back inside the playground (game → hub → menu, or close Settings)
+  instead of leaving it. Home jumps straight to the menu and unwinds the
+  entries it skips, so Back from the menu still leaves the app. Escape on
+  a game or hub screen goes Home too (after putting down a held tool).
 
 - **Keyboard + screen readers**: every tile, tool, choice and score badge
   is a named button — and so is every animal, pot, balloon, hole, cloud
@@ -135,8 +143,8 @@ The **More** drawer holds themed hub cards, each opening a small menu:
 - **Reduced motion**: with the OS "reduce motion" preference on, or the
   in-app **Less motion** setting, CSS animations collapse and the sparkle /
   confetti particle bursts are skipped entirely. Pop! balloons hold still
-  where they appear instead of drifting (they used to jump straight off
-  the top and be unpoppable).
+  where they appear instead of drifting, in three lanes and at most three
+  at a time (they used to jump straight off the top and be unpoppable).
 - **Timing**: **Take it slow** in Settings halves the pace of every timed
   game (WCAG 2.2.1), so nothing disappears before a slower hand gets there.
 - **Contrast**: all text meets WCAG AA (4.5:1) in light and dark mode —

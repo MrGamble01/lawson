@@ -542,7 +542,9 @@ document.addEventListener("click", (e) => {
   const r = e.target.getBoundingClientRect();
   useHeldToolAt(r.left + r.width / 2, r.top + r.height / 2);
 }, true);
-document.addEventListener("keydown", (e) => { if (e.key === "Escape") putDownTool(); });
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && _heldTool) { putDownTool(); e.__lawsonToolDropped = true; }
+});
 window.addEventListener("lawson:screen", putDownTool);
 
 // Badge bump helper (shared by games)
@@ -919,6 +921,69 @@ function leaveActiveGame() {
   activeGame = null;
 }
 
+// ---------- Back button / swipe-back / Escape = step back in the app ----------
+// Every hop into a hub or game pushes a history entry, so the browser or
+// Android Back button, the iOS swipe-back gesture and the Escape key step
+// back *inside* the playground (game → hub → menu, or close Settings)
+// instead of leaving it. Home still jumps straight to the menu and unwinds
+// the entries it skipped, so Back from the menu leaves the app as usual.
+let _navDepth = 0;
+function pushScreenState(screen, extra) {
+  _navDepth += 1;
+  try { history.pushState(Object.assign({ lawson: true, screen, depth: _navDepth }, extra || {}), ""); } catch (_) {}
+}
+// Land on a screen described by a history entry (or the menu).
+function navigateTo(state) {
+  const overlay = document.getElementById("settingsOverlay");
+  const settingsOpen = overlay && overlay.classList.contains("open");
+  if (settingsOpen && !(state && state.settings) && window.__closeSettings) window.__closeSettings({ fromHistory: true });
+  const id = state && state.screen ? state.screen : "menu";
+  if (id === _shownScreen) return;
+  leaveActiveGame();
+  cancelHubIntro();
+  cancelSpeech();
+  const game = Object.values(window.Lawson.games).find((g) => g && g.screen === id);
+  if (game) {
+    show(id);
+    activeGame = game;
+    game.start();
+  } else if (id === "activity" && state && ACTIVITIES[state.activity]) {
+    show("activity");
+    buildFlashcards(state.activity);
+  } else if (document.getElementById(id)) {
+    show(id);
+  } else {
+    show("menu");
+  }
+}
+window.addEventListener("popstate", (e) => {
+  const s = e.state && e.state.lawson ? e.state : null;
+  _navDepth = s ? (s.depth || 0) : 0;
+  navigateTo(s);
+});
+try { history.replaceState({ lawson: true, screen: "menu", depth: 0 }, ""); } catch (_) {}
+
+function goHome() {
+  leaveActiveGame();
+  cancelHubIntro();
+  cancelSpeech();
+  show("menu");
+  navChime(false);
+  if (_navDepth > 0) {
+    const d = _navDepth;
+    _navDepth = 0;
+    try { history.go(-d); } catch (_) {}
+  }
+}
+// Escape: put a tool down (handled above), close Settings (handled in the
+// panel), otherwise go Home.
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape" || e.__lawsonToolDropped) return;
+  const overlay = document.getElementById("settingsOverlay");
+  if (overlay && overlay.classList.contains("open")) return;
+  if (_shownScreen !== "menu") goHome();
+});
+
 // Daily streak: increments when today's first visit is on the day after
 // the last visit, resets to 1 if a day was missed, no-op if same day.
 // Stored as YYYY-MM-DD strings to be timezone-stable for the local user.
@@ -1052,6 +1117,7 @@ document.querySelectorAll("[data-hub]").forEach((btn) => {
     _lastNavTrigger = btn;
     const hub = btn.dataset.hub;
     show(hub);
+    pushScreenState(hub);
     const intro = HUB_INTROS[hub];
     if (intro) {
       _hubIntroTimer = setTimeout(() => {
@@ -1087,6 +1153,7 @@ document.querySelectorAll("[data-go]").forEach((btn) => {
     const game = window.Lawson.games[where];
     if (game) {
       show(game.screen);
+      pushScreenState(game.screen);
       activeGame = game;
       game.start();
       return;
@@ -1096,19 +1163,14 @@ document.querySelectorAll("[data-go]").forEach((btn) => {
       const activity = document.getElementById("activity");
       if (activity) activity.setAttribute("aria-label", where.charAt(0).toUpperCase() + where.slice(1));
       show("activity");
+      pushScreenState("activity", { activity: where });
       buildFlashcards(where);
     }
   });
 });
 
 document.querySelectorAll("[data-home]").forEach((btn) => {
-  onTap(btn, () => {
-    leaveActiveGame();
-    cancelHubIntro();
-    cancelSpeech();
-    show("menu");
-    navChime(false);
-  });
+  onTap(btn, goHome);
 });
 
 // Tap Bobo for a greeting + sparkle. Random short phrases so it stays
@@ -1484,10 +1546,16 @@ document.addEventListener("touchmove", (e) => {
     if (e.key === "Escape" && overlay.classList.contains("open")) { e.preventDefault(); close(); }
   });
 
+  let settingsPushed = false;
   function open(opts) {
     const onboarding = !!(opts && opts.onboarding);
     returnFocusTo = document.activeElement && document.activeElement !== document.body
       ? document.activeElement : openBtn;
+    // A history entry of its own, so Back / swipe-back closes the panel.
+    if (!settingsPushed) {
+      settingsPushed = true;
+      try { history.pushState(Object.assign({}, history.state || { lawson: true, screen: "menu", depth: 0 }, { settings: true }), ""); } catch (_) {}
+    }
     nameInput.value = isFirstRun() ? "" : KID_NAME;
     voiceTgl.checked = !isVoiceMuted();
     refreshVoices();
@@ -1511,8 +1579,16 @@ document.addEventListener("touchmove", (e) => {
       if (overlay.classList.contains("open")) nameInput.focus({ preventScroll: true });
     }, 50);
   }
-  function close() {
+  function close(opts) {
     if (!overlay.classList.contains("open")) return;
+    if (settingsPushed) {
+      settingsPushed = false;
+      // Closed from the panel: unwind the entry we pushed. Closed *by*
+      // Back (fromHistory): the entry is already gone.
+      if (!(opts && opts.fromHistory) && history.state && history.state.settings) {
+        try { history.back(); } catch (_) {}
+      }
+    }
     setKidName(nameInput.value);
     overlay.classList.remove("open");
     overlay.classList.remove("onboarding");
