@@ -231,6 +231,7 @@ function focusScreen(target) {
   try { target.focus({ preventScroll: true }); } catch (_) {}
 }
 function show(id) {
+  cancelPromptRepeat(); // a prompt reminder belongs to the screen that asked
   screens.forEach((s) => s.classList.toggle("active", s.id === id));
   // Track lobby-mode (menu + hubs) so the mascot and other ambient
   // chrome can stay visible across the home / hub navigation, but
@@ -905,7 +906,7 @@ function boboCheer() {
 // the utilities below. Keeping each game self-contained makes it easy to
 // tweak one without touching the others.
 window.Lawson = {
-  say, cancelSpeech, speechDone, afterSpeech, speechLog, speechStats, setSpeechSpeed, getSpeechSpeed, setSpokenName, getSpokenName, beep, happySound, buzzSound, haptic, sparkleAt, onTap, onTapOnce, pointOf, bumpBadge, show,
+  say, sayPrompt, cancelPromptRepeat, cancelSpeech, speechDone, afterSpeech, speechLog, speechStats, setSpeechSpeed, getSpeechSpeed, setSpokenName, getSpokenName, beep, happySound, buzzSound, haptic, sparkleAt, onTap, onTapOnce, pointOf, bumpBadge, show,
   audioCtx, unlockAudio, masterGain, setVolume, getVolume, isAudioHidden,
   getHighScore, setHighScore, bumpHighScore, tryNewHighScore,
   setVoiceMuted, setSoundMuted, isVoiceMuted, isSoundMuted,

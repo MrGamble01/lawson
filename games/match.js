@@ -79,10 +79,10 @@
     targetEl.textContent = answer.emoji;
     targetEl.setAttribute("role", "img");
     targetEl.setAttribute("aria-label", answer.name);
-    L.onTap(targetEl, () => L.say(`Find the ${answer.name}`));
+    L.onTap(targetEl, () => L.sayPrompt(`Find the ${answer.name}`));
     target.appendChild(targetEl);
 
-    if (speakPrompt) L.say(`Find the ${answer.name}`);
+    if (speakPrompt) L.sayPrompt(`Find the ${answer.name}`);
 
     options.forEach((item) => {
       const btn = document.createElement("button");
@@ -111,7 +111,7 @@
           cancelNext = L.afterSpeech(() => newRound(true), { minMs: 1300 });
         } else {
           L.buzzSound();
-          L.say(`Find the ${answer.name}`);
+          L.sayPrompt(`Find the ${answer.name}`);
           btn.classList.add("wrong");
           setTimeout(() => btn.classList.remove("wrong"), 500);
         }

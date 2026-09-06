@@ -831,5 +831,73 @@ assert.equal(said.at(-1), 'Pop the N!');
   windowEvents.removeEventListener('lawson:say', onSay2);
   run('setSpokenName("", ""); setSoundMuted(false)');
 
-  console.log('PASS: delayed voices, natural pitch, local quality preference, saved choice, language, volume, mute, missing voice fallback, speech completion promise, caption event, hide/show lifecycle, unusable-voice fallback, speechDone, afterSpeech, swallowed utterances, speech diagnostics, chime then cheer, announcements wait their turn, storyteller speed, name sounds-like');
+  // ---- Prompts that repeat once ----
+  run('setSpeechVoice("enhanced"); setSoundMuted(true); setSpeechSpeed("normal")');
+  timers.clear();
+  clockNow = 600000;
+  const n9 = spoken.length;
+  speak('sayPrompt("Find the cow!")');
+  assert.equal(spoken.length, n9 + 1, 'prompt said at once');
+  assert.deepEqual(timerDelays(), [12000], 'one reminder armed');
+  spoken.at(-1).onend();
+  await flush();
+  fireWhere(t => t.ms === 12000);
+  assert.equal(spoken.length, n9 + 2, 'said once more after the quiet spell');
+  assert.equal(spoken.at(-1).text, 'Find the cow!');
+  spoken.at(-1).onstart();
+  assert.deepEqual(timerDelays(), [], 'the reminder itself arms no second reminder');
+  spoken.at(-1).onend();
+  await flush();
+  // Anything else said meanwhile drops the reminder.
+  const n10 = spoken.length;
+  speak('sayPrompt("Find the pig!")');
+  spoken.at(-1).onend(); await flush();
+  speak('say("Great job!")');
+  assert.deepEqual(timerDelays(), [], 'a later line dropped the reminder');
+  spoken.at(-1).onend(); await flush();
+  assert.equal(spoken.length, n10 + 2);
+  // A newer prompt replaces the older reminder.
+  speak('sayPrompt("Find the duck!")');
+  spoken.at(-1).onend(); await flush();
+  speak('sayPrompt("Find the hen!")');
+  spoken.at(-1).onend(); await flush();
+  assert.deepEqual(timerDelays(), [12000], 'only the newest prompt is armed');
+  const n11 = spoken.length;
+  fireWhere(t => t.ms === 12000);
+  assert.equal(spoken.length, n11 + 1);
+  assert.equal(spoken.at(-1).text, 'Find the hen!', 'the newest prompt is the one repeated');
+  spoken.at(-1).onstart(); spoken.at(-1).onend(); await flush();
+  // Leaving the screen (cancelSpeech) drops it; so does a screen lock.
+  speak('sayPrompt("Find the sheep!")');
+  spoken.at(-1).onend(); await flush();
+  run('cancelPromptRepeat()');
+  assert.deepEqual(timerDelays(), []);
+  speak('sayPrompt("Find the goat!")');
+  spoken.at(-1).onend(); await flush();
+  run('cancelSpeech()');
+  assert.deepEqual(timerDelays(), [], 'cancelSpeech drops the reminder');
+  speak('sayPrompt("Find the frog!")');
+  spoken.at(-1).onend(); await flush();
+  document.hidden = true;
+  document.dispatchEvent(new Event('visibilitychange'));
+  assert.deepEqual(timerDelays(), [], 'hidden drops the reminder');
+  document.hidden = false;
+  document.dispatchEvent(new Event('visibilitychange'));
+  // Muted voice: nothing to remind with.
+  run('setVoiceMuted(true)');
+  const n12 = spoken.length;
+  run('sayPrompt("Find the owl!")');
+  fireWhere(t => t.ms === 12000);
+  assert.equal(spoken.length, n12, 'muted: no utterance, no repeat');
+  run('setVoiceMuted(false)');
+  // Still talking when the quiet spell would end: no reminder over it.
+  speak('sayPrompt("Find the bee!")');
+  const bee = spoken.at(-1);
+  const n13 = spoken.length;
+  fireWhere(t => t.ms === 12000);
+  assert.equal(spoken.length, n13, 'no reminder while the prompt itself is still going');
+  bee.onend(); await flush();
+  run('setSoundMuted(false)');
+
+  console.log('PASS: delayed voices, natural pitch, local quality preference, saved choice, language, volume, mute, missing voice fallback, speech completion promise, caption event, hide/show lifecycle, unusable-voice fallback, speechDone, afterSpeech, swallowed utterances, speech diagnostics, chime then cheer, announcements wait their turn, storyteller speed, name sounds-like, prompt reminder');
 })().catch(e => { console.error(e); process.exit(1); });
