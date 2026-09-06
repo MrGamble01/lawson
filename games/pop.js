@@ -125,23 +125,36 @@
     if (glyph) b.dataset.glyph = glyph;
     b.setAttribute("aria-label", glyph ? `Balloon ${glyph}` : rainbow ? "Rainbow balloon" : "Balloon");
     b.innerHTML = balloonSvg(hex, glyph, rainbow);
-    // Spread balloons out sideways so two never launch on top of each other
-    // (they are tap targets, and a toddler should be able to pick either).
-    const others = Array.from(area.querySelectorAll(".balloon")).map((o) => parseFloat(o.style.left) || 0);
-    let left = Math.random() * 78 + 11;
-    for (let tries = 0; tries < 8 && others.some((x) => Math.abs(x - left) < 15); tries++) {
-      left = Math.random() * 78 + 11;
-    }
-    b.style.left = left + "%";
+    const still = L.prefersReducedMotion();
+    const alive = Array.from(area.querySelectorAll(".balloon"));
     const dur = ((mode === "free" ? 5 : 6) + Math.random() * 4) * L.paceScale(); // "Take it slow" doubles it
     b.dataset.life = String(Math.round(dur * 1000));
-    if (L.prefersReducedMotion()) {
+    if (still) {
       // Reduced motion: no drifting. The balloon appears in place and waits
       // out its lifetime — with the float animation collapsed it would
-      // otherwise jump straight off the top and be unpoppable.
+      // otherwise jump straight off the top and be unpoppable. Still
+      // balloons sit in one of three lanes, at most three at a time, so
+      // they never overlap each other (each is a tap target).
+      const LANES = [20, 50, 80];
+      const used = alive.map((o) => o.dataset.lane);
+      const free = LANES.filter((l) => !used.includes(String(l)));
+      if (!free.length) return;
+      const lane = free[Math.floor(Math.random() * free.length)];
+      b.dataset.lane = String(lane);
+      b.style.left = lane + "%";
       b.classList.add("balloon--still");
       b.style.top = (12 + Math.random() * 55) + "%";
     } else {
+      // Spread balloons out sideways so two never launch on top of each
+      // other (they are tap targets, and a toddler should be able to pick
+      // either). The gap is the balloon's own width.
+      const others = alive.map((o) => parseFloat(o.style.left) || 0);
+      const gapPct = Math.max(15, (Math.min(160, Math.max(80, window.innerWidth * 0.14)) / Math.max(1, area.clientWidth)) * 100 + 3);
+      let left = Math.random() * 78 + 11;
+      for (let tries = 0; tries < 8 && others.some((x) => Math.abs(x - left) < gapPct); tries++) {
+        left = Math.random() * 78 + 11;
+      }
+      b.style.left = left + "%";
       b.style.top = "110%";
       b.style.animationDuration = dur + "s";
     }
