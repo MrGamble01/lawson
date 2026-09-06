@@ -8,6 +8,7 @@ Smoke, visual baseline and accessibility checks for every game and key screen.
 node tests/pacing-lint.js          # no bare timer right after a cheer, no chime right after a line, no setT(name) over a cheer (static check, no browser); --self-test checks the checker
 node tests/voice.js                # speech: voice choice, speed, name "sounds like", mute/volume, completion promise, caption event (no browser)
 node tests/story.js                # Story Time pacing on real narration end (no browser)
+node tests/dino.js                 # Baby Dino: "All clean!" heard before the next wash (no browser)
 node tests/stickers.js             # sticker announcement: jingle first, then waits for the cheer (no browser)
 node tests/nav-speech.js           # hub welcome line never spoken over a screen the kid tapped on to (Playwright)
 node tests/smoke.js                # smoke pass only (errors-free / screen renders / restart safe)
@@ -44,7 +45,8 @@ that a line spoken right after a chime waits for the chime to ring out
 the line, not after it, where it would land on the first word, and that
 a cheer is not followed by `setT(ms, name)` whose next prompt would
 cut it off — Baby Dino's "All clean!" used to start the next wash that
-way),
+way — and `tests/dino.js` holds that cheer the way a late-starting iPad
+voice would and checks the next wash waits),
 that a quiz prompt is repeated once after a quiet spell and dropped by any
 other line, a screen change, a lock or a muted voice, that the menu music
 ducks under a line in flight and eases back once it ends (or is cut off,
