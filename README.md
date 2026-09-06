@@ -81,7 +81,11 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   speak (an online voice with no connection, say), the storyteller reads
   with the best local voice instead and goes back to the chosen one when
   it can; Settings says who is standing in. A line the device swallows
-  (iPads sometimes drop one right after a cut-off) is read again. On iPad, additional voices can
+  (iPads sometimes drop one right after a cut-off) is read again. After
+  "Listen to this voice", Settings reports how long the engine took to
+  start and how the line ended, plus a tally of the recent lines
+  (swallowed, read again, stand-in voice, cut off) — the way to check the
+  speech timings on a real iPad. On iPad, additional voices can
   be downloaded in the device's accessibility speech settings. Story Time
   paces its pages on the chosen voice: each page turns once the line has
   actually been read, plus a beat to poke the scene. Poking a character
