@@ -2,7 +2,8 @@
 // Short narrated picture stories. Each story has 4 pages. Each page is
 // a scene of one or more tappable characters that say their own sound
 // or word when poked, plus a narrated sentence. The page auto-advances
-// once the line has been read; tapping the background also advances.
+// once the storyteller has actually finished the line (plus a beat to
+// poke around); tapping the background also advances.
 // Tapping a character plays its sound and wiggles it, but does NOT
 // advance — so the kid can poke around and explore the scene.
 (function () {
@@ -287,6 +288,24 @@
   let pageIdx = 0;
   let advanceTimer = null;
   let tapAttached = false;
+  // Bumped every time a page is shown, so a narration that finishes late
+  // (after the kid tapped ahead, or after leaving the game) can't advance
+  // a page it doesn't belong to.
+  let pageSeq = 0;
+
+  // Pacing. The storyteller voice is chosen by the parent (or the device),
+  // so how long a line takes to read varies a lot: enhanced voices are
+  // slower, online voices start late. Rather than guess from word count,
+  // wait for the speech engine to report the line finished, then hold the
+  // page for a beat so the kid can poke the scene. Word count still sets
+  // a floor (never flip pages faster than a toddler can look) and a
+  // ceiling (iOS sometimes never fires `end`, so don't hang forever).
+  const POKE_BEAT_MS = 1200;
+  function pacing(text) {
+    const words = text.split(/\s+/).filter(Boolean).length;
+    const minMs = Math.max(3800, words * 380 + POKE_BEAT_MS);
+    return { minMs, maxMs: minMs * 2 + 4000 };
+  }
 
   function renderPage() {
     const story = STORIES[storyIdx];
@@ -327,18 +346,30 @@
     txt.textContent = page.text;
     counter.textContent = `${pageIdx + 1} / ${story.pages.length}`;
 
-    L.say(page.text, 0.9);
-
-    // Auto-advance based on text length (~70 wpm) but give the kid an
-    // extra beat to poke around at the scene after the line ends.
-    const words = page.text.split(/\s+/).length;
-    const ms = Math.max(3800, words * 380 + 1200);
+    const seq = ++pageSeq;
+    const { minMs, maxMs } = pacing(page.text);
+    const shownAt = Date.now();
     clearTimeout(advanceTimer);
-    advanceTimer = setTimeout(advance, ms);
+    advanceTimer = setTimeout(advance, maxMs);
+
+    // Once the line has been spoken (or immediately when voice is muted,
+    // or when a character poke cuts the narration short), hold the page
+    // for the poke beat — but never shorter than the word-count floor.
+    Promise.resolve(L.say(page.text, 0.9)).then(() => {
+      if (seq !== pageSeq || advanceTimer === null) return;
+      const elapsed = Date.now() - shownAt;
+      const wait = Math.max(POKE_BEAT_MS, minMs - elapsed);
+      clearTimeout(advanceTimer);
+      advanceTimer = setTimeout(advance, wait);
+    });
   }
 
   function advance() {
     clearTimeout(advanceTimer);
+    // Whatever the current page's narration does from here on is moot;
+    // in particular, "The end!" below cuts the last line short, and that
+    // must not re-trigger the ending.
+    pageSeq += 1;
     const story = STORIES[storyIdx];
     if (pageIdx < story.pages.length - 1) {
       pageIdx += 1;
@@ -387,6 +418,7 @@
   function stop() {
     clearTimeout(advanceTimer);
     advanceTimer = null;
+    pageSeq += 1;
   }
 
   L.games.story = { screen: "storyGame", start, stop };

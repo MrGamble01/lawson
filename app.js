@@ -617,7 +617,7 @@ function boboCheer() {
 // the utilities below. Keeping each game self-contained makes it easy to
 // tweak one without touching the others.
 window.Lawson = {
-  say, beep, happySound, buzzSound, haptic, sparkleAt, onTap, onTapOnce, pointOf, bumpBadge, show,
+  say, cancelSpeech, beep, happySound, buzzSound, haptic, sparkleAt, onTap, onTapOnce, pointOf, bumpBadge, show,
   audioCtx, unlockAudio, masterGain, setVolume, getVolume,
   getHighScore, setHighScore, bumpHighScore, tryNewHighScore,
   setVoiceMuted, setSoundMuted, isVoiceMuted, isSoundMuted,
@@ -796,7 +796,7 @@ document.querySelectorAll("[data-go]").forEach((btn) => {
 document.querySelectorAll("[data-home]").forEach((btn) => {
   onTap(btn, () => {
     leaveActiveGame();
-    if (synth) synth.cancel();
+    cancelSpeech();
     show("menu");
     navChime(false);
   });
