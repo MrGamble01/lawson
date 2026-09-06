@@ -139,9 +139,9 @@
           critter.classList.toggle("gold", !!content.gold);
           critter.classList.add("up");
           labelHole(content.glyph ? `${content.glyph}!` : `${content.gold ? "gold " : ""}${content.name || "critter"}!`);
-          const upFor = mode === "free"
+          const upFor = (mode === "free"
             ? 900 + Math.random() * 700
-            : 1500 + Math.random() * 1100;
+            : 1500 + Math.random() * 1100) * L.paceScale(); // "Take it slow" doubles it
           downTimer = setTimeout(() => {
             critter.classList.remove("up");
             current = null;
@@ -199,7 +199,7 @@
   function tick() {
     popRandom();
     if (popInterval < 800 && Math.random() < 0.35) popRandom();
-    cycleTimer = setTimeout(tick, popInterval);
+    cycleTimer = setTimeout(tick, popInterval * L.paceScale());
   }
 
   function setMode(m) {

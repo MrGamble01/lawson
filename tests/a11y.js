@@ -19,8 +19,11 @@
 //      finale, new-best celebration), the tap alternatives to every
 //      drag (WCAG 2.2 §2.5.7): Garden, Farm, Baby Dino and Ice Cream are
 //      each played through by single taps, and the drag path still works;
-//      and keyboard play: every tap target is a focusable, named button,
-//      so Farm, Garden, Whack! and Pop! can be played with Tab + Enter.
+//      keyboard play: every tap target is a focusable, named button,
+//      so Farm, Garden, Whack! and Pop! can be played with Tab + Enter;
+//      and the comfort settings: "Take it slow" halves the pace of Whack!
+//      and Pop! (WCAG 2.2.1), "Less motion" collapses animations and
+//      skips particle bursts without the OS setting (WCAG 2.2.2).
 //
 // Run:  node tests/a11y.js
 // Exit: 0 pass · 1 violations or failed checks · 99 runner crashed.
@@ -629,6 +632,89 @@ async function keyboardPlay(page) {
   check(Number(await page.$eval("#popScoreVal", (el) => el.textContent)) >= 1, where, "pop: Enter on a balloon should pop it");
 }
 
+// Comfort settings: timing is adjustable and motion can be turned down
+// from inside the app.
+async function comfortSettings(page) {
+  const where = "comfort settings";
+
+  // "Take it slow" is wired through the Settings panel and persists.
+  await openScreen(page, { id: "menu", kind: "hub" });
+  await page.evaluate(() => { window.Lawson.setSlowPace(false); window.Lawson.setLessMotion(false); });
+  await page.evaluate(() => window.__openSettings());
+  await page.waitForTimeout(100);
+  check(await page.$eval("#settingsSlow", (el) => el.checked === false), where, "Take it slow toggle should reflect the saved (off) state");
+  await page.click("label:has(#settingsSlow)");
+  await page.click("#settingsClose");
+  await page.waitForTimeout(100);
+  check(await page.evaluate(() => localStorage.getItem("lawson:slow") === "1" && document.documentElement.classList.contains("slow-pace") && window.Lawson.paceScale() === 2),
+    where, "turning Take it slow on should persist and double the pace scale");
+
+  // Pop!: balloons live twice as long (normal 5–9 s → slow 10–18 s). Under
+  // the reduced motion these tests emulate they hold still instead of
+  // drifting — and must be present at all, not flung off the top.
+  await openScreen(page, { id: "pop", kind: "game" });
+  const slowDurs = await page.$$eval(".balloon", (els) => els.map((b) => Number(b.dataset.life) / 1000));
+  check(slowDurs.length > 0 && slowDurs.every((d) => d >= 10), where, `slow balloons should live ≥10 s, got ${JSON.stringify(slowDurs)}`);
+  check(await page.$$eval(".balloon--still", (els) => els.every((b) => { const r = b.getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight; })), where, "under reduced motion balloons should sit on screen, not off the top");
+
+  // Whack!: a critter stays up ≥1.8 s (normal free-mode max is 1.6 s).
+  await openScreen(page, { id: "whack", kind: "game" });
+  const upMs = await page.evaluate(() => new Promise((resolve) => {
+    const holes = [...document.querySelectorAll(".whack-hole")];
+    const isUp = (h) => !/: empty$/.test(h.getAttribute("aria-label"));
+    let hole = null, t0 = 0;
+    const start = Date.now();
+    const poll = setInterval(() => {
+      if (!hole) {
+        hole = holes.find(isUp) || null;
+        if (hole) t0 = Date.now();
+        else if (Date.now() - start > 5000) { clearInterval(poll); resolve(-1); }
+      } else if (!isUp(hole)) {
+        clearInterval(poll); resolve(Date.now() - t0);
+      } else if (Date.now() - t0 > 6000) { clearInterval(poll); resolve(-2); }
+    }, 20);
+  }));
+  check(upMs >= 1750, where, `slow-mode critter should stay up ≥1.75 s, measured ${upMs} ms`);
+
+  // Off again: normal pace.
+  await page.evaluate(() => window.Lawson.setSlowPace(false));
+  await openScreen(page, { id: "pop", kind: "game" });
+  const normalDurs = await page.$$eval(".balloon", (els) => els.map((b) => Number(b.dataset.life) / 1000));
+  check(normalDurs.length > 0 && normalDurs.every((d) => d <= 9.01), where, `normal balloons should take ≤9 s, got ${JSON.stringify(normalDurs)}`);
+
+  // "Less motion": without the OS preference, the in-app toggle alone
+  // collapses CSS animations and skips particle bursts.
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await openScreen(page, { id: "menu", kind: "hub" });
+  check(!(await page.evaluate(() => window.Lawson.prefersReducedMotion())), where, "with no OS preference and the toggle off, motion should be on");
+  await page.evaluate(() => window.__openSettings());
+  await page.waitForTimeout(100);
+  await page.click("label:has(#settingsMotion)");
+  await page.click("#settingsClose");
+  await page.waitForTimeout(100);
+  const lm = await page.evaluate(() => {
+    const before = document.querySelectorAll(".sparkle").length; // the mouse click above may have left an ambient one
+    window.Lawson.sparkleAt(100, 100);
+    // Chromium reports the collapsed 0.001ms as "1e-06s"; compare in seconds.
+    const dur = getComputedStyle(document.getElementById("mascot")).animationDuration;
+    const secs = dur.endsWith("ms") ? parseFloat(dur) / 1000 : parseFloat(dur);
+    return {
+      cls: document.documentElement.classList.contains("reduce-motion"),
+      saved: localStorage.getItem("lawson:lessMotion"),
+      prm: window.Lawson.prefersReducedMotion(),
+      sparkles: document.querySelectorAll(".sparkle").length - before,
+      mascotAnim: dur, mascotSecs: secs,
+    };
+  });
+  check(lm.cls && lm.saved === "1", where, "Less motion should persist and mark the document");
+  check(lm.prm === true, where, "Less motion should make prefersReducedMotion() true without the OS setting");
+  check(lm.sparkles === 0, where, `Less motion should skip sparkle bursts, got ${lm.sparkles} new`);
+  check(lm.mascotSecs < 0.01, where, `Less motion should collapse CSS animations, mascot animation-duration is ${lm.mascotAnim}`);
+  await page.evaluate(() => window.Lawson.setLessMotion(false));
+  check(!(await page.evaluate(() => window.Lawson.prefersReducedMotion())), where, "turning Less motion off should restore motion");
+  await page.emulateMedia({ reducedMotion: "reduce" });
+}
+
 // ---- main -----------------------------------------------------------------
 
 async function main() {
@@ -670,6 +756,7 @@ async function main() {
   await overlays(first);
   await dragAlternatives(first);
   await keyboardPlay(first);
+  await comfortSettings(first);
 
   await browser.close();
   pageErrors.forEach((m) => fail("page", `uncaught error: ${m}`));
@@ -685,7 +772,7 @@ async function main() {
     failures.forEach((f) => console.log(`  FAIL  ${f.where.padEnd(34)} ${f.what}`));
     process.exit(1);
   }
-  console.log("  behaviour: keyboard nav, settings modal, captions, mode tabs, badges, reduced motion, overlays, tap-instead-of-drag, keyboard play — all pass");
+  console.log("  behaviour: keyboard nav, settings modal, captions, mode tabs, badges, reduced motion, overlays, tap-instead-of-drag, keyboard play, comfort settings — all pass");
 }
 
 main().catch((e) => { console.error(e); process.exit(99); });

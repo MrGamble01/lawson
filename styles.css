@@ -38,6 +38,13 @@
     transition-duration: 0.001ms !important;
   }
 }
+/* Same treatment from the in-app "Less motion" setting. */
+html.reduce-motion *, html.reduce-motion *::before, html.reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  animation-delay: 0s !important;
+  transition-duration: 0.001ms !important;
+}
 
 /* Visible focus ring for keyboard users (a-z navigators on the PC port
    of the app, screen reader nav, etc.). Touch users won't see this
@@ -997,6 +1004,8 @@ html.dark .hub-title {
   animation: float linear forwards;
   filter: drop-shadow(0 4px 6px rgba(0,0,0,0.25));
 }
+/* Reduced motion: balloons hold still where they appear (pop.js). */
+.balloon--still { animation: none; }
 .balloon svg {
   width: 100%;
   height: 100%;
