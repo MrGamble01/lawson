@@ -52,7 +52,11 @@
   let rainStart = 0;
 
   function setT(ms, fn) { const t = setTimeout(fn, ms); timers.push(t); return t; }
-  function clearAll() { timers.forEach(clearTimeout); timers = []; }
+  function clearAll() { timers.forEach(clearTimeout); timers = []; clearNext(); }
+  // A line that waits for the one before it ("Bucket full of milk!"
+  // after "Squirt squirt!"); cancelled with the timers.
+  let cancelNext = null;
+  function clearNext() { if (cancelNext) cancelNext(); cancelNext = null; }
   function $(id) { return document.getElementById(id); }
   function rand(a, b) { return a + Math.random() * (b - a); }
 
@@ -599,10 +603,12 @@
     setT(420, () => cow.el.classList.remove("farm-react"));
     bumpCare();
     if (bucketMilkLevel >= COW_MILK_PER_FILL) {
-      setT(400, () => {
+      // Once "Squirt squirt!" has been heard, not over it.
+      clearNext();
+      cancelNext = L.afterSpeech(() => {
         L.happySound();
         L.say("Bucket full of milk!");
-      });
+      }, { beatMs: 150, minMs: 400, maxMs: 3000 });
     }
   }
 

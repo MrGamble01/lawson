@@ -5,7 +5,7 @@ Smoke, visual baseline and accessibility checks for every game and key screen.
 ## Run
 
 ```bash
-node tests/pacing-lint.js          # no bare timer right after a cheer, no chime right after a line (static check, no browser); --self-test checks the checker
+node tests/pacing-lint.js          # no bare timer after a cheer, no chime right after a line, no fixed timer speaking over a line (static check, no browser); --self-test checks the checker
 node tests/voice.js                # speech: voice choice, speed, name "sounds like", mute/volume, completion promise, caption event (no browser)
 node tests/story.js                # Story Time pacing on real narration end (no browser)
 node tests/stickers.js             # sticker announcement: jingle first, then waits for the cheer (no browser)
