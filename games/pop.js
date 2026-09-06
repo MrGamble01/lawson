@@ -123,8 +123,16 @@
     const b = document.createElement("div");
     b.className = "balloon" + (rainbow ? " balloon--rainbow" : "");
     if (glyph) b.dataset.glyph = glyph;
+    b.setAttribute("aria-label", glyph ? `Balloon ${glyph}` : rainbow ? "Rainbow balloon" : "Balloon");
     b.innerHTML = balloonSvg(hex, glyph, rainbow);
-    b.style.left = Math.random() * 78 + 11 + "%";
+    // Spread balloons out sideways so two never launch on top of each other
+    // (they are tap targets, and a toddler should be able to pick either).
+    const others = Array.from(area.querySelectorAll(".balloon")).map((o) => parseFloat(o.style.left) || 0);
+    let left = Math.random() * 78 + 11;
+    for (let tries = 0; tries < 8 && others.some((x) => Math.abs(x - left) < 15); tries++) {
+      left = Math.random() * 78 + 11;
+    }
+    b.style.left = left + "%";
     b.style.top = "110%";
     const dur = (mode === "free" ? 5 : 6) + Math.random() * 4;
     b.style.animationDuration = dur + "s";

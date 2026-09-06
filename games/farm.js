@@ -478,17 +478,17 @@
     const stage = $("farmStage");
     stage.innerHTML = `
       <div id="farmSky" class="farm-sky">
-        <div id="farmSunMoon" class="farm-sun">${sunSvg()}</div>
+        <div id="farmSunMoon" class="farm-sun" aria-hidden="true">${sunSvg()}</div>
         <div class="farm-stars" id="farmStars" aria-hidden="true"></div>
-        <div class="farm-cloud farm-cloud--1">${cloudSvg()}</div>
-        <div class="farm-cloud farm-cloud--2">${cloudSvg()}</div>
+        <div class="farm-cloud farm-cloud--1" aria-hidden="true">${cloudSvg()}</div>
+        <div class="farm-cloud farm-cloud--2" aria-hidden="true">${cloudSvg()}</div>
       </div>
       <div id="farmRain" class="farm-rain"></div>
       <div class="farm-mountain"></div>
       <div class="farm-hills"></div>
       <div class="farm-grass"></div>
 
-      <div class="farm-tree" id="farmTree">${treeSvg()}<div class="farm-apples" id="farmApples"></div></div>
+      <div class="farm-tree" id="farmTree" tabindex="-1">${treeSvg()}<div class="farm-apples" id="farmApples"></div></div>
       <div class="farm-barn">${barnSvg()}</div>
       <div class="farm-coop">${coopSvg()}<div class="farm-eggs" id="farmEggs"></div></div>
       <div class="farm-fence farm-fence--top">${fenceSvg()}</div>
@@ -496,22 +496,22 @@
       <div class="farm-pond">${pondSvg()}<div class="farm-lily">${lilyPadSvg()}</div></div>
       <div class="farm-pond-fish" id="farmFish"></div>
 
-      <div class="farm-cow" id="farmCow">${cowSvg()}</div>
-      <div class="farm-horse" id="farmHorse">${horseSvg()}</div>
-      <div class="farm-sheep" id="farmSheep">${sheepSvg()}</div>
-      <div class="farm-pig"  id="farmPig">${pigSvg()}</div>
-      <div class="farm-dog"  id="farmDog">${dogSvg()}</div>
-      <div class="farm-ducks" id="farmDucks">
-        <div class="farm-duck">${duckSvg()}</div>
-        <div class="farm-duck">${duckSvg()}</div>
+      <div class="farm-cow" id="farmCow" aria-label="Cow">${cowSvg()}</div>
+      <div class="farm-horse" id="farmHorse" aria-label="Horse">${horseSvg()}</div>
+      <div class="farm-sheep" id="farmSheep" aria-label="Sheep">${sheepSvg()}</div>
+      <div class="farm-pig"  id="farmPig" aria-label="Pig">${pigSvg()}</div>
+      <div class="farm-dog"  id="farmDog" aria-label="Dog">${dogSvg()}</div>
+      <div class="farm-ducks" id="farmDucks" aria-hidden="true">
+        <div class="farm-duck" aria-hidden="true">${duckSvg()}</div>
+        <div class="farm-duck" aria-hidden="true">${duckSvg()}</div>
       </div>
       <div class="farm-chickens" id="farmChickens">
-        <div class="farm-chicken">${chickenSvg("#fff")}</div>
-        <div class="farm-chicken">${chickenSvg("#fff8a8")}</div>
-        <div class="farm-chicken">${chickenSvg("#ffd0b3")}</div>
+        <div class="farm-chicken" aria-label="Chicken">${chickenSvg("#fff")}</div>
+        <div class="farm-chicken" aria-label="Chicken">${chickenSvg("#fff8a8")}</div>
+        <div class="farm-chicken" aria-label="Chicken">${chickenSvg("#ffd0b3")}</div>
       </div>
 
-      <div class="farm-tractor" id="farmTractor">${tractorSvg()}</div>
+      <div class="farm-tractor" id="farmTractor" aria-label="Tractor">${tractorSvg()}</div>
 
       <div class="farm-tools">
         <button id="farmBucket"   class="farm-tool farm-tool--bucket" aria-label="Milk bucket">${bucketSvg(0)}</button>
@@ -918,7 +918,9 @@
     const colors = ["#ff8ab0", "#fab005", "#74c0fc", "#da77f2", "#fa5252"];
     const f = document.createElement("button");
     f.className = "farm-fish";
-    f.setAttribute("aria-label", "Fish");
+    // A swimming poke-toy under the horse/tractor/ducks: pointer-only.
+    f.setAttribute("aria-hidden", "true");
+    f.setAttribute("tabindex", "-1");
     f.innerHTML = fishSvg(colors[i % colors.length]);
     f.style.setProperty("--delay", (i * 1.5) + "s");
     // Fixed lanes (row + start column) so the three fish never stack on

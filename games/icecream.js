@@ -113,8 +113,8 @@
         <div id="icecreamTubs" class="icecream-tubs"></div>
       </div>
       <div class="icecream-stand">
-        <div id="icecreamCone" class="icecream-cone">${coneSvg()}</div>
-        <div id="icecreamStack" class="icecream-stack"></div>
+        <div id="icecreamCone" class="icecream-cone" tabindex="-1">${coneSvg()}</div>
+        <div id="icecreamStack" class="icecream-stack" tabindex="-1"></div>
         <div id="icecreamToppings" class="icecream-toppings-overlay"></div>
       </div>
       <button id="icecreamEat" class="icecream-eat" disabled>Eat! 🤤</button>

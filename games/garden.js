@@ -249,9 +249,9 @@
     const stage = $("gardenStage");
     stage.innerHTML = `
       <div id="gardenSky" class="garden-sky">
-        <div class="garden-cloud garden-cloud--1">${cloudSvg()}</div>
-        <div class="garden-cloud garden-cloud--2">${cloudSvg()}</div>
-        <div class="garden-cloud garden-cloud--3">${cloudSvg()}</div>
+        <div class="garden-cloud garden-cloud--1" aria-hidden="true">${cloudSvg()}</div>
+        <div class="garden-cloud garden-cloud--2" aria-hidden="true">${cloudSvg()}</div>
+        <div class="garden-cloud garden-cloud--3" aria-hidden="true">${cloudSvg()}</div>
         <button id="gardenSun" class="garden-sun" aria-label="Sun">${sunSvg()}</button>
       </div>
       <div id="gardenInsects" class="garden-insects"></div>
@@ -302,10 +302,21 @@
     updatePotGlows();
   }
 
+  // Each pot is a button; its name says what tapping it will do.
+  const POT_LABELS = {
+    [STATE.EMPTY]:   "empty, tap to plant a seed",
+    [STATE.SEEDED]:  "seed planted, water it",
+    [STATE.SPROUT]:  "sprout, water it",
+    [STATE.YOUNG]:   "young plant, water it",
+    [STATE.MATURE]:  "ready, tap to pick",
+    [STATE.HARVEST]: "just picked",
+  };
   function updatePotGlows() {
     pots.forEach((pot) => {
       pot.glowEl.classList.toggle("active", pot.state === STATE.MATURE);
       pot.wrap.dataset.state = pot.state;
+      const what = pot.state === STATE.MATURE && pot.plant ? `${pot.plant.name} ready, tap to pick` : POT_LABELS[pot.state];
+      pot.wrap.setAttribute("aria-label", `Pot ${pot.idx + 1}: ${what}`);
     });
   }
 
