@@ -600,8 +600,8 @@
     bumpCare();
     if (bucketMilkLevel >= COW_MILK_PER_FILL) {
       setT(400, () => {
-        L.say("Bucket full of milk!");
         L.happySound();
+        L.say("Bucket full of milk!");
       });
     }
   }
@@ -743,8 +743,8 @@
     L.beep(320, 0.10, "triangle", 0.07);
     L.haptic(7);
     if (pigFedCount % PIG_FEED_THRESHOLD === 0) {
-      L.say("All full! Yum!");
       L.happySound();
+      L.say("All full! Yum!");
     } else {
       L.say("Slurp slurp!");
     }
@@ -789,8 +789,8 @@
     L.beep(500, 0.06, "triangle");
     L.beep(580, 0.06, "triangle", 0.07);
     L.haptic(7);
-    L.say("Munch munch!");
     L.happySound();
+    L.say("Munch munch!");
     const h = $("farmHorse");
     h.classList.add("farm-react");
     setT(420, () => h.classList.remove("farm-react"));
@@ -825,8 +825,8 @@
   function playFetch() {
     L.beep(640, 0.10, "triangle");
     L.haptic(8);
-    L.say("Fetch! Good dog!");
     L.happySound();
+    L.say("Fetch! Good dog!");
     const d = $("farmDog");
     d.classList.add("farm-fetch");
     setT(1300, () => d.classList.remove("farm-fetch"));
@@ -968,8 +968,8 @@
     }
     // 70% catch a fish
     if (Math.random() < 0.7) {
-      L.say("Caught a fish!");
       L.happySound();
+      L.say("Caught a fish!");
       bumpCare();
       // A fish flies up
       const colors = ["#ff8ab0", "#fab005", "#74c0fc", "#da77f2"];
@@ -1081,9 +1081,9 @@
     if (!cont) return;
     cont.classList.add("on");
     rainStart = Date.now();
-    L.say("It's raining on the farm!");
     L.beep(700, 0.6, "sine");
     L.beep(900, 0.5, "triangle", 0.15);
+    L.say("It's raining on the farm!");
     for (let i = 0; i < 40; i++) {
       const r = document.createElement("div");
       r.className = "farm-rain-drop";

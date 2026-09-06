@@ -173,9 +173,9 @@
   }
 
   function clearScene() {
-    L.say("All clean!");
     L.beep(420, 0.10, "triangle");
     L.haptic(8);
+    L.say("All clean!");
     placed.forEach((p) => {
       p.el.classList.add("scene-clearing");
       setT(360, () => p.el.remove());
@@ -334,8 +334,8 @@
       if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
       if (pressed) {
         pressed = false;
-        L.say(sticker.s);
         L.beep(720 + Math.random() * 200, 0.05, "sine");
+        L.say(sticker.s);
         el.classList.remove("scene-wiggle");
         void el.offsetWidth;
         el.classList.add("scene-wiggle");

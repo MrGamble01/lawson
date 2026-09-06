@@ -1208,8 +1208,8 @@ document.querySelectorAll("[data-home]").forEach((btn) => {
     // doesn't get a constant party.
     if (totalTaps % 10 === 0) {
       confettiRain(40);
-      say(`Bobo dance party!`);
       happySound();
+      say(`Bobo dance party!`);
       mascot.classList.add("flipping");
       setTimeout(() => mascot.classList.remove("flipping"), 800);
       return;
@@ -1223,8 +1223,8 @@ document.querySelectorAll("[data-home]").forEach((btn) => {
       recentTaps = [];
       mascot.classList.add("flipping");
       setTimeout(() => mascot.classList.remove("flipping"), 800);
-      say("Tickly!");
       happySound();
+      say("Tickly!");
       haptic([10, 30, 10, 30, 20]);
       const r = mascot.getBoundingClientRect();
       for (let k = 0; k < 6; k++) {

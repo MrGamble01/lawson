@@ -218,11 +218,11 @@
   function setupWhistle() {
     const w = $("trainWhistle");
     L.onTap(w, () => {
-      L.say("Choo choo!");
       L.beep(900, 0.18, "sine");
       L.beep(720, 0.22, "sine", 0.18);
       L.beep(900, 0.18, "sine", 0.42);
       L.haptic([8, 30, 8]);
+      L.say("Choo choo!");
       // Smoke puffs
       for (let k = 0; k < 4; k++) setT(k * 120, () => puffSmoke());
     });
@@ -243,8 +243,8 @@
     running = true;
     const b = $("trainGoStop");
     if (b) b.textContent = "⏸";
-    L.say("All aboard!");
     L.beep(420, 0.1, "triangle");
+    L.say("All aboard!");
     chugTimer = setInterval(() => {
       if (!running) return;
       chug();
@@ -320,10 +320,10 @@
     const xs = stationXs();
     const idx = xs.indexOf(trainPosPct);
     currentStation = idx;
-    L.say(`Station ${idx + 1}!`);
     L.beep(620, 0.10, "triangle");
     L.beep(720, 0.12, "triangle", 0.10);
     L.haptic([8, 30, 8]);
+    L.say(`Station ${idx + 1}!`);
     stationsVisited += 1;
     L.bumpBadge("trainScoreVal", stationsVisited);
     if (stationsVisited > bestAtStart && !celebrated) {
@@ -356,17 +356,17 @@
     if (car.passenger) {
       // Leaving
       carEl.innerHTML = "";
-      L.say(`Bye bye!`);
       L.beep(880, 0.06, "sine");
+      L.say(`Bye bye!`);
       car.passenger = null;
     } else {
       // Boarding
       const p = PASSENGERS[Math.floor(Math.random() * PASSENGERS.length)];
       car.passenger = p;
       carEl.textContent = p.e;
-      L.say(p.say);
       L.beep(640, 0.06, "triangle");
       L.beep(720, 0.06, "triangle", 0.06);
+      L.say(p.say);
     }
   }
 

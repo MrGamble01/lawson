@@ -191,8 +191,8 @@
         burst(rainbow ? "🌈" : "💥");
         b.remove();
         if (STREAK_MILESTONES.includes(streak)) {
-          L.say(`${L.cheer()} ${streak} in a row!`);
           L.happySound();
+          L.say(`${L.cheer()} ${streak} in a row!`);
           maybeCelebrateRecord(streak);
         }
         return;
