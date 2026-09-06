@@ -740,5 +740,48 @@ assert.equal(said.at(-1), 'Pop the N!');
   assert.deepEqual(timerDelays(), [], 'nothing left armed');
   run('setSoundMuted(false)');
 
-  console.log('PASS: delayed voices, natural pitch, local quality preference, saved choice, language, volume, mute, missing voice fallback, speech completion promise, caption event, hide/show lifecycle, unusable-voice fallback, speechDone, afterSpeech, swallowed utterances, speech diagnostics, chime then cheer, announcements wait their turn');
+  // ---- Storyteller speed ----
+  run('setSpeechVoice("enhanced"); setSoundMuted(true)');
+  assert.equal(run('getSpeechSpeed()'), 'normal', 'normal by default');
+  clockNow = 400000;
+  speak('say("At normal speed", 0.9)');
+  assert.equal(spoken.at(-1).rate, 0.9, 'a line keeps its own rate at normal speed');
+  run('setSpeechSpeed("slower")');
+  const sayEvents = [];
+  const onSay = e => sayEvents.push(e.detail);
+  window.addEventListener('lawson:say', onSay);
+  speak('say("Slower now", 0.9)');
+  assert.ok(Math.abs(spoken.at(-1).rate - 0.9 * 0.85) < 1e-9, 'slower multiplies the line rate');
+  assert.ok(Math.abs(sayEvents.at(-1).rate - 0.9 * 0.85) < 1e-9, 'the caption event carries the effective rate');
+  windowEvents.removeEventListener('lawson:say', onSay);
+  assert.equal(stored.get('lawson:speechSpeed'), 'slower', 'saved on the device');
+  run('setSpeechSpeed("faster")');
+  speak('say("Faster now")');
+  assert.ok(Math.abs(spoken.at(-1).rate - 0.95 * 1.15) < 1e-9);
+  run('setSpeechSpeed("bogus")');
+  assert.equal(run('getSpeechSpeed()'), 'faster', 'unknown speeds are ignored');
+  speak('say("Way too fast", 3)');
+  assert.equal(spoken.at(-1).rate, 1.6, 'clamped at the top');
+  run('setSpeechSpeed("slower")');
+  speak('say("Way too slow", 0.2)');
+  assert.equal(spoken.at(-1).rate, 0.6, 'clamped at the bottom');
+  // A fresh load reads the saved speed back.
+  const fresh = vm.createContext({ window: { speechSynthesis: synth, AudioContext, addEventListener() {}, dispatchEvent() {} },
+    document: { hidden: false, addEventListener() {} }, Event, CustomEvent, Date: { now: () => clockNow },
+    SpeechSynthesisUtterance: function(text) { this.text = text; },
+    localStorage: { getItem: k => stored.get(k) ?? null, setItem: (k, v) => stored.set(k, v) },
+    setInterval: () => 1, clearInterval() {}, setTimeout: () => 1, clearTimeout() {} });
+  vm.runInContext(source, fresh);
+  assert.equal(vm.runInContext('getSpeechSpeed()', fresh), 'slower', 'saved speed restored on load');
+  stored.set('lawson:speechSpeed', 'nonsense');
+  const fresh2 = vm.createContext({ window: { speechSynthesis: synth, AudioContext, addEventListener() {}, dispatchEvent() {} },
+    document: { hidden: false, addEventListener() {} }, Event, CustomEvent, Date: { now: () => clockNow },
+    SpeechSynthesisUtterance: function(text) { this.text = text; },
+    localStorage: { getItem: k => stored.get(k) ?? null, setItem: (k, v) => stored.set(k, v) },
+    setInterval: () => 1, clearInterval() {}, setTimeout: () => 1, clearTimeout() {} });
+  vm.runInContext(source, fresh2);
+  assert.equal(vm.runInContext('getSpeechSpeed()', fresh2), 'normal', 'a bad saved value falls back to normal');
+  run('setSpeechSpeed("normal"); setSoundMuted(false)');
+
+  console.log('PASS: delayed voices, natural pitch, local quality preference, saved choice, language, volume, mute, missing voice fallback, speech completion promise, caption event, hide/show lifecycle, unusable-voice fallback, speechDone, afterSpeech, swallowed utterances, speech diagnostics, chime then cheer, announcements wait their turn, storyteller speed');
 })().catch(e => { console.error(e); process.exit(1); });
