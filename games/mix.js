@@ -99,7 +99,13 @@
       bowl.style.background = mixColors(selected[0].hex, selected[1].hex);
       bowl.classList.add("filled");
       busy = true;
-      activeTimer = setTimeout(checkResult, 750);
+      // The bowl already shows the mix; wait for the second colour's
+      // name ("Blue") before the result line, so a late-starting engine
+      // doesn't lose it under "Orange! Great job!".
+      clearTimeout(activeTimer);
+      activeTimer = null;
+      clearNext();
+      cancelNext = L.afterSpeech(checkResult, { minMs: 750, beatMs: 150, maxMs: 3000 });
     }
   }
 

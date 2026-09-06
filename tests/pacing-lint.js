@@ -1,4 +1,4 @@
-// Static regression checks for two speech-pacing bugs that were fixed
+// Static regression checks for three speech-pacing bugs that were fixed
 // game by game and must not creep back:
 //
 // 1. "Cheer, then a fixed timer" (#18 and follow-ons): a game speaks a
@@ -9,12 +9,20 @@
 //    triggers a chime in the same tick. say() waits for a chime that is
 //    already ringing, but a chime triggered after it lands on the first
 //    word. Trigger the chime first; the line waits for it.
+// 3. "Short line, then a named follow-on" (Find It!, Color Mix): a game
+//    says a short name ("cow", "Blue") and then setTimeout(speakFn, 700)
+//    whose body speaks the next line. A late-starting engine loses the
+//    name. afterSpeech, same as rule 1. Not reported: an arrow timer
+//    (rule 1 covers the cheer case; visuals stay quiet), a named timer
+//    whose function does not speak or chime (a song stop, a game tick),
+//    and a timer past the line's .then() (already waiting).
 //
 // Run: node tests/pacing-lint.js            (checks every game)
 //      node tests/pacing-lint.js --self-test (checks the checker on fixtures)
 const fs = require('node:fs');
 const path = require('node:path');
 const WINDOW = 8;                 // lines after the say() to inspect for a bare timer
+const NAMED_WINDOW = 14;          // lines after the say() to inspect for setTimeout(name, ms)
 const CHIME_WINDOW = 2;           // lines after the say() to inspect for a chime
 const CONTEXT = 3;                // lines before it where `L.cheer()` may sit in a variable
 const SAY = /L\.say(?:Prompt)?\(/;
@@ -25,6 +33,19 @@ const SPEECH_GATED = /\.then\(/;  // a timer inside a .then() chain waits for sp
 const CHIME = /L\.(?:happySound|buzzSound|stickerJingle|beep)\(/;
 const DEFERRED = /setTimeout\(|setT\(|=>/;   // a chime scheduled for later is not on the first word
 const BRANCH_END = /^\s*(?:\}|else\b)/;       // the say() sits in another branch than what follows
+const NAMED_TIMER = /setTimeout\(\s*([A-Za-z_]\w*)\s*,/;
+
+function functionBody(lines, name) {
+  const start = new RegExp(`^\\s*function\\s+${name}\\s*\\(`);
+  const idx = lines.findIndex((l) => start.test(l));
+  if (idx < 0) return '';
+  const rest = [];
+  for (let i = idx + 1; i < lines.length; i++) {
+    if (/^\s*function\s+\w+\s*\(/.test(lines[i])) break;
+    rest.push(lines[i]);
+  }
+  return rest.join('\n');
+}
 
 function check(file, lines) {
   const problems = [];
@@ -38,6 +59,19 @@ function check(file, lines) {
         problems.push(`${file}:${j + 1}: chime right after the line on ${i + 1} lands on its first word — trigger the chime first, the line waits for it\n    ${l.trim()}`);
         break;
       }
+    }
+    // Rule 3: a named timer after any line, whose callback speaks or chimes.
+    for (let j = i + 1; j <= Math.min(i + NAMED_WINDOW, lines.length - 1); j++) {
+      const l = lines[j];
+      if (SAY.test(l)) break;
+      // Include the say() line: `L.say(text).then(() => setTimeout(...))`
+      // is already waiting for the line, even when .then( sits on it.
+      if (lines.slice(i, j + 1).some(x => SPEECH_GATED.test(x))) break;
+      const named = l.match(NAMED_TIMER);
+      if (!named) continue;
+      const body = functionBody(lines, named[1]);
+      if (!body || (!SAY.test(body) && !CHIME.test(body))) continue;
+      problems.push(`${file}:${j + 1}: named timer ${named[1]}() after the line on ${i + 1} speaks over it — use L.afterSpeech(${named[1]}, { minMs })\n    ${l.trim()}`);
     }
     // Rule 1: a bare timer after a cheer / "try again".
     const context = lines.slice(Math.max(0, i - CONTEXT), i + 1).join('\n');
@@ -75,6 +109,20 @@ function selfTest() {
   assert.equal(lint('L.say(L.cheer());\nsetTimeout(next, 900);').length, 1);
   assert.equal(lint('L.say(L.cheer());\nL.afterSpeech(next, { minMs: 900 });').length, 0);
   assert.equal(lint('L.say("Try again!");\nsetTimeout(() => el.classList.remove("x"), 300);').length, 0);
+  // Rule 3: a named timer whose body speaks is the leftover short-line shape.
+  const speakFn = 'function speakTarget() {\n  L.sayPrompt("Find the duck!");\n}\n';
+  assert.equal(lint('L.say("cow");\nsetTimeout(speakTarget, 700);\n' + speakFn).length, 1);
+  assert.match(lint('L.say("cow");\nsetTimeout(speakTarget, 700);\n' + speakFn)[0], /named timer speakTarget/);
+  assert.equal(lint('L.say("cow");\nL.afterSpeech(speakTarget, { minMs: 700 });\n' + speakFn).length, 0);
+  // A named timer a few lines down (bowl paint, then the result) still counts.
+  const checkFn = 'function checkResult() {\n  L.happySound();\n  L.say("Orange!");\n}\n';
+  assert.equal(lint('L.say("Blue");\nconst bowl = 1;\nif (two) {\n  bowl = 2;\n  busy = true;\n  setTimeout(checkResult, 750);\n}\n' + checkFn).length, 1);
+  // A named timer whose body does not speak (song stop, game tick) is fine.
+  assert.equal(lint('L.say("Song");\nsetTimeout(stopSong, 200);\nfunction stopSong() {\n  clear();\n}').length, 0);
+  // Already waiting on the line: the timer in the .then() is not over it
+  // (Story Time: .then( on the say() line, setTimeout a few lines down).
+  assert.equal(lint('L.say("cow").then(() => setTimeout(speakTarget, 100));\n' + speakFn).length, 0);
+  assert.equal(lint('Promise.resolve(L.say("Once")).then(() => {\n  setTimeout(advance, 400);\n});\nfunction advance() {\n  L.say("upon");\n}').length, 0);
   console.log('PASS: pacing lint self-test');
 }
 
@@ -87,6 +135,6 @@ if (require.main === module) {
     console.error('FAIL: speech pacing:\n' + problems.join('\n'));
     process.exit(1);
   }
-  console.log(`PASS: pacing lint — no bare timer right after a cheer, no chime right after a line, in ${files.length} games`);
+  console.log(`PASS: pacing lint — no bare timer right after a cheer, no chime right after a line, no named follow-on over a short line, in ${files.length} games`);
 }
 module.exports = { check };
