@@ -122,7 +122,11 @@ Doodle (reached via More → Art Studio) steps to Art Studio, then More,
 then the menu; Home from three hops deep unwinds the history depth to 0;
 the ABC flashcards (via More → Wonder World) round-trip through history; Back closes Settings and
 Done unwinds the Settings entry; Escape with a tool held only puts the
-tool down, and Escape again goes Home.
+tool down, and Escape again goes Home. Last, focus retention: answering
+Match and How Many? correctly by keyboard leaves focus on a choice of the
+rebuilt round (the answered button is gone); popping a balloon with Enter
+leaves focus on another balloon or the Pop! screen; Escape from a game
+still lands focus on the menu.
 
 Exit code 1 lists every failing screen/check; 99 means the runner crashed.
 

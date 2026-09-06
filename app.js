@@ -554,6 +554,35 @@ document.addEventListener("keydown", (e) => {
 });
 window.addEventListener("lawson:screen", putDownTool);
 
+// ---------- Keep keyboard focus inside a game when it rebuilds ----------
+// Quiz rounds replace the very button a keyboard user is standing on, and
+// a popped balloon removes itself. Browsers then drop focus to <body>, so
+// the next Tab starts again from the top of the page. Remember the path
+// to the focused element; when that element is removed while its screen
+// is still the active one, move focus to the first control inside the
+// nearest surviving ancestor (a new-round choice, the next balloon), or
+// to the screen itself — never to Home, which would read as "we left".
+let _focusTrail = [];
+document.addEventListener("focusin", (e) => {
+  const trail = [];
+  for (let n = e.target; n && n !== document.body && n.nodeType === 1; n = n.parentElement) trail.push(n);
+  _focusTrail = trail;
+});
+const FOCUS_FIXUP_TARGETS = 'button:not([disabled]):not(.home-btn), [role="button"]:not([tabindex="-1"])';
+function refocusAfterRemoval() {
+  if (document.activeElement !== document.body || !_focusTrail.length) return;
+  const lost = _focusTrail[0];
+  if (document.contains(lost)) return; // focus left for another reason
+  const screen = document.querySelector(".screen.active");
+  if (!screen || !_focusTrail.includes(screen)) { _focusTrail = []; return; } // navigated away
+  const parent = _focusTrail.find((n) => n !== lost && document.contains(n)) || screen;
+  const visible = (el) => !!(el.offsetParent || el.getClientRects().length);
+  const next = Array.from(parent.querySelectorAll(FOCUS_FIXUP_TARGETS)).find(visible) || screen;
+  try { next.focus({ preventScroll: true }); } catch (_) {}
+  _focusTrail = [];
+}
+new MutationObserver(refocusAfterRemoval).observe(document.body, { childList: true, subtree: true });
+
 // Badge bump helper (shared by games)
 function bumpBadge(id, val) {
   const el = document.getElementById(id);

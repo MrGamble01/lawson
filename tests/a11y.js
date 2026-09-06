@@ -26,7 +26,10 @@
 //      skips particle bursts without the OS setting (WCAG 2.2.2); and back
 //      navigation: the browser Back button (Android Back, iOS swipe-back)
 //      and Escape step back inside the app — game → hub → menu, or close
-//      Settings — while Home unwinds the history it skips.
+//      Settings — while Home unwinds the history it skips; and focus
+//      retention: when a quiz round rebuilds its choices or a popped
+//      balloon disappears, keyboard focus moves to the next control in
+//      the game instead of falling back to the page body.
 //
 // Run:  node tests/a11y.js
 // Exit: 0 pass · 1 violations or failed checks · 99 runner crashed.
@@ -785,6 +788,55 @@ async function backNavigation(page) {
   check((await active()) === "menu", where, `Escape on a game screen should go Home, got ${await active()}`);
 }
 
+// Keyboard focus survives the DOM churn of play.
+async function focusRetention(page) {
+  const where = "focus retention";
+  const activeDesc = () => page.evaluate(() => { const a = document.activeElement; return a ? `${a.tagName.toLowerCase()}${a.id ? "#" + a.id : ""}.${[...a.classList].join(".")}` : "none"; });
+
+  // Match: answer correctly by keyboard; the round rebuilds; focus lands
+  // on a choice of the new round, not on <body>.
+  await openScreen(page, { id: "match", kind: "game" });
+  const picked = await page.evaluate(() => {
+    const target = document.querySelector("#matchTarget .match-target-item").textContent.trim();
+    const btn = [...document.querySelectorAll(".match-choice")].find((b) => b.textContent.trim() === target);
+    btn.focus();
+    return btn.getAttribute("aria-label");
+  });
+  const oldChoice = await page.evaluateHandle(() => document.activeElement);
+  await page.keyboard.press("Enter");
+  await page.waitForTimeout(1700);
+  check(await page.evaluate(() => document.activeElement && document.activeElement.classList.contains("match-choice")), where, `Match: after a correct answer focus should be on a new-round choice, got ${await activeDesc()}`);
+  check(await page.evaluate((old) => !document.contains(old), oldChoice), where, "Match: the answered choice should have been replaced (round rebuilt)");
+  check(!!picked, where, "Match: choices should be named");
+
+  // How Many?: same shape, different game.
+  await openScreen(page, { id: "howmany", kind: "game" });
+  await page.evaluate(() => {
+    const n = document.querySelectorAll("#howmanyStage .howmany-item").length;
+    const btn = [...document.querySelectorAll(".howmany-choice")].find((b) => b.textContent.trim() === String(n));
+    btn.focus();
+  });
+  await page.keyboard.press("Enter");
+  await page.waitForTimeout(1700);
+  check(await page.evaluate(() => document.activeElement && document.activeElement.classList.contains("howmany-choice")), where, `How Many?: after a correct answer focus should be on a new-round choice, got ${await activeDesc()}`);
+
+  // Pop!: Enter pops the focused balloon (it is removed); focus moves to
+  // another balloon, or to the screen if none is left — never <body>.
+  await openScreen(page, { id: "pop", kind: "game" });
+  await page.focus(".balloon");
+  await page.keyboard.press("Enter");
+  await page.waitForTimeout(300);
+  check(await page.evaluate(() => { const a = document.activeElement; return a && a !== document.body && (a.classList.contains("balloon") || a.id === "popGame"); }), where, `Pop!: after popping, focus should stay in the game, got ${await activeDesc()}`);
+
+  // Leaving the game must not fight the fixup: Escape goes Home and focus
+  // ends up on the menu, not somewhere inside the stopped game.
+  await openScreen(page, { id: "match", kind: "game" });
+  await page.focus(".match-choice");
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(400);
+  check(await page.evaluate(() => document.querySelector(".screen.active").id === "menu" && document.getElementById("menu").contains(document.activeElement)), where, `leaving a game should leave focus on the menu, got ${await activeDesc()}`);
+}
+
 // ---- main -----------------------------------------------------------------
 
 async function main() {
@@ -828,6 +880,7 @@ async function main() {
   await keyboardPlay(first);
   await comfortSettings(first);
   await backNavigation(first);
+  await focusRetention(first);
 
   await browser.close();
   pageErrors.forEach((m) => fail("page", `uncaught error: ${m}`));
@@ -843,7 +896,7 @@ async function main() {
     failures.forEach((f) => console.log(`  FAIL  ${f.where.padEnd(34)} ${f.what}`));
     process.exit(1);
   }
-  console.log("  behaviour: keyboard nav, settings modal, captions, mode tabs, badges, reduced motion, overlays, tap-instead-of-drag, keyboard play, comfort settings, back navigation — all pass");
+  console.log("  behaviour: keyboard nav, settings modal, captions, mode tabs, badges, reduced motion, overlays, tap-instead-of-drag, keyboard play, comfort settings, back navigation, focus retention — all pass");
 }
 
 main().catch((e) => { console.error(e); process.exit(99); });

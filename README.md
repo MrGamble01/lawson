@@ -147,7 +147,10 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   seed planted, water it", "Hole 4: mole!"). Opening a game moves focus
   onto that screen (a labelled region); Home puts it back on the tile you
   came from. Mode tabs expose their pressed state; Memory cards say
-  "Hidden card" until flipped.
+  "Hidden card" until flipped. When a quiz round rebuilds its choices or a
+  popped balloon disappears, focus moves to the next control in the game
+  instead of falling back to the top of the page, so Tab + Enter play
+  keeps its place.
 - **Captions / live region**: see Settings above.
 - **Reduced motion**: with the OS "reduce motion" preference on, or the
   in-app **Less motion** setting, CSS animations collapse and the sparkle /
