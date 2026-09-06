@@ -105,7 +105,7 @@
     }
 
     // Voice prompt after a beat so it doesn't fight the navigation chime.
-    activeTimer = setTimeout(() => L.say(prompt.textContent), 350);
+    activeTimer = setTimeout(() => L.sayPrompt(prompt.textContent), 350);
   }
 
   function start() {

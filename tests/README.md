@@ -39,7 +39,9 @@ for the best local voice and tried again when the network returns, that a
 line the engine swallows after a cut-off is spoken again with the same
 voice (and the next line waits a beat after a cut-off), that every attempt
 is logged with its start latency and outcome for the Settings voice report,
-that a line spoken right after a chime waits for the chime to ring out, that a screen lock or
+that a line spoken right after a chime waits for the chime to ring out,
+that a quiz prompt is repeated once after a quiet spell and dropped by any
+other line, a screen change, a lock or a muted voice, that a screen lock or
 app switch silences speech and music and that coming back wakes a paused
 speech engine and an interrupted audio context, and that story pages flip
 after the narration finishes — never before the word-count floor, never

@@ -89,8 +89,8 @@
 
   function speakTarget() {
     if (!currentTarget) return;
-    if (mode === "free") L.say(`Find the ${currentTarget.n}!`);
-    else L.say(`Find the ${sayGlyph(currentTarget.glyph)}!`, undefined, `Find the ${currentTarget.glyph}!`);
+    if (mode === "free") L.sayPrompt(`Find the ${currentTarget.n}!`);
+    else L.sayPrompt(`Find the ${sayGlyph(currentTarget.glyph)}!`, undefined, `Find the ${currentTarget.glyph}!`);
   }
 
   function showPrompt() {

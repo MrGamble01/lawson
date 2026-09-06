@@ -110,7 +110,7 @@
       choicesEl.appendChild(btn);
     });
 
-    activeTimer = setTimeout(() => L.say("What comes next?"), 380);
+    activeTimer = setTimeout(() => L.sayPrompt("What comes next?"), 380);
   }
 
   function start() {
