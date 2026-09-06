@@ -797,7 +797,10 @@ function celebrateNewHigh(value) {
   haptic([15, 30, 15, 30, 25]);
   confettiRain(28);
   if (typeof earnSticker === "function") earnSticker("firstHigh");
-  setTimeout(() => say(`New best! ${value}!`), 220);
+  // Games call this just before they speak the cheer; afterSpeech() picks
+  // that line up and says "New best!" once it has finished, never over it
+  // (the old 220 ms timer cut the cheer off at its second word).
+  afterSpeech(() => say(`New best! ${value}!`), { beatMs: 150, minMs: 220, maxMs: 6000 });
   const overlay = document.getElementById("bestOverlay");
   const valEl = document.getElementById("bestValue");
   if (overlay && valEl) {

@@ -322,6 +322,10 @@
   // speech engine never reports the ending finished.
   const END_BEAT_MS = 1500;
   const END_MAX_MS = 9000;
+  // Cancels the "next story" that is waiting for the ending (and, the
+  // first time, the sticker announcement that follows it) to be heard.
+  let cancelNext = null;
+  function clearNext() { if (cancelNext) cancelNext(); cancelNext = null; }
   function pacing(text) {
     const words = text.split(/\s+/).filter(Boolean).length;
     const minMs = Math.max(3800, words * 380 + POKE_BEAT_MS);
@@ -447,16 +451,18 @@
       Promise.resolve(L.say(`The end! ${L.cheer()}`)).then(() => {
         if (!still()) return;
         L.earnSticker && L.earnSticker("storyteller");
-        return Promise.resolve(L.speechDone ? L.speechDone() : null).then(() => {
-          if (!still()) return;
-          clearTimeout(advanceTimer);
-          advanceTimer = setTimeout(nextStory, END_BEAT_MS);
-        });
+        // The announcement starts a beat after the award; afterSpeech()
+        // waits for it (and anything else that starts meanwhile) before
+        // the beat and the next story. The ceiling above still bounds it.
+        clearNext();
+        cancelNext = L.afterSpeech(() => { if (still()) nextStory(); },
+          { beatMs: END_BEAT_MS, minMs: END_BEAT_MS, maxMs: END_MAX_MS });
       });
     }
   }
 
   function nextStory() {
+    clearNext();
     storyIdx = (storyIdx + 1) % STORIES.length;
     pageIdx = 0;
     renderPage();
@@ -468,6 +474,7 @@
   // now stale.
   function freeze() {
     if (!active) return;
+    clearNext();
     clearTimeout(advanceTimer);
     advanceTimer = null;
     pageSeq += 1;
@@ -504,6 +511,7 @@
   }
   function stop() {
     active = false;
+    clearNext();
     atEnd = false;
     clearTimeout(advanceTimer);
     advanceTimer = null;

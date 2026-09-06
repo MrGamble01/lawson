@@ -98,7 +98,8 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   let the cheer — or "try again" — finish before the next prompt, and a
   hub's welcome line is skipped if the kid has already tapped on. A cheer
   starts as its chime rings out rather than underneath it, so the first
-  word is never masked.
+  word is never masked, and "New best!" and "Sticker!" announcements wait
+  for the cheer to finish instead of cutting it off.
 - Locking the iPad or switching apps silences the storyteller and the menu
   music straight away. Coming back wakes the speech and sound engines
   (iOS leaves both muted after a lock or a phone call) and Story Time
