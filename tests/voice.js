@@ -42,7 +42,7 @@ let clockNow = 0;   // virtual Date.now() for afterSpeech()'s floor arithmetic
 const timerDelays = () => [...timers.values()].map(t => t.ms);
 const context = vm.createContext({ window, document, Event, CustomEvent, Date: { now: () => clockNow },
   SpeechSynthesisUtterance: function(text) { this.text = text; },
-  localStorage: { getItem: k => stored.get(k) ?? null, setItem: (k, v) => stored.set(k, v) },
+  localStorage: { getItem: k => stored.get(k) ?? null, setItem: (k, v) => stored.set(k, v), removeItem: k => stored.delete(k) },
   setInterval: () => ++intervalsStarted, clearInterval: () => intervalsCleared++,
   setTimeout: (fn, ms) => { timers.set(++timerId, { fn, ms }); return timerId; }, clearTimeout: id => timers.delete(id) });
 const run = s => vm.runInContext(s, context);
@@ -783,5 +783,53 @@ assert.equal(said.at(-1), 'Pop the N!');
   assert.equal(vm.runInContext('getSpeechSpeed()', fresh2), 'normal', 'a bad saved value falls back to normal');
   run('setSpeechSpeed("normal"); setSoundMuted(false)');
 
-  console.log('PASS: delayed voices, natural pitch, local quality preference, saved choice, language, volume, mute, missing voice fallback, speech completion promise, caption event, hide/show lifecycle, unusable-voice fallback, speechDone, afterSpeech, swallowed utterances, speech diagnostics, chime then cheer, announcements wait their turn, storyteller speed');
+  // ---- The kid's name, as the storyteller should say it ----
+  run('setSpeechVoice("enhanced"); setSoundMuted(true)');
+  const heard = [];
+  const onSay2 = e => heard.push(e.detail);
+  window.addEventListener('lawson:say', onSay2);
+  clockNow = 500000;
+  run('setSpokenName("Siobhan", "Shi-vawn")');
+  speak('say("Great job, Siobhan! You found the cow!")');
+  assert.equal(spoken.at(-1).text, 'Great job, Shi-vawn! You found the cow!', 'the engine gets the spoken form');
+  assert.equal(heard.at(-1).text, 'Great job, Siobhan! You found the cow!', 'captions keep the written name');
+  assert.equal(heard.at(-1).spoken, 'Great job, Shi-vawn! You found the cow!');
+  assert.equal(stored.get('lawson:nameSpoken'), 'Shi-vawn', 'saved on the device');
+  speak('say("Siobhan, Siobhan!")');
+  assert.equal(spoken.at(-1).text, 'Shi-vawn, Shi-vawn!', 'every mention, including at the start');
+  // Whole words only: a short name must not rewrite words that contain it.
+  run('setSpokenName("Al", "Owl")');
+  speak('say("Always fun, Al! Al\'s turn.")');
+  assert.equal(spoken.at(-1).text, 'Always fun, Owl! Owl\'s turn.');
+  // Punctuation in a name is taken literally.
+  run('setSpokenName("D.J.", "Dee Jay")');
+  speak('say("Go, D.J.!")');
+  assert.equal(spoken.at(-1).text, 'Go, Dee Jay!');
+  // Blank, or the same as written, means as written — and the saved form is cleared.
+  run('setSpokenName("Siobhan", "")');
+  speak('say("Hi, Siobhan!")');
+  assert.equal(spoken.at(-1).text, 'Hi, Siobhan!');
+  assert.equal(stored.get('lawson:nameSpoken'), undefined, 'cleared when blank');
+  run('setSpokenName("Siobhan", "Siobhan")');
+  speak('say("Hi, Siobhan!")');
+  assert.equal(spoken.at(-1).text, 'Hi, Siobhan!');
+  // Caption override still wins for the written side.
+  run('setSpokenName("Siobhan", "Shi-vawn")');
+  speak('say("Pop the en, Siobhan!", 0.95, "Pop the N, Siobhan!")');
+  assert.equal(heard.at(-1).text, 'Pop the N, Siobhan!');
+  assert.equal(spoken.at(-1).text, 'Pop the en, Shi-vawn!');
+  // A fresh load restores the saved form (the app supplies the written name).
+  const fresh3 = vm.createContext({ window: { speechSynthesis: synth, AudioContext, addEventListener() {}, dispatchEvent() {} },
+    document: { hidden: false, addEventListener() {} }, Event, CustomEvent, Date: { now: () => clockNow },
+    SpeechSynthesisUtterance: function(text) { this.text = text; },
+    localStorage: { getItem: k => stored.get(k) ?? null, setItem: (k, v) => stored.set(k, v), removeItem: k => stored.delete(k) },
+    setInterval: () => 1, clearInterval() {}, setTimeout: () => 1, clearTimeout() {} });
+  vm.runInContext(source, fresh3);
+  assert.equal(vm.runInContext('getSpokenName()', fresh3), 'Shi-vawn', 'saved form restored on load');
+  vm.runInContext('setSpokenName("Siobhan", getSpokenName())', fresh3);
+  assert.equal(vm.runInContext('spokenForm("Bye, Siobhan!")', fresh3), 'Bye, Shi-vawn!');
+  windowEvents.removeEventListener('lawson:say', onSay2);
+  run('setSpokenName("", ""); setSoundMuted(false)');
+
+  console.log('PASS: delayed voices, natural pitch, local quality preference, saved choice, language, volume, mute, missing voice fallback, speech completion promise, caption event, hide/show lifecycle, unusable-voice fallback, speechDone, afterSpeech, swallowed utterances, speech diagnostics, chime then cheer, announcements wait their turn, storyteller speed, name sounds-like');
 })().catch(e => { console.error(e); process.exit(1); });
