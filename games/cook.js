@@ -87,7 +87,7 @@
       </div>
       <div class="cook-pan" id="cookPan">
         ${PAN_SVG}
-        <div class="cook-pancake" id="cookPancake"></div>
+        <div class="cook-pancake" id="cookPancake" aria-label="Pancake"></div>
         <div class="cook-bubbles" id="cookBubbles"></div>
       </div>
       <div class="cook-plate-area">

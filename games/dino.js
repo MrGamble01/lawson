@@ -57,7 +57,7 @@
     const stage = $("dinoStage");
     stage.innerHTML = `
       <div id="dinoFaceWrap" class="dino-face-wrap">
-        <div id="dinoShower" class="dino-shower" role="button" aria-label="Pull the shower">
+        <div id="dinoShower" class="dino-shower" role="button" tabindex="0" aria-label="Pull the shower">
           <div class="dino-shower-hose"></div>
           <div class="dino-shower-head">🚿</div>
         </div>
