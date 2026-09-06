@@ -53,7 +53,7 @@
 
   function speakClue() {
     if (!answer) return;
-    L.say(`${answer.s} Find the ${answer.n}!`);
+    L.sayPrompt(`${answer.s} Find the ${answer.n}!`);
   }
 
   function newRound() {

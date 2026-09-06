@@ -117,7 +117,7 @@
     });
 
     activeTimer = setTimeout(
-      () => L.say(`How many ${n === 1 ? item.name : item.plural}?`),
+      () => L.sayPrompt(`How many ${n === 1 ? item.name : item.plural}?`),
       450
     );
   }
