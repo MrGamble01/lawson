@@ -99,7 +99,9 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   sticker is announced and the next story begins. The quiz games (Listen,
   Match, Pattern, How Many?, Count, Find It!, Color Mix, Memory) likewise
   let the cheer — or "try again" — finish before the next prompt, and a
-  hub's welcome line is skipped if the kid has already tapped on. A quiz
+  hub's welcome line is skipped if the kid has already tapped on. Pop!
+  and Whack! ABC / 123 hear the popped letter (and its cheer) before the
+  next goal, so a slow voice never loses the name. A quiz
   prompt ("Find the cow!") is repeated once if nothing has happened for
   twelve seconds, so a kid who looked away gets a nudge, never a nag. A cheer
   starts as its chime rings out rather than underneath it, so the first
@@ -196,6 +198,8 @@ Smoke + visual baseline checks for every game live in `tests/`.
 ```bash
 node tests/voice.js                # speech engine + caption event (no browser)
 node tests/story.js                # Story Time pacing (no browser)
+node tests/pop.js                  # Pop! ABC: letter heard before the next goal (no browser)
+node tests/whack.js                # Whack! ABC: hit heard before the next goal (no browser)
 node tests/smoke.js                # errors-free / renders / restart-safe
 node tests/smoke.js --baseline     # + diff every screen against tests/baseline/
 node tests/smoke.js --update-baseline   # accept new baselines after UI changes

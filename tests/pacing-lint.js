@@ -9,6 +9,10 @@
 //    triggers a chime in the same tick. say() waits for a chime that is
 //    already ringing, but a chime triggered after it lands on the first
 //    word. Trigger the chime first; the line waits for it.
+// 3. "Hit, then newTarget()" (this follow-on): a learning-mode hit says
+//    the glyph (and maybe a cheer) and then calls newTarget() in the
+//    same tick. newTarget() speaks the next goal, which cuts the name
+//    off. Pick the next letter now; say it with L.afterSpeech.
 //
 // Run: node tests/pacing-lint.js            (checks every game)
 //      node tests/pacing-lint.js --self-test (checks the checker on fixtures)
@@ -25,6 +29,8 @@ const SPEECH_GATED = /\.then\(/;  // a timer inside a .then() chain waits for sp
 const CHIME = /L\.(?:happySound|buzzSound|stickerJingle|beep)\(/;
 const DEFERRED = /setTimeout\(|setT\(|=>/;   // a chime scheduled for later is not on the first word
 const BRANCH_END = /^\s*(?:\}|else\b)/;       // the say() sits in another branch than what follows
+const NEW_TARGET = /\bnewTarget\s*\(/;       // learning-mode retarget that speaks the next goal
+const SPEECH_WAIT = /afterSpeech\(|\.then\(/;
 
 function check(file, lines) {
   const problems = [];
@@ -36,6 +42,20 @@ function check(file, lines) {
       if (SAY.test(l) || BRANCH_END.test(l) || SPEECH_GATED.test(l) || DEFERRED.test(l)) break;
       if (CHIME.test(l)) {
         problems.push(`${file}:${j + 1}: chime right after the line on ${i + 1} lands on its first word — trigger the chime first, the line waits for it\n    ${l.trim()}`);
+        break;
+      }
+    }
+    // Rule 3: newTarget() still in this handler, not inside a timer and
+    // not after afterSpeech / .then. The next "Pop the X!" / "Whack the
+    // X!" would cut the glyph (or cheer) off.
+    for (let j = i + 1; j <= Math.min(i + WINDOW, lines.length - 1); j++) {
+      const l = lines[j];
+      if (SAY.test(l)) break;
+      if (SPEECH_WAIT.test(l)) break;
+      if (BRANCH_END.test(l)) break;
+      if (/setTimeout\(|setT\(/.test(l) && NEW_TARGET.test(l)) break;
+      if (NEW_TARGET.test(l) && !SPEECH_WAIT.test(l)) {
+        problems.push(`${file}:${j + 1}: newTarget() in the same tick as the line on ${i + 1} — wait with L.afterSpeech so the name is heard\n    ${l.trim()}`);
         break;
       }
     }
@@ -75,6 +95,15 @@ function selfTest() {
   assert.equal(lint('L.say(L.cheer());\nsetTimeout(next, 900);').length, 1);
   assert.equal(lint('L.say(L.cheer());\nL.afterSpeech(next, { minMs: 900 });').length, 0);
   assert.equal(lint('L.say("Try again!");\nsetTimeout(() => el.classList.remove("x"), 300);').length, 0);
+  // Rule 3: newTarget() in the same tick after a name / cheer.
+  assert.equal(lint('L.say("Bee!");\nnewTarget(area);').length, 1);
+  assert.match(lint('L.say("Bee! Yay!");\nburst("⭐");\nb.remove();\nnewTarget(area);')[0], /newTarget\(\) in the same tick as the line on 1/);
+  assert.equal(lint('L.say("Bee!");\nL.afterSpeech(speakTarget, { minMs: 400 });').length, 0);
+  assert.equal(lint('L.say("Bee!");\npickTarget();\nspawn(area, target);\nclearNext();\ncancelNext = L.afterSpeech(speakTarget, { minMs: 400 });').length, 0);
+  // A timer that calls newTarget is a different leftover (not this rule).
+  assert.equal(lint('L.say("Bee!");\nsetTimeout(newTarget, 400);').length, 0);
+  // A named speaker that is not newTarget is a different leftover.
+  assert.equal(lint('L.say("Station 2!");\nboardOrLeave(idx);').length, 0);
   console.log('PASS: pacing lint self-test');
 }
 
@@ -87,6 +116,6 @@ if (require.main === module) {
     console.error('FAIL: speech pacing:\n' + problems.join('\n'));
     process.exit(1);
   }
-  console.log(`PASS: pacing lint — no bare timer right after a cheer, no chime right after a line, in ${files.length} games`);
+  console.log(`PASS: pacing lint — no bare timer right after a cheer, no chime right after a line, no newTarget() in the same tick as a line, in ${files.length} games`);
 }
 module.exports = { check };
