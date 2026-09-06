@@ -14,9 +14,11 @@
 //      focus following), the Settings modal (aria-hidden flips, background
 //      goes inert, Tab is trapped, Escape closes, focus returns), captions /
 //      the live region, mode-tab pressed state, badge names, the
-//      reduced-motion switch for particle effects, and the transient
+//      reduced-motion switch for particle effects, the transient
 //      overlays (first-visit tutorial hint, sticker toast, all-stickers
-//      finale, new-best celebration).
+//      finale, new-best celebration), and the tap alternatives to every
+//      drag (WCAG 2.2 §2.5.7): Garden, Farm, Baby Dino and Ice Cream are
+//      each played through by single taps, and the drag path still works.
 //
 // Run:  node tests/a11y.js
 // Exit: 0 pass · 1 violations or failed checks · 99 runner crashed.
@@ -460,6 +462,93 @@ async function overlays(page) {
   await page.evaluate(() => { document.getElementById("bestOverlay").classList.remove("show"); window.Lawson.resetStickers(); });
 }
 
+// Every drag has a single-tap path (WCAG 2.2 §2.5.7 Dragging Movements).
+async function dragAlternatives(page) {
+  const where = "tap instead of drag";
+  const said = () => page.evaluate(() => window.__said.slice());
+  const waitFor = async (fn, ms = 5000) => {
+    const t0 = Date.now();
+    while (Date.now() - t0 < ms) { if (await page.evaluate(fn)) return true; await page.waitForTimeout(100); }
+    return false;
+  };
+
+  // Garden: tap a pot to plant, tap the can (it is picked up), tap the pot
+  // (it is watered). The pot's own "use the watering can" nag must not fire.
+  await openScreen(page, { id: "garden", kind: "game" });
+  await page.click('.garden-pot-wrap[data-pot="0"]');
+  await page.waitForTimeout(150);
+  check(await page.$eval('.garden-pot-wrap[data-pot="0"] .garden-plant', (el) => el.classList.contains("stage-seeded")), where, "garden: tapping an empty pot should plant a seed");
+  await page.click("#gardenWaterCan");
+  await page.waitForTimeout(100);
+  check(await page.$eval("#gardenWaterCan", (el) => el.classList.contains("held") && el.getAttribute("aria-pressed") === "true"), where, "garden: tapping the can should pick it up (held + aria-pressed)");
+  await page.evaluate(() => { window.__said.length = 0; });
+  await page.click('.garden-pot-wrap[data-pot="0"]');
+  await page.waitForTimeout(450);
+  check(await page.$eval('.garden-pot-wrap[data-pot="0"] .garden-plant', (el) => el.classList.contains("stage-sprout")), where, "garden: tapping the pot with the can held should water it");
+  check(await page.$eval("#gardenWaterCan", (el) => !el.classList.contains("held") && el.getAttribute("aria-pressed") === "false"), where, "garden: the can should be put down after use");
+  check(!(await said()).includes("Use the watering can!"), where, "garden: the pot's own tap handler must be swallowed while the can is in use");
+
+  // The drag path still works: drag the can onto the pot.
+  await page.waitForTimeout(800); // watering cooldown
+  const can = await page.$eval("#gardenWaterCan", (el) => { const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
+  const pot = await page.$eval('.garden-pot-wrap[data-pot="0"]', (el) => { const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
+  await page.mouse.move(can.x, can.y); await page.mouse.down();
+  await page.mouse.move(pot.x, pot.y, { steps: 12 }); await page.waitForTimeout(80);
+  await page.mouse.move(pot.x + 4, pot.y + 4, { steps: 3 }); await page.mouse.up();
+  await page.waitForTimeout(300);
+  check(await page.$eval('.garden-pot-wrap[data-pot="0"] .garden-plant', (el) => el.classList.contains("stage-young")), where, "garden: dragging the can over the pot should still water it");
+  check(await page.$eval("#gardenWaterCan", (el) => !el.classList.contains("held")), where, "garden: a drag must not leave the can picked up");
+
+  // Farm: tap the bucket, tap the cow → milk; the cow's own moo is swallowed.
+  await openScreen(page, { id: "farm", kind: "game" });
+  await page.evaluate(() => { window.__said.length = 0; });
+  await page.click("#farmBucket");
+  await page.waitForTimeout(100);
+  check(await page.$eval("#farmBucket", (el) => el.getAttribute("aria-pressed") === "true"), where, "farm: tapping a tool should pick it up");
+  await page.click("#farmCow");
+  await page.waitForTimeout(400);
+  const farmSaid = await said();
+  check(farmSaid.includes("Squirt squirt!"), where, `farm: bucket then cow should milk the cow, said ${JSON.stringify(farmSaid)}`);
+  check(!farmSaid.some((s) => /moo/i.test(s)), where, "farm: the cow's own tap must be swallowed while a tool is in use");
+  check(await page.$eval("#farmScoreVal", (el) => el.textContent === "1"), where, "farm: the care counter should bump");
+  // Tapping the tool again puts it down; Escape and leaving the screen do too.
+  await page.click("#farmShears"); await page.click("#farmShears");
+  await page.waitForTimeout(100);
+  check(await page.$eval("#farmShears", (el) => el.getAttribute("aria-pressed") === "false" && !el.classList.contains("held")), where, "farm: tapping a held tool again should put it down");
+  await page.click("#farmShears"); await page.keyboard.press("Escape");
+  check(await page.$eval("#farmShears", (el) => !el.classList.contains("held")), where, "farm: Escape should put the tool down");
+  await page.click("#farmRod");
+  await page.click("#farmGame .home-btn");
+  await page.waitForTimeout(300);
+  check(await page.evaluate(() => !document.querySelector(".held")), where, "farm: leaving the screen should put the tool down");
+  // Keyboard: Enter on a tool picks it up; activating a target uses it there.
+  await openScreen(page, { id: "farm", kind: "game" });
+  await page.evaluate(() => { window.__said.length = 0; });
+  await page.focus("#farmCarrot"); await page.keyboard.press("Enter");
+  await page.waitForTimeout(100);
+  check(await page.$eval("#farmCarrot", (el) => el.getAttribute("aria-pressed") === "true"), where, "farm: Enter on a tool should pick it up");
+  await page.evaluate(() => document.getElementById("farmHorse").click()); // keyboard-style activation (detail 0)
+  await page.waitForTimeout(300);
+  check((await said()).includes("Munch munch!"), where, "farm: activating the horse with the carrot held should feed it");
+
+  // Baby Dino: a tap on each tool performs the whole motion.
+  await openScreen(page, { id: "dino", kind: "game" });
+  const phase = () => page.evaluate(() => document.body.dataset.dinoPhase);
+  check((await phase()) === "soap", where, `dino: should start in the soap phase, got ${await phase()}`);
+  await page.click("#dinoSoap");
+  check(await waitFor(() => document.body.dataset.dinoPhase === "shower", 6000), where, "dino: tapping the soap should lather him and move to the shower phase");
+  await page.click("#dinoShower");
+  check(await waitFor(() => document.body.dataset.dinoPhase === "towel", 6000), where, "dino: tapping the shower should rinse him and move to the towel phase");
+  await page.click("#dinoTowel");
+  check(await waitFor(() => document.body.dataset.dinoPhase === "happy", 6000), where, "dino: tapping the towel should dry him");
+
+  // Ice Cream: tapping a tub adds that scoop.
+  await openScreen(page, { id: "icecream", kind: "game" });
+  await page.click(".icecream-tub");
+  await page.waitForTimeout(200);
+  check((await page.$$eval(".icecream-scoop", (els) => els.length)) === 1, where, "ice cream: tapping a tub should add its scoop to the cone");
+}
+
 // ---- main -----------------------------------------------------------------
 
 async function main() {
@@ -499,6 +588,7 @@ async function main() {
   await modeTabsAndBadges(first);
   await reducedMotion(first);
   await overlays(first);
+  await dragAlternatives(first);
 
   await browser.close();
   pageErrors.forEach((m) => fail("page", `uncaught error: ${m}`));
@@ -514,7 +604,7 @@ async function main() {
     failures.forEach((f) => console.log(`  FAIL  ${f.where.padEnd(34)} ${f.what}`));
     process.exit(1);
   }
-  console.log("  behaviour: keyboard nav, settings modal, captions, mode tabs, badges, reduced motion, overlays — all pass");
+  console.log("  behaviour: keyboard nav, settings modal, captions, mode tabs, badges, reduced motion, overlays, tap-instead-of-drag — all pass");
 }
 
 main().catch((e) => { console.error(e); process.exit(99); });

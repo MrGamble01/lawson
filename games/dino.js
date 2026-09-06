@@ -80,6 +80,7 @@
 
   function enterPhase(p) {
     phase = p;
+    autoBusy = false;
     document.body.dataset.dinoPhase = p;
     const prompt = $("dinoPrompt");
     if (p === "soap") {
@@ -101,10 +102,12 @@
   function setupSoap() {
     const soap = $("dinoSoap");
     let dragging = false;
+    let down = null;
 
     function onDown(e) {
       if (phase !== "soap") return;
       dragging = true;
+      down = { x: e.clientX, y: e.clientY };
       soap.setPointerCapture?.(e.pointerId);
       soap.classList.add("grabbed");
       e.preventDefault();
@@ -117,11 +120,14 @@
         maybeDropLather(e.clientX, e.clientY, faceRect);
       }
     }
-    function onUp() {
+    function onUp(e) {
       if (!dragging) return;
       dragging = false;
       soap.classList.remove("grabbed");
       releaseFloating(soap);
+      // A tap (no drag) scrubs for him — see autoScrub.
+      if (down && e && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 8) { down = null; autoScrub(); return; }
+      down = null;
       if (lather.length >= LATHER_GOAL && phase === "soap") {
         setT(280, () => enterPhase("shower"));
       }
@@ -130,6 +136,47 @@
     soap.addEventListener("pointermove", onMove);
     soap.addEventListener("pointerup", onUp);
     soap.addEventListener("pointercancel", onUp);
+    soap.addEventListener("click", (e) => { if (e.detail === 0) autoScrub(); }); // keyboard
+  }
+
+  // Tap alternative to the soap drag (WCAG 2.2 §2.5.7): the soap sweeps
+  // itself over his face in a zigzag, lathering as it goes, until the
+  // lather goal is met — the same lather bubbles a drag would leave.
+  let autoBusy = false;
+  function autoScrub() {
+    if (phase !== "soap" || autoBusy) return;
+    const soap = $("dinoSoap"), wrap = $("dinoFaceWrap");
+    if (!soap || !wrap) return;
+    autoBusy = true;
+    soap.classList.add("grabbed");
+    // 5×5 zigzag, 17.5% apart: well over LATHER_MIN_DIST_PCT, so every dab
+    // lands (25 ≥ LATHER_GOAL) and one pass is enough.
+    const path = [];
+    for (let row = 0; row < 5; row++) {
+      for (let col = 0; col < 5; col++) {
+        const c = row % 2 ? 4 - col : col;
+        path.push({ px: 15 + c * 17.5, py: 15 + row * 17.5 });
+      }
+    }
+    let i = 0;
+    const step = () => {
+      if (phase !== "soap") { finish(); return; }
+      const r = wrap.getBoundingClientRect();
+      const p = path[i % path.length];
+      const x = r.left + (p.px / 100) * r.width, y = r.top + (p.py / 100) * r.height;
+      moveFloating(soap, x, y);
+      lastLatherTime = 0; // each step is a deliberate dab
+      maybeDropLather(x, y, r);
+      i += 1;
+      if (lather.length >= LATHER_GOAL || i >= path.length * 4) {
+        finish();
+        setT(280, () => { if (phase === "soap") enterPhase("shower"); });
+        return;
+      }
+      setT(90, step);
+    };
+    const finish = () => { autoBusy = false; soap.classList.remove("grabbed"); releaseFloating(soap); };
+    step();
   }
 
   function maybeDropLather(clientX, clientY, faceRect) {
@@ -160,10 +207,13 @@
     let dragging = false;
     let startY = 0;
 
+    let startX = 0;
+
     function onDown(e) {
       if (phase !== "shower" || showerActive) return;
       dragging = true;
       startY = e.clientY;
+      startX = e.clientX;
       shower.setPointerCapture?.(e.pointerId);
       e.preventDefault();
     }
@@ -173,9 +223,11 @@
       shower.style.transform = `translateY(${dy}px)`;
       if (dy >= SHOWER_PULL_THRESHOLD && !showerActive) startShower();
     }
-    function onUp() {
+    function onUp(e) {
       if (!dragging) return;
       dragging = false;
+      // A tap (no pull) turns the shower on too.
+      if (!showerActive && e && Math.hypot(e.clientX - startX, e.clientY - startY) < 8) { startShower(); return; }
       if (!showerActive) {
         shower.style.transform = "";
       }
@@ -184,6 +236,7 @@
     shower.addEventListener("pointermove", onMove);
     shower.addEventListener("pointerup", onUp);
     shower.addEventListener("pointercancel", onUp);
+    shower.addEventListener("click", (e) => { if (e.detail === 0 && phase === "shower" && !showerActive) startShower(); });
   }
 
   function startShower() {
@@ -244,10 +297,12 @@
   function setupTowel() {
     const towel = $("dinoTowel");
     let dragging = false;
+    let down = null;
 
     function onDown(e) {
       if (phase !== "towel") return;
       dragging = true;
+      down = { x: e.clientX, y: e.clientY };
       towel.setPointerCapture?.(e.pointerId);
       towel.classList.add("grabbed");
       e.preventDefault();
@@ -257,16 +312,42 @@
       moveFloating(towel, e.clientX, e.clientY);
       wipeNearby(e.clientX, e.clientY);
     }
-    function onUp() {
+    function onUp(e) {
       if (!dragging) return;
       dragging = false;
       towel.classList.remove("grabbed");
       releaseFloating(towel);
+      // A tap (no drag) dries him — see autoDry.
+      if (down && e && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 8) autoDry();
+      down = null;
     }
     towel.addEventListener("pointerdown", onDown);
     towel.addEventListener("pointermove", onMove);
     towel.addEventListener("pointerup", onUp);
     towel.addEventListener("pointercancel", onUp);
+    towel.addEventListener("click", (e) => { if (e.detail === 0) autoDry(); }); // keyboard
+  }
+
+  // Tap alternative to the towel drag: the towel visits each droplet in
+  // turn and wipes it, ending the phase exactly as a drag would.
+  function autoDry() {
+    if (phase !== "towel" || autoBusy) return;
+    const towel = $("dinoTowel"), wrap = $("dinoFaceWrap");
+    if (!towel || !wrap) return;
+    autoBusy = true;
+    towel.classList.add("grabbed");
+    const finish = () => { autoBusy = false; towel.classList.remove("grabbed"); releaseFloating(towel); };
+    const step = () => {
+      const d = droplets[0];
+      if (!d || phase !== "towel") { finish(); return; }
+      const r = wrap.getBoundingClientRect();
+      const x = r.left + (d.x / 100) * r.width, y = r.top + (d.y / 100) * r.height;
+      moveFloating(towel, x, y);
+      wipeNearby(x, y);
+      if (phase !== "towel" || droplets.length === 0) { finish(); return; }
+      setT(130, step);
+    };
+    step();
   }
 
   function wipeNearby(clientX, clientY) {

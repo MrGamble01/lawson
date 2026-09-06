@@ -25,10 +25,11 @@ behind the **More** card.
 - **Find It!** — hidden-object hunt across themed scenes (farm, ocean,
   park, sky). Free / ABC / 123 modes.
 - **Cook!** — pancakes: pour batter, watch it bubble, flip, plate, stack.
-- **Baby Dino** — bath time: drag soap to lather, pull the shower to
-  rinse, drag the towel to dry. Hearts when he's clean.
-- **Garden!** — plant a seed, drag the watering can to grow it, harvest
-  the fruit. 12 plants; bees, butterflies, a bird, surprise rain, and a
+- **Baby Dino** — bath time: drag (or tap) soap to lather, pull (or tap)
+  the shower to rinse, drag (or tap) the towel to dry. Hearts when he's
+  clean.
+- **Garden!** — plant a seed, drag the watering can (or tap the can, then
+  the pot) to grow it, harvest the fruit. 12 plants; bees, butterflies, a bird, surprise rain, and a
   slow day/night cycle.
 
 ## More → hubs
@@ -50,9 +51,10 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   decorated scene is saved and restored between visits.
 - **Farm** — care for animals: milk the cow, shear the sheep, feed the
   pig/horse, fetch with the dog, collect eggs, pick apples, fish, drive
-  the tractor. Day/night + weather.
-- **Ice Cream** — build a sundae: drag scoops onto a cone, add toppings,
-  tap Eat!
+  the tractor. Drag a tool onto an animal, or tap the tool and then the
+  animal. Day/night + weather.
+- **Ice Cream** — build a sundae: drag scoops onto a cone (or tap a tub),
+  add toppings, tap Eat!
 - **Train** — drive a chuffing train between three stations; passengers
   hop on and off.
 - **Music Studio** — drum kit, rainbow xylophone, jingle bells, plus a
@@ -119,6 +121,13 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   skipped entirely.
 - **Contrast**: all text meets WCAG AA (4.5:1) in light and dark mode —
   checked on every screen by `tests/a11y.js` with axe-core.
+- **Tap instead of drag** (WCAG 2.2 §2.5.7): every drag has a single-tap
+  path. In Garden and Farm, tap a tool to pick it up (it lifts and bobs),
+  then tap the plant or animal — the tool hops over, does its job and
+  snaps back; tap it again, press Escape or leave the screen to put it
+  down. In Baby Dino a tap on the soap, shower or towel performs the
+  whole motion; in Ice Cream a tap on a tub scoops that flavour straight
+  onto the cone. Enter on a focused tool, then on a target, does the same.
 - **Touch targets**: every control meets WCAG 2.2's 24px target-size rule
   at phone and iPad sizes, and nothing (mascots, toasts, captions) ever
   floats on top of Home, the tabs, the badges or the tiles.

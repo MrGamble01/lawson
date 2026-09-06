@@ -447,11 +447,7 @@
       can.style.top    = (e.clientY - can.offsetHeight / 2) + "px";
       can.style.right  = "auto";
       can.style.bottom = "auto";
-      spawnWaterDrops(e.clientX, e.clientY);
-      pots.forEach((pot) => {
-        const r = pot.wrap.getBoundingClientRect();
-        if (inside(e.clientX, e.clientY, r)) tryWater(pot);
-      });
+      waterAt(e.clientX, e.clientY);
     }
     function onUp() {
       if (!dragging) return;
@@ -467,6 +463,17 @@
     can.addEventListener("pointermove",   onMove);
     can.addEventListener("pointerup",     onUp);
     can.addEventListener("pointercancel", onUp);
+    // No-drag path: tap the can, then tap a plant.
+    L.tapToUse(can, { onUse: waterAt, hint: "Now tap a plant!" });
+  }
+
+  // Pour wherever the can is: drops fall and any pot under it grows.
+  function waterAt(x, y) {
+    spawnWaterDrops(x, y);
+    pots.forEach((pot) => {
+      const r = pot.wrap.getBoundingClientRect();
+      if (inside(x, y, r)) tryWater(pot);
+    });
   }
 
   function inside(x, y, r) {
