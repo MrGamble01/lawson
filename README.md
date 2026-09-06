@@ -72,7 +72,9 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   voices with enhanced quality when available, using their natural pitch.
   The choice is saved on this device. Available voices depend on the device;
   voices marked online require a connection. On iPad, additional voices can
-  be downloaded in the device's accessibility speech settings.
+  be downloaded in the device's accessibility speech settings. Story Time
+  paces its pages on the chosen voice: each page turns once the line has
+  actually been read, plus a beat to poke the scene.
 - **Volume** — one master slider for all app audio
 - Music on the menu (on/off)
 - Dark mode

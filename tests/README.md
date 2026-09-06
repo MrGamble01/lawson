@@ -5,6 +5,8 @@ Smoke + visual baseline checks for every game and key screen.
 ## Run
 
 ```bash
+node tests/voice.js                # speech: voice choice, mute/volume, completion promise (no browser)
+node tests/story.js                # Story Time pacing on real narration end (no browser)
 node tests/smoke.js                # smoke pass only (errors-free / screen renders / restart safe)
 node tests/smoke.js --baseline     # smoke + diff every screen against tests/baseline/
 node tests/smoke.js --update-baseline   # write fresh baseline PNGs (use after intentional visual changes)
@@ -20,6 +22,14 @@ Exit codes:
 | 99   | Test runner crashed                                  |
 
 ## What it checks
+
+`tests/voice.js` and `tests/story.js` are plain Node scripts with no
+Playwright dependency. They load `lib/audio.js` / `games/story.js` into a
+`vm` sandbox with a fake speech engine, DOM and clock, so they check exact
+behaviour: which voice gets picked, that `say()` resolves when a line
+really ends (or is interrupted, muted, or silenced), and that story pages
+flip after the narration finishes — never before the word-count floor,
+never after the no-`end`-event ceiling.
 
 For each of the 24 games (`tests/smoke.js: GAMES`):
 

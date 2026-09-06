@@ -46,4 +46,55 @@ assert.equal(spoken.length, count);
 run('setVoiceMuted(false); setVolume(0); say("Quiet"); unlockSpeech()');
 assert.equal(spoken.length, count);
 assert.ok(canceled > 0);
-console.log('PASS: delayed voices, natural pitch, local quality preference, saved choice, language, volume, mute, missing voice fallback');
+
+// say() reports when a line has actually finished, so games can pace on
+// real narration instead of guessing from word count.
+(async () => {
+  const settled = [];
+  const track = (p, tag) => p.then(() => settled.push(tag));
+  const flush = () => new Promise(r => setImmediate(r));
+  run('setVolume(1)');
+  // Nothing spoken (muted) still resolves, straight away.
+  run('setVoiceMuted(true)');
+  track(run('say("Quiet")'), 'muted');
+  await flush();
+  assert.deepEqual(settled, ['muted']);
+  run('setVoiceMuted(false)');
+  // Pending until the engine says the line ended.
+  track(run('say("First line")'), 'first');
+  await flush();
+  assert.deepEqual(settled, ['muted']);
+  spoken.at(-1).onend();
+  await flush();
+  assert.deepEqual(settled, ['muted', 'first']);
+  // A later say() cuts the previous line short and releases its waiter,
+  // even if the engine never fires end/error for the cancelled utterance.
+  track(run('say("Second line")'), 'second');
+  const second = spoken.at(-1);
+  track(run('say("Third line")'), 'third');
+  await flush();
+  assert.deepEqual(settled, ['muted', 'first', 'second']);
+  // A stale end event from the interrupted line must not settle the new one.
+  second.onend();
+  await flush();
+  assert.deepEqual(settled, ['muted', 'first', 'second']);
+  spoken.at(-1).onerror();
+  await flush();
+  assert.deepEqual(settled, ['muted', 'first', 'second', 'third']);
+  // Muting or silencing mid-line releases the waiter too.
+  track(run('say("Fourth line")'), 'fourth');
+  run('setVoiceMuted(true)');
+  await flush();
+  assert.deepEqual(settled.at(-1), 'fourth');
+  run('setVoiceMuted(false)');
+  track(run('say("Fifth line")'), 'fifth');
+  run('setVolume(0)');
+  await flush();
+  assert.deepEqual(settled.at(-1), 'fifth');
+  run('setVolume(1)');
+  track(run('say("Sixth line")'), 'sixth');
+  run('cancelSpeech()');
+  await flush();
+  assert.deepEqual(settled.at(-1), 'sixth');
+  console.log('PASS: delayed voices, natural pitch, local quality preference, saved choice, language, volume, mute, missing voice fallback, speech completion promise');
+})().catch(e => { console.error(e); process.exit(1); });
