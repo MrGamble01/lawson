@@ -740,7 +740,7 @@ function boboCheer() {
 // the utilities below. Keeping each game self-contained makes it easy to
 // tweak one without touching the others.
 window.Lawson = {
-  say, cancelSpeech, speechDone, afterSpeech, beep, happySound, buzzSound, haptic, sparkleAt, onTap, onTapOnce, pointOf, bumpBadge, show,
+  say, cancelSpeech, speechDone, afterSpeech, speechLog, speechStats, beep, happySound, buzzSound, haptic, sparkleAt, onTap, onTapOnce, pointOf, bumpBadge, show,
   audioCtx, unlockAudio, masterGain, setVolume, getVolume, isAudioHidden,
   getHighScore, setHighScore, bumpHighScore, tryNewHighScore,
   setVoiceMuted, setSoundMuted, isVoiceMuted, isSoundMuted,
@@ -1185,7 +1185,43 @@ document.addEventListener("touchmove", (e) => {
       : VOICE_HINT;
   }
   voiceChoice.addEventListener("change", () => setSpeechVoice(voiceChoice.value));
-  voicePreview.addEventListener("click", () => say("Hi! Let's play and discover something wonderful together."));
+  // The preview doubles as an on-device check of the speech timings: once
+  // the line has settled, say how long the engine took to start and how
+  // the line ended, plus a tally of the recent lines (story pages, cheers).
+  const voiceReport = document.getElementById("settingsVoiceReport");
+  const sec = (ms) => (ms == null ? "? s" : `${(ms / 1000).toFixed(1)} s`);
+  function describeAttempt(e) {
+    const who = e.voice || "the default voice";
+    const again = e.stage === 1 ? " (read again after a swallowed start)" : e.stage === 2 ? " (stand-in voice)" : "";
+    if (e.outcome === "ended") return `${who}${again}: started in ${sec(e.startMs)}, finished in ${sec(e.endMs)}.`;
+    if (e.outcome === "dropped") return `${who}${again}: never started within ${sec(e.endMs)}.`;
+    if (e.outcome === "cut") return `${who}${again}: cut off after ${sec(e.endMs)}.`;
+    if (/^error:/.test(e.outcome)) return `${who}${again}: failed (${e.outcome.slice(6)}) after ${sec(e.endMs)}.`;
+    return `${who}${again}: still going.`;
+  }
+  function voiceReportText() {
+    const log = speechLog();
+    if (!log.length) return "";
+    const st = speechStats();
+    let text = describeAttempt(log[log.length - 1]);
+    if (st.lines > 1) {
+      const parts = [];
+      if (st.started) parts.push(`start ${sec(st.startMedianMs)} typical, ${sec(st.startMaxMs)} at most`);
+      if (st.dropped) parts.push(`${st.dropped} swallowed`);
+      if (st.reread) parts.push(`${st.reread} read again`);
+      if (st.fallbacks) parts.push(`${st.fallbacks} by a stand-in voice`);
+      if (st.errors) parts.push(`${st.errors} failed`);
+      if (st.cut) parts.push(`${st.cut} cut off`);
+      text += ` Last ${st.lines} lines: ${parts.join(", ")}.`;
+    }
+    return text;
+  }
+  voicePreview.addEventListener("click", () => {
+    if (voiceReport) voiceReport.textContent = "Listening…";
+    Promise.resolve(say("Hi! Let's play and discover something wonderful together.")).then(() => {
+      if (voiceReport) voiceReport.textContent = voiceReportText();
+    });
+  });
   window.addEventListener("lawson:voiceschanged", refreshVoices);
   const soundTgl   = document.getElementById("settingsSound");
   const captionsTgl = document.getElementById("settingsCaptions");

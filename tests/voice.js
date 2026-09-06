@@ -530,5 +530,112 @@ assert.equal(said.at(-1), 'Pop the N!');
   assert.equal(settled.at(-1), 'remote-hang');
   window.dispatchEvent(new Event('online'));
 
-  console.log('PASS: delayed voices, natural pitch, local quality preference, saved choice, language, volume, mute, missing voice fallback, speech completion promise, caption event, hide/show lifecycle, unusable-voice fallback, speechDone, afterSpeech, swallowed utterances');
+  // ---- Speech diagnostics: what the Settings voice report reads ----
+  run('setSpeechVoice("enhanced")');
+  const logLen = () => run('speechLog().length');
+  const lastEntry = () => run('speechLog().at(-1)');
+  // The buffer is a ring, so look entries up by text + stage, not index.
+  const entry = (text, stage = 0) => run(`speechLog().find(e => e.text === ${JSON.stringify(text)} && e.stage === ${stage})`);
+  // A normal line: start latency and end recorded.
+  clockNow = 10000;
+  run('say("Report line")');
+  assert.equal(lastEntry().outcome, 'pending');
+  assert.equal(lastEntry().text, 'Report line');
+  assert.equal(lastEntry().voice, 'Samantha Enhanced');
+  assert.equal(lastEntry().local, true);
+  assert.equal(lastEntry().stage, 0);
+  clockNow = 10400;
+  spoken.at(-1).onstart();
+  assert.equal(lastEntry().startMs, 400, 'start latency measured');
+  clockNow = 12600;
+  spoken.at(-1).onend();
+  await flush();
+  assert.equal(lastEntry().outcome, 'ended');
+  assert.equal(lastEntry().endMs, 2600);
+  // A line cut off by the next one is closed as "cut" even if the engine
+  // reports nothing.
+  clockNow = 20000;
+  run('say("Cut by next")');
+  clockNow = 20300;
+  spoken.at(-1).onstart();
+  clockNow = 21000;
+  run('say("The next one")');       // deferred 60 ms (cut-off), no engine echo for the old line
+  assert.equal(entry('Cut by next').outcome, 'cut');
+  assert.equal(entry('Cut by next').endMs, 1000);
+  fireDeferred();
+  assert.equal(lastEntry().text, 'The next one');
+  assert.equal(lastEntry().delayMs, 60, 'the beat after a cut-off is recorded');
+  assert.equal(lastEntry().outcome, 'pending');
+  spoken.at(-1).onstart(); spoken.at(-1).onend();
+  await flush();
+  // A swallowed line: the first attempt is "dropped", the re-read is stage 1.
+  clockNow = 30000;
+  run('say("Swallowed report")');
+  clockNow = 32500;
+  fireWatchdogs(); fireDeferred();
+  assert.equal(entry('Swallowed report').outcome, 'dropped');
+  assert.equal(entry('Swallowed report').endMs, 2500);
+  assert.equal(lastEntry().stage, 1, 're-read logged as stage 1');
+  assert.equal(lastEntry().voice, 'Samantha Enhanced');
+  spoken.at(-1).onstart(); spoken.at(-1).onend();
+  await flush();
+  assert.equal(lastEntry().outcome, 'ended');
+  // A voice error and its stand-in are stage 0 error + stage 2.
+  run('setSpeechVoice("online")');
+  run('say("Stand-in report")');
+  spoken.at(-1).onstart();
+  spoken.at(-1).onerror({ error: 'network' });
+  await flush();
+  fireDeferred();
+  assert.equal(entry('Stand-in report').outcome, 'error:network');
+  assert.equal(lastEntry().stage, 2);
+  assert.equal(lastEntry().voice, 'Samantha Enhanced');
+  spoken.at(-1).onstart(); spoken.at(-1).onend();
+  await flush();
+  window.dispatchEvent(new Event('online'));
+  // The tally the report shows agrees with the log (which still holds lines
+  // from the sections above — it is a ring of the last 20).
+  const st = run('speechStats()');
+  const done = run('speechLog()').filter(e => e.outcome !== 'pending');
+  const count = pred => done.filter(pred).length;
+  assert.equal(st.lines, done.length, 'all logged lines are settled');
+  assert.equal(st.lines, logLen());
+  assert.equal(st.ended, count(e => e.outcome === 'ended'));
+  assert.equal(st.cut, count(e => e.outcome === 'cut'));
+  assert.equal(st.dropped, count(e => e.outcome === 'dropped'));
+  assert.equal(st.errors, count(e => /^error:/.test(e.outcome)));
+  assert.equal(st.reread, count(e => e.stage === 1));
+  assert.equal(st.fallbacks, count(e => e.stage === 2));
+  assert.equal(st.started, count(e => e.startMs != null));
+  assert.ok(st.dropped >= 1 && st.reread >= 1 && st.fallbacks >= 1 && st.errors >= 1 && st.cut >= 1 && st.ended >= 4);
+  const starts = done.filter(e => e.startMs != null).map(e => e.startMs).sort((a, b) => a - b);
+  assert.equal(st.startMedianMs, starts[Math.floor(starts.length / 2)]);
+  assert.equal(st.startMaxMs, starts[starts.length - 1]);
+  // No English voice at all: the line still gets a watchdog, settles as
+  // "dropped" with nothing to retry, and the voice list stays untouched.
+  const savedVoices = voices;
+  voices = [];
+  events.dispatchEvent(new Event('voiceschanged'));
+  assert.equal(run('preferredVoice'), null);
+  track(run('say("Voiceless")'), 'voiceless');
+  assert.equal(spoken.at(-1).voice, undefined);
+  assert.deepEqual(timerDelays(), [2500], 'watchdog armed without a voice');
+  const before3 = spoken.length;
+  fireWatchdogs(); fireDeferred();
+  await flush();
+  assert.equal(settled.at(-1), 'voiceless', 'settled, no hang');
+  assert.equal(spoken.length, before3, 'nothing to retry with');
+  assert.equal(lastEntry().outcome, 'dropped');
+  assert.equal(lastEntry().voice, '');
+  voices = savedVoices;
+  events.dispatchEvent(new Event('voiceschanged'));
+  // speechLog() hands out copies, and the buffer is capped.
+  run('speechLog()[0].outcome = "tampered"');
+  assert.notEqual(run('speechLog()[0].outcome'), 'tampered');
+  for (let i = 0; i < 30; i++) { speak(`say("Filler ${i}")`); spoken.at(-1).onend(); }
+  await flush();
+  assert.equal(logLen(), 20, 'ring buffer keeps the last 20');
+  assert.equal(lastEntry().text, 'Filler 29');
+
+  console.log('PASS: delayed voices, natural pitch, local quality preference, saved choice, language, volume, mute, missing voice fallback, speech completion promise, caption event, hide/show lifecycle, unusable-voice fallback, speechDone, afterSpeech, swallowed utterances, speech diagnostics');
 })().catch(e => { console.error(e); process.exit(1); });
