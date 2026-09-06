@@ -127,9 +127,17 @@
     });
     svg.appendChild(poly);
 
+    // Each dot is a keyboard target (onTap upgrades SVG groups to buttons);
+    // its name says whether it is done, next, or still waiting.
+    const dotEls = [];
+    const labelDots = () => dotEls.forEach((el, idx) => {
+      const n = idx + 1;
+      el.setAttribute("aria-label", n < nextDot ? `Dot ${n}, connected` : n === nextDot ? `Dot ${n}, next` : `Dot ${n}`);
+    });
     p.dots.forEach((d, i) => {
       const num = i + 1;
       const g = svgEl("g", { transform: `translate(${d.x},${d.y})`, class: "dot" });
+      dotEls.push(g);
       const circle = svgEl("circle", { r: "22", fill: "#fff", stroke: "#ff4081", "stroke-width": "4" });
       const label  = svgEl("text", {
         "text-anchor": "middle", "dominant-baseline": "central",
@@ -166,12 +174,14 @@
         L.beep(380 + num * 25, 0.1, "triangle");
         L.say(String(num));
         nextDot += 1;
+        labelDots();
 
         if (nextDot > p.dots.length) {
           advanceTimer = setTimeout(() => winPuzzle(p, svg), 450);
         }
       });
     });
+    labelDots();
 
     stage.appendChild(svg);
     L.say(`Connect the dots! Start with 1.`);

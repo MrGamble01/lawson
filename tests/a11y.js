@@ -26,7 +26,10 @@
 //      skips particle bursts without the OS setting (WCAG 2.2.2); and back
 //      navigation: the browser Back button (Android Back, iOS swipe-back)
 //      and Escape step back inside the app — game → hub → menu, or close
-//      Settings — while Home unwinds the history it skips.
+//      Settings — while Home unwinds the history it skips; and SVG +
+//      Story keyboard play: Dots' SVG dots are named buttons that say who
+//      is next and connect on Enter; Story Time turns the page from a
+//      real Next button or Enter on the screen, never from a character.
 //
 // Run:  node tests/a11y.js
 // Exit: 0 pass · 1 violations or failed checks · 99 runner crashed.
@@ -785,6 +788,48 @@ async function backNavigation(page) {
   check((await active()) === "menu", where, `Escape on a game screen should go Home, got ${await active()}`);
 }
 
+// Dots (SVG targets) and Story Time (whole-screen tap) by keyboard.
+async function svgAndStoryKeyboard(page) {
+  const where = "dots + story keyboard";
+  const said = () => page.evaluate(() => window.__said.slice());
+
+  await openScreen(page, { id: "dots", kind: "game" });
+  const dots = await page.$$eval(".dots-svg g.dot", (els) => els.map((g) => ({ role: g.getAttribute("role"), tab: g.tabIndex, label: g.getAttribute("aria-label"), done: g.classList.contains("done") })));
+  check(dots.length >= 3, where, `dots: expected a puzzle with dots, got ${dots.length}`);
+  check(dots.every((d) => d.role === "button" && d.tab === 0 && /^Dot \d+/.test(d.label || "")), where, `dots: every dot should be a named, focusable button, got ${JSON.stringify(dots.slice(0, 3))}`);
+  check(dots[0] && /next$/.test(dots[0].label), where, `dots: dot 1 should be announced as next, got ${JSON.stringify(dots[0] && dots[0].label)}`);
+  // Wrong dot first: not connected, and the right one is called out.
+  await page.evaluate(() => { window.__said.length = 0; document.querySelector(".dots-svg g.dot:nth-of-type(3)").focus(); });
+  await page.keyboard.press("Enter");
+  await page.waitForTimeout(150);
+  check(await page.$eval(".dots-svg g.dot:nth-of-type(3)", (g) => !g.classList.contains("done")), where, "dots: Enter on the wrong dot must not connect it");
+  check((await said()).includes("Find 1!"), where, `dots: the wrong dot should call out the right one, said ${JSON.stringify(await said())}`);
+  // Right dot: connected, names update.
+  await page.evaluate(() => document.querySelector(".dots-svg g.dot:nth-of-type(1)").focus());
+  await page.keyboard.press("Enter");
+  await page.waitForTimeout(150);
+  const after = await page.$$eval(".dots-svg g.dot", (els) => els.slice(0, 2).map((g) => ({ done: g.classList.contains("done"), label: g.getAttribute("aria-label") })));
+  check(after[0].done && /connected$/.test(after[0].label), where, `dots: Enter on dot 1 should connect it and say so, got ${JSON.stringify(after[0])}`);
+  check(/next$/.test(after[1].label), where, `dots: dot 2 should now be announced as next, got ${JSON.stringify(after[1])}`);
+
+  // Story Time.
+  await openScreen(page, { id: "story", kind: "game" });
+  const counter = () => page.$eval("#storyCounter", (el) => el.textContent.trim());
+  check((await counter()) === "1 / 4", where, `story: should open on page 1, got ${await counter()}`);
+  check(await page.$eval("#storyNext", (b) => b.tagName === "BUTTON" && /[\p{L}]/u.test(b.textContent)), where, "story: the hint should be a real, labelled Next button");
+  await page.focus("#storyNext"); await page.keyboard.press("Enter");
+  await page.waitForTimeout(250);
+  check((await counter()) === "2 / 4", where, `story: Enter on Next should turn the page, got ${await counter()}`);
+  await page.evaluate(() => document.getElementById("storyGame").focus());
+  await page.keyboard.press("Enter");
+  await page.waitForTimeout(250);
+  check((await counter()) === "3 / 4", where, `story: Enter on the screen should turn the page, got ${await counter()}`);
+  // A character poke must not turn the page.
+  await page.focus(".story-character"); await page.keyboard.press("Enter");
+  await page.waitForTimeout(250);
+  check((await counter()) === "3 / 4", where, `story: Enter on a character must not turn the page, got ${await counter()}`);
+}
+
 // ---- main -----------------------------------------------------------------
 
 async function main() {
@@ -828,6 +873,7 @@ async function main() {
   await keyboardPlay(first);
   await comfortSettings(first);
   await backNavigation(first);
+  await svgAndStoryKeyboard(first);
 
   await browser.close();
   pageErrors.forEach((m) => fail("page", `uncaught error: ${m}`));
@@ -843,7 +889,7 @@ async function main() {
     failures.forEach((f) => console.log(`  FAIL  ${f.where.padEnd(34)} ${f.what}`));
     process.exit(1);
   }
-  console.log("  behaviour: keyboard nav, settings modal, captions, mode tabs, badges, reduced motion, overlays, tap-instead-of-drag, keyboard play, comfort settings, back navigation — all pass");
+  console.log("  behaviour: keyboard nav, settings modal, captions, mode tabs, badges, reduced motion, overlays, tap-instead-of-drag, keyboard play, comfort settings, back navigation, dots + story keyboard — all pass");
 }
 
 main().catch((e) => { console.error(e); process.exit(99); });

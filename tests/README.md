@@ -122,7 +122,12 @@ Doodle (reached via More → Art Studio) steps to Art Studio, then More,
 then the menu; Home from three hops deep unwinds the history depth to 0;
 the ABC flashcards (via More → Wonder World) round-trip through history; Back closes Settings and
 Done unwinds the Settings entry; Escape with a tool held only puts the
-tool down, and Escape again goes Home.
+tool down, and Escape again goes Home. Then Dots and Story Time by
+keyboard: every SVG dot is a named, focusable button whose name says who
+is next; Enter on the wrong dot calls out the right one without
+connecting; Enter on the right dot connects it and the names move on;
+Story Time turns the page from the "keep going" button and from Enter on
+the screen, but not from Enter on a character.
 
 Exit code 1 lists every failing screen/check; 99 means the runner crashed.
 

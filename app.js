@@ -389,9 +389,11 @@ function onTap(el, fn) {
 // a name with aria-label. Skipped: elements a game has already given a
 // role or tabindex, aria-hidden decorations, and containers that hold
 // their own controls (a button inside a button is invalid).
+const SVG_TAP_TAGS = new Set(["g", "circle", "ellipse", "rect", "path", "polygon"]);
 function makeTappableAccessible(el) {
   if (!el || !el.tagName) return;
-  if (el.tagName !== "DIV" && el.tagName !== "SPAN") return;
+  const isSvgShape = el.namespaceURI === "http://www.w3.org/2000/svg" && SVG_TAP_TAGS.has(el.tagName);
+  if (el.tagName !== "DIV" && el.tagName !== "SPAN" && !isSvgShape) return;
   if (el.hasAttribute("role") || el.hasAttribute("tabindex")) return;
   if (el.getAttribute("aria-hidden") === "true") return;
   if (el.querySelector('button, input, select, a[href], [tabindex]:not([tabindex="-1"]), [role="button"]')) return;
@@ -439,7 +441,10 @@ document.addEventListener("keydown", (e) => {
   const el = e.target;
   if (!el || !el.matches || !el.matches('[role="button"]:not(button):not(a)')) return;
   e.preventDefault();
-  el.click();
+  // SVG elements have no click(); a synthetic click reaches onTap's
+  // listener just the same (detail 0 marks it as keyboard-driven).
+  if (typeof el.click === "function") el.click();
+  else el.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
 });
 
 // ---------- Tap alternative to dragging (WCAG 2.2 §2.5.7) ----------

@@ -175,6 +175,7 @@
     stage.innerHTML = page.svg;
 
     stage.querySelectorAll(".region").forEach((region) => {
+      region.setAttribute("aria-label", region.dataset.name || "part"); // a keyboard target once onTap upgrades it
       region.style.cursor = "pointer";
       L.onTap(region, (e) => {
         if (e.stopPropagation) e.stopPropagation();
