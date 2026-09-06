@@ -105,7 +105,12 @@ another; Farm (Enter on the cow reacts; carrot then horse by keyboard
 feeds it), Garden (plant, pick up the can and water a pot by Enter, with
 the pot's name tracking its state), Whack! (the six holes are the buttons
 and say who is up; Enter scores) and Pop! (Enter pops a balloon) are
-played with the keyboard alone.
+played with the keyboard alone. Finally the comfort settings: "Take it
+slow" turned on through the panel persists, doubles the pace scale, makes
+Pop! balloons take ≥10 s (normal ≤9 s) and keeps a Whack! critter up
+≥1.75 s (normal ≤1.6 s); "Less motion" turned on through the panel, with
+no OS preference emulated, persists, makes `prefersReducedMotion()` true,
+collapses CSS animations and skips sparkle bursts.
 
 Exit code 1 lists every failing screen/check; 99 means the runner crashed.
 

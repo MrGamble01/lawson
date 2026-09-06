@@ -80,10 +80,39 @@ setCaptionsEnabled(isCaptionsEnabled());
   });
 })();
 
-// Reduced motion: the CSS already collapses animations; JS-driven
-// particle bursts (sparkles, confetti) are skipped entirely so they don't
-// strobe for a frame.
+// Comfort settings (parent-facing, in Settings):
+// - "Take it slow" runs every timed game at half speed — Whack! critters
+//   stay up twice as long and pop half as often, Pop! balloons drift
+//   twice as slowly, hints linger — for kids who need more time to aim
+//   (WCAG 2.2.1 Timing Adjustable).
+// - "Less motion" applies the reduced-motion treatment without touching
+//   the OS setting (WCAG 2.2.2 / 2.3.3): CSS animations collapse and the
+//   sparkle / confetti bursts are skipped.
+const SLOW_SCALE = 2;
+function setSlowPace(on) {
+  try { localStorage.setItem("lawson:slow", on ? "1" : "0"); } catch (_) {}
+  document.documentElement.classList.toggle("slow-pace", !!on);
+}
+function isSlowPace() {
+  try { return localStorage.getItem("lawson:slow") === "1"; } catch (_) { return false; }
+}
+// Multiply any gameplay duration by this.
+function paceScale() { return isSlowPace() ? SLOW_SCALE : 1; }
+function setLessMotion(on) {
+  try { localStorage.setItem("lawson:lessMotion", on ? "1" : "0"); } catch (_) {}
+  document.documentElement.classList.toggle("reduce-motion", !!on);
+}
+function isLessMotion() {
+  try { return localStorage.getItem("lawson:lessMotion") === "1"; } catch (_) { return false; }
+}
+setSlowPace(isSlowPace());
+setLessMotion(isLessMotion());
+
+// Reduced motion (OS preference or the in-app toggle): the CSS collapses
+// animations; JS-driven particle bursts (sparkles, confetti) are skipped
+// entirely so they don't strobe for a frame.
 function prefersReducedMotion() {
+  if (isLessMotion()) return true;
   try { return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches); }
   catch (_) { return false; }
 }
@@ -884,6 +913,7 @@ window.Lawson = {
   earnSticker, isStickerEarned, listStickers, resetStickers,
   KID_NAME, cheer, shuffled, celebrateNewHigh, confettiRain, boboCheer,
   setCaptionsEnabled, isCaptionsEnabled, prefersReducedMotion,
+  setSlowPace, isSlowPace, paceScale, setLessMotion, isLessMotion,
   tapToUse, putDownTool, heldTool,
   games: {}, // each game adds { screen, start, stop } here
 };
@@ -1399,6 +1429,8 @@ document.addEventListener("touchmove", (e) => {
   const captionsTgl = document.getElementById("settingsCaptions");
   const musicTgl   = document.getElementById("settingsMusic");
   const darkTgl    = document.getElementById("settingsDark");
+  const slowTgl    = document.getElementById("settingsSlow");
+  const motionTgl  = document.getElementById("settingsMotion");
   const volumeInput = document.getElementById("settingsVolume");
   const closeBtn   = document.getElementById("settingsClose");
   const resetBtn   = document.getElementById("settingsReset");
@@ -1428,6 +1460,8 @@ document.addEventListener("touchmove", (e) => {
     if (musicTgl.checked && document.body.classList.contains("on-menu")) startMusic();
   });
   if (darkTgl) darkTgl.addEventListener("change", () => setDarkMode(darkTgl.checked));
+  if (slowTgl) slowTgl.addEventListener("change", () => setSlowPace(slowTgl.checked));
+  if (motionTgl) motionTgl.addEventListener("change", () => setLessMotion(motionTgl.checked));
   if (captionsTgl) captionsTgl.addEventListener("change", () => setCaptionsEnabled(captionsTgl.checked));
 
   // Modal plumbing: while the panel is open the rest of the page is
@@ -1477,6 +1511,8 @@ document.addEventListener("touchmove", (e) => {
     soundTgl.checked = !isSoundMuted();
     if (musicTgl) musicTgl.checked = isMusicEnabled();
     if (darkTgl) darkTgl.checked = isDarkMode();
+    if (slowTgl) slowTgl.checked = isSlowPace();
+    if (motionTgl) motionTgl.checked = isLessMotion();
     if (volumeInput) volumeInput.value = Math.round(getVolume() * 100);
     if (captionsTgl) captionsTgl.checked = isCaptionsEnabled();
     resetBtn.textContent = "🧹 Reset scores";
