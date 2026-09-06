@@ -288,6 +288,11 @@
   let pageIdx = 0;
   let advanceTimer = null;
   let tapAttached = false;
+  let active = false;
+  // True between "The end!" and the next story starting, so a story that
+  // was interrupted at its ending resumes with a fresh story rather than
+  // replaying the ending (and its sticker fanfare) a second time.
+  let atEnd = false;
   // Bumped every time a page is shown, so a narration that finishes late
   // (after the kid tapped ahead, or after leaving the game) can't advance
   // a page it doesn't belong to.
@@ -346,6 +351,7 @@
     txt.textContent = page.text;
     counter.textContent = `${pageIdx + 1} / ${story.pages.length}`;
 
+    atEnd = false;
     const seq = ++pageSeq;
     const { minMs, maxMs } = pacing(page.text);
     const shownAt = Date.now();
@@ -388,18 +394,42 @@
       }
       L.earnSticker && L.earnSticker("storyteller");
       // Next story after a beat.
-      advanceTimer = setTimeout(() => {
-        storyIdx = (storyIdx + 1) % STORIES.length;
-        pageIdx = 0;
-        renderPage();
-      }, 2400);
+      atEnd = true;
+      advanceTimer = setTimeout(nextStory, 2400);
     }
   }
+
+  function nextStory() {
+    storyIdx = (storyIdx + 1) % STORIES.length;
+    pageIdx = 0;
+    renderPage();
+  }
+
+  // The app went to the background (screen lock, app switch): the audio
+  // layer has already silenced the narration. Freeze the page so it
+  // doesn't churn ahead unheard; whatever narration was in flight is
+  // now stale.
+  function freeze() {
+    if (!active) return;
+    clearTimeout(advanceTimer);
+    advanceTimer = null;
+    pageSeq += 1;
+  }
+  // Back in the foreground: read the current page again from the top
+  // (or, if the story had just ended, move on to the next one).
+  function thaw() {
+    if (!active) return;
+    if (atEnd) nextStory();
+    else renderPage();
+  }
+  window.addEventListener("lawson:audiohidden", freeze);
+  window.addEventListener("lawson:audiovisible", thaw);
 
   function start() {
     storyIdx = (storyIdx + 1) % STORIES.length;
     if (storyIdx < 0) storyIdx = 0;
     pageIdx = 0;
+    active = true;
     const screen = document.getElementById("storyGame");
     if (screen && !tapAttached) {
       // Tap the background to advance. Tapping a story-character
@@ -416,6 +446,8 @@
     renderPage();
   }
   function stop() {
+    active = false;
+    atEnd = false;
     clearTimeout(advanceTimer);
     advanceTimer = null;
     pageSeq += 1;

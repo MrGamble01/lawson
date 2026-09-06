@@ -27,9 +27,11 @@ Exit codes:
 Playwright dependency. They load `lib/audio.js` / `games/story.js` into a
 `vm` sandbox with a fake speech engine, DOM and clock, so they check exact
 behaviour: which voice gets picked, that `say()` resolves when a line
-really ends (or is interrupted, muted, or silenced), and that story pages
-flip after the narration finishes — never before the word-count floor,
-never after the no-`end`-event ceiling.
+really ends (or is interrupted, muted, or silenced), that a screen lock or
+app switch silences speech and music and that coming back wakes a paused
+speech engine and an interrupted audio context, and that story pages flip
+after the narration finishes — never before the word-count floor, never
+after the no-`end`-event ceiling — and freeze while the app is hidden.
 
 For each of the 24 games (`tests/smoke.js: GAMES`):
 
