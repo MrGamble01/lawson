@@ -10,7 +10,7 @@ node tests/story.js                # Story Time pacing on real narration end (no
 node tests/smoke.js                # smoke pass only (errors-free / screen renders / restart safe)
 node tests/smoke.js --baseline     # smoke + diff every screen against tests/baseline/
 node tests/smoke.js --update-baseline   # write fresh baseline PNGs (use after intentional visual changes)
-node tests/a11y.js                 # accessibility: axe-core on every screen + keyboard / modal / captions behaviour
+node tests/a11y.js                 # accessibility: axe-core on every screen (4 configs) + keyboard / modal / captions / overlay behaviour
 ```
 
 Exit codes:
@@ -57,17 +57,24 @@ change to refresh the reference.
 
 Visits every hub, the open Settings dialog, a flashcard activity and every
 registered game (read from `window.Lawson.games`, so new games are picked
-up automatically) and, on each:
+up automatically), in four configurations — light and dark mode on a phone
+(414×896), and light mode on an iPad in portrait (820×1180) and landscape
+(1180×820) — and, on each:
 
 1. Runs [axe-core](https://github.com/dequelabs/axe-core) (vendored in
-   `tests/vendor/axe-core`, no install needed) with the WCAG 2.0/2.1 A + AA
-   and best-practice rule sets. Any violation fails. The one rule switched
-   off is `meta-viewport` — pinch-zoom is intentionally disabled for
-   toddlers; the reason is printed with the results.
+   `tests/vendor/axe-core`, no install needed) with the WCAG 2.0/2.1/2.2
+   A + AA and best-practice rule sets, which include colour contrast and
+   the 2.2 24px target-size rule. Any violation fails. The one rule
+   switched off is `meta-viewport` — pinch-zoom is intentionally disabled
+   for toddlers; the reason is printed with the results.
 2. Checks what axe can't: the active screen is a labelled, focusable region
    and keyboard focus is inside it; every visible button has a *readable*
    name (letters or digits, not only an emoji); nothing focusable is inside
-   an `aria-hidden` subtree.
+   an `aria-hidden` subtree; `[hidden]` elements are really gone from
+   layout; navigation chrome (Home, mode tabs, badges, tiles, the gear) is
+   hit-testable at its centre, so nothing floats on top of it; and, with
+   captions on, a spoken line is drawn inside the header strip without
+   overlapping any control or the Story Time text bubble.
 
 Then it drives the app by keyboard only: Enter on a tile opens the game
 and focus follows; Tab lands on Home; Enter returns to the menu with focus
@@ -77,7 +84,10 @@ focus to the gear. Captions must mirror `say()` (even muted), be drawn
 when the setting is on and stay in the accessibility tree when it is off.
 Mode tabs must track `aria-pressed`, score badges must be named by their
 value and react to Enter, and particle effects must be skipped under
-`prefers-reduced-motion`.
+`prefers-reduced-motion`. Finally the transient overlays are triggered and
+checked while up: the first-visit tutorial hint (fires from a real tile
+tap, is a status message, leaves with the screen), the sticker toast, the
+all-stickers finale and the new-best celebration.
 
 Exit code 1 lists every failing screen/check; 99 means the runner crashed.
 

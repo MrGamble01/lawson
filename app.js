@@ -46,16 +46,31 @@ function isCaptionsEnabled() {
 setCaptionsEnabled(isCaptionsEnabled());
 (function setupCaptions() {
   let hideT = null;
+  // The caption is sized to the header strip, whose height depends on the
+  // title's fluid font size — measure it rather than guess.
+  const syncHeaderHeight = () => {
+    const header = document.querySelector("header");
+    if (header) document.documentElement.style.setProperty("--header-h", header.offsetHeight + "px");
+  };
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", syncHeaderHeight);
+  else syncHeaderHeight();
+  window.addEventListener("resize", syncHeaderHeight);
   window.addEventListener("lawson:say", (e) => {
     const el = document.getElementById("captions");
     const text = e.detail && e.detail.text;
     if (!el || !text) return;
     el.textContent = text;
     el.classList.add("show");
+    // The caption is drawn over the header title (the one spot every
+    // screen keeps free of game controls); this class fades the title.
+    document.body.classList.add("caption-showing");
     clearTimeout(hideT);
     // Linger long enough to be read: ~1/3 s per word, 2–6 s overall.
     const words = String(text).split(/\s+/).filter(Boolean).length;
-    hideT = setTimeout(() => el.classList.remove("show"), Math.min(6000, Math.max(2000, 1000 + words * 320)));
+    hideT = setTimeout(() => {
+      el.classList.remove("show");
+      document.body.classList.remove("caption-showing");
+    }, Math.min(6000, Math.max(2000, 1000 + words * 320)));
   });
 })();
 
@@ -195,6 +210,11 @@ function show(id) {
   const target = document.getElementById(id);
   const title = target && target.dataset && target.dataset.title;
   if (title) showGameBanner(title);
+  // Let loosely-coupled features (tutorial hints, captions) react to the
+  // navigation without wrapping this function.
+  if (typeof CustomEvent === "function") {
+    window.dispatchEvent(new CustomEvent("lawson:screen", { detail: { id, changed: id !== _shownScreen } }));
+  }
   if (id !== _shownScreen) {
     _shownScreen = id;
     focusScreen(target);

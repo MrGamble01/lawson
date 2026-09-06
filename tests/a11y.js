@@ -2,15 +2,21 @@
 //
 //   1. axe-core (vendored in tests/vendor/axe-core) runs on each hub, the
 //      Settings dialog, a flashcard activity and every game, with the
-//      WCAG 2.0/2.1 A + AA and best-practice rule sets.
+//      WCAG 2.0/2.1/2.2 A + AA and best-practice rule sets — in light mode,
+//      dark mode, and at iPad portrait / landscape sizes (CONFIGS below).
 //   2. Structural checks axe doesn't make: the active screen is a labelled,
 //      focusable region; every visible button has a *readable* name (not
-//      just an emoji); nothing focusable hides inside aria-hidden.
+//      just an emoji); nothing focusable hides inside aria-hidden; `hidden`
+//      really hides; navigation chrome (Home, tabs, badges, tiles, gear) is
+//      hit-testable at its centre, i.e. nothing floats on top of it; the
+//      caption pill never covers a control or the story text.
 //   3. Behaviour: keyboard-only navigation into a game and back (with
 //      focus following), the Settings modal (aria-hidden flips, background
 //      goes inert, Tab is trapped, Escape closes, focus returns), captions /
-//      the live region, mode-tab pressed state, badge names, and the
-//      reduced-motion switch for particle effects.
+//      the live region, mode-tab pressed state, badge names, the
+//      reduced-motion switch for particle effects, and the transient
+//      overlays (first-visit tutorial hint, sticker toast, all-stickers
+//      finale, new-best celebration).
 //
 // Run:  node tests/a11y.js
 // Exit: 0 pass · 1 violations or failed checks · 99 runner crashed.
@@ -28,7 +34,12 @@ const ROOT  = path.resolve(__dirname, "..");
 const INDEX = "file://" + path.join(ROOT, "index.html");
 const AXE   = fs.readFileSync(path.join(__dirname, "vendor", "axe-core", "axe.min.js"), "utf8");
 
-const VIEWPORT = { width: 414, height: 896 };
+const CONFIGS = [
+  { name: "light · phone portrait",  viewport: { width: 414,  height: 896 }, dark: false },
+  { name: "dark · phone portrait",   viewport: { width: 414,  height: 896 }, dark: true },
+  { name: "light · iPad portrait",   viewport: { width: 820,  height: 1180 }, dark: false },
+  { name: "light · iPad landscape",  viewport: { width: 1180, height: 820 }, dark: false },
+];
 const HUBS = ["menu", "moreHub", "artHub", "musicHub", "townHub", "brainHub", "libraryHub", "numbersHub", "exploreHub"];
 
 // Rules we deliberately do not enforce, with the reason.
@@ -39,7 +50,12 @@ const DISABLED_RULES = {
   // zoom anyway.
   "meta-viewport": "pinch-zoom is intentionally off for toddlers",
 };
-const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "best-practice"];
+const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa", "best-practice"];
+
+// Controls that must never be covered by something else (mascots, toasts,
+// captions…): checked by hit-testing their centre on every screen.
+const CHROME = '.home-btn, .mode-tab, .badge, [data-go], [data-hub], #settingsBtn, #streakBadge';
+const CAPTION_SAMPLE = "Hello there! Let's play and discover something wonderful together.";
 
 const failures = [];
 function fail(where, what) { failures.push({ where, what }); }
@@ -47,25 +63,28 @@ function check(cond, where, what) { if (!cond) fail(where, what); }
 
 // ---- page helpers ------------------------------------------------------
 
-async function boot() {
-  const browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: VIEWPORT });
-  await page.addInitScript(() => {
-    try { localStorage.setItem("lawson:kidName", "Lawson"); } catch (_) {}
+async function boot(browser, config) {
+  const page = await browser.newPage({ viewport: config.viewport });
+  await page.addInitScript((dark) => {
+    try {
+      localStorage.setItem("lawson:kidName", "Lawson");
+      localStorage.setItem("lawson:dark", dark ? "1" : "0");
+    } catch (_) {}
     // Record everything the app says (captions event) for assertions.
     window.__said = [];
     window.addEventListener("lawson:say", (e) => window.__said.push(e.detail.text));
-  });
+  }, config.dark);
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto(INDEX);
   await page.waitForTimeout(2200);
   await page.evaluate(() => {
     document.getElementById("splash")?.remove();
+    document.querySelector(".welcome-toast")?.remove();
     if (window.__closeSettings) window.__closeSettings();
     window.show("menu");
   });
   await page.addScriptTag({ content: AXE });
-  return { browser, page };
+  return page;
 }
 
 // Open a screen the same way the app does (stop games, show, start).
@@ -73,6 +92,8 @@ async function openScreen(page, target) {
   await page.evaluate((t) => {
     Object.values(window.Lawson.games).forEach((g) => g && g.stop && g.stop());
     if (window.__closeSettings) window.__closeSettings();
+    document.querySelectorAll(".tutorial-overlay, .sticker-toast, .all-stickers-overlay").forEach((el) => el.remove());
+    document.getElementById("bestOverlay").classList.remove("show");
     if (t.kind === "hub") {
       window.show(t.id);
     } else if (t.kind === "settings") {
@@ -101,7 +122,7 @@ async function runAxe(page) {
 
 // Structural checks that don't need axe.
 async function structuralChecks(page) {
-  return page.evaluate(() => {
+  return page.evaluate((CHROME) => {
     const out = [];
     const visible = (el) => !!(el.offsetParent || el.getClientRects().length);
     const settingsOpen = document.getElementById("settingsOverlay").classList.contains("open");
@@ -152,8 +173,58 @@ async function structuralChecks(page) {
         out.push(`focusable ${el.tagName.toLowerCase()}.${[...el.classList].join(".")} inside aria-hidden`);
       });
     });
+
+    // Navigation chrome is hit-testable at its centre: nothing (a mascot,
+    // a toast, a caption) floats on top of it. Skipped while the Settings
+    // dialog covers the page on purpose.
+    if (!settingsOpen) {
+      document.querySelectorAll(CHROME).forEach((el) => {
+        if (!visible(el)) return;
+        const r = el.getBoundingClientRect();
+        if (r.width < 2 || r.height < 2) return;
+        const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+        if (cx < 0 || cy < 0 || cx > innerWidth || cy > innerHeight) return;
+        const hit = document.elementFromPoint(cx, cy);
+        if (!hit || !el.contains(hit)) {
+          const desc = (x) => !x ? "nothing" : (x.id ? `#${x.id}` : `${x.tagName.toLowerCase()}.${[...x.classList].join(".")}`);
+          out.push(`${desc(el)} is covered at its centre by ${desc(hit)}`);
+        }
+      });
+    }
     return [...new Set(out)];
-  });
+  }, CHROME);
+}
+
+// With captions on, a spoken line must not be drawn over any control or
+// over Story Time's own text bubble.
+async function captionOverlapCheck(page) {
+  return page.evaluate((sample) => {
+    const out = [];
+    const settingsOpen = document.getElementById("settingsOverlay").classList.contains("open");
+    if (settingsOpen) return out; // the dialog covers the page; caption sits behind it
+    window.Lawson.setCaptionsEnabled(true);
+    window.Lawson.say(sample);
+    const cap = document.getElementById("captions").getBoundingClientRect();
+    if (cap.width < 40) out.push("caption did not render while captions are on");
+    const hits = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+    const header = document.querySelector("header").getBoundingClientRect();
+    if (cap.top < header.top - 1 || cap.bottom > header.bottom + 1) out.push(`caption (${Math.round(cap.top)}–${Math.round(cap.bottom)}px) is not inside the header strip (${Math.round(header.top)}–${Math.round(header.bottom)}px)`);
+    document.querySelectorAll('button, [role="button"], .story-bubble, .mode-tabs').forEach((el) => {
+      if (!(el.offsetParent || el.getClientRects().length)) return;
+      if (el.closest("#captions")) return;
+      const r = el.getBoundingClientRect();
+      if (r.width < 2 || r.height < 2) return;
+      if (hits(cap, r)) {
+        const desc = el.id ? `#${el.id}` : `${el.tagName.toLowerCase()}.${[...el.classList].join(".")}`;
+        out.push(`caption overlaps ${desc}`);
+      }
+    });
+    // Tidy up so the caption doesn't linger into the next screen's checks.
+    document.getElementById("captions").classList.remove("show");
+    document.body.classList.remove("caption-showing");
+    window.Lawson.setCaptionsEnabled(false);
+    return [...new Set(out)];
+  }, CAPTION_SAMPLE);
 }
 
 // ---- behaviour checks ----------------------------------------------------
@@ -258,9 +329,17 @@ async function captions(page) {
 
   await page.evaluate(() => { window.Lawson.setCaptionsEnabled(true); window.Lawson.setVoiceMuted(false); window.Lawson.say("Hello there"); });
   await page.waitForTimeout(80);
-  let s = await page.$eval("#captions", (el) => ({ text: el.textContent, w: el.getBoundingClientRect().width }));
+  let s = await page.evaluate(() => {
+    const el = document.getElementById("captions");
+    const r = el.getBoundingClientRect();
+    const h = document.querySelector("header").getBoundingClientRect();
+    return { text: el.textContent, w: r.width, inHeader: r.top >= h.top - 1 && r.bottom <= h.bottom + 1,
+      titleHidden: getComputedStyle(document.querySelector("header h1")).visibility === "hidden" };
+  });
   check(s.text === "Hello there", where, `caption text should mirror say(), got ${JSON.stringify(s.text)}`);
   check(s.w > 40, where, "caption should be visible on screen when captions are on");
+  check(s.inHeader, where, "caption should be drawn inside the header strip");
+  check(s.titleHidden, where, "the header title should step aside while a caption is showing");
 
   // Muted voice still captions — that's when it matters most.
   await page.evaluate(() => { window.Lawson.setVoiceMuted(true); window.Lawson.say("Still shown"); window.Lawson.setVoiceMuted(false); });
@@ -268,12 +347,15 @@ async function captions(page) {
   s = await page.$eval("#captions", (el) => el.textContent);
   check(s === "Still shown", where, "caption should update even when the voice is muted");
 
-  // Off: still in the accessibility tree (screen readers), but not drawn.
+  // Off: still in the accessibility tree (screen readers), but not drawn,
+  // and the title is back.
   await page.evaluate(() => { window.Lawson.setCaptionsEnabled(false); window.Lawson.say("Read by screen readers only"); });
   await page.waitForTimeout(80);
-  s = await page.$eval("#captions", (el) => ({ text: el.textContent, w: el.getBoundingClientRect().width, hidden: el.getAttribute("aria-hidden") }));
+  s = await page.$eval("#captions", (el) => ({ text: el.textContent, w: el.getBoundingClientRect().width, hidden: el.getAttribute("aria-hidden"),
+    titleShown: getComputedStyle(document.querySelector("header h1")).visibility !== "hidden" }));
   check(s.text === "Read by screen readers only", where, "live region should still update with captions off");
   check(s.w <= 1 && s.hidden !== "true", where, "captions-off should visually hide the region without aria-hiding it");
+  check(s.titleShown, where, "the header title must be visible when captions are off");
 }
 
 async function modeTabsAndBadges(page) {
@@ -325,50 +407,114 @@ async function reducedMotion(page) {
   await page.emulateMedia({ reducedMotion: "reduce" });
 }
 
+// Transient overlays never appear in the per-screen sweep, so trigger each
+// one and run axe + the structural checks while it is up.
+async function overlays(page) {
+  const where = "overlays";
+  const axeHere = async (label) => {
+    const v = (await runAxe(page)).filter((x) => !DISABLED_RULES[x.id]);
+    v.forEach((x) => fail(where, `${label}: axe ${x.id} [${x.impact}] ${x.help}: ${x.nodes.slice(0, 3).join(" | ")}`));
+    (await structuralChecks(page)).forEach((s) => fail(where, `${label}: ${s}`));
+  };
+
+  // First-visit tutorial hint fires from a real tile tap, is a status
+  // message, and leaves with the screen.
+  await openScreen(page, { id: "menu", kind: "hub" });
+  await page.evaluate(() => localStorage.removeItem("lawson:tutSeen:pop"));
+  await page.click('[data-go="pop"]');
+  await page.waitForTimeout(1100);
+  const hint = await page.evaluate(() => {
+    const el = document.querySelector(".tutorial-overlay.show");
+    return el && { role: el.getAttribute("role"), text: el.textContent.trim() };
+  });
+  check(!!hint, where, "first visit to Pop! via its tile should show the tutorial hint");
+  if (hint) {
+    check(hint.role === "status", where, "tutorial hint should be a status message");
+    check(/balloon/i.test(hint.text), where, `tutorial hint should be Pop!'s, got ${JSON.stringify(hint.text)}`);
+    await axeHere("tutorial hint");
+    await page.click("#popGame .home-btn");
+    await page.waitForTimeout(600);
+    check(await page.evaluate(() => !document.querySelector(".tutorial-overlay")), where, "tutorial hint should disappear when the screen changes");
+  }
+
+  // Sticker toast.
+  await openScreen(page, { id: "match", kind: "game" });
+  await page.evaluate(() => { window.Lawson.resetStickers(); window.Lawson.earnSticker("match10"); });
+  await page.waitForTimeout(150);
+  check(await page.$eval(".sticker-toast", (el) => el.getAttribute("role") === "status").catch(() => false), where, "sticker toast should be a status message");
+  await axeHere("sticker toast");
+
+  // All-stickers finale (decorative: say() carries the words).
+  await page.evaluate(() => { document.querySelectorAll(".sticker-toast").forEach((el) => el.remove()); window._allStickersCelebration(); });
+  await page.waitForTimeout(150);
+  check(await page.$eval(".all-stickers-overlay", (el) => el.getAttribute("aria-hidden") === "true").catch(() => false), where, "all-stickers finale should be aria-hidden (announced via speech)");
+  check((await page.evaluate(() => window.__said.at(-1) || "")).startsWith("All stickers!"), where, "all-stickers finale should be announced");
+  await axeHere("all-stickers finale");
+  await page.evaluate(() => document.querySelectorAll(".all-stickers-overlay").forEach((el) => el.remove()));
+
+  // New-best celebration.
+  await page.evaluate(() => window.Lawson.celebrateNewHigh(9));
+  await page.waitForTimeout(300);
+  check(await page.$eval("#bestOverlay", (el) => el.classList.contains("show") && el.getAttribute("aria-hidden") === "true"), where, "new-best overlay should show and stay aria-hidden");
+  await axeHere("new-best overlay");
+  await page.evaluate(() => { document.getElementById("bestOverlay").classList.remove("show"); window.Lawson.resetStickers(); });
+}
+
 // ---- main -----------------------------------------------------------------
 
 async function main() {
-  const { browser, page } = await boot();
+  const browser = await chromium.launch();
   const pageErrors = [];
-  page.on("pageerror", (e) => pageErrors.push(e.message));
-
-  const games = await page.evaluate(() => Object.keys(window.Lawson.games));
-  const targets = [
-    ...HUBS.map((id) => ({ id, kind: "hub" })),
-    { id: "settings", kind: "settings" },
-    { id: "letters", kind: "activity" },
-    ...games.map((id) => ({ id, kind: "game" })),
-  ];
-
   const rows = [];
-  for (const t of targets) {
-    await openScreen(page, t);
-    const violations = (await runAxe(page)).filter((v) => !DISABLED_RULES[v.id]);
-    const structural = await structuralChecks(page);
-    rows.push({ id: t.id, violations: violations.length, structural: structural.length });
-    violations.forEach((v) => fail(t.id, `axe ${v.id} [${v.impact}] ${v.help}: ${v.nodes.slice(0, 4).join(" | ")}`));
-    structural.forEach((s) => fail(t.id, s));
+  let first = null;
+
+  for (const config of CONFIGS) {
+    const page = await boot(browser, config);
+    page.on("pageerror", (e) => pageErrors.push(`${config.name}: ${e.message}`));
+    const games = await page.evaluate(() => Object.keys(window.Lawson.games));
+    const targets = [
+      ...HUBS.map((id) => ({ id, kind: "hub" })),
+      { id: "settings", kind: "settings" },
+      { id: "letters", kind: "activity" },
+      ...games.map((id) => ({ id, kind: "game" })),
+    ];
+    for (const t of targets) {
+      await openScreen(page, t);
+      const violations = (await runAxe(page)).filter((v) => !DISABLED_RULES[v.id]);
+      const structural = await structuralChecks(page);
+      const caption = await captionOverlapCheck(page);
+      rows.push({ config: config.name, id: t.id, problems: violations.length + structural.length + caption.length });
+      const where = `${t.id} (${config.name})`;
+      violations.forEach((v) => fail(where, `axe ${v.id} [${v.impact}] ${v.help}: ${v.nodes.slice(0, 4).join(" | ")}`));
+      structural.forEach((s) => fail(where, s));
+      caption.forEach((s) => fail(where, s));
+    }
+    if (!first) first = page; else await page.close();
   }
 
-  await keyboardNavigation(page);
-  await settingsModal(page);
-  await captions(page);
-  await modeTabsAndBadges(page);
-  await reducedMotion(page);
+  // Behaviour checks run once, on the phone-portrait light page.
+  await keyboardNavigation(first);
+  await settingsModal(first);
+  await captions(first);
+  await modeTabsAndBadges(first);
+  await reducedMotion(first);
+  await overlays(first);
 
   await browser.close();
   pageErrors.forEach((m) => fail("page", `uncaught error: ${m}`));
 
-  console.log(`\nA11y: ${rows.length} screens scanned (axe-core ${AXE.match(/axe v([\d.]+)/)[1]}, tags ${AXE_TAGS.join(",")})`);
+  const screens = rows.length / CONFIGS.length;
+  console.log(`\nA11y: ${screens} screens × ${CONFIGS.length} configs (${CONFIGS.map((c) => c.name).join("; ")})`);
+  console.log(`  axe-core ${AXE.match(/axe v([\d.]+)/)[1]}, tags ${AXE_TAGS.join(",")}`);
   console.log(`  disabled rules: ${Object.entries(DISABLED_RULES).map(([k, v]) => `${k} (${v})`).join("; ")}`);
-  const clean = rows.filter((r) => !r.violations && !r.structural).length;
-  console.log(`  clean screens: ${clean}/${rows.length}`);
+  const clean = rows.filter((r) => !r.problems).length;
+  console.log(`  clean screen passes: ${clean}/${rows.length}`);
   if (failures.length) {
     console.log(`\n${failures.length} problem(s):`);
-    failures.forEach((f) => console.log(`  FAIL  ${f.where.padEnd(22)} ${f.what}`));
+    failures.forEach((f) => console.log(`  FAIL  ${f.where.padEnd(34)} ${f.what}`));
     process.exit(1);
   }
-  console.log("  behaviour: keyboard nav, settings modal, captions, mode tabs, badges, reduced motion — all pass");
+  console.log("  behaviour: keyboard nav, settings modal, captions, mode tabs, badges, reduced motion, overlays — all pass");
 }
 
 main().catch((e) => { console.error(e); process.exit(99); });

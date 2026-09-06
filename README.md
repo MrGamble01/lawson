@@ -69,9 +69,11 @@ The **More** drawer holds themed hub cards, each opening a small menu:
 - Edit the kid's name (used in cheers across every game)
 - Mute voice and/or sound effects independently
 - **Captions** — show what the storyteller says as words on screen (great
-  for kids who are hard of hearing, or when the voice is muted). Off or
-  on, every spoken line is also announced to screen readers through a
-  live region.
+  for kids who are hard of hearing, or when the voice is muted). The
+  caption is drawn over the header title, the one strip every screen
+  keeps free of game controls, so it never covers a tool or the story
+  text. Off or on, every spoken line is also announced to screen readers
+  through a live region.
 - Choose and preview a storyteller voice. Automatic prefers local English
   voices with enhanced quality when available, using their natural pitch.
   The choice is saved on this device. Available voices depend on the device;
@@ -111,8 +113,11 @@ The **More** drawer holds themed hub cards, each opening a small menu:
 - **Reduced motion**: with the OS "reduce motion" preference on, CSS
   animations collapse and the sparkle / confetti particle bursts are
   skipped entirely.
-- **Contrast**: all text meets WCAG AA (4.5:1) — checked on every screen
-  by `tests/a11y.js` with axe-core.
+- **Contrast**: all text meets WCAG AA (4.5:1) in light and dark mode —
+  checked on every screen by `tests/a11y.js` with axe-core.
+- **Touch targets**: every control meets WCAG 2.2's 24px target-size rule
+  at phone and iPad sizes, and nothing (mascots, toasts, captions) ever
+  floats on top of Home, the tabs, the badges or the tiles.
 - Pinch-zoom is deliberately disabled so a toddler's second finger can't
   zoom the playground away; the UI is already very large.
 
@@ -123,7 +128,9 @@ The **More** drawer holds themed hub cards, each opening a small menu:
 - **Welcome toast**: time-of-day greeting on app load with a daily
   streak counter once it's 2+ days in a row.
 - **Tutorials**: `lib/tutorial.js` shows a one-time hint the first time
-  the kid opens each game.
+  the kid opens each game (it listens for the `lawson:screen` event that
+  `show()` fires). Taps pass straight through the hint to the game and
+  dismiss it; leaving the screen dismisses it too.
 - **Audio**: every sound routes through a single master gain node
   (`lib/audio.js`) so the Settings volume slider is one knob for
   the whole app.
@@ -142,7 +149,7 @@ node tests/story.js                # Story Time pacing (no browser)
 node tests/smoke.js                # errors-free / renders / restart-safe
 node tests/smoke.js --baseline     # + diff every screen against tests/baseline/
 node tests/smoke.js --update-baseline   # accept new baselines after UI changes
-node tests/a11y.js                 # axe-core + keyboard / modal / captions checks on every screen
+node tests/a11y.js                 # axe-core (light, dark, phone, iPad) + keyboard / modal / captions / overlay checks
 ```
 
 See `tests/README.md` for details (needs Playwright + Chromium).
