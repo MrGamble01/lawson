@@ -96,7 +96,9 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   sticker is announced and the next story begins. The quiz games (Listen,
   Match, Pattern, How Many?, Count, Find It!, Color Mix, Memory) likewise
   let the cheer — or "try again" — finish before the next prompt, and a
-  hub's welcome line is skipped if the kid has already tapped on.
+  hub's welcome line is skipped if the kid has already tapped on. A cheer
+  starts as its chime rings out rather than underneath it, so the first
+  word is never masked.
 - Locking the iPad or switching apps silences the storyteller and the menu
   music straight away. Coming back wakes the speech and sound engines
   (iOS leaves both muted after a lock or a phone call) and Story Time
