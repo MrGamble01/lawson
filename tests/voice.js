@@ -28,12 +28,14 @@ const document = { hidden: false,
 // Virtual one-shot timers (the say() start watchdog); fireTimers() runs them all.
 const timers = new Map();
 let timerId = 0;
-const fireTimers = () => { const due = [...timers.values()]; timers.clear(); due.forEach(fn => fn()); };
-const context = vm.createContext({ window, document, Event, CustomEvent,
+const fireTimers = () => { const due = [...timers.values()]; timers.clear(); due.forEach(t => t.fn()); };
+let clockNow = 0;   // virtual Date.now() for afterSpeech()'s floor arithmetic
+const timerDelays = () => [...timers.values()].map(t => t.ms);
+const context = vm.createContext({ window, document, Event, CustomEvent, Date: { now: () => clockNow },
   SpeechSynthesisUtterance: function(text) { this.text = text; },
   localStorage: { getItem: k => stored.get(k) ?? null, setItem: (k, v) => stored.set(k, v) },
   setInterval: () => ++intervalsStarted, clearInterval: () => intervalsCleared++,
-  setTimeout: (fn) => { timers.set(++timerId, fn); return timerId; }, clearTimeout: id => timers.delete(id) });
+  setTimeout: (fn, ms) => { timers.set(++timerId, { fn, ms }); return timerId; }, clearTimeout: id => timers.delete(id) });
 const run = s => vm.runInContext(s, context);
 run(source);
 run('say("Hello")');
@@ -338,5 +340,90 @@ assert.equal(said.at(-1), 'Pop the N!');
   await flush();
   assert.equal(settled.at(-1), 'after', 'stays resolved once the line has ended');
 
-  console.log('PASS: delayed voices, natural pitch, local quality preference, saved choice, language, volume, mute, missing voice fallback, speech completion promise, caption event, hide/show lifecycle, unusable-voice fallback, speechDone');
+  // ---- afterSpeech(): "cheer, then next round" ----
+  run('setSpeechVoice("enhanced")');   // a local voice: no start watchdog in the timer list
+  timers.clear();
+  let fired = 0;
+  context.next = () => fired++;
+  // Nothing being said: the floor alone decides, and the ceiling is dropped.
+  clockNow = 0;
+  run('afterSpeech(next, { minMs: 1500, beatMs: 500, maxMs: 6000 })');
+  assert.deepEqual(timerDelays(), [6000], 'ceiling armed at once');
+  await flush();
+  assert.deepEqual(timerDelays(), [1500], 'idle engine: wait out the floor');
+  fireTimers();
+  assert.equal(fired, 1);
+  // A cheer in flight that runs past the floor: fire one beat after it ends.
+  fired = 0; clockNow = 0;
+  run('say("Great job, Lawson! It\'s a cow!")');
+  const cheerLine = spoken.at(-1);
+  run('afterSpeech(next, { minMs: 1500, beatMs: 500 })');
+  await flush();
+  assert.deepEqual(timerDelays(), [6000], 'still waiting for the cheer');
+  clockNow = 2000;
+  cheerLine.onend();
+  await flush();
+  assert.deepEqual(timerDelays(), [500], 'one beat after the cheer');
+  fireTimers();
+  assert.equal(fired, 1);
+  // A cheer that ends before the floor: the floor still holds.
+  fired = 0; clockNow = 0;
+  run('say("Yay!")');
+  run('afterSpeech(next, { minMs: 1500, beatMs: 500 })');
+  clockNow = 400;
+  spoken.at(-1).onend();
+  await flush();
+  assert.deepEqual(timerDelays(), [1100], 'floor minus elapsed');
+  fireTimers();
+  assert.equal(fired, 1);
+  // "New best!" starts while the cheer is being waited for: wait for it too.
+  fired = 0; clockNow = 0;
+  run('say("Great job!")');
+  run('afterSpeech(next, { minMs: 1000, beatMs: 500 })');
+  await flush();
+  run('say("New best! 7!")');     // cuts the cheer, as celebrateNewHigh does
+  const best = spoken.at(-1);
+  await flush();
+  assert.deepEqual(timerDelays(), [6000], 'still waiting: a newer line is in flight');
+  clockNow = 3000;
+  best.onend();
+  await flush();
+  assert.deepEqual(timerDelays(), [500]);
+  fireTimers();
+  assert.equal(fired, 1, 'fired once, after the newer line');
+  // Engine goes quiet: the ceiling fires, and the late end changes nothing.
+  fired = 0; clockNow = 0;
+  run('say("Hanging cheer")');
+  const hangingCheer = spoken.at(-1);
+  run('afterSpeech(next, { minMs: 1000, beatMs: 500, maxMs: 6000 })');
+  await flush();
+  fireTimers();                   // the ceiling
+  assert.equal(fired, 1, 'ceiling moved the game on');
+  clockNow = 7000;
+  hangingCheer.onend();
+  await flush();
+  assert.deepEqual(timerDelays(), [], 'nothing rescheduled after the ceiling');
+  assert.equal(fired, 1);
+  // Cancelled (the game was left): never fires.
+  fired = 0; clockNow = 0;
+  run('say("Cancelled cheer")');
+  const cancelledCheer = spoken.at(-1);
+  run('cancelNext = afterSpeech(next, { minMs: 1000 })');
+  run('cancelNext()');
+  assert.deepEqual(timerDelays(), [], 'ceiling dropped on cancel');
+  cancelledCheer.onend();
+  await flush();
+  await flush();
+  assert.deepEqual(timerDelays(), []);
+  assert.equal(fired, 0);
+  // Voice muted: say() resolves at once, so the floor is the whole wait.
+  fired = 0; clockNow = 0;
+  run('setVoiceMuted(true); say("Muted cheer"); afterSpeech(next, { minMs: 1800, beatMs: 500 })');
+  await flush();
+  assert.deepEqual(timerDelays(), [1800], 'muted: old fixed delay preserved');
+  fireTimers();
+  assert.equal(fired, 1);
+  run('setVoiceMuted(false)');
+
+  console.log('PASS: delayed voices, natural pitch, local quality preference, saved choice, language, volume, mute, missing voice fallback, speech completion promise, caption event, hide/show lifecycle, unusable-voice fallback, speechDone, afterSpeech');
 })().catch(e => { console.error(e); process.exit(1); });

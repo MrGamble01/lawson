@@ -84,7 +84,9 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   actually been read, plus a beat to poke the scene. Poking a character
   answers with its sound, then the storyteller picks the line back up if
   it was cut off. "The end!" and the cheer are heard in full before the
-  sticker is announced and the next story begins.
+  sticker is announced and the next story begins. The quiz games (Listen,
+  Match, Pattern, How Many?, Count) likewise let the cheer finish before
+  the next round's prompt.
 - Locking the iPad or switching apps silences the storyteller and the menu
   music straight away. Coming back wakes the speech and sound engines
   (iOS leaves both muted after a lock or a phone call) and Story Time

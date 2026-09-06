@@ -62,6 +62,9 @@
     L.bumpHighScore("matchBest", value);
   }
 
+  let cancelNext = null;
+  function clearNext() { if (cancelNext) cancelNext(); cancelNext = null; }
+
   function newRound(speakPrompt) {
     const target = document.getElementById("matchTarget");
     const choices = document.getElementById("matchChoices");
@@ -104,7 +107,8 @@
           btn.classList.add("correct");
           const p = L.pointOf(e);
           L.sparkleAt(p.x, p.y);
-          setTimeout(() => newRound(true), 1300);
+          clearNext();
+          cancelNext = L.afterSpeech(() => newRound(true), { minMs: 1300 });
         } else {
           L.buzzSound();
           L.say(`Find the ${answer.name}`);
@@ -125,7 +129,7 @@
     newRound(true);
   }
 
-  function stop() {}
+  function stop() { clearNext(); }
 
   L.games.match = { screen: "matchGame", start, stop };
 })();

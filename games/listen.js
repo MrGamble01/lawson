@@ -30,6 +30,9 @@
   let score = 0;
   let answer = null;
   let activeTimer = null;
+  // Cancels a pending "next round" that is waiting for the cheer to finish.
+  let cancelNext = null;
+  function clearNext() { if (cancelNext) cancelNext(); cancelNext = null; }
   let bestAtStart = 0;
   let celebrated = false;
 
@@ -81,8 +84,11 @@
           btn.classList.add("correct");
           const p = L.pointOf(e);
           L.sparkleAt(p.x, p.y);
+          // Next round once the cheer has been heard (never sooner than
+          // the old fixed delay, so a muted voice feels the same).
           clearTimeout(activeTimer);
-          activeTimer = setTimeout(newRound, 1500);
+          clearNext();
+          cancelNext = L.afterSpeech(newRound, { minMs: 1500 });
         } else {
           // Wrong answer: keep score (don't reset — that punishes guessing,
           // which is part of how toddlers learn), but break the streak
@@ -118,6 +124,7 @@
   function stop() {
     clearTimeout(activeTimer);
     activeTimer = null;
+    clearNext();
     const stage = document.getElementById("listenChoices");
     if (stage) stage.innerHTML = "";
   }

@@ -26,6 +26,8 @@
 
   let total = 0;
   let activeTimer = null;
+  let cancelNext = null;
+  function clearNext() { if (cancelNext) cancelNext(); cancelNext = null; }
   let bestAtStart = 0;
   let celebrated = false;
 
@@ -91,8 +93,9 @@
                 r.top  + r.height / 2 + (Math.random() - 0.5) * 80,
               ), k * 50);
             }
-            // Next round.
-            activeTimer = setTimeout(() => startRound(item), 2400);
+            // Next round, once the total and the cheer have been heard.
+            clearNext();
+            cancelNext = L.afterSpeech(() => startRound(item), { minMs: 2400 });
           }, 600);
         }
       });
@@ -117,6 +120,7 @@
   function stop() {
     clearTimeout(activeTimer);
     activeTimer = null;
+    clearNext();
     const stage = document.getElementById("countStage");
     if (stage) stage.innerHTML = "";
   }
