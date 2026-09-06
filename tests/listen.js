@@ -139,12 +139,13 @@ function reset() {
   listen.start();
   await flush();
   assert.equal(spoken.length, 0, 'opening clue is on a timer, not same-tick');
+  await runUntil(200);
   tap(ids.listenChoices.children[0]);
   await flush();
   await runUntil(400);
   assert.equal(spoken.length, 0, 'leftover opening clue must not land after a wrong tap');
   await runUntil(550);
-  assert.equal(spoken.length, 1, 're-ask starts at the 350 ms floor');
+  assert.equal(spoken.length, 1, 're-ask starts at the 350 ms floor (200 + 350)');
   assert.match(lastLine().text, /Find the dog!/);
 
   // 2. Wrong tap while the opening clue is still in flight: hold it past
