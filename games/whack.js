@@ -69,6 +69,12 @@
       hole.innerHTML = `<div class="whack-dirt"></div><div class="whack-critter"></div>`;
       grid.appendChild(hole);
       const critter = hole.querySelector(".whack-critter");
+      // The hole is the keyboard / screen-reader target (its name says who
+      // is up); the critter inside is decoration so the two don't nest.
+      critter.setAttribute("aria-hidden", "true");
+      critter.setAttribute("tabindex", "-1");
+      const labelHole = (who) => hole.setAttribute("aria-label", `Hole ${i + 1}: ${who}`);
+      labelHole("empty");
 
       let current = null; // { emoji?, name?, glyph?, gold? }
       let downTimer = null;
@@ -81,6 +87,7 @@
         critter.classList.remove("up");
         current = null;
         clearTimeout(downTimer);
+        labelHole("empty");
         const r = critter.getBoundingClientRect();
 
         if (mode === "free") {
@@ -131,12 +138,14 @@
           }
           critter.classList.toggle("gold", !!content.gold);
           critter.classList.add("up");
+          labelHole(content.glyph ? `${content.glyph}!` : `${content.gold ? "gold " : ""}${content.name || "critter"}!`);
           const upFor = mode === "free"
             ? 900 + Math.random() * 700
             : 1500 + Math.random() * 1100;
           downTimer = setTimeout(() => {
             critter.classList.remove("up");
             current = null;
+            labelHole("empty");
           }, upFor);
           return true;
         },
@@ -144,6 +153,7 @@
           critter.classList.remove("up", "gold", "whack-critter--glyph", "bonk");
           current = null;
           clearTimeout(downTimer);
+          labelHole("empty");
         },
       });
     }

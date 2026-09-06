@@ -153,10 +153,10 @@
     const stage = $("trainStage");
     stage.innerHTML = `
       <div id="trainSky" class="train-sky">
-        <div id="trainSun" class="train-sun">${bigSunSvg()}</div>
-        <div class="train-cloud train-cloud--1"></div>
-        <div class="train-cloud train-cloud--2"></div>
-        <div class="train-cloud train-cloud--3"></div>
+        <div id="trainSun" class="train-sun" aria-label="Sun">${bigSunSvg()}</div>
+        <div class="train-cloud train-cloud--1" aria-hidden="true"></div>
+        <div class="train-cloud train-cloud--2" aria-hidden="true"></div>
+        <div class="train-cloud train-cloud--3" aria-hidden="true"></div>
       </div>
       <div class="train-hills"></div>
       <div class="train-ground"></div>
