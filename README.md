@@ -146,8 +146,9 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   played with Tab and Enter. Names carry state where it matters ("Pot 2:
   seed planted, water it", "Hole 4: mole!"). Opening a game moves focus
   onto that screen (a labelled region); Home puts it back on the tile you
-  came from. Mode tabs expose their pressed state; Memory cards say
-  "Hidden card" until flipped.
+  came from. Mode tabs expose their pressed state; Doodle's brushes,
+  sizes and Stamp do too (and Stamp says "Draw!" when the 8-second
+  stamp window ends). Memory cards say "Hidden card" until flipped.
 - **Captions / live region**: see Settings above.
 - **Reduced motion**: with the OS "reduce motion" preference on, or the
   in-app **Less motion** setting, CSS animations collapse and the sparkle /
@@ -196,6 +197,7 @@ Smoke + visual baseline checks for every game live in `tests/`.
 ```bash
 node tests/voice.js                # speech engine + caption event (no browser)
 node tests/story.js                # Story Time pacing (no browser)
+node tests/doodle.js               # Doodle tool pressed state + stamp timeout (no browser)
 node tests/smoke.js                # errors-free / renders / restart-safe
 node tests/smoke.js --baseline     # + diff every screen against tests/baseline/
 node tests/smoke.js --update-baseline   # accept new baselines after UI changes
