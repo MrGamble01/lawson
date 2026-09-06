@@ -96,9 +96,10 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   actually been read, plus a beat to poke the scene. Poking a character
   answers with its sound, then the storyteller picks the line back up if
   it was cut off. "The end!" and the cheer are heard in full before the
-  sticker is announced and the next story begins. The quiz games (Listen,
+  sticker is announced and the next story begins.   The quiz games (Listen,
   Match, Pattern, How Many?, Count, Find It!, Color Mix, Memory) likewise
-  let the cheer — or "try again" — finish before the next prompt, and a
+  let the cheer — or "try again" — finish before the next prompt, and
+  Baby Dino waits for "All clean!" before the next wash. A
   hub's welcome line is skipped if the kid has already tapped on. A quiz
   prompt ("Find the cow!") is repeated once if nothing has happened for
   twelve seconds, so a kid who looked away gets a nudge, never a nag. A cheer
