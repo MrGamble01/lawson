@@ -5,7 +5,10 @@
 // once the storyteller has actually finished the line (plus a beat to
 // poke around); tapping the background also advances.
 // Tapping a character plays its sound and wiggles it, but does NOT
-// advance — so the kid can poke around and explore the scene.
+// advance — so the kid can poke around and explore the scene. If the
+// poke cut the storyteller off mid-line, the line is read again once
+// the character has had its say, the way a parent picks a sentence
+// back up after answering "what's that?".
 (function () {
   const L = window.Lawson;
 
@@ -297,6 +300,14 @@
   // (after the kid tapped ahead, or after leaving the game) can't advance
   // a page it doesn't belong to.
   let pageSeq = 0;
+  // Per page: whether the storyteller has got to the end of the line
+  // uninterrupted yet, which reading attempt is current (a poke cuts one
+  // off and a later attempt replaces it), and which poke is the latest
+  // (rapid pokes should trigger one re-read, after the last of them).
+  let lineHeard = false;
+  let readingId = 0;
+  let pokeId = 0;
+  let pageShownAt = 0;
 
   // Pacing. The storyteller voice is chosen by the parent (or the device),
   // so how long a line takes to read varies a lot: enhanced voices are
@@ -340,7 +351,7 @@
         if (e.stopPropagation) e.stopPropagation();
         L.beep(420 + Math.random() * 280, 0.1, "triangle");
         L.haptic(8);
-        if (ch.sound) L.say(ch.sound, 0.95);
+        if (ch.sound) poke(ch.sound);
         btn.classList.remove("wiggle");
         void btn.offsetWidth;
         btn.classList.add("wiggle");
@@ -352,21 +363,50 @@
     counter.textContent = `${pageIdx + 1} / ${story.pages.length}`;
 
     atEnd = false;
+    lineHeard = false;
     const seq = ++pageSeq;
     const { minMs, maxMs } = pacing(page.text);
-    const shownAt = Date.now();
+    pageShownAt = Date.now();
     clearTimeout(advanceTimer);
     advanceTimer = setTimeout(advance, maxMs);
+    readLine(page.text, seq, pageShownAt, minMs);
+  }
 
-    // Once the line has been spoken (or immediately when voice is muted,
-    // or when a character poke cuts the narration short), hold the page
-    // for the poke beat — but never shorter than the word-count floor.
-    Promise.resolve(L.say(page.text, 0.9)).then(() => {
-      if (seq !== pageSeq || advanceTimer === null) return;
+  // Read the page's line. Once it has been spoken to the end (or at once
+  // when voice is muted), hold the page for the poke beat — but never
+  // shorter than the word-count floor. A reading that gets cut off by a
+  // poke is superseded (readingId moves on) and schedules nothing; the
+  // poke's own follow-up decides whether to read the line again. The
+  // ceiling armed by renderPage() still bounds a page that keeps getting
+  // poked.
+  function readLine(text, seq, shownAt, minMs) {
+    const id = ++readingId;
+    Promise.resolve(L.say(text, 0.9)).then(() => {
+      if (seq !== pageSeq || id !== readingId || advanceTimer === null) return;
+      lineHeard = true;
       const elapsed = Date.now() - shownAt;
       const wait = Math.max(POKE_BEAT_MS, minMs - elapsed);
       clearTimeout(advanceTimer);
       advanceTimer = setTimeout(advance, wait);
+    });
+  }
+
+  // A character was poked: say its sound now (this cuts off whatever the
+  // storyteller was saying), then, if the page's line hadn't been heard
+  // to the end yet, read it again from the top — unless the kid has
+  // poked again meanwhile (the newest poke owns the re-read), the page
+  // has moved on, or the story is sitting on "The end!" (re-reading the
+  // last line there would run the ending a second time).
+  function poke(sound) {
+    const seq = pageSeq;
+    const id = ++pokeId;
+    const story = STORIES[storyIdx];
+    const page = story && story.pages[pageIdx];
+    const shownAt = pageShownAt;
+    if (!lineHeard) readingId += 1; // the reading in flight is being cut off
+    Promise.resolve(L.say(sound, 0.95)).then(() => {
+      if (seq !== pageSeq || id !== pokeId || lineHeard || atEnd || !page) return;
+      readLine(page.text, seq, shownAt, pacing(page.text).minMs);
     });
   }
 
