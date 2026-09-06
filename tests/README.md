@@ -114,7 +114,13 @@ slow" turned on through the panel persists, doubles the pace scale, makes
 Pop! balloons take ≥10 s (normal ≤9 s) and keeps a Whack! critter up
 ≥1.75 s (normal ≤1.6 s); "Less motion" turned on through the panel, with
 no OS preference emulated, persists, makes `prefersReducedMotion()` true,
-collapses CSS animations and skips sparkle bursts.
+collapses CSS animations and skips sparkle bursts. And back navigation:
+Back from Pop! returns to the menu with the game stopped; Back from
+Doodle (reached via More → Art Studio) steps to Art Studio, then More,
+then the menu; Home from three hops deep unwinds the history depth to 0;
+the ABC flashcards (via More → Wonder World) round-trip through history; Back closes Settings and
+Done unwinds the Settings entry; Escape with a tool held only puts the
+tool down, and Escape again goes Home.
 
 Exit code 1 lists every failing screen/check; 99 means the runner crashed.
 
