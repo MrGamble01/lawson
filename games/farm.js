@@ -875,9 +875,11 @@
     a.className = "farm-apple";
     a.setAttribute("aria-label", "Apple");
     a.innerHTML = appleSvg();
+    // Two rows, far enough apart that a toddler's finger (and WCAG 2.2's
+    // 24px target rule) can tell them apart.
     const positions = [
-      { x: 22, y: 24 }, { x: 50, y: 14 }, { x: 76, y: 24 },
-      { x: 30, y: 40 }, { x: 70, y: 42 }, { x: 50, y: 32 },
+      { x: 16, y: 16 }, { x: 50, y: 12 }, { x: 84, y: 16 },
+      { x: 32, y: 58 }, { x: 68, y: 58 },
     ];
     const p = positions[i % positions.length];
     a.style.left = p.x + "%";
@@ -919,7 +921,11 @@
     f.setAttribute("aria-label", "Fish");
     f.innerHTML = fishSvg(colors[i % colors.length]);
     f.style.setProperty("--delay", (i * 1.5) + "s");
-    f.style.setProperty("--top",   (12 + Math.random() * 60) + "%");
+    // Fixed lanes (row + start column) so the three fish never stack on
+    // each other — random depths used to overlap, and with reduced motion
+    // they'd all sit at the same spot.
+    f.style.setProperty("--top",  [6, 38, 68][i % 3] + "%");
+    f.style.setProperty("--left", [0, 30, 60][i % 3] + "%");
     cont.appendChild(f);
     L.onTap(f, () => {
       L.beep(620, 0.06, "sine");

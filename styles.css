@@ -58,7 +58,8 @@ select:focus-visible,
 
 /* ---------- Captions / live region ----------
    Off: visually hidden but still read by screen readers.
-   On (body.captions-on) + .show: a subtitle pill above the bottom edge. */
+   On (body.captions-on) + .show: a pill drawn over the header title — the
+   one strip every screen keeps free of tools, badges and story text. */
 .captions {
   position: absolute;
   width: 1px; height: 1px;
@@ -71,31 +72,38 @@ select:focus-visible,
 }
 body.captions-on .captions.show {
   position: fixed;
-  left: 50%;
-  bottom: calc(18px + env(safe-area-inset-bottom, 0px));
-  transform: translateX(-50%);
-  width: auto; height: auto;
-  max-width: min(92vw, 720px);
+  top: 4px;
+  left: 12px;
+  right: 76px;              /* clear of the ⚙️ button */
+  height: calc(var(--header-h, 60px) - 8px); /* --header-h is measured by app.js */
+  width: auto;
   margin: 0;
-  padding: 10px 18px;
-  overflow: visible;
+  padding: 4px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
   clip: auto;
   clip-path: none;
   white-space: normal;
   text-align: center;
-  font-size: clamp(18px, 3vw, 26px);
+  font-size: clamp(15px, 2.6vw, 22px);
   font-weight: 800;
-  line-height: 1.3;
+  line-height: 1.2;
   color: #fff;
-  background: rgba(20, 12, 40, 0.86);
+  background: rgba(20, 12, 40, 0.88);
   border: 3px solid rgba(255,255,255,0.85);
-  border-radius: 18px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+  border-radius: 16px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.3);
   z-index: 120;
   pointer-events: none;
   animation: captionIn 0.18s ease-out;
 }
-@keyframes captionIn { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+/* Leave room for the streak badge when it's showing. */
+body.captions-on:has(#streakBadge:not([hidden])) .captions.show { right: 150px; }
+/* The title steps aside while a caption is up. */
+body.captions-on.caption-showing header h1 { visibility: hidden; }
+@keyframes captionIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
 html.dark body.captions-on .captions.show { background: rgba(0,0,0,0.9); }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -293,7 +301,8 @@ html.dark .menu-cloud { opacity: 0.55; }
 }
 .sunny svg { width: 100%; height: 100%; pointer-events: none; }
 .sunny:active { transform: scale(0.9); }
-body.on-lobby .sunny { display: block; }
+/* Menu only: on hub screens Sunny sat exactly on top of the Home button. */
+body.on-menu .sunny { display: block; }
 @keyframes sunnyBob {
   0%, 100% { transform: translateY(0) rotate(0deg); }
   50%      { transform: translateY(-6px) rotate(8deg); }
@@ -1777,6 +1786,7 @@ html.dark .hub-title {
   gap: 12px;
   padding: 10px 4px;
   font-weight: bold;
+  color: #555; /* explicit: the panel stays white in dark mode */
 }
 .settings-slider-label { flex-shrink: 0; }
 .settings-slider input[type="range"] {
@@ -1861,6 +1871,36 @@ html.dark .hub-title {
   max-width: calc(100% - 220px);
   /* Sit just below the home button (64+10+gap) */
   padding-left: 84px;
+  /* The padded box overlaps the Home button; only the swatches take taps. */
+  pointer-events: none;
+}
+.doodle-brushes > * { pointer-events: auto; }
+/* Narrow screens: the tool row can't share the top strip with Home and
+   the brush row (it used to land on top of both), so the tools take the
+   strip, wrapping if they must, and the brushes drop to a row beneath,
+   with the size column beside them. */
+@media (max-width: 900px) {
+  .doodle-tools {
+    left: 84px;
+    right: 16px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  .doodle-brushes {
+    top: 90px;
+    left: 14px;
+    right: 72px;
+    padding-left: 0;
+    max-width: none;
+  }
+  .doodle-sizes { top: 90px; }
+}
+@media (max-width: 600px) {
+  /* Four tools wrap to two rows here; everything else moves down a row,
+     and the size column drops below the second tool row. */
+  .doodle-brushes { top: 156px; }
+  .doodle-sizes { top: 212px; }
 }
 .doodle-brush {
   width: 38px;
@@ -3192,7 +3232,7 @@ html.dark .hub-title {
   position: absolute;
   right: 6%;
   bottom: 28%;
-  width: clamp(120px, 26vw, 200px);
+  width: clamp(150px, 28vw, 220px);
   z-index: 4;
   cursor: pointer;
   background: transparent;
@@ -3206,7 +3246,7 @@ html.dark .hub-title {
 }
 .farm-apple {
   position: absolute;
-  width: clamp(26px, 6vw, 36px);
+  width: clamp(28px, 6vw, 38px);
   background: transparent;
   border: none;
   cursor: pointer;
@@ -3253,10 +3293,14 @@ html.dark .hub-title {
   pointer-events: none;
   z-index: 6;
 }
+/* Phones: the pond used to sit under the tool tray; lift it clear. */
+@media (max-width: 600px) {
+  .farm-pond, .farm-pond-fish { bottom: 13%; }
+}
 .farm-fish {
   position: absolute;
-  width: clamp(36px, 8vw, 60px);
-  left: -10%;
+  width: clamp(40px, 8vw, 60px); /* ≥24px tall at the fish's 40:25 aspect */
+  left: var(--left, -10%);
   top: var(--top, 30%);
   background: transparent;
   border: none;
@@ -3594,9 +3638,8 @@ html.dark .hub-title {
   transform: translate(-50%, 40px);
   opacity: 0;
   z-index: 220;
-  pointer-events: auto;
+  pointer-events: none; /* taps go to the game underneath (and dismiss the hint) */
   transition: opacity 0.36s ease, transform 0.36s cubic-bezier(.34, 1.56, .64, 1);
-  cursor: pointer;
 }
 .tutorial-overlay.show {
   opacity: 1;
