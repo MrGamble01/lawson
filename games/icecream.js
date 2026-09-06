@@ -159,6 +159,7 @@
   function setupScoopDrag(tub, flavor) {
     let dragging = false;
     let ghost = null;
+    let downX = 0, downY = 0;
 
     function makeGhost(x, y) {
       ghost = document.createElement("div");
@@ -186,6 +187,8 @@
 
     tub.addEventListener("pointerdown", (e) => {
       dragging = true;
+      downX = e.clientX;
+      downY = e.clientY;
       tub.setPointerCapture?.(e.pointerId);
       tub.classList.add("grabbed");
       makeGhost(e.clientX, e.clientY);
@@ -200,8 +203,15 @@
       if (!dragging) return;
       dragging = false;
       tub.classList.remove("grabbed");
-      dropGhost(e.clientX, e.clientY);
+      if (Math.hypot(e.clientX - downX, e.clientY - downY) < 6) {
+        // Tap → that scoop goes straight onto the cone (no drag needed).
+        if (ghost) { ghost.remove(); ghost = null; }
+        addScoop(flavor);
+      } else {
+        dropGhost(e.clientX, e.clientY);
+      }
     });
+    tub.addEventListener("click", (e) => { if (e.detail === 0) addScoop(flavor); }); // keyboard
     tub.addEventListener("pointercancel", () => {
       dragging = false;
       tub.classList.remove("grabbed");

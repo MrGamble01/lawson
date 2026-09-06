@@ -1134,6 +1134,13 @@
     };
     tool.addEventListener("pointerup",     releaseAndSnap);
     tool.addEventListener("pointercancel", releaseAndSnap);
+    // No-drag path: tap the tool, then tap the animal (or the pond).
+    const HINTS = {
+      farmBucket: "Now tap the cow!",   farmShears: "Now tap the sheep!",
+      farmCarrot: "Now tap the horse!", farmSlop:   "Now tap the pig!",
+      farmBall:   "Now tap the dog!",   farmRod:    "Now tap the pond!",
+    };
+    L.tapToUse(tool, { onUse: (x, y) => onDropHandler && onDropHandler(x, y), hint: HINTS[tool.id] });
   }
 
   function overEl(x, y, el) {

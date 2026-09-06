@@ -1,5 +1,5 @@
 // Service worker for offline play. Bump CACHE when assets change.
-const CACHE = "lawson-v48-speech-report";
+const CACHE = "lawson-v49-tap-instead-of-drag";
 const ASSETS = [
   "./",
   "./index.html",

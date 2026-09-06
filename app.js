@@ -389,6 +389,116 @@ document.addEventListener("keydown", (e) => {
   el.click();
 });
 
+// ---------- Tap alternative to dragging (WCAG 2.2 §2.5.7) ----------
+// Dragging is hard for small hands and impossible with a switch or a
+// keyboard, so every tool that is normally dragged can also be *used by
+// tapping*: tap the tool to pick it up (it lifts and reads as pressed),
+// then tap where you would have dragged it — the tool hops there, does
+// its job through the game's own drop handler, and snaps back. Tapping
+// the tool again, pressing Escape, or leaving the screen puts it down.
+// Enter/Space on the focused tool and then on a target does the same.
+let _heldTool = null;
+let _heldUse = null;
+function tapToUse(tool, opts) {
+  const { onUse, hint, canHold } = opts || {};
+  if (!tool || tool.__lawsonTapToUse) return;
+  tool.__lawsonTapToUse = true;
+  tool.setAttribute("aria-pressed", "false");
+  let down = null;
+  const toggle = () => {
+    if (_heldTool === tool) { putDownTool(); return; }
+    if (canHold && !canHold()) return;
+    pickUpTool(tool, onUse, hint);
+  };
+  tool.addEventListener("pointerdown", (e) => { down = { x: e.clientX, y: e.clientY, t: Date.now() }; });
+  tool.addEventListener("pointerup", (e) => {
+    if (!down) return;
+    const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y);
+    const quick = Date.now() - down.t < 600;
+    down = null;
+    if (moved > 8 || !quick) return; // that was a drag, handled by the game
+    toggle();
+  });
+  tool.addEventListener("pointercancel", () => { down = null; });
+  // Keyboard: Enter/Space produce a click with no pointer events.
+  tool.addEventListener("click", (e) => { if (e.detail === 0) toggle(); });
+}
+function pickUpTool(tool, onUse, hint) {
+  putDownTool();
+  _heldTool = tool;
+  _heldUse = onUse;
+  tool.classList.add("held");
+  tool.setAttribute("aria-pressed", "true");
+  haptic(8);
+  beep(660, 0.06, "triangle");
+  if (hint) say(hint);
+}
+function putDownTool() {
+  if (!_heldTool) return;
+  _heldTool.classList.remove("held");
+  _heldTool.setAttribute("aria-pressed", "false");
+  _heldTool = null;
+  _heldUse = null;
+}
+function heldTool() { return _heldTool; }
+// Swallow the tap that lands on the target, so the target's own tap
+// handler (a moo, a "use the watering can!") doesn't fire as well.
+function swallowNextTap() {
+  let done = false;
+  const types = ["touchend", "click", "pointerup"];
+  const finish = () => {
+    if (done) return;
+    done = true;
+    types.forEach((t) => document.removeEventListener(t, stop, true));
+  };
+  // Stop at the tail of *this* tap (its click, or its touchend — whose
+  // preventDefault also drops the synthetic click) so the next tap is free.
+  const stop = (e) => {
+    e.stopPropagation(); e.preventDefault();
+    if (e.type === "click" || e.type === "touchend") finish();
+  };
+  types.forEach((t) => document.addEventListener(t, stop, true));
+  setTimeout(finish, 300);
+}
+// The held tool hops to the point, works, and snaps back to its slot.
+function useHeldToolAt(x, y) {
+  const tool = _heldTool, use = _heldUse;
+  if (!tool || typeof use !== "function") return;
+  putDownTool();
+  const hop = !prefersReducedMotion();
+  if (hop) {
+    tool.classList.add("hopping");
+    tool.style.position = "fixed";
+    tool.style.left = (x - tool.offsetWidth / 2) + "px";
+    tool.style.top = (y - tool.offsetHeight / 2) + "px";
+    tool.style.right = "auto";
+    tool.style.bottom = "auto";
+  }
+  try { use(x, y); } catch (_) {}
+  setTimeout(() => {
+    tool.classList.remove("hopping");
+    tool.style.position = "";
+    tool.style.left = "";
+    tool.style.top = "";
+    tool.style.right = "";
+    tool.style.bottom = "";
+  }, hop ? 380 : 0);
+}
+document.addEventListener("pointerdown", (e) => {
+  if (!_heldTool || _heldTool.contains(e.target)) return;
+  swallowNextTap();
+  useHeldToolAt(e.clientX, e.clientY);
+}, true);
+document.addEventListener("click", (e) => {
+  // Keyboard activation of a target while a tool is held.
+  if (!_heldTool || e.detail !== 0 || _heldTool.contains(e.target)) return;
+  e.stopPropagation(); e.preventDefault();
+  const r = e.target.getBoundingClientRect();
+  useHeldToolAt(r.left + r.width / 2, r.top + r.height / 2);
+}, true);
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") putDownTool(); });
+window.addEventListener("lawson:screen", putDownTool);
+
 // Badge bump helper (shared by games)
 function bumpBadge(id, val) {
   const el = document.getElementById(id);
@@ -748,6 +858,7 @@ window.Lawson = {
   earnSticker, isStickerEarned, listStickers, resetStickers,
   KID_NAME, cheer, shuffled, celebrateNewHigh, confettiRain, boboCheer,
   setCaptionsEnabled, isCaptionsEnabled, prefersReducedMotion,
+  tapToUse, putDownTool, heldTool,
   games: {}, // each game adds { screen, start, stop } here
 };
 

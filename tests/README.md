@@ -88,7 +88,14 @@ value and react to Enter, and particle effects must be skipped under
 `prefers-reduced-motion`. Finally the transient overlays are triggered and
 checked while up: the first-visit tutorial hint (fires from a real tile
 tap, is a status message, leaves with the screen), the sticker toast, the
-all-stickers finale and the new-best celebration.
+all-stickers finale and the new-best celebration. Last, the tap
+alternatives to dragging (WCAG 2.2 §2.5.7) are played through with single
+taps: Garden (pot → can → pot waters it, the pot's own nag is swallowed,
+and a real mouse drag still waters), Farm (bucket → cow milks it without
+the cow's moo; tapping a held tool again, Escape and leaving the screen
+all put it down; Enter on a tool then activating a target works), Baby
+Dino (one tap each on soap, shower and towel walks all three phases) and
+Ice Cream (a tap on a tub adds the scoop).
 
 Exit code 1 lists every failing screen/check; 99 means the runner crashed.
 

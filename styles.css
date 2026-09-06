@@ -56,6 +56,28 @@ select:focus-visible,
    follows navigation) but a ring around the whole screen is just noise. */
 .screen:focus, .screen:focus-visible { outline: none; }
 
+/* ---------- Held tool (tap alternative to dragging) ----------
+   A tapped tool lifts, glows and bobs until it is tapped onto its target
+   (or put down again). `.hopping` is the short trip to the tap point. */
+button.held {
+  transform: translateY(-8px) scale(1.1);
+  outline: 4px solid var(--c-brand);
+  outline-offset: 4px;
+  border-radius: 14px;
+  z-index: 30;
+  animation: heldBob 0.9s ease-in-out infinite;
+  cursor: grabbing;
+}
+@keyframes heldBob {
+  0%, 100% { transform: translateY(-8px) scale(1.1); }
+  50%      { transform: translateY(-14px) scale(1.12); }
+}
+button.hopping {
+  z-index: 30;
+  transition: left 0.28s cubic-bezier(.34,1.56,.64,1), top 0.28s cubic-bezier(.34,1.56,.64,1);
+  pointer-events: none;
+}
+
 /* ---------- Captions / live region ----------
    Off: visually hidden but still read by screen readers.
    On (body.captions-on) + .show: a pill drawn over the header title — the
