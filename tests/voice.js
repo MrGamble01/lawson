@@ -9,13 +9,25 @@ let voices = [], spoken = [], canceled = 0;
 const events = new EventTarget();
 const synth = { getVoices: () => voices, addEventListener: events.addEventListener.bind(events),
   speak: u => spoken.push(u), cancel: () => canceled++ };
+let resumedSynth = 0, resumedCtx = 0, intervalsStarted = 0, intervalsCleared = 0;
+synth.resume = () => { resumedSynth++; synth.paused = false; };
 class AudioContext {
+  constructor() { this.state = 'running'; }
   createGain() { return { gain: { value: 1 }, connect() {} }; }
+  resume() { resumedCtx++; this.state = 'running'; return Promise.resolve(); }
 }
-const context = vm.createContext({ window: { speechSynthesis: synth, AudioContext,
-  dispatchEvent() {} }, Event, SpeechSynthesisUtterance: function(text) { this.text = text; },
+const windowEvents = new EventTarget();
+const window = { speechSynthesis: synth, AudioContext,
+  addEventListener: windowEvents.addEventListener.bind(windowEvents),
+  dispatchEvent: windowEvents.dispatchEvent.bind(windowEvents) };
+const docEvents = new EventTarget();
+const document = { hidden: false,
+  addEventListener: docEvents.addEventListener.bind(docEvents),
+  dispatchEvent: docEvents.dispatchEvent.bind(docEvents) };
+const context = vm.createContext({ window, document, Event,
+  SpeechSynthesisUtterance: function(text) { this.text = text; },
   localStorage: { getItem: k => stored.get(k) ?? null, setItem: (k, v) => stored.set(k, v) },
-  setInterval: () => 1, clearInterval() {} });
+  setInterval: () => ++intervalsStarted, clearInterval: () => intervalsCleared++ });
 const run = s => vm.runInContext(s, context);
 run(source);
 run('say("Hello")');
@@ -96,5 +108,69 @@ assert.ok(canceled > 0);
   run('cancelSpeech()');
   await flush();
   assert.deepEqual(settled.at(-1), 'sixth');
-  console.log('PASS: delayed voices, natural pitch, local quality preference, saved choice, language, volume, mute, missing voice fallback, speech completion promise');
+
+  // ---- App lifecycle: screen lock / app switch ----
+  const lifecycle = [];
+  window.addEventListener('lawson:audiohidden', () => lifecycle.push('hidden'));
+  window.addEventListener('lawson:audiovisible', () => lifecycle.push('visible'));
+  // Menu music is playing and the storyteller is mid-line.
+  const musicBase = intervalsStarted; // audio.js also uses setInterval for the voice nudge
+  run('setMusicEnabled(true); startMusic()');
+  assert.equal(intervalsStarted, musicBase + 1, 'music loop running');
+  track(run('say("Once upon a time")'), 'story');
+  const before = { canceled, cleared: intervalsCleared, spokenCount: spoken.length };
+  // Lock the screen: narration cut and its waiter released, music loop
+  // stopped, listeners told.
+  document.hidden = true;
+  document.dispatchEvent(new Event('visibilitychange'));
+  await flush();
+  assert.equal(settled.at(-1), 'story', 'in-flight narration released on hide');
+  assert.ok(canceled > before.canceled, 'speech cancelled on hide');
+  assert.ok(intervalsCleared > before.cleared, 'music stopped on hide');
+  assert.deepEqual(lifecycle, ['hidden']);
+  assert.equal(run('isAudioHidden()'), true);
+  // pagehide arriving after visibilitychange is a no-op, not a second event.
+  window.dispatchEvent(new Event('pagehide'));
+  assert.deepEqual(lifecycle, ['hidden']);
+  // Nothing speaks or plays behind a locked screen.
+  track(run('say("Should not be heard")'), 'behind-lock');
+  await flush();
+  assert.equal(spoken.length, before.spokenCount, 'no utterance while hidden');
+  assert.equal(settled.at(-1), 'behind-lock', 'hidden say() still resolves');
+  run('startMusic()');
+  assert.equal(intervalsStarted, musicBase + 1, 'music does not start while hidden');
+  // Unlock: iOS has left the speech engine paused and the audio context
+  // interrupted. Both are woken, the music loop restarts, listeners told.
+  synth.paused = true;
+  run('audioCtx.state = "interrupted"');
+  document.hidden = false;
+  document.dispatchEvent(new Event('visibilitychange'));
+  await flush();
+  assert.deepEqual(lifecycle, ['hidden', 'visible']);
+  assert.equal(run('isAudioHidden()'), false);
+  assert.equal(resumedSynth, 1, 'paused speech engine resumed');
+  assert.equal(resumedCtx, 1, 'interrupted audio context resumed');
+  assert.equal(intervalsStarted, musicBase + 2, 'music restarted because it was playing before');
+  window.dispatchEvent(new Event('pageshow'));
+  assert.deepEqual(lifecycle, ['hidden', 'visible'], 'duplicate show is a no-op');
+  // Music that was already off stays off across a hide/show.
+  run('stopMusic()');
+  window.dispatchEvent(new Event('pagehide'));
+  window.dispatchEvent(new Event('pageshow'));
+  assert.equal(intervalsStarted, musicBase + 2, 'no phantom music after unlock');
+  // A stuck-paused engine is also recovered on the next say(), for
+  // interruptions (Siri, phone call) that never hide the page.
+  synth.paused = true;
+  run('say("After a phone call")');
+  assert.equal(resumedSynth, 2);
+  assert.equal(spoken.at(-1).text, 'After a phone call');
+  // A running context is left alone; a closed one is never resumed.
+  run('unlockAudio()');
+  assert.equal(resumedCtx, 1);
+  run('audioCtx.state = "closed"; unlockAudio()');
+  assert.equal(resumedCtx, 1);
+  run('audioCtx.state = "suspended"; unlockAudio()');
+  assert.equal(resumedCtx, 2);
+
+  console.log('PASS: delayed voices, natural pitch, local quality preference, saved choice, language, volume, mute, missing voice fallback, speech completion promise, hide/show lifecycle');
 })().catch(e => { console.error(e); process.exit(1); });

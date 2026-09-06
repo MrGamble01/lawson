@@ -64,8 +64,14 @@ const L = {
   beep() {}, haptic() {}, happySound() {}, sparkleAt() {},
   cheer: () => 'Yay!', earnSticker: () => { stickers++; },
 };
+const windowEvents = new EventTarget();
+const window = { Lawson: L,
+  addEventListener: windowEvents.addEventListener.bind(windowEvents),
+  dispatchEvent: windowEvents.dispatchEvent.bind(windowEvents) };
+const hideApp = () => window.dispatchEvent(new Event('lawson:audiohidden'));
+const showApp = () => window.dispatchEvent(new Event('lawson:audiovisible'));
 vm.runInNewContext(source, {
-  window: { Lawson: L }, document, Math,
+  window, document, Math, Event,
   setTimeout: vSetTimeout, clearTimeout: vClearTimeout, Date: { now: () => clock.now },
 });
 const story = L.games.story;
@@ -156,5 +162,54 @@ const ceilFor = s => floorFor(s) * 2 + 4000;
   assert.equal(counter(), '2 / 4');
   assert.deepEqual(pendingTimers(), []);
 
-  console.log('PASS: story pacing — floor, slow-voice wait, no-end ceiling, single ending, muted, tap-ahead, stop');
+  // 8. Screen lock mid-page: the page freezes (no timers, stale narration
+  //    inert) and on unlock the same page is read again from the top.
+  story.start();
+  assert.equal(counter(), '1 / 4');
+  const p8 = lastLine();
+  await runUntil(clock.now + 800);
+  hideApp();
+  assert.deepEqual(pendingTimers(), [], 'no timers while hidden');
+  await finishLine(p8); // audio layer cancels narration on hide → settles
+  await runUntil(clock.now + 60000);
+  assert.equal(counter(), '1 / 4', 'page did not churn ahead while hidden');
+  const spokenBefore = spoken.length;
+  showApp();
+  assert.equal(spoken.length, spokenBefore + 1, 'page re-read on unlock');
+  assert.equal(lastLine().text, p8.text);
+  assert.equal(counter(), '1 / 4');
+  assert.equal(pendingTimers().length, 1, 'ceiling armed again');
+  await finishLine(lastLine());
+  await runUntil(clock.now + floorFor(p8.text));
+  assert.equal(counter(), '2 / 4', 'pacing continues normally after unlock');
+
+  // 9. Screen lock at "The end!": unlock moves on to the next story
+  //    instead of replaying the ending.
+  const screenTap2 = ids.storyGame.handlers[0];
+  screenTap2({ target: { closest: () => null } }); // → 3 / 4
+  screenTap2({ target: { closest: () => null } }); // → 4 / 4
+  assert.equal(counter(), '4 / 4');
+  const stickersBefore = stickers;
+  screenTap2({ target: { closest: () => null } }); // → The end!
+  assert.equal(stickers, stickersBefore + 1);
+  const endsBefore = spoken.filter(s => s.text.startsWith('The end!')).length;
+  await runUntil(clock.now + 1000); // let the 12 sparkle timers (≤ 605 ms) fire
+  assert.equal(pendingTimers().length, 1, 'only the next-story timer remains');
+  hideApp();
+  assert.deepEqual(pendingTimers(), []);
+  await runUntil(clock.now + 60000);
+  showApp();
+  assert.equal(counter(), '1 / 4', 'next story started on unlock');
+  assert.equal(spoken.filter(s => s.text.startsWith('The end!')).length, endsBefore, 'ending not replayed');
+  assert.equal(stickers, stickersBefore + 1, 'sticker not re-awarded');
+
+  // 10. Lifecycle events are ignored when the game isn't open.
+  story.stop();
+  const spokenAfterStop = spoken.length;
+  hideApp();
+  showApp();
+  assert.equal(spoken.length, spokenAfterStop, 'no narration from a closed game');
+  assert.deepEqual(pendingTimers(), []);
+
+  console.log('PASS: story pacing — floor, slow-voice wait, no-end ceiling, single ending, muted, tap-ahead, stop, lock/unlock freeze + resume');
 })().catch(e => { console.error(e); process.exit(1); });

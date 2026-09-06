@@ -618,7 +618,7 @@ function boboCheer() {
 // tweak one without touching the others.
 window.Lawson = {
   say, cancelSpeech, beep, happySound, buzzSound, haptic, sparkleAt, onTap, onTapOnce, pointOf, bumpBadge, show,
-  audioCtx, unlockAudio, masterGain, setVolume, getVolume,
+  audioCtx, unlockAudio, masterGain, setVolume, getVolume, isAudioHidden,
   getHighScore, setHighScore, bumpHighScore, tryNewHighScore,
   setVoiceMuted, setSoundMuted, isVoiceMuted, isSoundMuted,
   setMusicEnabled, isMusicEnabled, startMusic, stopMusic,
