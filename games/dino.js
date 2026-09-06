@@ -245,9 +245,9 @@
     const water = $("dinoShowerWater");
     if (shower) shower.classList.add("active");
     if (water) water.classList.add("on");
-    L.say("Splash splash!");
     L.beep(720, 0.5, "sine");
     L.beep(900, 0.4, "triangle", 0.12);
+    L.say("Splash splash!");
     lather.forEach((b, i) => {
       setT(150 + i * 55, () => {
         b.el.classList.add("rinsed");

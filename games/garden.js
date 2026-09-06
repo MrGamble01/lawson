@@ -357,21 +357,21 @@
       pot.state = STATE.SPROUT;
       pot.plantEl.innerHTML = sproutSvg(p.stem);
       pot.plantEl.classList.add("stage-sprout");
-      L.say("Sprout!");
       L.beep(600, 0.10, "triangle");
+      L.say("Sprout!");
     } else if (pot.growth === 2) {
       pot.state = STATE.YOUNG;
       pot.plantEl.innerHTML = youngSvg(p.stem);
       pot.plantEl.classList.add("stage-young");
-      L.say("Growing!");
       L.beep(680, 0.10, "triangle");
+      L.say("Growing!");
     } else if (pot.growth >= 3) {
       pot.state = STATE.MATURE;
       pot.plantEl.innerHTML = matureSvg(p.stem, p.emoji, p.fruitColor);
       pot.plantEl.classList.add("stage-mature");
-      L.say(p.say);
       L.beep(760, 0.16, "triangle");
       L.haptic(8);
+      L.say(p.say);
       // Sparkle the moment of ripeness.
       const r = pot.plantEl.getBoundingClientRect();
       L.sparkleAt(r.left + r.width / 2, r.top + r.height / 2);
@@ -657,9 +657,9 @@
     const cont = $("gardenRain");
     if (!cont) return;
     cont.classList.add("on");
-    L.say("It's raining!");
     L.beep(700, 0.6, "sine");
     L.beep(900, 0.5, "triangle", 0.15);
+    L.say("It's raining!");
     rainPieces = [];
     for (let i = 0; i < 40; i++) {
       const r = document.createElement("div");
