@@ -1036,6 +1036,20 @@ document.addEventListener("touchmove", (e) => {
   if (!openBtn || !overlay) return;
   const nameInput  = document.getElementById("settingsName");
   const voiceTgl   = document.getElementById("settingsVoice");
+  const voiceChoice = document.getElementById("settingsVoiceChoice");
+  const voicePreview = document.getElementById("settingsVoicePreview");
+  function refreshVoices() {
+    const automatic = new Option("Automatic (recommended)", "");
+    const voices = availableVoices();
+    voiceChoice.replaceChildren(automatic, ...voices.map(v =>
+      new Option(`${v.name} — ${v.lang}${v.localService ? "" : " (online)"}`, v.voiceURI)));
+    voiceChoice.value = voices.some(v => v.voiceURI === savedVoiceURI) ? savedVoiceURI : "";
+    voiceChoice.disabled = !synth;
+    voicePreview.disabled = !synth || isVoiceMuted() || getVolume() === 0;
+  }
+  voiceChoice.addEventListener("change", () => setSpeechVoice(voiceChoice.value));
+  voicePreview.addEventListener("click", () => say("Hi! Let's play and discover something wonderful together."));
+  window.addEventListener("lawson:voiceschanged", refreshVoices);
   const soundTgl   = document.getElementById("settingsSound");
   const musicTgl   = document.getElementById("settingsMusic");
   const darkTgl    = document.getElementById("settingsDark");
@@ -1047,6 +1061,7 @@ document.addEventListener("touchmove", (e) => {
   // Toggles are "on means enabled", so the checkbox value is the inverse
   // of the muted flag.
   voiceTgl.addEventListener("change", () => setVoiceMuted(!voiceTgl.checked));
+  voiceTgl.addEventListener("change", refreshVoices);
   soundTgl.addEventListener("change", () => {
     setSoundMuted(!soundTgl.checked);
     if (soundTgl.checked) beep(500, 0.08); // little chirp when re-enabling
@@ -1055,6 +1070,7 @@ document.addEventListener("touchmove", (e) => {
   // parent hears the new level. `input` updates live; `change` chirps.
   if (volumeInput) {
     volumeInput.addEventListener("input", () => setVolume(volumeInput.value / 100));
+    volumeInput.addEventListener("input", refreshVoices);
     volumeInput.addEventListener("change", () => {
       setVolume(volumeInput.value / 100);
       if (!isSoundMuted() && volumeInput.value > 0) beep(600, 0.1, "triangle");
@@ -1071,6 +1087,7 @@ document.addEventListener("touchmove", (e) => {
     const onboarding = !!(opts && opts.onboarding);
     nameInput.value = isFirstRun() ? "" : KID_NAME;
     voiceTgl.checked = !isVoiceMuted();
+    refreshVoices();
     soundTgl.checked = !isSoundMuted();
     if (musicTgl) musicTgl.checked = isMusicEnabled();
     if (darkTgl) darkTgl.checked = isDarkMode();

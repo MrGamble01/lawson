@@ -68,6 +68,11 @@ The **More** drawer holds themed hub cards, each opening a small menu:
 
 - Edit the kid's name (used in cheers across every game)
 - Mute voice and/or sound effects independently
+- Choose and preview a storyteller voice. Automatic prefers local English
+  voices with enhanced quality when available, using their natural pitch.
+  The choice is saved on this device. Available voices depend on the device;
+  voices marked online require a connection. On iPad, additional voices can
+  be downloaded in the device's accessibility speech settings.
 - **Volume** — one master slider for all app audio
 - Music on the menu (on/off)
 - Dark mode
