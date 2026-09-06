@@ -4897,6 +4897,24 @@ body[data-dino-phase="towel"] .dino-towel {
   color: #6741d9;
   margin-top: 6px;
 }
+/* The hint is a real "Next page" button for keyboard and switch users,
+   styled as the same quiet line of text. */
+button.story-hint {
+  display: block;
+  margin: 6px auto 0;
+  background: none;
+  border: 0;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: clamp(13px, 2vw, 16px);
+  font-weight: 700;
+  cursor: pointer;
+}
+button.story-hint:active { background: rgba(103, 65, 217, 0.12); }
+/* Connect-the-dots: the focused dot thickens its ring as well as showing
+   the outline, so it reads on any puzzle background. */
+.dots-svg g.dot:focus-visible circle { stroke-width: 7; }
 
 /* ---------- Welcome toast (top, app-load only) ---------- */
 .welcome-toast {

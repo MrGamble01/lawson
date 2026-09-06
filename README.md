@@ -43,7 +43,8 @@ The **More** drawer holds themed hub cards, each opening a small menu:
 - **Wonder World** — ABC + 8 flashcard topics (Colors, Shapes, Animals,
   Vehicles, Dinos, Weather, Food, Family)
 - **Town** — Train, Farm, Ice Cream (illustrated sandbox scenes)
-- **Library** — Story, Sticker book
+- **Library** — Story (tap anywhere, the "keep going" line, or press
+  Enter to turn the page), Sticker book
 
 **Sandboxes** (open-ended, no scoring):
 
@@ -147,7 +148,10 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   seed planted, water it", "Hole 4: mole!"). Opening a game moves focus
   onto that screen (a labelled region); Home puts it back on the tile you
   came from. Mode tabs expose their pressed state; Memory cards say
-  "Hidden card" until flipped.
+  "Hidden card" until flipped. Connect-the-dots' SVG dots are buttons
+  too, named "Dot 3, next" / "Dot 2, connected", and so are Coloring's
+  regions ("roof", "left top wing"); Story Time turns the page from its
+  "keep going" button or Enter on the screen.
 - **Captions / live region**: see Settings above.
 - **Reduced motion**: with the OS "reduce motion" preference on, or the
   in-app **Less motion** setting, CSS animations collapse and the sparkle /
