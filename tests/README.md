@@ -5,9 +5,10 @@ Smoke, visual baseline and accessibility checks for every game and key screen.
 ## Run
 
 ```bash
-node tests/pacing-lint.js          # no bare timer right after a cheer, no chime right after a line (static check, no browser); --self-test checks the checker
+node tests/pacing-lint.js          # no bare timer right after a cheer, no chime right after a line, no helper-then-line in the same tick (static check, no browser); --self-test checks the checker
 node tests/voice.js                # speech: voice choice, speed, name "sounds like", mute/volume, completion promise, caption event (no browser)
 node tests/story.js                # Story Time pacing on real narration end (no browser)
+node tests/scene.js                # Sticker Scene: hear the scene name before the welcome (no browser)
 node tests/stickers.js             # sticker announcement: jingle first, then waits for the cheer (no browser)
 node tests/nav-speech.js           # hub welcome line never spoken over a screen the kid tapped on to (Playwright)
 node tests/smoke.js                # smoke pass only (errors-free / screen renders / restart safe)
@@ -41,7 +42,11 @@ voice (and the next line waits a beat after a cut-off), that every attempt
 is logged with its start latency and outcome for the Settings voice report,
 that a line spoken right after a chime waits for the chime to ring out
 (`tests/pacing-lint.js` makes sure every game triggers its chime before
-the line, not after it, where it would land on the first word),
+the line, not after it, where it would land on the first word, and that
+a helper which already spoke is not followed by another line in the same
+tick — Sticker Scene's `build()` then welcome),
+`tests/scene.js` holds the opening "The park!" past the old same-tick
+cut-off and checks the welcome starts one beat after it ends,
 that a quiz prompt is repeated once after a quiet spell and dropped by any
 other line, a screen change, a lock or a muted voice, that the menu music
 ducks under a line in flight and eases back once it ends (or is cut off,

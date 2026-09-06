@@ -121,9 +121,11 @@
   let placed = [];
   let sceneIdx = 0;
   let timers = [];
+  let cancelWelcome = null;
+  function clearWelcome() { if (cancelWelcome) cancelWelcome(); cancelWelcome = null; }
 
   function setT(ms, fn) { const t = setTimeout(fn, ms); timers.push(t); return t; }
-  function clearAll() { timers.forEach(clearTimeout); timers = []; }
+  function clearAll() { timers.forEach(clearTimeout); timers = []; clearWelcome(); }
   function $(id) { return document.getElementById(id); }
 
   // ====================================================================
@@ -143,7 +145,9 @@
         <span class="scene-clear-label">Clear</span>
       </button>
       <div id="sceneTray" class="scene-tray"></div>`;
-    applyScene();
+    // Silent: start() owns the welcome (and a restored picture's greeting)
+    // so "The park!" is not cut off in the same tick. Scene-switch speaks.
+    applyScene(true);
     buildTray();
     setupSwitchers();
   }
@@ -160,11 +164,14 @@
 
   function setupSwitchers() {
     L.onTap($("sceneSwitch"), () => {
+      // A pending welcome must not land on the new scene's name.
+      clearWelcome();
       sceneIdx = (sceneIdx + 1) % SCENES.length;
-      applyScene();
+      // Chime first: say() waits for it, so "The beach!" is not masked.
       L.beep(580, 0.06, "sine");
       L.beep(720, 0.08, "sine", 0.06);
       L.haptic(6);
+      applyScene();
       saveScene();
     });
     L.onTap($("sceneClear"), () => {
@@ -392,10 +399,18 @@
     sceneIdx = 0;
     clearAll();
     build();
-    // Bring back the kid's saved scene if there is one; otherwise greet.
+    // Bring back the kid's saved scene if there is one; otherwise name
+    // the picture, then the how-to — never both in the same tick.
     const restored = loadScene();
-    if (restored) L.say("Here's your picture!");
-    else L.say("Drag stickers onto the picture!");
+    if (restored) {
+      L.say("Here's your picture!");
+    } else {
+      L.say(SCENES[sceneIdx % SCENES.length].say);
+      clearWelcome();
+      cancelWelcome = L.afterSpeech(() => L.say("Drag stickers onto the picture!"), {
+        beatMs: 150, minMs: 400, maxMs: 3000,
+      });
+    }
   }
 
   function stop() {

@@ -9,6 +9,10 @@
 //    triggers a chime in the same tick. say() waits for a chime that is
 //    already ringing, but a chime triggered after it lands on the first
 //    word. Trigger the chime first; the line waits for it.
+// 3. "Helper speaks, then a line" (Sticker Scene): build() names the
+//    picture and start() greets in the same tick, so the name is cut off.
+//    A same-file helper whose own body speaks (or calls applyScene()
+//    without silent) must not be followed by L.say in the same handler.
 //
 // Run: node tests/pacing-lint.js            (checks every game)
 //      node tests/pacing-lint.js --self-test (checks the checker on fixtures)
@@ -51,7 +55,80 @@ function check(file, lines) {
       }
     }
   });
+  // Rule 3: a helper that already spoke, then another line in the same handler.
+  const fns = functionBodies(lines);
+  const speaks = new Map();
+  for (const [name, body] of fns) speaks.set(name, functionSpeaks(body, fns));
+  lines.forEach((line, i) => {
+    if (/^\s*function\s/.test(line)) return;      // the definition, not a call
+    const call = line.match(/\b([A-Za-z_]\w*)\s*\(/);
+    if (!call) return;
+    const name = call[1];
+    if (!speaks.get(name)) return;
+    if (SILENT_APPLY.test(line)) return;          // applyScene(true) is quiet
+    if (SPEECH_GATED.test(line) || /afterSpeech\(/.test(line)) return;
+    for (let j = i + 1; j <= Math.min(i + WINDOW, lines.length - 1); j++) {
+      const l = lines[j];
+      if (BRANCH_END.test(l) && /^\s*\}/.test(l)) break;
+      if (SPEECH_GATED.test(l) || /afterSpeech\(/.test(l)) break;
+      if (/setTimeout\(|setT\(/.test(l)) break;   // a timer leftover, not this one
+      if (SAY.test(l)) {
+        problems.push(`${file}:${j + 1}: ${name}() already speaks; the line on ${j + 1} cuts it off — wait with L.afterSpeech or silence the helper\n    ${l.trim()}`);
+        break;
+      }
+    }
+  });
   return problems;
+}
+
+const SILENT_APPLY = /applyScene\(\s*true\s*\)/;
+const CALLBACK = /(?:onTap(?:Once)?|forEach|setTimeout|setT|addEventListener)\s*\(|=>/;
+
+function functionBodies(lines) {
+  const fns = new Map();
+  for (let i = 0; i < lines.length; i++) {
+    const m = lines[i].match(/^\s*function\s+([A-Za-z_]\w*)\s*\(/);
+    if (!m) continue;
+    let depth = 0, started = false, end = i;
+    for (let j = i; j < lines.length; j++) {
+      const open = (lines[j].match(/\{/g) || []).length;
+      const close = (lines[j].match(/\}/g) || []).length;
+      depth += open - close;
+      if (open) started = true;
+      if (started && depth <= 0) { end = j; break; }
+    }
+    fns.set(m[1], lines.slice(i, end + 1));
+  }
+  return fns;
+}
+
+// A function "speaks" when its own body (not an onTap / timer callback)
+// calls L.say, or calls applyScene() without the silent flag. One hop
+// through a same-file helper is enough (build → applyScene).
+function functionSpeaks(body, fns, seen) {
+  seen = seen || new Set();
+  const name = (body[0].match(/function\s+([A-Za-z_]\w*)/) || [])[1];
+  if (!name || seen.has(name)) return false;
+  seen.add(name);
+  let skipDepth = 0;
+  for (const l of body.slice(1)) {
+    const open = (l.match(/\{/g) || []).length;
+    const close = (l.match(/\}/g) || []).length;
+    if (skipDepth > 0) {
+      skipDepth += open - close;
+      continue;
+    }
+    if (CALLBACK.test(l)) {
+      skipDepth = Math.max(0, open - close);
+      continue;
+    }
+    if (SAY.test(l)) return true;
+    if (SILENT_APPLY.test(l)) continue;           // applyScene(true) is quiet
+    if (/\bapplyScene\s*\(/.test(l)) return true;
+    const hop = l.match(/^\s*([A-Za-z_]\w*)\s*\(/);
+    if (hop && fns.has(hop[1]) && hop[1] !== name && functionSpeaks(fns.get(hop[1]), fns, seen)) return true;
+  }
+  return false;
 }
 
 function selfTest() {
@@ -75,6 +152,17 @@ function selfTest() {
   assert.equal(lint('L.say(L.cheer());\nsetTimeout(next, 900);').length, 1);
   assert.equal(lint('L.say(L.cheer());\nL.afterSpeech(next, { minMs: 900 });').length, 0);
   assert.equal(lint('L.say("Try again!");\nsetTimeout(() => el.classList.remove("x"), 300);').length, 0);
+  // Rule 3: a speaking helper then a line in the same handler.
+  assert.equal(lint('function applyScene() {\n  L.say("The park!");\n}\nfunction start() {\n  applyScene();\n  L.say("Drag stickers onto the picture!");\n}').length, 1);
+  assert.equal(lint('function applyScene(silent) {\n  if (!silent) L.say("The park!");\n}\nfunction build() {\n  applyScene();\n}\nfunction start() {\n  build();\n  L.say("Drag stickers onto the picture!");\n}').length, 1);
+  assert.match(lint('function applyScene() {\n  L.say("The park!");\n}\nfunction start() {\n  applyScene();\n  L.say("Hi");\n}')[0], /already speaks/);
+  // Silencing the helper, or waiting, is the right shape.
+  assert.equal(lint('function applyScene(silent) {\n  if (!silent) L.say("The park!");\n}\nfunction build() {\n  applyScene(true);\n}\nfunction start() {\n  build();\n  L.say("The park!");\n}').length, 0);
+  assert.equal(lint('function applyScene() {\n  L.say("The park!");\n}\nfunction start() {\n  applyScene();\n  L.afterSpeech(() => L.say("Hi"), { minMs: 400 });\n}').length, 0);
+  // A say that only lives in an onTap is not the helper speaking.
+  assert.equal(lint('function build() {\n  L.onTap(el, () => L.say("Woof!"));\n}\nfunction start() {\n  build();\n  L.say("Welcome!");\n}').length, 0);
+  // Say then a named speaker is a different leftover (Train's boardOrLeave).
+  assert.equal(lint('function boardOrLeave() {\n  L.say("Woof!");\n}\nfunction arrive() {\n  L.say("Station 2!");\n  boardOrLeave();\n}').length, 0);
   console.log('PASS: pacing lint self-test');
 }
 
@@ -87,6 +175,6 @@ if (require.main === module) {
     console.error('FAIL: speech pacing:\n' + problems.join('\n'));
     process.exit(1);
   }
-  console.log(`PASS: pacing lint — no bare timer right after a cheer, no chime right after a line, in ${files.length} games`);
+  console.log(`PASS: pacing lint — no bare timer right after a cheer, no chime right after a line, no helper-then-line in the same tick, in ${files.length} games`);
 }
 module.exports = { check };
