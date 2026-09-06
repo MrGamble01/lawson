@@ -58,16 +58,19 @@ const document = { getElementById: id => ids[id] || null, createElement: () => e
 const spoken = [];      // [text, resolve]
 let stickers = 0;
 let inFlight = null;    // like lib/audio.js: a new line cuts off (settles) the one in flight
+let lastSaid = Promise.resolve();
 const L = {
   games: {},
-  say: (text) => new Promise(resolve => {
+  say: (text) => (lastSaid = new Promise(resolve => {
     if (inFlight) inFlight.resolve();
     inFlight = { text, resolve };
     spoken.push(inFlight);
-  }),
+  })),
+  speechDone: () => lastSaid,
   onTap: (node, fn) => node.handlers.push(fn),
   beep() {}, haptic() {}, happySound() {}, sparkleAt() {},
-  cheer: () => 'Yay!', earnSticker: () => { stickers++; },
+  cheer: () => 'Yay!',
+  earnSticker: () => { stickers++; if (stickers === 1) L.say('Sticker! Storyteller!', 1.05); },
 };
 const windowEvents = new EventTarget();
 const window = { Lawson: L,
@@ -133,14 +136,22 @@ const ceilFor = s => floorFor(s) * 2 + 4000;
   await runUntil(p4Shown + floorFor(p4.text));
   const endLines = spoken.filter(s => s.text.startsWith('The end!'));
   assert.equal(endLines.length, 1);
-  assert.equal(stickers, 1);
+  assert.equal(stickers, 0, 'sticker not awarded over the ending line');
+  assert.equal(lastLine(), endLines[0]);
   await finishLine(p3); // stale end event from the page the ceiling skipped
+  await runUntil(clock.now + 3000);
+  assert.equal(counter(), '4 / 4', 'still on the ending while "The end!" is being said');
   await finishLine(endLines[0]);
-  await runUntil(clock.now + 2399);
+  assert.equal(stickers, 1, 'sticker awarded once the ending was heard');
+  assert.equal(lastLine().text, 'Sticker! Storyteller!', 'announcement follows the ending');
+  await runUntil(clock.now + 3000);
+  assert.equal(counter(), '4 / 4', 'still waiting for the sticker line');
+  await finishLine(lastLine());
+  await runUntil(clock.now + 1499);
   assert.equal(spoken.filter(s => s.text.startsWith('The end!')).length, 1, 'ending fired once');
-  assert.equal(stickers, 1);
+  assert.equal(counter(), '4 / 4');
   await runUntil(clock.now + 1);
-  assert.equal(counter(), '1 / 4', 'next story started after the beat');
+  assert.equal(counter(), '1 / 4', 'next story one beat after the sticker line');
   assert.equal(stickers, 1);
 
   // 5. Muted voice: say() resolves immediately → page holds for the floor.
@@ -196,10 +207,12 @@ const ceilFor = s => floorFor(s) * 2 + 4000;
   assert.equal(counter(), '4 / 4');
   const stickersBefore = stickers;
   screenTap2({ target: { closest: () => null } }); // → The end!
-  assert.equal(stickers, stickersBefore + 1);
   const endsBefore = spoken.filter(s => s.text.startsWith('The end!')).length;
   await runUntil(clock.now + 1000); // let the 12 sparkle timers (≤ 605 ms) fire
-  assert.equal(pendingTimers().length, 1, 'only the next-story timer remains');
+  assert.equal(pendingTimers().length, 1, 'only the ending ceiling remains');
+  await finishLine(lastLine());      // "The end!" heard → sticker (already earned) → beat armed
+  assert.equal(stickers, stickersBefore + 1);
+  assert.equal(lastLine().text.startsWith('The end!'), true, 'no announcement for an old sticker');
   hideApp();
   assert.deepEqual(pendingTimers(), []);
   await runUntil(clock.now + 60000);
@@ -280,7 +293,8 @@ const ceilFor = s => floorFor(s) * 2 + 4000;
   const readsOfP14 = linesSaid(p14.text);
   ids.storyGame.handlers[0]({ target: { closest: () => null } }); // → The end! (cuts the sound off)
   await flush();
-  await runUntil(clock.now + 2400);                              // → next story rendered exactly now
+  await finishLine(lastLine());                                   // ending heard
+  await runUntil(clock.now + 1500);                               // → next story rendered exactly now
   assert.equal(counter(), '1 / 4');
   assert.equal(linesSaid(p14.text), readsOfP14, 'stale poke did not re-read the old page');
 
@@ -308,15 +322,27 @@ const ceilFor = s => floorFor(s) * 2 + 4000;
   const stickersBefore16 = stickers;
   tapAhead();                        // → The end! (last line never heard)
   await flush();
-  pokeChar(0);
+  const ending16 = lastLine();
+  pokeChar(0);                       // cuts "The end!" off; the sound is what's in flight now
   await flush();
   await finishLine(lastLine());
-  await runUntil(clock.now + 2400);  // the next-story beat; a re-read would have landed inside it
+  await runUntil(clock.now + 1500);  // a re-read would have landed inside this window
   assert.equal(linesSaid(p16.text), 1, 'last line not re-read over the ending');
   assert.equal(spoken.filter(s => s.text.startsWith('The end!')).length, endsBefore16 + 1, 'ending fired once');
+  assert.equal(counter(), '1 / 4', 'next story started once the ending settled');
   assert.equal(stickers, stickersBefore16 + 1);
-  assert.equal(counter(), '1 / 4', 'next story started');
+
+  // 17. The engine never reports "The end!" finished: the ceiling moves on.
+  [tapAhead, tapAhead, tapAhead, tapAhead].forEach(f => f()); // 1 → 2 → 3 → 4 → The end!
+  await flush();
+  const endShown = clock.now;
+  assert.ok(lastLine().text.startsWith('The end!'));
+  await runUntil(endShown + 8999);
+  assert.equal(counter(), '4 / 4');
+  await runUntil(endShown + 9000);
+  assert.equal(counter(), '1 / 4', 'ceiling started the next story');
+  void ending16;
   story.stop();
 
-  console.log('PASS: story pacing — floor, slow-voice wait, no-end ceiling, single ending, muted, tap-ahead, stop, lock/unlock freeze + resume, poke-then-resume');
+  console.log('PASS: story pacing — floor, slow-voice wait, no-end ceiling, single ending, muted, tap-ahead, stop, lock/unlock freeze + resume, poke-then-resume, ending heard before sticker + next story');
 })().catch(e => { console.error(e); process.exit(1); });

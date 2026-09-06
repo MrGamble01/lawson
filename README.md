@@ -83,7 +83,8 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   paces its pages on the chosen voice: each page turns once the line has
   actually been read, plus a beat to poke the scene. Poking a character
   answers with its sound, then the storyteller picks the line back up if
-  it was cut off.
+  it was cut off. "The end!" and the cheer are heard in full before the
+  sticker is announced and the next story begins.
 - Locking the iPad or switching apps silences the storyteller and the menu
   music straight away. Coming back wakes the speech and sound engines
   (iOS leaves both muted after a lock or a phone call) and Story Time

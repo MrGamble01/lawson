@@ -317,6 +317,11 @@
   // a floor (never flip pages faster than a toddler can look) and a
   // ceiling (iOS sometimes never fires `end`, so don't hang forever).
   const POKE_BEAT_MS = 1200;
+  // After "The end!" (and, the first time, the sticker announcement) has
+  // been heard: a beat before the next story, and a ceiling in case the
+  // speech engine never reports the ending finished.
+  const END_BEAT_MS = 1500;
+  const END_MAX_MS = 9000;
   function pacing(text) {
     const words = text.split(/\s+/).filter(Boolean).length;
     const minMs = Math.max(3800, words * 380 + POKE_BEAT_MS);
@@ -423,7 +428,6 @@
     } else {
       // Story ends — sparkle, "The end!", and earn a sticker.
       L.happySound();
-      L.say(`The end! ${L.cheer()}`);
       const stage = document.getElementById("storyStage");
       const r = stage.getBoundingClientRect();
       for (let k = 0; k < 12; k++) {
@@ -432,10 +436,23 @@
           r.top  + r.height / 2 + (Math.random() - 0.5) * 220,
         ), k * 55);
       }
-      L.earnSticker && L.earnSticker("storyteller");
-      // Next story after a beat.
       atEnd = true;
-      advanceTimer = setTimeout(nextStory, 2400);
+      const seq = pageSeq;
+      const still = () => seq === pageSeq && atEnd && advanceTimer !== null;
+      advanceTimer = setTimeout(nextStory, END_MAX_MS);
+      // Let "The end!" and the cheer be heard in full. Only then award
+      // the sticker: its announcement ("Sticker! ...") goes through the
+      // same speech layer and would otherwise cut the ending off. Wait
+      // for that line too, then a beat, then the next story.
+      Promise.resolve(L.say(`The end! ${L.cheer()}`)).then(() => {
+        if (!still()) return;
+        L.earnSticker && L.earnSticker("storyteller");
+        return Promise.resolve(L.speechDone ? L.speechDone() : null).then(() => {
+          if (!still()) return;
+          clearTimeout(advanceTimer);
+          advanceTimer = setTimeout(nextStory, END_BEAT_MS);
+        });
+      });
     }
   }
 
