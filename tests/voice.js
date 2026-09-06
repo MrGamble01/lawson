@@ -320,5 +320,23 @@ assert.equal(said.at(-1), 'Pop the N!');
   events.dispatchEvent(new Event('voiceschanged'));
   assert.equal(run('preferredVoice.voiceURI'), 'online');
 
-  console.log('PASS: delayed voices, natural pitch, local quality preference, saved choice, language, volume, mute, missing voice fallback, speech completion promise, caption event, hide/show lifecycle, unusable-voice fallback');
+  // ---- speechDone(): wait for whatever is being said right now ----
+  run('setVoiceMuted(true)');
+  track(run('speechDone()'), 'idle');
+  await flush();
+  assert.equal(settled.at(-1), 'idle', 'resolved at once when nothing is in flight');
+  run('setVoiceMuted(false)');
+  const sd = run('say("Sticker! Storyteller!")');
+  assert.strictEqual(run('speechDone()'), sd, 'speechDone() is the promise of the current line');
+  track(run('speechDone()'), 'sticker-line');
+  await flush();
+  assert.notEqual(settled.at(-1), 'sticker-line');
+  spoken.at(-1).onend();
+  await flush();
+  assert.equal(settled.at(-1), 'sticker-line');
+  track(run('speechDone()'), 'after');
+  await flush();
+  assert.equal(settled.at(-1), 'after', 'stays resolved once the line has ended');
+
+  console.log('PASS: delayed voices, natural pitch, local quality preference, saved choice, language, volume, mute, missing voice fallback, speech completion promise, caption event, hide/show lifecycle, unusable-voice fallback, speechDone');
 })().catch(e => { console.error(e); process.exit(1); });

@@ -35,7 +35,8 @@ app switch silences speech and music and that coming back wakes a paused
 speech engine and an interrupted audio context, and that story pages flip
 after the narration finishes — never before the word-count floor, never
 after the no-`end`-event ceiling — freeze while the app is hidden, and
-pick the line back up after a character poke cuts it off.
+pick the line back up after a character poke cuts it off, and let "The
+end!" and the sticker announcement finish before the next story.
 
 For each of the 24 games (`tests/smoke.js: GAMES`):
 
