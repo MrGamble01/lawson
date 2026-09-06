@@ -98,8 +98,10 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   it was cut off. "The end!" and the cheer are heard in full before the
   sticker is announced and the next story begins. The quiz games (Listen,
   Match, Pattern, How Many?, Count, Find It!, Color Mix, Memory) likewise
-  let the cheer — or "try again" — finish before the next prompt, and a
-  hub's welcome line is skipped if the kid has already tapped on. A quiz
+  let the cheer — or "try again" — finish before the next prompt. Memory
+  also waits for the last card's name ("bee") before "You matched them
+  all!", so a late-starting iPad voice is not cut off. A hub's welcome
+  line is skipped if the kid has already tapped on. A quiz
   prompt ("Find the cow!") is repeated once if nothing has happened for
   twelve seconds, so a kid who looked away gets a nudge, never a nag. A cheer
   starts as its chime rings out rather than underneath it, so the first
