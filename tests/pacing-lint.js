@@ -1,4 +1,4 @@
-// Static regression checks for two speech-pacing bugs that were fixed
+// Static regression checks for three speech-pacing bugs that were fixed
 // game by game and must not creep back:
 //
 // 1. "Cheer, then a fixed timer" (#18 and follow-ons): a game speaks a
@@ -9,6 +9,9 @@
 //    triggers a chime in the same tick. say() waits for a chime that is
 //    already ringing, but a chime triggered after it lands on the first
 //    word. Trigger the chime first; the line waits for it.
+// 3. "Leftover opening clue" (Listen): a game schedules speakClue on
+//    activeTimer, then a later unstored setTimeout(speakClue) races it.
+//    Clear the leftover and wait with afterSpeech(speakClue, { minMs }).
 //
 // Run: node tests/pacing-lint.js            (checks every game)
 //      node tests/pacing-lint.js --self-test (checks the checker on fixtures)
@@ -25,10 +28,16 @@ const SPEECH_GATED = /\.then\(/;  // a timer inside a .then() chain waits for sp
 const CHIME = /L\.(?:happySound|buzzSound|stickerJingle|beep)\(/;
 const DEFERRED = /setTimeout\(|setT\(|=>/;   // a chime scheduled for later is not on the first word
 const BRANCH_END = /^\s*(?:\}|else\b)/;       // the say() sits in another branch than what follows
+const UNSTORED_CLUE = /^\s*setTimeout\(\s*(?:speakClue\s*,|\(\)\s*=>\s*speakClue\s*\()/;
 
 function check(file, lines) {
   const problems = [];
   lines.forEach((line, i) => {
+    // Rule 3: an unstored speakClue timer races the opening prompt
+    // (or cuts a clue already in flight) and cannot be cancelled.
+    if (UNSTORED_CLUE.test(line)) {
+      problems.push(`${file}:${i + 1}: leftover speakClue timer is not stored and cannot cancel the opening prompt — clear activeTimer and use L.afterSpeech(speakClue, { minMs })\n    ${line.trim()}`);
+    }
     if (!SAY.test(line)) return;
     // Rule 2: a chime right after the line.
     for (let j = i + 1; j <= Math.min(i + CHIME_WINDOW, lines.length - 1); j++) {
@@ -75,6 +84,17 @@ function selfTest() {
   assert.equal(lint('L.say(L.cheer());\nsetTimeout(next, 900);').length, 1);
   assert.equal(lint('L.say(L.cheer());\nL.afterSpeech(next, { minMs: 900 });').length, 0);
   assert.equal(lint('L.say("Try again!");\nsetTimeout(() => el.classList.remove("x"), 300);').length, 0);
+  // Rule 3: an unstored speakClue timer is the leftover opening race.
+  assert.equal(lint('setTimeout(speakClue, 350);').length, 1);
+  assert.equal(lint('setTimeout(() => speakClue(), 350);').length, 1);
+  assert.match(lint('setTimeout(speakClue, 350);')[0], /leftover speakClue timer/);
+  // Stored on activeTimer, or handed to afterSpeech, is the right shape.
+  assert.equal(lint('activeTimer = setTimeout(speakClue, 400);').length, 0);
+  assert.equal(lint('cancelNext = L.afterSpeech(speakClue, { minMs: 350 });').length, 0);
+  // Other leftover shapes (Find It! speakTarget, inline sayPrompt) are
+  // not this rule — they belong to the PRs that already claimed them.
+  assert.equal(lint('setTimeout(speakTarget, 700);').length, 0);
+  assert.equal(lint('activeTimer = setTimeout(() => L.sayPrompt("How many?"), 450);').length, 0);
   console.log('PASS: pacing lint self-test');
 }
 
@@ -87,6 +107,6 @@ if (require.main === module) {
     console.error('FAIL: speech pacing:\n' + problems.join('\n'));
     process.exit(1);
   }
-  console.log(`PASS: pacing lint — no bare timer right after a cheer, no chime right after a line, in ${files.length} games`);
+  console.log(`PASS: pacing lint — no bare timer right after a cheer, no chime right after a line, no leftover speakClue timer, in ${files.length} games`);
 }
 module.exports = { check };

@@ -101,7 +101,10 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   let the cheer — or "try again" — finish before the next prompt, and a
   hub's welcome line is skipped if the kid has already tapped on. A quiz
   prompt ("Find the cow!") is repeated once if nothing has happened for
-  twelve seconds, so a kid who looked away gets a nudge, never a nag. A cheer
+  twelve seconds, so a kid who looked away gets a nudge, never a nag. Listen's
+  opening clue is cancelled if the kid taps a choice or Hear it again before
+  it starts, and a wrong tap waits for a clue already in flight before asking
+  again. A cheer
   starts as its chime rings out rather than underneath it, so the first
   word is never masked — every game triggers its chime before the line
   (the farm, garden, train and scene sounds included), and a check keeps
@@ -196,6 +199,7 @@ Smoke + visual baseline checks for every game live in `tests/`.
 ```bash
 node tests/voice.js                # speech engine + caption event (no browser)
 node tests/story.js                # Story Time pacing (no browser)
+node tests/listen.js               # Listen leftover opening clue (no browser)
 node tests/smoke.js                # errors-free / renders / restart-safe
 node tests/smoke.js --baseline     # + diff every screen against tests/baseline/
 node tests/smoke.js --update-baseline   # accept new baselines after UI changes
