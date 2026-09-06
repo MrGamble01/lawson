@@ -27,6 +27,8 @@
 
   let score = 0;
   let activeTimer = null;
+  let cancelNext = null;
+  function clearNext() { if (cancelNext) cancelNext(); cancelNext = null; }
   let bestAtStart = 0;
   let celebrated = false;
 
@@ -94,7 +96,8 @@
           const p = L.pointOf(e);
           L.sparkleAt(p.x, p.y);
           clearTimeout(activeTimer);
-          activeTimer = setTimeout(newRound, 1700);
+          clearNext();
+          cancelNext = L.afterSpeech(newRound, { minMs: 1700 });
         } else {
           L.buzzSound();
           btn.classList.add("wrong");
@@ -118,7 +121,7 @@
     document.getElementById("patternBestVal").textContent = bestAtStart;
     newRound();
   }
-  function stop() { clearTimeout(activeTimer); activeTimer = null; }
+  function stop() { clearTimeout(activeTimer); activeTimer = null; clearNext(); }
 
   L.games.pattern = { screen: "patternGame", start, stop };
 })();

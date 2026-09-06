@@ -30,6 +30,8 @@
 
   let score = 0;
   let activeTimer = null;
+  let cancelNext = null;
+  function clearNext() { if (cancelNext) cancelNext(); cancelNext = null; }
   let answer = 0;
   let lastItem = null;
   let lastN = 0;
@@ -100,7 +102,8 @@
           const p = L.pointOf(e);
           L.sparkleAt(p.x, p.y);
           clearTimeout(activeTimer);
-          activeTimer = setTimeout(newRound, 1800);
+          clearNext();
+          cancelNext = L.afterSpeech(newRound, { minMs: 1800 });
         } else {
           L.buzzSound();
           btn.classList.add("wrong");
@@ -128,7 +131,7 @@
     document.getElementById("howmanyBestVal").textContent = bestAtStart;
     newRound();
   }
-  function stop() { clearTimeout(activeTimer); activeTimer = null; }
+  function stop() { clearTimeout(activeTimer); activeTimer = null; clearNext(); }
 
   L.games.howmany = { screen: "howmanyGame", start, stop };
 })();
