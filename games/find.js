@@ -61,6 +61,10 @@
   let targets = [];
   let currentTarget = null;      // { e, n } in free; { glyph } in learning
   let activeTimer = null;
+  // Cancels a pending "next target / next scene" that is waiting for
+  // the cheer to finish.
+  let cancelNext = null;
+  function clearNext() { if (cancelNext) cancelNext(); cancelNext = null; }
   let busy = false;
   let bestKey = "findBest";
   let bestAtStart = 0;
@@ -107,7 +111,8 @@
     if (!currentTarget) {
       L.happySound();
       L.say(`${L.cheer()} You found them all!`);
-      activeTimer = setTimeout(newScene, 1700);
+      clearNext();
+      cancelNext = L.afterSpeech(newScene, { minMs: 1700 });
       return;
     }
     showPrompt();
@@ -212,7 +217,10 @@
       const c = L.cheer();
       if (mode === "free") L.say(`${c} ${currentTarget.n}!`);
       else L.say(`${c} ${sayGlyph(currentTarget.glyph)}!`, undefined, `${c} ${currentTarget.glyph}!`);
-      activeTimer = setTimeout(nextTarget, 1100);
+      // Next target once the cheer has been heard (never sooner than the
+      // old fixed delay, so a muted voice feels the same).
+      clearNext();
+      cancelNext = L.afterSpeech(nextTarget, { minMs: 1100 });
     } else {
       L.buzzSound();
       el.classList.add("wrong");
@@ -259,6 +267,7 @@
   function stop() {
     clearTimeout(activeTimer);
     activeTimer = null;
+    clearNext();
     const s = document.getElementById("findStage");
     if (s) s.innerHTML = "";
     currentTarget = null;
