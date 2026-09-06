@@ -74,9 +74,11 @@
   let rainPieces = [];
   let dayTimer = null;
   let dayPhase = 0; // 0..3 sliding around the day
+  let cancelPower = null;
 
   function setT(ms, fn) { const t = setTimeout(fn, ms); timers.push(t); return t; }
   function clearAllTimers() { timers.forEach(clearTimeout); timers = []; }
+  function clearPower() { if (cancelPower) { cancelPower(); cancelPower = null; } }
   function $(id) { return document.getElementById(id); }
 
   // ====================================================================
@@ -527,6 +529,9 @@
       taps += 1;
       L.beep(880, 0.10, "sine");
       L.haptic(6);
+      // A new tap cancels a pending "Sunshine power!" so a sixth tap
+      // does not speak the easter egg over the next "Sunshine!".
+      clearPower();
       L.say("Sunshine!");
       sun.classList.remove("spinning");
       void sun.offsetWidth;
@@ -535,13 +540,18 @@
       const r = sun.getBoundingClientRect();
       L.sparkleAt(r.left + r.width / 2, r.top + r.height / 2);
       // Easter egg: every 5 taps, briefly accelerate every plant by one.
+      // "Sunshine power!" used to start in the same tick and cut the
+      // first word off (an enhanced iPad voice can take 300 ms–1 s to
+      // begin). Wait for it, same 400 ms floor when the voice is muted.
       if (taps % 5 === 0) {
-        L.say("Sunshine power!");
-        pots.forEach((pot) => {
-          if (pot.state !== STATE.EMPTY && pot.state !== STATE.MATURE) {
-            setT(120 + pot.idx * 80, () => growPot(pot));
-          }
-        });
+        cancelPower = L.afterSpeech(() => {
+          L.say("Sunshine power!");
+          pots.forEach((pot) => {
+            if (pot.state !== STATE.EMPTY && pot.state !== STATE.MATURE) {
+              setT(120 + pot.idx * 80, () => growPot(pot));
+            }
+          });
+        }, { beatMs: 150, minMs: 400, maxMs: 3000 });
       }
     });
   }
@@ -811,6 +821,7 @@
     celebrated = false;
     dayPhase = 0;
     bestAtStart = L.getHighScore("gardenBest");
+    clearPower();
     clearAllTimers();
     if (weatherTimer) { clearTimeout(weatherTimer); weatherTimer = null; }
     if (rainTimer)    { clearTimeout(rainTimer); rainTimer = null; }
@@ -822,6 +833,7 @@
   }
 
   function stop() {
+    clearPower();
     clearAllTimers();
     if (weatherTimer) { clearTimeout(weatherTimer); weatherTimer = null; }
     if (rainTimer)    { clearTimeout(rainTimer); rainTimer = null; }

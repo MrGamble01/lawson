@@ -104,9 +104,11 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   twelve seconds, so a kid who looked away gets a nudge, never a nag. A cheer
   starts as its chime rings out rather than underneath it, so the first
   word is never masked — every game triggers its chime before the line
-  (the farm, garden, train and scene sounds included), and a check keeps
+  (  the farm, garden, train and scene sounds included), and a check keeps
   it that way — and "New best!" and "Sticker!" announcements wait for
-  the cheer to finish instead of cutting it off.
+  the cheer to finish instead of cutting it off. Garden's sun easter egg
+  waits for "Sunshine!" before "Sunshine power!" so the first word is
+  heard.
 - Locking the iPad or switching apps silences the storyteller and the menu
   music straight away. Coming back wakes the speech and sound engines
   (iOS leaves both muted after a lock or a phone call) and Story Time
@@ -196,6 +198,7 @@ Smoke + visual baseline checks for every game live in `tests/`.
 ```bash
 node tests/voice.js                # speech engine + caption event (no browser)
 node tests/story.js                # Story Time pacing (no browser)
+node tests/garden.js               # Garden sun: "Sunshine!" before "Sunshine power!" (no browser)
 node tests/smoke.js                # errors-free / renders / restart-safe
 node tests/smoke.js --baseline     # + diff every screen against tests/baseline/
 node tests/smoke.js --update-baseline   # accept new baselines after UI changes

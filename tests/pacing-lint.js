@@ -9,6 +9,11 @@
 //    triggers a chime in the same tick. say() waits for a chime that is
 //    already ringing, but a chime triggered after it lands on the first
 //    word. Trigger the chime first; the line waits for it.
+// 3. "Two lines in the same tick": a game says a line and then another
+//    say() in the same handler with no afterSpeech / .then between them.
+//    The second cuts the first off. A say() inside a later timer is a
+//    different leftover (those have their own follow-ons); a say() in
+//    the other branch of an if/else is not after the first.
 //
 // Run: node tests/pacing-lint.js            (checks every game)
 //      node tests/pacing-lint.js --self-test (checks the checker on fixtures)
@@ -25,6 +30,7 @@ const SPEECH_GATED = /\.then\(/;  // a timer inside a .then() chain waits for sp
 const CHIME = /L\.(?:happySound|buzzSound|stickerJingle|beep)\(/;
 const DEFERRED = /setTimeout\(|setT\(|=>/;   // a chime scheduled for later is not on the first word
 const BRANCH_END = /^\s*(?:\}|else\b)/;       // the say() sits in another branch than what follows
+const LATER_HANDLER = /onTap(?:Once)?\(|addEventListener\(|\.forEach\(/;
 
 function check(file, lines) {
   const problems = [];
@@ -37,6 +43,32 @@ function check(file, lines) {
       if (CHIME.test(l)) {
         problems.push(`${file}:${j + 1}: chime right after the line on ${i + 1} lands on its first word — trigger the chime first, the line waits for it\n    ${l.trim()}`);
         break;
+      }
+    }
+    // Rule 3: another say() still in this handler, not inside a timer
+    // and not after afterSpeech / .then. A say() that only lives inside
+    // an onTap / forEach callback is a later tap, not this tick.
+    if (!LATER_HANDLER.test(line)) {
+      const baseIndent = indentOf(line);
+      let timerBraces = 0;
+      for (let j = i + 1; j < lines.length; j++) {
+        const l = lines[j];
+        if (!l.trim()) continue;
+        if (timerBraces === 0 && indentOf(l) < baseIndent && /^\s*(?:function\b|[\}\)])/.test(l)) break;
+        if (timerBraces === 0 && BRANCH_END.test(l) && indentOf(l) <= baseIndent) break;
+        if (timerBraces === 0 && /afterSpeech\(|\.then\(/.test(l)) break;
+        if (timerBraces === 0 && LATER_HANDLER.test(l)) break;
+        if (/setTimeout\(|setT\(/.test(l)) {
+          timerBraces += braceDelta(l);
+          if (timerBraces < 0) timerBraces = 0;
+        } else if (timerBraces > 0) {
+          timerBraces += braceDelta(l);
+          if (timerBraces < 0) timerBraces = 0;
+        }
+        if (SAY.test(l) && timerBraces === 0 && !/setTimeout\(|setT\(/.test(l)) {
+          problems.push(`${file}:${j + 1}: second say() in the same tick as the line on ${i + 1} — wait with L.afterSpeech so the first is heard\n    ${l.trim()}`);
+          break;
+        }
       }
     }
     // Rule 1: a bare timer after a cheer / "try again".
@@ -54,6 +86,9 @@ function check(file, lines) {
   return problems;
 }
 
+function indentOf(s) { return s.match(/^(\s*)/)[1].length; }
+function braceDelta(s) { return (s.match(/\{/g) || []).length - (s.match(/\}/g) || []).length; }
+
 function selfTest() {
   const assert = require('node:assert/strict');
   const lint = src => check('fixture.js', src.split('\n'));
@@ -69,12 +104,29 @@ function selfTest() {
   // A chime scheduled for later, or after the line has been heard, is fine.
   assert.equal(lint('L.say("Yes");\nsetT(300, () => L.beep(400));').length, 0);
   assert.equal(lint('L.say("Yes").then(() => L.happySound());').length, 0);
-  // A later line owns what follows it.
-  assert.equal(lint('L.say("One");\nL.say("Two");\nL.beep(400);').length, 1);
+  // A later line owns the chime that follows it (rule 2); the pair is also rule 3.
+  const pair = lint('L.say("One");\nL.say("Two");\nL.beep(400);');
+  assert.equal(pair.length, 2);
+  assert.match(pair[0], /second say\(\) in the same tick as the line on 1/);
+  assert.match(pair[1], /chime right after the line on 2/);
   // Rule 1 still fires on a bare timer after a cheer and is quiet on afterSpeech.
   assert.equal(lint('L.say(L.cheer());\nsetTimeout(next, 900);').length, 1);
   assert.equal(lint('L.say(L.cheer());\nL.afterSpeech(next, { minMs: 900 });').length, 0);
   assert.equal(lint('L.say("Try again!");\nsetTimeout(() => el.classList.remove("x"), 300);').length, 0);
+  // Rule 3: a second say() in the same tick, even after a visual timer.
+  assert.equal(lint('L.say("Sunshine!");\nsetT(900, () => sun.classList.remove("spinning"));\nif (taps % 5 === 0) {\n  L.say("Sunshine power!");\n}').length, 1);
+  assert.match(lint('L.say("Sunshine!");\nL.say("Sunshine power!");')[0], /second say\(\) in the same tick/);
+  // afterSpeech gates the follow-on; a say() inside a later timer is not this rule;
+  // the other branch of an if/else is not after the line.
+  assert.equal(lint('L.say("Sunshine!");\nL.afterSpeech(() => {\n  L.say("Sunshine power!");\n}, { minMs: 400 });').length, 0);
+  assert.equal(lint('L.say("Flip!");\nsetT(780, () => {\n  L.say("Yummy!");\n});').length, 0);
+  assert.equal(lint('L.say("Flip!");\nsetTimeout(() => L.say("Yummy!"), 780);').length, 0);
+  assert.equal(lint('if (full) {\n  L.say("All full! Yum!");\n} else {\n  L.say("Slurp slurp!");\n}').length, 0);
+  // A say() that only runs on a later tap, or a prompt then a forEach of
+  // answer handlers, is not this tick.
+  assert.equal(lint('L.say("Tweet tweet!");\nL.onTap(bird, (e) => {\n  L.say("Pretty bird!");\n});').length, 0);
+  assert.equal(lint('L.onTap(el, () => L.sayPrompt("Find the cow"));\nif (speak) L.sayPrompt("Find the cow");').length, 0);
+  assert.equal(lint('if (speak) L.sayPrompt("Find the cow");\noptions.forEach((item) => {\n  L.onTap(btn, () => L.say(L.cheer()));\n});').length, 0);
   console.log('PASS: pacing lint self-test');
 }
 
@@ -87,6 +139,6 @@ if (require.main === module) {
     console.error('FAIL: speech pacing:\n' + problems.join('\n'));
     process.exit(1);
   }
-  console.log(`PASS: pacing lint — no bare timer right after a cheer, no chime right after a line, in ${files.length} games`);
+  console.log(`PASS: pacing lint — no bare timer right after a cheer, no chime right after a line, no second say() in the same tick, in ${files.length} games`);
 }
 module.exports = { check };
