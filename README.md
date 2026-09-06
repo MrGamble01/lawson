@@ -68,6 +68,10 @@ The **More** drawer holds themed hub cards, each opening a small menu:
 
 - Edit the kid's name (used in cheers across every game)
 - Mute voice and/or sound effects independently
+- **Captions** — show what the storyteller says as words on screen (great
+  for kids who are hard of hearing, or when the voice is muted). Off or
+  on, every spoken line is also announced to screen readers through a
+  live region.
 - Choose and preview a storyteller voice. Automatic prefers local English
   voices with enhanced quality when available, using their natural pitch.
   The choice is saved on this device. Available voices depend on the device;
@@ -82,8 +86,26 @@ The **More** drawer holds themed hub cards, each opening a small menu:
 - **Volume** — one master slider for all app audio
 - Music on the menu (on/off)
 - Dark mode
+- The panel is a real modal: Escape closes it, Tab stays inside it, and
+  focus returns to the gear when it closes.
 - **Show tips again** — re-arms the first-visit hint for every game
 - Reset all high scores (two-tap confirm so toddlers can't fire it)
+
+## Accessibility
+
+- **Keyboard + screen readers**: every tile, tool, choice and score badge
+  is a named button. Opening a game moves focus onto that screen (a
+  labelled region); Home puts it back on the tile you came from. Mode
+  tabs expose their pressed state; Memory cards say "Hidden card" until
+  flipped.
+- **Captions / live region**: see Settings above.
+- **Reduced motion**: with the OS "reduce motion" preference on, CSS
+  animations collapse and the sparkle / confetti particle bursts are
+  skipped entirely.
+- **Contrast**: all text meets WCAG AA (4.5:1) — checked on every screen
+  by `tests/a11y.js` with axe-core.
+- Pinch-zoom is deliberately disabled so a toddler's second finger can't
+  zoom the playground away; the UI is already very large.
 
 ## Behind the scenes
 
@@ -106,9 +128,12 @@ The **More** drawer holds themed hub cards, each opening a small menu:
 Smoke + visual baseline checks for every game live in `tests/`.
 
 ```bash
+node tests/voice.js                # speech engine + caption event (no browser)
+node tests/story.js                # Story Time pacing (no browser)
 node tests/smoke.js                # errors-free / renders / restart-safe
 node tests/smoke.js --baseline     # + diff every screen against tests/baseline/
 node tests/smoke.js --update-baseline   # accept new baselines after UI changes
+node tests/a11y.js                 # axe-core + keyboard / modal / captions checks on every screen
 ```
 
 See `tests/README.md` for details (needs Playwright + Chromium).
@@ -123,3 +148,6 @@ See `tests/README.md` for details (needs Playwright + Chromium).
    to `ASSETS` in `sw.js` (bump the cache version).
 4. Add a smoke entry in `tests/smoke.js` (`GAMES` array) and refresh
    the baseline with `node tests/smoke.js --update-baseline`.
+5. Give every tappable thing a readable name (`aria-label` for
+   emoji-only buttons) and run `node tests/a11y.js` — it picks the new
+   game up automatically from `window.Lawson.games`.

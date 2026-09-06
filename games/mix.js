@@ -74,6 +74,7 @@
       drop.style.background = c.hex;
       drop.dataset.name = c.name;
       drop.title = c.name;
+      drop.setAttribute("aria-label", c.name);
       L.onTap(drop, (e) => {
         if (e.stopPropagation) e.stopPropagation();
         onDrop(c, drop);

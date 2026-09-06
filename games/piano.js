@@ -257,6 +257,7 @@
     BLACK.forEach((k) => {
       const key = document.createElement("button");
       key.className = "piano-black";
+      key.setAttribute("aria-label", k.note.replace("#", " sharp"));
       // position each black key centered on the boundary between white keys
       const pct = ((k.afterWhite + 1) / WHITE.length) * 100;
       key.style.left = `calc(${pct}% - 4.5%)`;

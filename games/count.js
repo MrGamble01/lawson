@@ -60,6 +60,7 @@
       const tile = document.createElement("button");
       tile.className = "count-item";
       tile.textContent = item.emoji;
+      tile.setAttribute("aria-label", item.name);
       // Stagger entry slightly for a satisfying cascade.
       tile.style.animationDelay = (i * 0.06) + "s";
 

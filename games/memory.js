@@ -57,6 +57,7 @@
     card.className = "memory-card";
     card.dataset.emoji = item.e;
     card.dataset.name = item.n;
+    card.setAttribute("aria-label", "Hidden card");
     card.innerHTML = `
       <div class="memory-card-inner">
         <div class="memory-face memory-face--back" style="--c:${BACK_COLORS[i % BACK_COLORS.length]}"><span>✨</span></div>
@@ -72,6 +73,7 @@
     if (card.classList.contains("flipped")) return;
 
     card.classList.add("flipped");
+    card.setAttribute("aria-label", card.dataset.name);
     L.beep(500 + Math.random() * 250, 0.08, "triangle");
     L.say(card.dataset.name, 1.05);
 
@@ -102,6 +104,8 @@
       setTimeout(() => {
         a.classList.remove("flipped");
         b.classList.remove("flipped");
+        a.setAttribute("aria-label", "Hidden card");
+        b.setAttribute("aria-label", "Hidden card");
         L.buzzSound();
         lock = false;
       }, 1100);

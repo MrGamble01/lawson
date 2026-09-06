@@ -76,6 +76,7 @@
       const btn = document.createElement("button");
       btn.className = "pattern-choice";
       btn.textContent = it.e;
+      btn.setAttribute("aria-label", it.n);
       L.onTap(btn, (e) => {
         if (e.stopPropagation) e.stopPropagation();
         if (it.e === answer.e) {

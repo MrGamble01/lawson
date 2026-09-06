@@ -60,7 +60,7 @@
 
   <header>
     <h1>Lawson's Playground</h1>
-    <div id="streakBadge" class="streak-badge" hidden aria-label="Daily streak">🔥<span id="streakBadgeVal">0</span></div>
+    <div id="streakBadge" class="streak-badge" role="button" tabindex="0" hidden aria-label="Daily streak">🔥<span id="streakBadgeVal">0</span></div>
     <button id="settingsBtn" class="settings-btn" aria-label="Settings">⚙️</button>
   </header>
 
@@ -81,11 +81,11 @@
        up. Tap one to pop it — gives the kid something to do anywhere
        on the menu, not just on the tiles. -->
   <div class="menu-bubbles" aria-hidden="true">
-    <button class="bubble" aria-label="Pop the bubble" style="--c:#ff8ab0; --x:8%;  --delay:0s;  --dur:15s; --drift:30px;"></button>
-    <button class="bubble" aria-label="Pop the bubble" style="--c:#74c0fc; --x:88%; --delay:3s;  --dur:18s; --drift:-40px;"></button>
-    <button class="bubble" aria-label="Pop the bubble" style="--c:#ffd43b; --x:30%; --delay:7s;  --dur:14s; --drift:-20px;"></button>
-    <button class="bubble" aria-label="Pop the bubble" style="--c:#69db7c; --x:70%; --delay:11s; --dur:17s; --drift:25px;"></button>
-    <button class="bubble" aria-label="Pop the bubble" style="--c:#da77f2; --x:50%; --delay:5s;  --dur:16s; --drift:-15px;"></button>
+    <button class="bubble" aria-label="Pop the bubble" tabindex="-1" style="--c:#ff8ab0; --x:8%;  --delay:0s;  --dur:15s; --drift:30px;"></button>
+    <button class="bubble" aria-label="Pop the bubble" tabindex="-1" style="--c:#74c0fc; --x:88%; --delay:3s;  --dur:18s; --drift:-40px;"></button>
+    <button class="bubble" aria-label="Pop the bubble" tabindex="-1" style="--c:#ffd43b; --x:30%; --delay:7s;  --dur:14s; --drift:-20px;"></button>
+    <button class="bubble" aria-label="Pop the bubble" tabindex="-1" style="--c:#69db7c; --x:70%; --delay:11s; --dur:17s; --drift:25px;"></button>
+    <button class="bubble" aria-label="Pop the bubble" tabindex="-1" style="--c:#da77f2; --x:50%; --delay:5s;  --dur:16s; --drift:-15px;"></button>
   </div>
 
   <!-- Sunny the sun mascot — second character, top-left of the menu.
@@ -141,7 +141,7 @@
          a hub screen with that place's activities. App-Store style: fewer
          choices per screen, clearer hierarchy, every tap is curated. -->
     <!-- Home: the three games Lawson plays, each with Free / ABC / 123. -->
-    <section id="menu" class="screen active">
+    <section id="menu" class="screen active" aria-label="Home">
       <div class="menu-places menu-home3">
         <button class="place place--game" data-go="pop" style="--c:#ff922b">
           <span class="place-emoji">🎈</span>
@@ -176,7 +176,7 @@
 
     <!-- More: the rest of the activities, one tap off the home screen. -->
     <section id="moreHub" class="screen hub-screen" data-hub-theme="explore">
-      <button class="home-btn" data-home>🏠</button>
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
       <h2 class="hub-title">✨ More to Explore</h2>
       <div class="menu-places more-places">
         <button class="place" data-hub="artHub" style="--c:#fab005">
@@ -298,7 +298,7 @@
 
     <!-- ===== Art Studio hub ===== -->
     <section id="artHub" class="screen hub-screen" data-hub-theme="art">
-      <button class="home-btn" data-home>🏠</button>
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
       <h2 class="hub-title">🎨 Art Studio</h2>
       <div class="hub-tiles">
         <button class="tile" data-go="doodle" style="--c:#22b8cf">
@@ -318,7 +318,7 @@
 
     <!-- ===== Music hub ===== -->
     <section id="musicHub" class="screen hub-screen" data-hub-theme="music">
-      <button class="home-btn" data-home>🏠</button>
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
       <h2 class="hub-title">🎵 Music</h2>
       <div class="hub-tiles">
         <button class="tile" data-go="piano" style="--c:#845ef7">
@@ -335,7 +335,7 @@
 
     <!-- ===== Town hub (Train, Farm, Ice Cream — places to visit) ===== -->
     <section id="townHub" class="screen hub-screen" data-hub-theme="play">
-      <button class="home-btn" data-home>🏠</button>
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
       <h2 class="hub-title">🏘️ Town</h2>
       <div class="hub-tiles">
         <button class="tile" data-go="train" style="--c:#1c7ed6">
@@ -352,7 +352,7 @@
 
     <!-- ===== Brain Games hub ===== -->
     <section id="brainHub" class="screen hub-screen" data-hub-theme="brain">
-      <button class="home-btn" data-home>🏠</button>
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
       <h2 class="hub-title">🧩 Brain Games</h2>
       <div class="hub-tiles">
         <button class="tile" data-go="match" style="--c:#20c997">
@@ -372,7 +372,7 @@
 
     <!-- ===== Library hub (Story + Stickers) ===== -->
     <section id="libraryHub" class="screen hub-screen" data-hub-theme="library">
-      <button class="home-btn" data-home>🏠</button>
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
       <h2 class="hub-title">📖 Library</h2>
       <div class="hub-tiles">
         <button class="tile" data-go="story" style="--c:#9775fa">
@@ -387,7 +387,7 @@
 
     <!-- Numbers hub: counting games -->
     <section id="numbersHub" class="screen hub-screen" data-hub-theme="numbers">
-      <button class="home-btn" data-home>🏠</button>
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
       <h2 class="hub-title">🔢 Numbers</h2>
       <div class="hub-tiles">
         <button class="tile" data-go="numbers" style="--c:#4dabf7">
@@ -404,7 +404,7 @@
 
     <!-- Wonder World hub: alphabet + themed flashcard topics -->
     <section id="exploreHub" class="screen hub-screen" data-hub-theme="explore">
-      <button class="home-btn" data-home>🏠</button>
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
       <h2 class="hub-title">🌍 Wonder World</h2>
       <div class="hub-tiles">
         <button class="tile" data-go="letters" style="--c:#ff6b6b">
@@ -439,21 +439,21 @@
 
     <!-- Generic activity screen (letters/numbers/colors/shapes/animals) -->
     <section id="activity" class="screen">
-      <button class="home-btn" data-home>🏠</button>
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
       <div id="stage" class="stage"></div>
       <div id="bigDisplay" class="big-display"></div>
     </section>
 
     <!-- Balloon popping -->
     <section id="popGame" class="screen" data-title="🎈 Pop!">
-      <button class="home-btn" data-home>🏠</button>
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
       <div id="popScore" class="badge">🎈 <span id="popScoreVal">0</span></div>
       <div id="popStreak" class="badge badge--streak">🔥 <span id="popStreakVal">0</span></div>
       <div id="popBest" class="badge badge--best">🏆 <span id="popBestVal">0</span></div>
-      <div id="popModes" class="mode-tabs">
-        <button class="mode-tab active" data-mode="free">🎈 Free</button>
-        <button class="mode-tab" data-mode="letters">🔤 ABC</button>
-        <button class="mode-tab" data-mode="numbers">🔢 123</button>
+      <div id="popModes" class="mode-tabs" role="group" aria-label="Game mode">
+        <button class="mode-tab active" data-mode="free" aria-pressed="true">🎈 Free</button>
+        <button class="mode-tab" data-mode="letters" aria-pressed="false">🔤 ABC</button>
+        <button class="mode-tab" data-mode="numbers" aria-pressed="false">🔢 123</button>
       </div>
       <div id="popPrompt" class="target-banner" hidden></div>
       <div id="popArea" class="pop-area"></div>
@@ -461,14 +461,14 @@
 
     <!-- Piano -->
     <section id="pianoGame" class="screen" data-title="🎹 Piano">
-      <button class="home-btn" data-home>🏠</button>
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
       <button id="pianoSong" class="piano-song-btn">🎵 Song</button>
       <div id="pianoBoard" class="piano-board"></div>
     </section>
 
     <!-- Whack-a-Mole -->
     <section id="whackGame" class="screen" data-title="🐹 Whack!">
-      <button class="home-btn" data-home>🏠</button>
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
       <div id="whackScore" class="badge">🔨 <span id="whackScoreVal">0</span></div>
       <div id="whackBest" class="badge badge--best">🏆 <span id="whackBestVal">0</span></div>
       <div id="whackGrid" class="whack-grid"></div>
@@ -476,7 +476,7 @@
 
     <!-- Doodle -->
     <section id="doodleGame" class="screen" data-title="🎨 Doodle">
-      <button class="home-btn" data-home>🏠</button>
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
       <div class="doodle-tools">
         <button id="doodleStamp" class="doodle-tool">✨ Stamp</button>
         <button id="doodleUndo" class="doodle-tool doodle-tool--undo" disabled>↶ Undo</button>
@@ -490,7 +490,7 @@
 
     <!-- Counting -->
     <section id="countGame" class="screen" data-title="🔢 Count">
-      <button class="home-btn" data-home>🏠</button>
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
       <div id="countScore" class="badge">🔢 <span id="countScoreVal">0</span></div>
       <div id="countBest" class="badge badge--best">🏆 <span id="countBestVal">0</span></div>
       <div id="countPrompt" class="count-prompt">Count!</div>
@@ -499,7 +499,7 @@
 
     <!-- Coloring Pages -->
     <section id="colorGame" class="screen" data-title="🖍️ Coloring">
-      <button class="home-btn" data-home>🏠</button>
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
       <div class="color-tools">
         <button id="colorNext" class="color-tool">📄 Next</button>
         <button id="colorClear" class="color-tool color-tool--clear">🧽 Clear</button>
@@ -510,7 +510,7 @@
 
     <!-- Matching game -->
     <section id="matchGame" class="screen" data-title="🧩 Match">
-      <button class="home-btn" data-home>🏠</button>
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
       <div id="matchScore" class="badge">⭐ <span id="matchScoreVal">0</span></div>
       <div id="matchBest" class="badge badge--best">🏆 <span id="matchBestVal">0</span></div>
       <div class="match-layout">
@@ -522,7 +522,7 @@
 
     <!-- Memory Match (concentration) -->
     <section id="memoryGame" class="screen" data-title="🃏 Memory">
-      <button class="home-btn" data-home>🏠</button>
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
       <div id="memoryScore" class="badge">🃏 <span id="memoryScoreVal">0</span></div>
       <div id="memoryBest" class="badge badge--best">🏆 <span id="memoryBestVal">0</span></div>
       <div id="memoryBoard" class="memory-board"></div>
@@ -530,7 +530,7 @@
 
     <!-- Connect the Dots -->
     <section id="dotsGame" class="screen" data-title="🔗 Dots">
-      <button class="home-btn" data-home>🏠</button>
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
       <div id="dotsScore" class="badge">🔗 <span id="dotsScoreVal">0</span></div>
       <div id="dotsBest" class="badge badge--best">🏆 <span id="dotsBestVal">0</span></div>
       <div id="dotsStage" class="dots-stage"></div>
@@ -538,7 +538,7 @@
 
     <!-- Listen & Find -->
     <section id="listenGame" class="screen" data-title="👂 Listen">
-      <button class="home-btn" data-home>🏠</button>
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
       <div id="listenScore" class="badge">👂 <span id="listenScoreVal">0</span></div>
       <div id="listenBest" class="badge badge--best">🏆 <span id="listenBestVal">0</span></div>
       <div class="listen-layout">
@@ -550,7 +550,7 @@
 
     <!-- How Many? -->
     <section id="howmanyGame" class="screen" data-title="🧮 How Many?">
-      <button class="home-btn" data-home>🏠</button>
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
       <div id="howmanyScore" class="badge">🧮 <span id="howmanyScoreVal">0</span></div>
       <div id="howmanyBest" class="badge badge--best">🏆 <span id="howmanyBestVal">0</span></div>
       <div class="howmany-layout">
@@ -562,13 +562,13 @@
 
     <!-- Find It! -->
     <section id="findGame" class="screen" data-title="🔍 Find It!">
-      <button class="home-btn" data-home>🏠</button>
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
       <div id="findScore" class="badge">🔍 <span id="findScoreVal">0</span></div>
       <div id="findBest" class="badge badge--best">🏆 <span id="findBestVal">0</span></div>
-      <div id="findModes" class="mode-tabs">
-        <button class="mode-tab active" data-mode="free">🔍 Free</button>
-        <button class="mode-tab" data-mode="letters">🔤 ABC</button>
-        <button class="mode-tab" data-mode="numbers">🔢 123</button>
+      <div id="findModes" class="mode-tabs" role="group" aria-label="Game mode">
+        <button class="mode-tab active" data-mode="free" aria-pressed="true">🔍 Free</button>
+        <button class="mode-tab" data-mode="letters" aria-pressed="false">🔤 ABC</button>
+        <button class="mode-tab" data-mode="numbers" aria-pressed="false">🔢 123</button>
       </div>
       <div id="findPrompt" class="find-prompt">Find!</div>
       <div id="findStage" class="find-stage"></div>
@@ -576,7 +576,7 @@
 
     <!-- Pattern -->
     <section id="patternGame" class="screen" data-title="🧠 Pattern">
-      <button class="home-btn" data-home>🏠</button>
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
       <div id="patternScore" class="badge">🧠 <span id="patternScoreVal">0</span></div>
       <div id="patternBest" class="badge badge--best">🏆 <span id="patternBestVal">0</span></div>
       <div class="pattern-layout">
@@ -588,7 +588,7 @@
 
     <!-- Color Mix -->
     <section id="mixGame" class="screen" data-title="🧪 Color Mix">
-      <button class="home-btn" data-home>🏠</button>
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
       <div id="mixScore" class="badge">🧪 <span id="mixScoreVal">0</span></div>
       <div id="mixBest" class="badge badge--best">🏆 <span id="mixBestVal">0</span></div>
       <div class="mix-layout">
@@ -603,7 +603,7 @@
 
     <!-- Story Time -->
     <section id="storyGame" class="screen" data-title="📖 Story">
-      <button class="home-btn" data-home>🏠</button>
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
       <div id="storyCounter" class="story-counter">1 / 4</div>
       <div id="storyStage" class="story-stage"></div>
       <div class="story-bubble">
@@ -614,13 +614,13 @@
 
     <!-- Sticker Scene! drag stickers onto themed backgrounds -->
     <section id="sceneGame" class="screen" data-title="🖼️ Sticker Scene!">
-      <button class="home-btn" data-home>🏠</button>
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
       <div id="sceneStage" class="scene-stage"></div>
     </section>
 
     <!-- Train! drive the choo-choo -->
     <section id="trainGame" class="screen" data-title="🚂 Train!">
-      <button class="home-btn" data-home>🏠</button>
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
       <div id="trainScore" class="badge">🚉 <span id="trainScoreVal">0</span></div>
       <div id="trainBest" class="badge badge--best">🏆 <span id="trainBestVal">0</span></div>
       <div id="trainStage" class="train-stage"></div>
@@ -628,7 +628,7 @@
 
     <!-- Music Studio -->
     <section id="musicGame" class="screen" data-title="🎵 Music Studio">
-      <button class="home-btn" data-home>🏠</button>
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
       <div id="musicScore" class="badge">🎶 <span id="musicScoreVal">0</span></div>
       <div id="musicBest" class="badge badge--best">🏆 <span id="musicBestVal">0</span></div>
       <div id="musicStage" class="music-stage"></div>
@@ -636,7 +636,7 @@
 
     <!-- Farm! sandbox -->
     <section id="farmGame" class="screen" data-title="🏡 Farm!">
-      <button class="home-btn" data-home>🏠</button>
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
       <div id="farmScore" class="badge">⭐ <span id="farmScoreVal">0</span></div>
       <div id="farmBest" class="badge badge--best">🏆 <span id="farmBestVal">0</span></div>
       <div id="farmStage" class="farm-stage"></div>
@@ -644,7 +644,7 @@
 
     <!-- Ice Cream! make a sundae -->
     <section id="icecreamGame" class="screen" data-title="🍦 Ice Cream!">
-      <button class="home-btn" data-home>🏠</button>
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
       <div id="icecreamScore" class="badge">🍦 <span id="icecreamScoreVal">0</span></div>
       <div id="icecreamBest" class="badge badge--best">🏆 <span id="icecreamBestVal">0</span></div>
       <div id="icecreamStage" class="icecream-stage"></div>
@@ -652,7 +652,7 @@
 
     <!-- Garden! plant, water, harvest -->
     <section id="gardenGame" class="screen" data-title="🌱 Garden!">
-      <button class="home-btn" data-home>🏠</button>
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
       <div id="gardenScore" class="badge">🍓 <span id="gardenScoreVal">0</span></div>
       <div id="gardenBest" class="badge badge--best">🏆 <span id="gardenBestVal">0</span></div>
       <div id="gardenStage" class="garden-stage"></div>
@@ -660,7 +660,7 @@
 
     <!-- Baby Dino: make him better -->
     <section id="dinoGame" class="screen" data-title="🦖 Baby Dino">
-      <button class="home-btn" data-home>🏠</button>
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
       <div id="dinoScore" class="badge">💖 <span id="dinoScoreVal">0</span></div>
       <div id="dinoBest" class="badge badge--best">🏆 <span id="dinoBestVal">0</span></div>
       <div id="dinoStage" class="dino-stage"></div>
@@ -668,7 +668,7 @@
 
     <!-- Cook! pancakes -->
     <section id="cookGame" class="screen" data-title="🥞 Cook!">
-      <button class="home-btn" data-home>🏠</button>
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
       <div id="cookScore" class="badge">🥞 <span id="cookScoreVal">0</span></div>
       <div id="cookBest" class="badge badge--best">🏆 <span id="cookBestVal">0</span></div>
       <div id="cookStage" class="cook-stage"></div>
@@ -676,7 +676,7 @@
 
     <!-- Sticker collection -->
     <section id="stickersGame" class="screen" data-title="🌟 Stickers">
-      <button class="home-btn" data-home>🏠</button>
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
       <div class="stickers-header">
         <h2>🌟 Sticker Book</h2>
         <div id="stickerCount" class="stickers-count">0 / 0</div>
@@ -695,10 +695,15 @@
     <div id="bestValue" class="best-value">0</div>
   </div>
 
+  <!-- Captions / live region: mirrors everything the storyteller says.
+       Always announced to screen readers; shown on screen when the
+       Captions setting is on. -->
+  <div id="captions" class="captions" role="status" aria-live="polite" aria-atomic="true"></div>
+
   <!-- Settings panel (overlays everything) -->
   <div id="settingsOverlay" class="settings-overlay" aria-hidden="true">
-    <div class="settings-panel" role="dialog" aria-label="Settings">
-      <h2>Settings</h2>
+    <div class="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <h2 id="settingsTitle">Settings</h2>
       <label class="settings-field">
         <span>Kid's name</span>
         <input id="settingsName" type="text" maxlength="20" autocomplete="off" autocapitalize="words" spellcheck="false" />
@@ -710,6 +715,12 @@
         <span class="settings-toggle-track" aria-hidden="true"></span>
         <span class="settings-toggle-label">🗣️ Voice</span>
       </label>
+      <label class="settings-toggle">
+        <input id="settingsCaptions" type="checkbox" />
+        <span class="settings-toggle-track" aria-hidden="true"></span>
+        <span class="settings-toggle-label">💬 Captions</span>
+      </label>
+      <p class="settings-hint">Shows what the storyteller says as words on screen.</p>
       <label class="settings-field">
         <span>Storyteller voice</span>
         <select id="settingsVoiceChoice" aria-describedby="settingsVoiceHint"></select>

@@ -203,11 +203,17 @@
       swatch.className = "color-swatch";
       swatch.style.background = c.hex;
       swatch.dataset.name = c.name;
+      swatch.setAttribute("aria-label", c.name);
+      swatch.setAttribute("aria-pressed", String(c.hex === currentColor.hex));
       if (c.hex === currentColor.hex) swatch.classList.add("active");
       L.onTap(swatch, () => {
         currentColor = c;
-        palette.querySelectorAll(".color-swatch").forEach((s) => s.classList.remove("active"));
+        palette.querySelectorAll(".color-swatch").forEach((s) => {
+          s.classList.remove("active");
+          s.setAttribute("aria-pressed", "false");
+        });
         swatch.classList.add("active");
+        swatch.setAttribute("aria-pressed", "true");
         L.beep(500, 0.08, "sine");
         L.say(c.name);
       });
