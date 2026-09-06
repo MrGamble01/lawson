@@ -112,6 +112,15 @@
     }
   }
 
+  let winTimer = null;
+  let cancelNext = null;
+  function clearNext() {
+    clearTimeout(winTimer);
+    winTimer = null;
+    if (cancelNext) cancelNext();
+    cancelNext = null;
+  }
+
   function winRound() {
     rounds += 1;
     if (rounds >= 3) L.earnSticker && L.earnSticker("memory3");
@@ -120,7 +129,9 @@
     const bestEl = document.getElementById("memoryBestVal");
     if (bestEl) bestEl.textContent = L.getHighScore("memoryBest");
 
-    setTimeout(() => {
+    clearNext();
+    winTimer = setTimeout(() => {
+      winTimer = null;
       L.say(`${L.cheer()} You matched them all!`);
       const r = board.getBoundingClientRect();
       for (let k = 0; k < 14; k++) {
@@ -129,7 +140,9 @@
           r.top  + r.height / 2 + (Math.random() - 0.5) * 220,
         ), k * 55);
       }
-      setTimeout(setupRound, 2200);
+      // New board once the cheer has been heard (and not on a screen the
+      // kid has already left).
+      cancelNext = L.afterSpeech(setupRound, { minMs: 2200 });
     }, 350);
   }
 
@@ -158,6 +171,7 @@
   }
 
   function stop() {
+    clearNext();
     const b = document.getElementById("memoryBoard");
     if (b) b.innerHTML = "";
     firstPick = null;
