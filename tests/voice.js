@@ -637,5 +637,66 @@ assert.equal(said.at(-1), 'Pop the N!');
   assert.equal(logLen(), 20, 'ring buffer keeps the last 20');
   assert.equal(lastEntry().text, 'Filler 29');
 
-  console.log('PASS: delayed voices, natural pitch, local quality preference, saved choice, language, volume, mute, missing voice fallback, speech completion promise, caption event, hide/show lifecycle, unusable-voice fallback, speechDone, afterSpeech, swallowed utterances, speech diagnostics');
+  // ---- Chime, then cheer ----
+  run('setSpeechVoice("enhanced")');
+  // happySound() is a 0.4 s arpeggio (beeps at 0, 0.1, 0.2 s; last one 0.2 s
+  // long): a cheer spoken right after it waits for it to ring out.
+  clockNow = 50000;
+  run('happySound()');
+  const n6 = spoken.length;
+  track(run('say("Great job, Lawson!")'), 'after-chime');
+  assert.equal(spoken.length, n6, 'cheer not spoken under the chime');
+  assert.deepEqual(timerDelays(), [400], 'starts as the chime ends');
+  fireWhere(t => t.ms === 400);
+  assert.equal(spoken.length, n6 + 1);
+  assert.equal(lastEntry().delayMs, 400, 'the wait shows in the diagnostics');
+  spoken.at(-1).onstart(); spoken.at(-1).onend();
+  await flush();
+  assert.equal(settled.at(-1), 'after-chime');
+  // Part-way through the chime: only the remainder.
+  clockNow = 60000;
+  run('buzzSound()');                // 0.18 s + 0.22 s at 0.1 s → 0.32 s
+  clockNow = 60200;
+  run('say("Try again!")');
+  assert.deepEqual(timerDelays(), [120], 'remaining 120 ms of the buzz');
+  fireWhere(t => t.ms === 120);
+  spoken.at(-1).onstart(); spoken.at(-1).onend();
+  await flush();
+  // Chime long gone: spoken at once.
+  clockNow = 70000;
+  run('happySound()');
+  clockNow = 71000;
+  const n7 = spoken.length;
+  run('say("Later")');
+  assert.equal(spoken.length, n7 + 1, 'no wait once the chime is over');
+  spoken.at(-1).onstart(); spoken.at(-1).onend();
+  await flush();
+  // A cut-off line and a chime: the longer of the two waits applies.
+  clockNow = 80000;
+  track(speak('say("In flight again")'), 'inflight2');
+  run('happySound()');
+  run('say("Cut and chimed")');
+  assert.deepEqual(timerDelays(), [400], 'chime wait beats the 60 ms cut-off beat');
+  fireWhere(t => t.ms === 400);
+  spoken.at(-1).onstart(); spoken.at(-1).onend();
+  await flush();
+  // Capped: a long effect never holds a line back more than half a second.
+  clockNow = 90000;
+  run('beep(440, 2)');
+  run('say("Capped")');
+  assert.deepEqual(timerDelays(), [500]);
+  fireWhere(t => t.ms === 500);
+  spoken.at(-1).onstart(); spoken.at(-1).onend();
+  await flush();
+  // Sound effects muted: no chime plays, so no wait either.
+  clockNow = 100000;
+  run('setSoundMuted(true); happySound()');
+  const n8 = spoken.length;
+  run('say("Muted effects")');
+  assert.equal(spoken.length, n8 + 1, 'nothing to wait for when effects are muted');
+  spoken.at(-1).onstart(); spoken.at(-1).onend();
+  await flush();
+  run('setSoundMuted(false)');
+
+  console.log('PASS: delayed voices, natural pitch, local quality preference, saved choice, language, volume, mute, missing voice fallback, speech completion promise, caption event, hide/show lifecycle, unusable-voice fallback, speechDone, afterSpeech, swallowed utterances, speech diagnostics, chime then cheer');
 })().catch(e => { console.error(e); process.exit(1); });
