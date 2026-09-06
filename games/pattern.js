@@ -102,7 +102,20 @@
           L.buzzSound();
           btn.classList.add("wrong");
           setTimeout(() => btn.classList.remove("wrong"), 500);
+          // Drop the opening "What comes next?" if it hasn't spoken
+          // yet — that 380 ms timer used to land on this nag whenever
+          // a toddler tapped before it fired (an enhanced iPad voice
+          // takes 300 ms to a second to begin).
+          clearTimeout(activeTimer);
+          activeTimer = null;
+          clearNext();
           L.say("Try again!");
+          // Then ask the question again once the nag has been heard
+          // (same 380 ms floor when the voice is muted).
+          cancelNext = L.afterSpeech(
+            () => L.sayPrompt("What comes next?"),
+            { minMs: 380, beatMs: 150, maxMs: 3000 },
+          );
           score = 0;
           L.bumpBadge("patternScoreVal", 0);
         }

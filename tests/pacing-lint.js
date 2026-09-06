@@ -1,4 +1,4 @@
-// Static regression checks for two speech-pacing bugs that were fixed
+// Static regression checks for three speech-pacing bugs that were fixed
 // game by game and must not creep back:
 //
 // 1. "Cheer, then a fixed timer" (#18 and follow-ons): a game speaks a
@@ -9,6 +9,13 @@
 //    triggers a chime in the same tick. say() waits for a chime that is
 //    already ringing, but a chime triggered after it lands on the first
 //    word. Trigger the chime first; the line waits for it.
+// 3. "Wrong-answer nag, leftover opening prompt" : a quiz schedules
+//    sayPrompt on activeTimer at the start of the round, then a wrong
+//    tap says "Count them again!" / "Try again!" without cancelling
+//    that timer. A toddler who taps before the prompt fires (an
+//    enhanced iPad voice takes 300 ms to a second to begin) hears the
+//    question cut the nag off. Clear the timer and wait with
+//    L.afterSpeech before asking again.
 //
 // Run: node tests/pacing-lint.js            (checks every game)
 //      node tests/pacing-lint.js --self-test (checks the checker on fixtures)
@@ -25,6 +32,10 @@ const SPEECH_GATED = /\.then\(/;  // a timer inside a .then() chain waits for sp
 const CHIME = /L\.(?:happySound|buzzSound|stickerJingle|beep)\(/;
 const DEFERRED = /setTimeout\(|setT\(|=>/;   // a chime scheduled for later is not on the first word
 const BRANCH_END = /^\s*(?:\}|else\b)/;       // the say() sits in another branch than what follows
+const NAG = /L\.say\(\s*["'`](?:Count them again!|Try again!)["'`]\s*\)/;
+const CLEARS_PROMPT = /clearTimeout\(\s*activeTimer\s*\)|afterSpeech\(/;
+const SCHEDULES_PROMPT = /activeTimer\s*=\s*setTimeout/;
+const SAY_PROMPT = /sayPrompt\(/;
 
 function check(file, lines) {
   const problems = [];
@@ -37,6 +48,26 @@ function check(file, lines) {
       if (CHIME.test(l)) {
         problems.push(`${file}:${j + 1}: chime right after the line on ${i + 1} lands on its first word — trigger the chime first, the line waits for it\n    ${l.trim()}`);
         break;
+      }
+    }
+    // Rule 3: a wrong-answer nag that does not cancel a still-pending
+    // opening sayPrompt stored on activeTimer. Only games that schedule
+    // that prompt are checked — Farm's "Try again!" after a missed
+    // fish has no leftover prompt.
+    if (NAG.test(line)) {
+      const src = lines.join('\n');
+      if (SCHEDULES_PROMPT.test(src) && SAY_PROMPT.test(src)) {
+        const baseIndent = indentOf(line);
+        let gated = false;
+        for (let j = i + 1; j < lines.length; j++) {
+          const l = lines[j];
+          if (!l.trim()) continue;
+          if (indentOf(l) <= baseIndent && BRANCH_END.test(l)) break;
+          if (CLEARS_PROMPT.test(l)) { gated = true; break; }
+        }
+        if (!gated) {
+          problems.push(`${file}:${i + 1}: wrong-answer nag on line ${i + 1} leaves the opening sayPrompt timer running — clearTimeout(activeTimer) and L.afterSpeech so the nag is heard\n    ${line.trim()}`);
+        }
       }
     }
     // Rule 1: a bare timer after a cheer / "try again".
@@ -53,6 +84,8 @@ function check(file, lines) {
   });
   return problems;
 }
+
+function indentOf(s) { return s.match(/^(\s*)/)[1].length; }
 
 function selfTest() {
   const assert = require('node:assert/strict');
@@ -75,6 +108,14 @@ function selfTest() {
   assert.equal(lint('L.say(L.cheer());\nsetTimeout(next, 900);').length, 1);
   assert.equal(lint('L.say(L.cheer());\nL.afterSpeech(next, { minMs: 900 });').length, 0);
   assert.equal(lint('L.say("Try again!");\nsetTimeout(() => el.classList.remove("x"), 300);').length, 0);
+  // Rule 3: a nag that does not cancel a still-pending opening prompt.
+  assert.equal(lint('} else {\n  L.say("Count them again!");\n  score = 0;\n}\nactiveTimer = setTimeout(() => L.sayPrompt("How many?"), 450);').length, 1);
+  assert.match(lint('} else {\n  L.say("Try again!");\n}\nactiveTimer = setTimeout(() => L.sayPrompt("What comes next?"), 380);')[0], /wrong-answer nag on line 2/);
+  // afterSpeech (or an explicit clear) is the right shape.
+  assert.equal(lint('} else {\n  clearTimeout(activeTimer);\n  L.say("Count them again!");\n  L.afterSpeech(() => L.sayPrompt("How many?"), { minMs: 450 });\n}\nactiveTimer = setTimeout(() => L.sayPrompt("How many?"), 450);').length, 0);
+  assert.equal(lint('} else {\n  L.say("Try again!");\n  L.afterSpeech(() => L.sayPrompt("What comes next?"), { minMs: 380 });\n}\nactiveTimer = setTimeout(() => L.sayPrompt("What comes next?"), 380);').length, 0);
+  // A "Try again!" in a game that never schedules a sayPrompt is not this leftover.
+  assert.equal(lint('} else {\n  L.say("Try again!");\n}').length, 0);
   console.log('PASS: pacing lint self-test');
 }
 
@@ -87,6 +128,6 @@ if (require.main === module) {
     console.error('FAIL: speech pacing:\n' + problems.join('\n'));
     process.exit(1);
   }
-  console.log(`PASS: pacing lint — no bare timer right after a cheer, no chime right after a line, in ${files.length} games`);
+  console.log(`PASS: pacing lint — no bare timer right after a cheer, no chime right after a line, no leftover opening prompt after a wrong-answer nag, in ${files.length} games`);
 }
 module.exports = { check };
