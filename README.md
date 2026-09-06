@@ -110,6 +110,11 @@ The **More** drawer holds themed hub cards, each opening a small menu:
 - **Volume** — one master slider for all app audio
 - Music on the menu (on/off)
 - Dark mode
+- **Take it slow** — half speed for the timed games: Whack! critters stay
+  up twice as long and pop half as often, Pop! balloons drift twice as
+  slowly, first-visit hints linger. For kids who need more time to aim.
+- **Less motion** — turns off the wiggles, floating and sparkles without
+  changing the iPad's own setting.
 - The panel is a real modal: Escape closes it, Tab stays inside it, and
   focus returns to the gear when it closes.
 - **Show tips again** — re-arms the first-visit hint for every game
@@ -127,9 +132,13 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   came from. Mode tabs expose their pressed state; Memory cards say
   "Hidden card" until flipped.
 - **Captions / live region**: see Settings above.
-- **Reduced motion**: with the OS "reduce motion" preference on, CSS
-  animations collapse and the sparkle / confetti particle bursts are
-  skipped entirely.
+- **Reduced motion**: with the OS "reduce motion" preference on, or the
+  in-app **Less motion** setting, CSS animations collapse and the sparkle /
+  confetti particle bursts are skipped entirely. Pop! balloons hold still
+  where they appear instead of drifting (they used to jump straight off
+  the top and be unpoppable).
+- **Timing**: **Take it slow** in Settings halves the pace of every timed
+  game (WCAG 2.2.1), so nothing disappears before a slower hand gets there.
 - **Contrast**: all text meets WCAG AA (4.5:1) in light and dark mode —
   checked on every screen by `tests/a11y.js` with axe-core.
 - **Tap instead of drag** (WCAG 2.2 §2.5.7): every drag has a single-tap

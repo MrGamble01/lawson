@@ -133,9 +133,18 @@
       left = Math.random() * 78 + 11;
     }
     b.style.left = left + "%";
-    b.style.top = "110%";
-    const dur = (mode === "free" ? 5 : 6) + Math.random() * 4;
-    b.style.animationDuration = dur + "s";
+    const dur = ((mode === "free" ? 5 : 6) + Math.random() * 4) * L.paceScale(); // "Take it slow" doubles it
+    b.dataset.life = String(Math.round(dur * 1000));
+    if (L.prefersReducedMotion()) {
+      // Reduced motion: no drifting. The balloon appears in place and waits
+      // out its lifetime — with the float animation collapsed it would
+      // otherwise jump straight off the top and be unpoppable.
+      b.classList.add("balloon--still");
+      b.style.top = (12 + Math.random() * 55) + "%";
+    } else {
+      b.style.top = "110%";
+      b.style.animationDuration = dur + "s";
+    }
 
     let popped = false;
 
@@ -216,7 +225,7 @@
 
   function startSpawning(area) {
     clearInterval(spawnTimer);
-    spawnTimer = setInterval(() => spawn(area), mode === "free" ? 1100 : 1300);
+    spawnTimer = setInterval(() => spawn(area), (mode === "free" ? 1100 : 1300) * L.paceScale());
   }
 
   function setMode(m, area) {
