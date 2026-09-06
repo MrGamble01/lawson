@@ -53,6 +53,8 @@
   // ====================================================================
   let songIdx = 0;
   let songTimers = [];
+  let cancelStart = null;
+  function clearStart() { if (cancelStart) cancelStart(); cancelStart = null; }
   let beatTotal = 0;
   let bestAtStart = 0;
   let celebrated = false;
@@ -201,16 +203,9 @@
     });
   }
 
-  function playSong() {
-    stopSong();
-    const song = SONGS[songIdx % SONGS.length];
-    songIdx += 1;
-    const btn = $("musicSong");
-    if (btn) btn.classList.add("playing");
-    L.say(song.name);
-    const beat = 60 / song.bpm;
-    let t = 400;
-    song.notes.forEach((n, i) => {
+  function scheduleNotes(song, beat) {
+    let t = 0;
+    song.notes.forEach((n) => {
       songTimers.push(setTimeout(() => {
         playXylo(n);
       }, t));
@@ -219,7 +214,21 @@
     songTimers.push(setTimeout(stopSong, t + 200));
   }
 
+  function playSong() {
+    stopSong();
+    const song = SONGS[songIdx % SONGS.length];
+    songIdx += 1;
+    const btn = $("musicSong");
+    if (btn) btn.classList.add("playing");
+    L.say(song.name);
+    // First note once the name has been heard (never sooner than the old
+    // 400 ms lead, so a muted voice feels the same).
+    const beat = 60 / song.bpm;
+    cancelStart = L.afterSpeech(() => scheduleNotes(song, beat), { beatMs: 150, minMs: 400, maxMs: 3000 });
+  }
+
   function stopSong() {
+    clearStart();
     songTimers.forEach(clearTimeout);
     songTimers = [];
     const btn = $("musicSong");

@@ -37,7 +37,9 @@ behind the **More** card.
 The **More** drawer holds themed hub cards, each opening a small menu:
 
 - **Art Studio** — Doodle, Coloring, Color Mix, Sticker Scene
-- **Music** — Piano, Music Studio (drums + xylophone + bells), Listen
+- **Music** — Piano, Music Studio (drums + xylophone + bells), Listen.
+  Each Song button names the tune and waits for the name to be heard
+  before the first note.
 - **Brain Games** — Match, Memory, Pattern, Dots
 - **Numbers** — 1 2 3, Count, How Many?
 - **Wonder World** — ABC + 8 flashcard topics (Colors, Shapes, Animals,
@@ -58,7 +60,8 @@ The **More** drawer holds themed hub cards, each opening a small menu:
 - **Train** — drive a chuffing train between three stations; passengers
   hop on and off.
 - **Music Studio** — drum kit, rainbow xylophone, jingle bells, plus a
-  Song button that plays familiar tunes.
+  Song button that names the tune and waits for the name to be heard
+  before the first note, so "Twinkle Twinkle" is never played over.
 - **Doodle** — rainbow / solid brushes, eraser, sizes, save as PNG.
 
 **Collection:**
@@ -104,9 +107,10 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   twelve seconds, so a kid who looked away gets a nudge, never a nag. A cheer
   starts as its chime rings out rather than underneath it, so the first
   word is never masked — every game triggers its chime before the line
-  (the farm, garden, train and scene sounds included), and a check keeps
+  (  the farm, garden, train and scene sounds included), and a check keeps
   it that way — and "New best!" and "Sticker!" announcements wait for
-  the cheer to finish instead of cutting it off.
+  the cheer to finish instead of cutting it off. Piano and Music Studio
+  wait for the song name the same way before the first note.
 - Locking the iPad or switching apps silences the storyteller and the menu
   music straight away. Coming back wakes the speech and sound engines
   (iOS leaves both muted after a lock or a phone call) and Story Time
@@ -196,6 +200,8 @@ Smoke + visual baseline checks for every game live in `tests/`.
 ```bash
 node tests/voice.js                # speech engine + caption event (no browser)
 node tests/story.js                # Story Time pacing (no browser)
+node tests/piano.js                # Piano Song: first note waits for the name (no browser)
+node tests/music.js                # Music Studio Song: first note waits for the name (no browser)
 node tests/smoke.js                # errors-free / renders / restart-safe
 node tests/smoke.js --baseline     # + diff every screen against tests/baseline/
 node tests/smoke.js --update-baseline   # accept new baselines after UI changes

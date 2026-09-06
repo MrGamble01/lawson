@@ -9,6 +9,11 @@
 //    triggers a chime in the same tick. say() waits for a chime that is
 //    already ringing, but a chime triggered after it lands on the first
 //    word. Trigger the chime first; the line waits for it.
+// 3. "Song name, then notes on a fixed timer": Piano / Music Studio say
+//    the tune's name and then start the melody on a bare 400–500 ms
+//    timeout. The notes are not a spoken line, so rules 1–2 miss them;
+//    they still land on the first word of "Twinkle Twinkle" whenever the
+//    engine starts late. Wait with L.afterSpeech; the old delay is the floor.
 //
 // Run: node tests/pacing-lint.js            (checks every game)
 //      node tests/pacing-lint.js --self-test (checks the checker on fixtures)
@@ -51,6 +56,20 @@ function check(file, lines) {
       }
     }
   });
+  // Rule 3: a song name, then notes on a fixed timer (Piano / Music Studio).
+  lines.forEach((line, i) => {
+    if (!/L\.say\(song\.name\)/.test(line)) return;
+    for (let j = i + 1; j < lines.length; j++) {
+      const l = lines[j];
+      if (/^\s*function\b/.test(l)) break;
+      if (/afterSpeech/.test(l) || SPEECH_GATED.test(l)) break;
+      const nxt = lines[j + 1] || '';
+      if (/setTimeout\(/.test(l) && /playNote\(|playXylo\(/.test(l + nxt)) {
+        problems.push(`${file}:${j + 1}: notes on a fixed timer after the song name on line ${i + 1} — use L.afterSpeech so the name is heard first\n    ${l.trim()}`);
+        break;
+      }
+    }
+  });
   return problems;
 }
 
@@ -75,6 +94,16 @@ function selfTest() {
   assert.equal(lint('L.say(L.cheer());\nsetTimeout(next, 900);').length, 1);
   assert.equal(lint('L.say(L.cheer());\nL.afterSpeech(next, { minMs: 900 });').length, 0);
   assert.equal(lint('L.say("Try again!");\nsetTimeout(() => el.classList.remove("x"), 300);').length, 0);
+  // Rule 3: notes on a fixed timer after the song name.
+  assert.equal(lint('L.say(song.name);\nlet t = 500;\nsetTimeout(() => {\n  playNote(freq);\n}, t);').length, 1);
+  assert.equal(lint('L.say(song.name);\nsetTimeout(() => {\n  playXylo(n);\n}, 400);').length, 1);
+  assert.match(lint('L.say(song.name);\nsetTimeout(() => {\n  playNote(freq);\n}, 500);')[0], /notes on a fixed timer after the song name on line 1/);
+  // afterSpeech (or a .then) is the right shape; a later function owns its own timers.
+  assert.equal(lint('L.say(song.name);\nL.afterSpeech(() => scheduleNotes(), { minMs: 500 });').length, 0);
+  assert.equal(lint('L.say(song.name);\nL.say("x").then(() => playNote());').length, 0);
+  assert.equal(lint('L.say(song.name);\nfunction scheduleNotes() {\n  setTimeout(() => playNote(freq), 0);\n}').length, 0);
+  // A key tap that speaks the letter is not a song name.
+  assert.equal(lint('L.say("C");\nsetTimeout(() => playNote(freq), 10);').length, 0);
   console.log('PASS: pacing lint self-test');
 }
 
@@ -87,6 +116,6 @@ if (require.main === module) {
     console.error('FAIL: speech pacing:\n' + problems.join('\n'));
     process.exit(1);
   }
-  console.log(`PASS: pacing lint — no bare timer right after a cheer, no chime right after a line, in ${files.length} games`);
+  console.log(`PASS: pacing lint — no bare timer right after a cheer, no chime right after a line, no notes on a fixed timer after a song name, in ${files.length} games`);
 }
 module.exports = { check };
