@@ -870,7 +870,7 @@ function boboCheer() {
 // the utilities below. Keeping each game self-contained makes it easy to
 // tweak one without touching the others.
 window.Lawson = {
-  say, cancelSpeech, speechDone, afterSpeech, speechLog, speechStats, beep, happySound, buzzSound, haptic, sparkleAt, onTap, onTapOnce, pointOf, bumpBadge, show,
+  say, cancelSpeech, speechDone, afterSpeech, speechLog, speechStats, setSpeechSpeed, getSpeechSpeed, beep, happySound, buzzSound, haptic, sparkleAt, onTap, onTapOnce, pointOf, bumpBadge, show,
   audioCtx, unlockAudio, masterGain, setVolume, getVolume, isAudioHidden,
   getHighScore, setHighScore, bumpHighScore, tryNewHighScore,
   setVoiceMuted, setSoundMuted, isVoiceMuted, isSoundMuted,
@@ -1334,6 +1334,14 @@ document.addEventListener("touchmove", (e) => {
       : VOICE_HINT;
   }
   voiceChoice.addEventListener("change", () => setSpeechVoice(voiceChoice.value));
+  // Storyteller speed: pick, then hear a short line at that pace.
+  const speedChoice = document.getElementById("settingsSpeechSpeed");
+  if (speedChoice) {
+    speedChoice.addEventListener("change", () => {
+      setSpeechSpeed(speedChoice.value);
+      say("Once upon a time, a little duck swam in the pond.");
+    });
+  }
   // The preview doubles as an on-device check of the speech timings: once
   // the line has settled, say how long the engine took to start and how
   // the line ended, plus a tally of the recent lines (story pages, cheers).
@@ -1449,6 +1457,7 @@ document.addEventListener("touchmove", (e) => {
     nameInput.value = isFirstRun() ? "" : KID_NAME;
     voiceTgl.checked = !isVoiceMuted();
     refreshVoices();
+    if (speedChoice) speedChoice.value = getSpeechSpeed();
     soundTgl.checked = !isSoundMuted();
     if (musicTgl) musicTgl.checked = isMusicEnabled();
     if (darkTgl) darkTgl.checked = isDarkMode();

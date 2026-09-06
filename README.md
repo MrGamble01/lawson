@@ -104,6 +104,9 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   music straight away. Coming back wakes the speech and sound engines
   (iOS leaves both muted after a lock or a phone call) and Story Time
   re-reads the page it was on.
+- **Storyteller speed** — Slower, Normal or Faster for every line the
+  storyteller says; a sample line plays at the new pace. Saved on this
+  device.
 - **Volume** — one master slider for all app audio
 - Music on the menu (on/off)
 - Dark mode
