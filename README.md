@@ -95,7 +95,8 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   paces its pages on the chosen voice: each page turns once the line has
   actually been read, plus a beat to poke the scene. Poking a character
   answers with its sound, then the storyteller picks the line back up if
-  it was cut off. "The end!" and the cheer are heard in full before the
+  it was cut off. Tapping the words hears the line again from the top
+  (the page waits for it); tapping anywhere else turns the page. "The end!" and the cheer are heard in full before the
   sticker is announced and the next story begins. The quiz games (Listen,
   Match, Pattern, How Many?, Count, Find It!, Color Mix, Memory) likewise
   let the cheer — or "try again" — finish before the next prompt, and a

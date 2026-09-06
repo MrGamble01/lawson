@@ -372,5 +372,80 @@ const ceilFor = s => floorFor(s) * 2 + 4000;
   void ending16;
   story.stop();
 
-  console.log('PASS: story pacing — floor, slow-voice wait, no-end ceiling, single ending, muted, tap-ahead, stop, lock/unlock freeze + resume, poke-then-resume, ending heard before sticker + next story');
+  // 18. Tapping the words reads the line again from the top and holds the
+  //     page for it: the pending turn goes back to the ceiling, then comes
+  //     forward to a beat after the re-read has been heard.
+  const tapWords = () => ids.storyGame.handlers[0]({ target: { closest: sel => sel === '.story-bubble' ? {} : null } });
+  story.start();
+  const t18 = clock.now;
+  const p18 = lastLine();
+  const said18 = linesSaid(p18.text);   // counts are over the whole run; this story has been told before
+  await runUntil(t18 + 600);
+  tapWords();
+  await flush();
+  assert.ok(p18.done, 'the reading in flight is cut off');
+  assert.equal(lastLine().text, p18.text, 'the same line is read again');
+  assert.equal(linesSaid(p18.text), said18 + 1);
+  assert.equal(counter(), '1 / 4', 'tapping the words never turns the page');
+  assert.deepEqual(pendingTimers(), [t18 + 600 + ceilFor(p18.text)], 'page turn pushed back to the ceiling');
+  await runUntil(t18 + floorFor(p18.text) + 200);
+  assert.equal(counter(), '1 / 4', 'past the floor, the page still waits for the re-read');
+  await finishLine(lastLine());
+  assert.deepEqual(pendingTimers(), [clock.now + 1200], 'a beat after the re-read');
+  await runUntil(clock.now + 1199);
+  assert.equal(counter(), '1 / 4');
+  await runUntil(clock.now + 1);
+  assert.equal(counter(), '2 / 4', 'turned a beat after the re-read');
+
+  // 19. The line was already heard and the turn is pending: the words tap
+  //     re-reads anyway (it is a request, not a poke) and the earlier turn
+  //     is cancelled in favour of one after the re-read.
+  const t19 = clock.now;
+  const p19 = lastLine();
+  const said19 = linesSaid(p19.text);
+  await finishLine(p19);
+  assert.deepEqual(pendingTimers(), [t19 + floorFor(p19.text)]);
+  await runUntil(t19 + floorFor(p19.text) - 300);
+  tapWords();
+  await flush();
+  assert.equal(linesSaid(p19.text), said19 + 1, 'a heard line is still re-read on request');
+  await runUntil(t19 + floorFor(p19.text) + 500);
+  assert.equal(counter(), '2 / 4', 'the pending turn was cancelled for the re-read');
+  await finishLine(lastLine());
+  await runUntil(clock.now + 1200);
+  assert.equal(counter(), '3 / 4', 'turned a beat after the re-read');
+
+  // 20. A poke's pending re-read yields to the words tap: one re-read, not two.
+  const t20 = clock.now;
+  const p20 = lastLine();
+  const said20 = linesSaid(p20.text);
+  pokeChar(0);
+  await flush();
+  const sound20 = lastLine();
+  assert.notEqual(sound20.text, p20.text);
+  tapWords();
+  await flush();
+  assert.ok(sound20.done, 'the poke sound is cut off by the request');
+  assert.equal(lastLine().text, p20.text);
+  assert.equal(linesSaid(p20.text), said20 + 1, 'one re-read, from the tap');
+  await runUntil(clock.now + 200);
+  assert.equal(linesSaid(p20.text), said20 + 1, 'the poke did not add a second re-read');
+  await finishLine(lastLine());
+  await runUntil(t20 + floorFor(p20.text) + 1200);
+  assert.equal(counter(), '4 / 4');
+
+  // 21. At "The end!" there is no page line to hear: the last line is not
+  //     re-read over the ending.
+  const p21 = lastLine();
+  const said21 = linesSaid(p21.text);
+  tapAhead();                        // → The end!
+  await flush();
+  assert.ok(lastLine().text.startsWith('The end!'));
+  tapWords();
+  await flush();
+  assert.equal(linesSaid(p21.text), said21, 'no re-read of the last line over the ending');
+  assert.equal(counter(), '4 / 4');
+  story.stop();
+
+  console.log('PASS: story pacing — floor, slow-voice wait, no-end ceiling, single ending, muted, tap-ahead, stop, lock/unlock freeze + resume, poke-then-resume, ending heard before sticker + next story, tap the words to hear the line again');
 })().catch(e => { console.error(e); process.exit(1); });
