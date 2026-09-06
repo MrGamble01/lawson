@@ -698,5 +698,47 @@ assert.equal(said.at(-1), 'Pop the N!');
   await flush();
   run('setSoundMuted(false)');
 
-  console.log('PASS: delayed voices, natural pitch, local quality preference, saved choice, language, volume, mute, missing voice fallback, speech completion promise, caption event, hide/show lifecycle, unusable-voice fallback, speechDone, afterSpeech, swallowed utterances, speech diagnostics, chime then cheer');
+  // ---- afterSpeech(): a line that starts during the beat is heard too ----
+  run('setSpeechVoice("enhanced"); setSoundMuted(true)');   // no chime waits in this section
+  timers.clear();
+  let fired2 = 0;
+  context.next2 = () => fired2++;
+  clockNow = 200000;
+  run('afterSpeech(next2, { minMs: 1000, beatMs: 500, maxMs: 6000 })');
+  await flush();
+  assert.deepEqual(timerDelays(), [1000], 'idle: the floor is armed');
+  // "Sticker! ..." starts 300 ms in (as achievements.js now schedules it).
+  clockNow = 200300;
+  run('say("Sticker! Storyteller!")');
+  const stickerLine = spoken.at(-1);
+  stickerLine.onstart();
+  clockNow = 201000;
+  fireWhere(t => t.ms === 1000);       // the floor fires while the line is in flight
+  assert.equal(fired2, 0, 'not fired over the announcement');
+  assert.deepEqual(timerDelays(), [5000], 'only the ceiling remains, re-armed for the rest of the window');
+  clockNow = 202500;
+  stickerLine.onend();
+  await flush();
+  assert.deepEqual(timerDelays(), [500], 'one beat after the announcement');
+  fireWhere(t => t.ms === 500);
+  assert.equal(fired2, 1, 'fired once the announcement was heard');
+  // The ceiling still bounds a line that never ends.
+  fired2 = 0; clockNow = 300000;
+  run('afterSpeech(next2, { minMs: 1000, beatMs: 500, maxMs: 6000 })');
+  await flush();
+  clockNow = 300300;
+  run('say("Never ends")');
+  spoken.at(-1).onstart();
+  clockNow = 301000;
+  fireWhere(t => t.ms === 1000);
+  assert.equal(fired2, 0);
+  clockNow = 306000;
+  fireWhere(t => t.ms === 5000);       // the ceiling
+  assert.equal(fired2, 1, 'ceiling fired despite the line still going');
+  run('cancelSpeech()');
+  await flush();
+  assert.deepEqual(timerDelays(), [], 'nothing left armed');
+  run('setSoundMuted(false)');
+
+  console.log('PASS: delayed voices, natural pitch, local quality preference, saved choice, language, volume, mute, missing voice fallback, speech completion promise, caption event, hide/show lifecycle, unusable-voice fallback, speechDone, afterSpeech, swallowed utterances, speech diagnostics, chime then cheer, announcements wait their turn');
 })().catch(e => { console.error(e); process.exit(1); });

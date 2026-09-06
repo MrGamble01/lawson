@@ -63,14 +63,40 @@ const L = {
   games: {},
   say: (text) => (lastSaid = new Promise(resolve => {
     if (inFlight) inFlight.resolve();
-    inFlight = { text, resolve };
-    spoken.push(inFlight);
+    const entry = { text, done: false, resolve: () => { entry.done = true; resolve(); } };
+    inFlight = entry;
+    spoken.push(entry);
   })),
   speechDone: () => lastSaid,
+  // Mirrors lib/audio.js afterSpeech() on the virtual clock: idle + beat,
+  // floor, ceiling, and a line that starts during the beat is waited for.
+  afterSpeech: (fn, opts) => {
+    const { beatMs = 500, minMs = 1200, maxMs = 6000 } = opts || {};
+    const started = clock.now;
+    let done = false;
+    const elapsed = () => clock.now - started;
+    const ceiling = () => fire(true);
+    let timer = vSetTimeout(ceiling, maxMs);
+    function idle() { const line = lastSaid; return line.then(() => (lastSaid === line ? undefined : idle())); }
+    function fire(force) {
+      if (done) return;
+      if (!force && inFlight && !inFlight.done) {
+        vClearTimeout(timer);
+        timer = vSetTimeout(ceiling, Math.max(0, maxMs - elapsed()));
+        idle().then(() => { if (done) return; vClearTimeout(timer); timer = vSetTimeout(fire, Math.min(beatMs, Math.max(0, maxMs - elapsed()))); });
+        return;
+      }
+      done = true; vClearTimeout(timer); fn();
+    }
+    idle().then(() => { if (done) return; vClearTimeout(timer); timer = vSetTimeout(fire, Math.max(beatMs, minMs - elapsed())); });
+    return () => { done = true; vClearTimeout(timer); };
+  },
   onTap: (node, fn) => node.handlers.push(fn),
   beep() {}, haptic() {}, happySound() {}, sparkleAt() {},
   cheer: () => 'Yay!',
-  earnSticker: () => { stickers++; if (stickers === 1) L.say('Sticker! Storyteller!', 1.05); },
+  // Like lib/achievements.js: the first award announces itself a beat
+  // later, through afterSpeech, so it never talks over the cheer.
+  earnSticker: () => { stickers++; if (stickers === 1) L.afterSpeech(() => L.say('Sticker! Storyteller!', 1.05), { beatMs: 150, minMs: 0 }); },
 };
 const windowEvents = new EventTarget();
 const window = { Lawson: L,
@@ -143,7 +169,9 @@ const ceilFor = s => floorFor(s) * 2 + 4000;
   assert.equal(counter(), '4 / 4', 'still on the ending while "The end!" is being said');
   await finishLine(endLines[0]);
   assert.equal(stickers, 1, 'sticker awarded once the ending was heard');
-  assert.equal(lastLine().text, 'Sticker! Storyteller!', 'announcement follows the ending');
+  assert.notEqual(lastLine().text, 'Sticker! Storyteller!', 'announcement not spoken in the same instant');
+  await runUntil(clock.now + 150);
+  assert.equal(lastLine().text, 'Sticker! Storyteller!', 'announcement follows the ending after a beat');
   await runUntil(clock.now + 3000);
   assert.equal(counter(), '4 / 4', 'still waiting for the sticker line');
   await finishLine(lastLine());
