@@ -204,6 +204,7 @@
       const sw = document.createElement("button");
       sw.className = "doodle-size";
       sw.title = s.name;
+      sw.setAttribute("aria-label", s.name);
       sw.innerHTML = `<span class="doodle-size-dot" style="--d:${Math.round(s.paint * 1.4)}px"></span>`;
       if (s.name === size.name) sw.classList.add("active");
       L.onTap(sw, (e) => {
@@ -227,6 +228,7 @@
       sw.className = "doodle-brush";
       sw.dataset.name = b.name;
       sw.title = b.name;
+      sw.setAttribute("aria-label", b.name);
       if (b.hex) {
         sw.style.background = b.hex;
       } else if (b.erase) {

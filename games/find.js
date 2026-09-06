@@ -86,7 +86,7 @@
   function speakTarget() {
     if (!currentTarget) return;
     if (mode === "free") L.say(`Find the ${currentTarget.n}!`);
-    else L.say(`Find the ${sayGlyph(currentTarget.glyph)}!`);
+    else L.say(`Find the ${sayGlyph(currentTarget.glyph)}!`, undefined, `Find the ${currentTarget.glyph}!`);
   }
 
   function showPrompt() {
@@ -161,6 +161,7 @@
         const el = document.createElement("button");
         el.className = "find-item";
         el.textContent = item.e;
+        el.setAttribute("aria-label", item.n);
         el.style.fontSize = `clamp(38px, ${5.5 + Math.random() * 2}vw, 76px)`;
         L.onTap(el, (e) => onTapItem(item, el, e));
         stage.appendChild(el);
@@ -208,8 +209,9 @@
       el.classList.add("found");
       const p = L.pointOf(e);
       L.sparkleAt(p.x, p.y);
-      const said = mode === "free" ? currentTarget.n : sayGlyph(currentTarget.glyph);
-      L.say(`${L.cheer()} ${said}!`);
+      const c = L.cheer();
+      if (mode === "free") L.say(`${c} ${currentTarget.n}!`);
+      else L.say(`${c} ${sayGlyph(currentTarget.glyph)}!`, undefined, `${c} ${currentTarget.glyph}!`);
       activeTimer = setTimeout(nextTarget, 1100);
     } else {
       L.buzzSound();
@@ -217,7 +219,7 @@
       setTimeout(() => el.classList.remove("wrong"), 400);
       // Name what they tapped (reinforces learning), then repeat the goal.
       if (mode === "free") L.say(item.n);
-      else L.say(`That's ${sayGlyph(item.glyph)}.`);
+      else L.say(`That's ${sayGlyph(item.glyph)}.`, undefined, `That's ${item.glyph}.`);
       setTimeout(speakTarget, 700);
     }
   }
@@ -231,8 +233,11 @@
             : m === "numbers" ? "findNumbersBest" : "findBest";
     bestAtStart = L.getHighScore(bestKey);
 
-    document.querySelectorAll("#findGame .mode-tab").forEach((btn) =>
-      btn.classList.toggle("active", btn.dataset.mode === m));
+    document.querySelectorAll("#findGame .mode-tab").forEach((btn) => {
+      const on = btn.dataset.mode === m;
+      btn.classList.toggle("active", on);
+      btn.setAttribute("aria-pressed", String(on));
+    });
 
     L.bumpBadge("findScoreVal", 0);
     updateBest();

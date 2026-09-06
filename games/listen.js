@@ -66,6 +66,7 @@
       const btn = document.createElement("button");
       btn.className = "listen-choice";
       btn.textContent = item.e;
+      btn.setAttribute("aria-label", item.n);
       L.onTap(btn, (e) => {
         if (item.n === answer.n) {
           L.happySound();

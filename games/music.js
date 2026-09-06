@@ -152,6 +152,7 @@
       btn.className = "music-bell";
       btn.style.background = b.color;
       btn.textContent = "🔔";
+      btn.setAttribute("aria-label", `Bell ${i + 1}`);
       cont.appendChild(btn);
       L.onTap(btn, () => playBell(b, btn));
     });

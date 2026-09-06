@@ -50,6 +50,7 @@
       if (has) earned += 1;
       const card = document.createElement("button");
       card.className = "sticker-card" + (has ? " earned" : " locked");
+      card.setAttribute("aria-label", has ? `${s.title}. ${s.desc}` : "Locked sticker. Keep playing to find it.");
       card.innerHTML = `
         <div class="sticker-card-emoji">${has ? s.emoji : "❓"}</div>
         <div class="sticker-card-title">${has ? s.title : "???"}</div>`;

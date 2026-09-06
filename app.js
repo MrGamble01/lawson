@@ -32,6 +32,41 @@ function isDarkMode() {
 // Apply saved dark-mode preference as early as possible.
 setDarkMode(isDarkMode());
 
+// Captions: everything the storyteller says is mirrored into #captions,
+// a polite live region. Screen readers always get it; the Captions
+// setting decides whether it's also drawn on screen (for kids who are
+// hard of hearing, or when the voice is muted).
+function setCaptionsEnabled(on) {
+  try { localStorage.setItem("lawson:captions", on ? "1" : "0"); } catch (_) {}
+  document.body.classList.toggle("captions-on", !!on);
+}
+function isCaptionsEnabled() {
+  try { return localStorage.getItem("lawson:captions") === "1"; } catch (_) { return false; }
+}
+setCaptionsEnabled(isCaptionsEnabled());
+(function setupCaptions() {
+  let hideT = null;
+  window.addEventListener("lawson:say", (e) => {
+    const el = document.getElementById("captions");
+    const text = e.detail && e.detail.text;
+    if (!el || !text) return;
+    el.textContent = text;
+    el.classList.add("show");
+    clearTimeout(hideT);
+    // Linger long enough to be read: ~1/3 s per word, 2–6 s overall.
+    const words = String(text).split(/\s+/).filter(Boolean).length;
+    hideT = setTimeout(() => el.classList.remove("show"), Math.min(6000, Math.max(2000, 1000 + words * 320)));
+  });
+})();
+
+// Reduced motion: the CSS already collapses animations; JS-driven
+// particle bursts (sparkles, confetti) are skipped entirely so they don't
+// strobe for a frame.
+function prefersReducedMotion() {
+  try { return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches); }
+  catch (_) { return false; }
+}
+
 // Personalize branding with the saved kid name. Default-named runs are
 // unchanged (still "Lawson's"). Once a parent sets a different name in
 // Settings, the splash, header, and tab title all reflect it on the
@@ -119,6 +154,32 @@ function shuffled(arr) {
 
 // ---------- Screens ----------
 const screens = document.querySelectorAll(".screen");
+// Every screen is a labelled region that can take programmatic focus, so
+// switching screens moves keyboard / screen-reader focus with it instead
+// of leaving it on a tile that just disappeared.
+function stripLeadingEmoji(s) {
+  return String(s || "").replace(/^[^\p{L}\p{N}]+/u, "").trim();
+}
+screens.forEach((s) => {
+  if (!s.hasAttribute("tabindex")) s.setAttribute("tabindex", "-1");
+  if (s.hasAttribute("aria-label")) return;
+  const heading = s.querySelector(".hub-title");
+  const label = stripLeadingEmoji(s.dataset.title || (heading && heading.textContent));
+  if (label) s.setAttribute("aria-label", label);
+});
+let _shownScreen = "menu";
+let _lastNavTrigger = null; // the tile that opened the current game/hub
+function focusScreen(target) {
+  if (!target || typeof target.focus !== "function") return;
+  if (target.contains(document.activeElement) && document.activeElement !== document.body) return;
+  // Going back to the lobby: return focus to the tile that started the
+  // trip when it's visible again, so keyboard users land where they left.
+  const back = _lastNavTrigger;
+  if (back && target.contains(back) && back.offsetParent !== null) {
+    try { back.focus({ preventScroll: true }); return; } catch (_) {}
+  }
+  try { target.focus({ preventScroll: true }); } catch (_) {}
+}
 function show(id) {
   screens.forEach((s) => s.classList.toggle("active", s.id === id));
   // Track lobby-mode (menu + hubs) so the mascot and other ambient
@@ -134,6 +195,10 @@ function show(id) {
   const target = document.getElementById(id);
   const title = target && target.dataset && target.dataset.title;
   if (title) showGameBanner(title);
+  if (id !== _shownScreen) {
+    _shownScreen = id;
+    focusScreen(target);
+  }
   // Music plays only on the menu so the gameplay sound design stays
   // clean. Cheap to start/stop — it's just a Web Audio interval.
   if (isMenu && isMusicEnabled()) startMusic();
@@ -147,6 +212,7 @@ function showGameBanner(text) {
   if (existing) existing.remove();
   const b = document.createElement("div");
   b.className = "game-banner";
+  b.setAttribute("aria-hidden", "true"); // the screen itself carries the name
   b.textContent = text;
   document.body.appendChild(b);
   setTimeout(() => b.remove(), 1000);
@@ -157,6 +223,7 @@ function showGameBanner(text) {
 // size, distance, and rotation so each celebration feels organic rather
 // than a perfect ring.
 function sparkleAt(x, y) {
+  if (prefersReducedMotion()) return;
   const emojis = ["✨", "⭐", "🎉", "💖", "🌟", "💫", "🎊"];
   const count = 10;
   for (let i = 0; i < count; i++) {
@@ -269,6 +336,39 @@ function onTapOnce(el, fn) {
   onTap(el, fn);
 }
 
+// Score / best badges are tappable, so they are exposed as buttons whose
+// name carries the current value ("Score 7", "Best 12"). A MutationObserver
+// keeps the name in sync however a game updates the number.
+function badgeKind(badge) {
+  if (badge.classList.contains("badge--best")) return "Best";
+  if (badge.classList.contains("badge--streak")) return "Streak";
+  return "Score";
+}
+function refreshBadgeLabel(badge) {
+  const valEl = badge.querySelector("span");
+  const v = valEl ? valEl.textContent.trim() : "";
+  badge.setAttribute("aria-label", `${badgeKind(badge)} ${v}`.trim());
+}
+(function setupBadgeA11y() {
+  document.querySelectorAll(".badge").forEach((badge) => {
+    badge.setAttribute("role", "button");
+    badge.setAttribute("tabindex", "0");
+    refreshBadgeLabel(badge);
+    new MutationObserver(() => refreshBadgeLabel(badge))
+      .observe(badge, { childList: true, characterData: true, subtree: true });
+  });
+})();
+
+// Enter / Space activate anything that only *acts* like a button
+// (role="button" on a div), matching what native buttons do for free.
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Enter" && e.key !== " ") return;
+  const el = e.target;
+  if (!el || !el.matches || !el.matches('[role="button"]:not(button):not(a)')) return;
+  e.preventDefault();
+  el.click();
+});
+
 // Badge bump helper (shared by games)
 function bumpBadge(id, val) {
   const el = document.getElementById(id);
@@ -276,6 +376,7 @@ function bumpBadge(id, val) {
   el.textContent = val;
   const badge = el.closest(".badge");
   if (badge) {
+    refreshBadgeLabel(badge);
     badge.classList.remove("bump");
     void badge.offsetWidth;
     badge.classList.add("bump");
@@ -411,6 +512,7 @@ const ACTIVITIES = {
     label: (ch) => `${ch}<span class="letter-lower">${ch.toLowerCase()}</span>`,
     labelHtml: true,
     speak: (ch) => `${LETTER_SOUND[ch]}, ${LETTER_WORD[ch]}`,
+    caption: (ch) => `${ch}, ${LETTER_WORD[ch]}`,
     display: (ch, c) => ({ text: `${ch}${ch.toLowerCase()}`, color: c, caption: LETTER_WORD[ch] }),
   },
   numbers: {
@@ -499,7 +601,7 @@ function buildFlashcards(name) {
     if (cfg.background) el.style.background = cfg.background(item);
     onTap(el, (e) => {
       happySound();
-      say(cfg.speak(item));
+      say(cfg.speak(item), undefined, cfg.caption ? cfg.caption(item) : undefined);
       const d = cfg.display(item, c);
       showBigDisplay(d.text, d.color, d.caption);
       const p = pointOf(e);
@@ -518,6 +620,7 @@ function buildFlashcards(name) {
 // personal best, all-stickers finale. ~30 pieces with randomized size,
 // rotation, color, and fall speed.
 function confettiRain(count = 32) {
+  if (prefersReducedMotion()) return;
   const colors  = ["#ff4081", "#fab005", "#37b24d", "#4dabf7", "#7950f2", "#ff922b", "#20c997", "#e64980"];
   const glyphs  = ["🎉", "🎊", "🌟", "⭐", "💖", "🎈", "✨"];
   for (let i = 0; i < count; i++) {
@@ -624,6 +727,7 @@ window.Lawson = {
   setMusicEnabled, isMusicEnabled, startMusic, stopMusic,
   earnSticker, isStickerEarned, listStickers, resetStickers,
   KID_NAME, cheer, shuffled, celebrateNewHigh, confettiRain, boboCheer,
+  setCaptionsEnabled, isCaptionsEnabled, prefersReducedMotion,
   games: {}, // each game adds { screen, start, stop } here
 };
 
@@ -673,6 +777,7 @@ function renderStreakBadge() {
   try { streak = parseInt(localStorage.getItem("lawson:streak") || "0", 10) || 0; } catch (_) {}
   if (streak >= 2) {
     val.textContent = streak;
+    badge.setAttribute("aria-label", `Daily streak: ${streak} days in a row`);
     badge.hidden = false;
     // Tap-to-celebrate. Each tap speaks the count and a brief cheer
     // so the kid hears the achievement reinforced.
@@ -707,6 +812,7 @@ function renderStreakBadge() {
 
   const el = document.createElement("div");
   el.className = "welcome-toast";
+  el.setAttribute("role", "status");
   el.textContent = `${prefix}, ${KID_NAME}!${streakBit}`;
   document.body.appendChild(el);
   // Delay the slide-in so the toast emerges just as the splash fades —
@@ -753,6 +859,7 @@ document.querySelectorAll("[data-hub]").forEach((btn) => {
     unlockSpeech();
     navChime(true);
     leaveActiveGame();
+    _lastNavTrigger = btn;
     show(btn.dataset.hub);
     const intro = HUB_INTROS[btn.dataset.hub];
     if (intro) setTimeout(() => say(intro), 380);
@@ -765,6 +872,7 @@ document.querySelectorAll("[data-go]").forEach((btn) => {
     unlockSpeech();
     const where = btn.dataset.go;
     navChime(true);
+    _lastNavTrigger = btn;
 
     // Quick wave from Bobo before leaving — fires from menu or hubs,
     // anywhere he's visible.
@@ -787,6 +895,8 @@ document.querySelectorAll("[data-go]").forEach((btn) => {
     }
 
     if (ACTIVITIES[where]) {
+      const activity = document.getElementById("activity");
+      if (activity) activity.setAttribute("aria-label", where.charAt(0).toUpperCase() + where.slice(1));
       show("activity");
       buildFlashcards(where);
     }
@@ -1058,6 +1168,7 @@ document.addEventListener("touchmove", (e) => {
   voicePreview.addEventListener("click", () => say("Hi! Let's play and discover something wonderful together."));
   window.addEventListener("lawson:voiceschanged", refreshVoices);
   const soundTgl   = document.getElementById("settingsSound");
+  const captionsTgl = document.getElementById("settingsCaptions");
   const musicTgl   = document.getElementById("settingsMusic");
   const darkTgl    = document.getElementById("settingsDark");
   const volumeInput = document.getElementById("settingsVolume");
@@ -1089,9 +1200,47 @@ document.addEventListener("touchmove", (e) => {
     if (musicTgl.checked && document.body.classList.contains("on-menu")) startMusic();
   });
   if (darkTgl) darkTgl.addEventListener("change", () => setDarkMode(darkTgl.checked));
+  if (captionsTgl) captionsTgl.addEventListener("change", () => setCaptionsEnabled(captionsTgl.checked));
+
+  // Modal plumbing: while the panel is open the rest of the page is
+  // inert (unsupported browsers ignore the property), Tab cycles inside
+  // the panel, Escape closes, and focus returns to wherever it came from.
+  let returnFocusTo = null;
+  let inerted = [];
+  const panel = overlay.querySelector(".settings-panel");
+  function focusables() {
+    return Array.from(panel.querySelectorAll("button, input, select, [tabindex]:not([tabindex='-1'])"))
+      .filter((el) => !el.disabled && el.offsetParent !== null);
+  }
+  function setBackgroundInert(on) {
+    if (on) {
+      inerted = Array.from(document.body.children)
+        .filter((el) => el !== overlay && el.id !== "captions");
+      inerted.forEach((el) => { try { el.inert = true; } catch (_) {} });
+    } else {
+      inerted.forEach((el) => { try { el.inert = false; } catch (_) {} });
+      inerted = [];
+    }
+  }
+  overlay.addEventListener("keydown", (e) => {
+    if (e.key !== "Tab") return;
+    const list = focusables();
+    if (!list.length) return;
+    const first = list[0], last = list[list.length - 1];
+    if (e.shiftKey && (document.activeElement === first || !panel.contains(document.activeElement))) {
+      e.preventDefault(); last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault(); first.focus();
+    }
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && overlay.classList.contains("open")) { e.preventDefault(); close(); }
+  });
 
   function open(opts) {
     const onboarding = !!(opts && opts.onboarding);
+    returnFocusTo = document.activeElement && document.activeElement !== document.body
+      ? document.activeElement : openBtn;
     nameInput.value = isFirstRun() ? "" : KID_NAME;
     voiceTgl.checked = !isVoiceMuted();
     refreshVoices();
@@ -1099,22 +1248,34 @@ document.addEventListener("touchmove", (e) => {
     if (musicTgl) musicTgl.checked = isMusicEnabled();
     if (darkTgl) darkTgl.checked = isDarkMode();
     if (volumeInput) volumeInput.value = Math.round(getVolume() * 100);
+    if (captionsTgl) captionsTgl.checked = isCaptionsEnabled();
     resetBtn.textContent = "🧹 Reset scores";
     resetBtn.classList.remove("confirming");
     if (tipsBtn) tipsBtn.textContent = "💡 Show tips again";
     closeBtn.textContent = onboarding ? "✨ Let's play!" : "✅ Done";
     overlay.classList.toggle("onboarding", onboarding);
     overlay.classList.add("open");
-    setTimeout(() => nameInput.focus({ preventScroll: true }), 50);
+    overlay.setAttribute("aria-hidden", "false");
+    setBackgroundInert(true);
+    setTimeout(() => {
+      if (overlay.classList.contains("open")) nameInput.focus({ preventScroll: true });
+    }, 50);
   }
   function close() {
+    if (!overlay.classList.contains("open")) return;
     setKidName(nameInput.value);
     overlay.classList.remove("open");
     overlay.classList.remove("onboarding");
+    overlay.setAttribute("aria-hidden", "true");
+    setBackgroundInert(false);
+    const back = returnFocusTo && document.contains(returnFocusTo) ? returnFocusTo : openBtn;
+    returnFocusTo = null;
+    try { back.focus({ preventScroll: true }); } catch (_) {}
     beep(500, 0.08);
   }
-  // Expose open() so first-run onboarding can trigger it.
+  // Expose open()/close() so first-run onboarding (and tests) can drive it.
   window.__openSettings = open;
+  window.__closeSettings = close;
   onTap(openBtn, (e) => { if (e.stopPropagation) e.stopPropagation(); open(); });
   onTap(closeBtn, close);
   // Tapping the dimmed backdrop closes too, but only if you tap outside the panel.

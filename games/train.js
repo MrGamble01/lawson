@@ -191,6 +191,7 @@
       const s = document.createElement("button");
       s.className = "train-station";
       s.dataset.station = String(i);
+      s.setAttribute("aria-label", `Station ${i + 1}`);
       s.style.left = xs[i] + "%";
       s.innerHTML = stationSvg(i + 1);
       cont.appendChild(s);

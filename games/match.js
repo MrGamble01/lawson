@@ -74,6 +74,8 @@
     const targetEl = document.createElement("div");
     targetEl.className = "match-target-item";
     targetEl.textContent = answer.emoji;
+    targetEl.setAttribute("role", "img");
+    targetEl.setAttribute("aria-label", answer.name);
     L.onTap(targetEl, () => L.say(`Find the ${answer.name}`));
     target.appendChild(targetEl);
 
@@ -83,6 +85,7 @@
       const btn = document.createElement("button");
       btn.className = "match-choice";
       btn.textContent = item.emoji;
+      btn.setAttribute("aria-label", item.name);
       L.onTap(btn, (e) => {
         if (item.emoji === answer.emoji) {
           L.happySound();

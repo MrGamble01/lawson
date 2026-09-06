@@ -97,7 +97,7 @@
     lastTarget = target;
     const prompt = document.getElementById("popPrompt");
     if (prompt) prompt.textContent = `Pop the ${target}!`;
-    L.say(`Pop the ${sayGlyph(target)}!`);
+    L.say(`Pop the ${sayGlyph(target)}!`, undefined, `Pop the ${target}!`);
     // Guarantee one findable target right away.
     spawn(area, target);
   }
@@ -174,8 +174,8 @@
         L.happySound();
         updateBadges();
         maybeCelebrateRecord(score);
-        if (score % 5 === 0) L.say(`${sayGlyph(glyph)}! ${L.cheer()}`);
-        else L.say(`${sayGlyph(glyph)}!`);
+        const tail = score % 5 === 0 ? ` ${L.cheer()}` : "";
+        L.say(`${sayGlyph(glyph)}!${tail}`, undefined, `${glyph}!${tail}`);
         burst("⭐");
         b.remove();
         newTarget(area);
@@ -184,7 +184,8 @@
         L.beep(240, 0.14, "triangle");
         burst("💨");
         b.remove();
-        L.say(`That's ${sayGlyph(glyph)}. Find the ${sayGlyph(target)}!`);
+        L.say(`That's ${sayGlyph(glyph)}. Find the ${sayGlyph(target)}!`, undefined,
+              `That's ${glyph}. Find the ${target}!`);
       }
     });
 
@@ -220,8 +221,11 @@
             : m === "numbers" ? "popNumbersBest" : "popBest";
     bestAtStart = L.getHighScore(bestKey);
 
-    document.querySelectorAll("#popGame .mode-tab").forEach((btn) =>
-      btn.classList.toggle("active", btn.dataset.mode === m));
+    document.querySelectorAll("#popGame .mode-tab").forEach((btn) => {
+      const on = btn.dataset.mode === m;
+      btn.classList.toggle("active", on);
+      btn.setAttribute("aria-pressed", String(on));
+    });
     const prompt = document.getElementById("popPrompt");
     const streakBadge = document.getElementById("popStreak");
     if (prompt) prompt.hidden = (m === "free");

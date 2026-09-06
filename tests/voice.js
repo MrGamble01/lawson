@@ -29,7 +29,7 @@ const document = { hidden: false,
 const timers = new Map();
 let timerId = 0;
 const fireTimers = () => { const due = [...timers.values()]; timers.clear(); due.forEach(fn => fn()); };
-const context = vm.createContext({ window, document, Event,
+const context = vm.createContext({ window, document, Event, CustomEvent,
   SpeechSynthesisUtterance: function(text) { this.text = text; },
   localStorage: { getItem: k => stored.get(k) ?? null, setItem: (k, v) => stored.set(k, v) },
   setInterval: () => ++intervalsStarted, clearInterval: () => intervalsCleared++,
@@ -64,6 +64,22 @@ assert.equal(spoken.length, count);
 run('setVoiceMuted(false); setVolume(0); say("Quiet"); unlockSpeech()');
 assert.equal(spoken.length, count);
 assert.ok(canceled > 0);
+
+// Every line is announced to the app (captions + screen-reader live
+// region) before the mute check, so muted play still gets the words.
+const said = [];
+window.addEventListener('lawson:say', e => said.push(e.detail.text));
+run('setVoiceMuted(false); setVolume(1); say("Captioned")');
+assert.deepEqual(said, ['Captioned']);
+run('setVoiceMuted(true); say("Muted but captioned")');
+assert.equal(said.at(-1), 'Muted but captioned');
+run('setVoiceMuted(false); setVolume(0); say("Silent but captioned")');
+assert.equal(said.at(-1), 'Silent but captioned');
+run('setVolume(1)');
+// A pronunciation spelling for the engine ("en") is captioned as written ("N").
+run('say("Pop the en!", 0.95, "Pop the N!")');
+assert.equal(spoken.at(-1).text, 'Pop the en!');
+assert.equal(said.at(-1), 'Pop the N!');
 
 // say() reports when a line has actually finished, so games can pace on
 // real narration instead of guessing from word count.
@@ -142,6 +158,7 @@ assert.ok(canceled > 0);
   track(run('say("Should not be heard")'), 'behind-lock');
   await flush();
   assert.equal(spoken.length, before.spokenCount, 'no utterance while hidden');
+  assert.notEqual(said.at(-1), 'Should not be heard', 'no caption while hidden');
   assert.equal(settled.at(-1), 'behind-lock', 'hidden say() still resolves');
   run('startMusic()');
   assert.equal(intervalsStarted, musicBase + 1, 'music does not start while hidden');
@@ -303,5 +320,5 @@ assert.ok(canceled > 0);
   events.dispatchEvent(new Event('voiceschanged'));
   assert.equal(run('preferredVoice.voiceURI'), 'online');
 
-  console.log('PASS: delayed voices, natural pitch, local quality preference, saved choice, language, volume, mute, missing voice fallback, speech completion promise, hide/show lifecycle, unusable-voice fallback');
+  console.log('PASS: delayed voices, natural pitch, local quality preference, saved choice, language, volume, mute, missing voice fallback, speech completion promise, caption event, hide/show lifecycle, unusable-voice fallback');
 })().catch(e => { console.error(e); process.exit(1); });
