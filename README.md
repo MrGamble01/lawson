@@ -144,10 +144,12 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   and sun you can tap: `onTap()` turns any plain tap target into a
   focusable `role="button"`, so the sandbox and arcade games can be
   played with Tab and Enter. Names carry state where it matters ("Pot 2:
-  seed planted, water it", "Hole 4: mole!"). Opening a game moves focus
-  onto that screen (a labelled region); Home puts it back on the tile you
-  came from. Mode tabs expose their pressed state; Memory cards say
-  "Hidden card" until flipped.
+  seed planted, water it", "Hole 4: mole!"). Match's example picture is
+  a button named like the prompt ("Find the dog"), so Tab and Enter
+  hear it again — a `role="img"` here used to skip the button upgrade.
+  Opening a game moves focus onto that screen (a labelled region); Home
+  puts it back on the tile you came from. Mode tabs expose their pressed
+  state; Memory cards say "Hidden card" until flipped.
 - **Captions / live region**: see Settings above.
 - **Reduced motion**: with the OS "reduce motion" preference on, or the
   in-app **Less motion** setting, CSS animations collapse and the sparkle /
@@ -196,6 +198,7 @@ Smoke + visual baseline checks for every game live in `tests/`.
 ```bash
 node tests/voice.js                # speech engine + caption event (no browser)
 node tests/story.js                # Story Time pacing (no browser)
+node tests/match.js                # Match example is a named button that re-hears the prompt (no browser)
 node tests/smoke.js                # errors-free / renders / restart-safe
 node tests/smoke.js --baseline     # + diff every screen against tests/baseline/
 node tests/smoke.js --update-baseline   # accept new baselines after UI changes
