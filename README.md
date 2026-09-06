@@ -68,7 +68,10 @@ The **More** drawer holds themed hub cards, each opening a small menu:
 
 ## Settings (gear icon in the header)
 
-- Edit the kid's name (used in cheers across every game)
+- Edit the kid's name (used in cheers across every game), and, if the
+  storyteller says it wrong, write how it **sounds like** — every line
+  that names the kid is spoken that way while captions keep the real
+  spelling. A greeting plays so the parent can check.
 - Mute voice and/or sound effects independently
 - **Captions** — show what the storyteller says as words on screen (great
   for kids who are hard of hearing, or when the voice is muted). The

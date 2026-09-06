@@ -9,10 +9,16 @@ let KID_NAME = (function () {
     return (stored && stored.trim()) || DEFAULT_KID_NAME;
   } catch (_) { return DEFAULT_KID_NAME; }
 })();
+// Apply the saved "sounds like" form to the name we just loaded.
+if (typeof setSpokenName === "function") setSpokenName(KID_NAME, getSpokenName());
+
 function setKidName(name) {
   KID_NAME = (name && name.trim()) || DEFAULT_KID_NAME;
   try { localStorage.setItem("lawson:kidName", KID_NAME); } catch (_) {}
   if (window.Lawson) window.Lawson.KID_NAME = KID_NAME;
+  // The storyteller's spoken form of the name applies to whatever the
+  // name is now (audio.js only knows the name through this call).
+  if (typeof setSpokenName === "function") setSpokenName(KID_NAME, getSpokenName());
   // Live-update branding (splash is gone by now, but header + tab title
   // reflect the new name without a reload).
   const header = document.querySelector("header h1");
@@ -901,7 +907,7 @@ function boboCheer() {
 // the utilities below. Keeping each game self-contained makes it easy to
 // tweak one without touching the others.
 window.Lawson = {
-  say, cancelSpeech, speechDone, afterSpeech, speechLog, speechStats, setSpeechSpeed, getSpeechSpeed, beep, happySound, buzzSound, haptic, sparkleAt, onTap, onTapOnce, pointOf, bumpBadge, show,
+  say, cancelSpeech, speechDone, afterSpeech, speechLog, speechStats, setSpeechSpeed, getSpeechSpeed, setSpokenName, getSpokenName, beep, happySound, buzzSound, haptic, sparkleAt, onTap, onTapOnce, pointOf, bumpBadge, show,
   audioCtx, unlockAudio, masterGain, setVolume, getVolume, isAudioHidden,
   getHighScore, setHighScore, bumpHighScore, tryNewHighScore,
   setVoiceMuted, setSoundMuted, isVoiceMuted, isSoundMuted,
@@ -1406,6 +1412,15 @@ document.addEventListener("touchmove", (e) => {
   const overlay = document.getElementById("settingsOverlay");
   if (!openBtn || !overlay) return;
   const nameInput  = document.getElementById("settingsName");
+  // "Sounds like": how the storyteller should say the name. Blank means
+  // as written. Changing it plays a greeting so the parent can check.
+  const nameSpokenInput = document.getElementById("settingsNameSpoken");
+  if (nameSpokenInput) {
+    nameSpokenInput.addEventListener("change", () => {
+      setSpokenName((nameInput.value && nameInput.value.trim()) || KID_NAME, nameSpokenInput.value);
+      say(`Hi, ${(nameInput.value && nameInput.value.trim()) || KID_NAME}! Let's play!`);
+    });
+  }
   const voiceTgl   = document.getElementById("settingsVoice");
   const voiceChoice = document.getElementById("settingsVoiceChoice");
   const voicePreview = document.getElementById("settingsVoicePreview");
@@ -1557,6 +1572,7 @@ document.addEventListener("touchmove", (e) => {
       try { history.pushState(Object.assign({}, history.state || { lawson: true, screen: "menu", depth: 0 }, { settings: true }), ""); } catch (_) {}
     }
     nameInput.value = isFirstRun() ? "" : KID_NAME;
+    if (nameSpokenInput) nameSpokenInput.value = getSpokenName();
     voiceTgl.checked = !isVoiceMuted();
     refreshVoices();
     if (speedChoice) speedChoice.value = getSpeechSpeed();
@@ -1589,6 +1605,7 @@ document.addEventListener("touchmove", (e) => {
         try { history.back(); } catch (_) {}
       }
     }
+    if (nameSpokenInput) setSpokenName(KID_NAME, nameSpokenInput.value);
     setKidName(nameInput.value);
     overlay.classList.remove("open");
     overlay.classList.remove("onboarding");

@@ -1,5 +1,5 @@
 // Service worker for offline play. Bump CACHE when assets change.
-const CACHE = "lawson-v56-back-navigation";
+const CACHE = "lawson-v57-back-navigation";
 const ASSETS = [
   "./",
   "./index.html",
