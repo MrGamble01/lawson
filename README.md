@@ -115,7 +115,9 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   storyteller says; a sample line plays at the new pace. Saved on this
   device.
 - **Volume** — one master slider for all app audio
-- Music on the menu (on/off)
+- Music on the menu (on/off). It ducks under the storyteller: a hub
+  welcome, a Bobo tickle or the voice preview is never sung over, and the
+  loop eases back up once the line has ended.
 - Dark mode
 - **Take it slow** — half speed for the timed games: Whack! critters stay
   up twice as long and pop half as often, Pop! balloons drift twice as
