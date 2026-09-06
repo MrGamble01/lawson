@@ -56,6 +56,8 @@ function el(tag, id, cls) {
       },
       contains(c) { return node._classes.has(c); },
     },
+    get className() { return [...node._classes].join(' '); },
+    set className(v) { node._classes = new Set(String(v).split(/\s+/).filter(Boolean)); },
     setAttribute(n, v) {
       node.attrs[n] = String(v);
       if (n === 'id') { node.id = v; ids[v] = node; }

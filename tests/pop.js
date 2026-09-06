@@ -69,6 +69,8 @@ function el(tag, id, cls) {
       },
       contains(c) { return node._classes.has(c); },
     },
+    get className() { return [...node._classes].join(' '); },
+    set className(v) { node._classes = new Set(String(v).split(/\s+/).filter(Boolean)); },
     setAttribute(n, v) {
       node.attrs[n] = String(v);
       if (n === 'id') { node.id = v; ids[v] = node; }
@@ -208,6 +210,7 @@ vm.runInNewContext(source, {
 const pop = L.games.pop;
 const lastLine = () => spoken.at(-1);
 const texts = () => spoken.map((s) => s.text);
+const goals = () => texts().filter((t) => /^Pop the /.test(t) && t !== 'Pop the balloons!');
 const finishLine = async (entry) => { entry.resolve(); await flush(); };
 const tap = (node) => node.handlers.forEach((fn) => fn({ stopPropagation() {} }));
 const lettersTab = () => ids.popModes.children.find((c) => c.dataset.mode === 'letters');
@@ -233,15 +236,17 @@ const targetBalloon = () => ids.popArea.querySelectorAll(`.balloon[data-glyph="$
   assert.ok(!hit.text.startsWith('Pop the '), 'the popped letter is spoken, not the next goal');
   assert.match(hit.text, /!$/);
   assert.ok(currentGoal() && currentGoal() !== letter, 'banner moves on immediately');
+  assert.equal(goals().length, 1, 'next goal must not start in the same tick');
 
   await runUntil(clock.now + 550);
-  assert.equal(hit.done, false);
-  assert.equal(texts().filter((t) => t.startsWith('Pop the ')).length, 1, 'next goal must not start while the letter is held');
+  assert.equal(hit.done, false, 'letter still held at +550');
+  assert.equal(goals().length, 1, 'next goal must not start while the letter is held');
   const releasedAt = clock.now;
   await finishLine(hit);
   await runUntil(releasedAt + 149);
-  assert.equal(texts().filter((t) => t.startsWith('Pop the ')).length, 1, 'next goal waits the 150 ms beat');
+  assert.equal(goals().length, 1, 'next goal waits the 150 ms beat');
   await runUntil(releasedAt + 150);
+  assert.equal(goals().length, 2, 'next goal starts one beat after the letter ends');
   assert.match(lastLine().text, /^Pop the /);
   assert.notEqual(lastLine().text, goal1.text, 'the next goal is a new letter');
 
@@ -260,7 +265,7 @@ const targetBalloon = () => ids.popArea.querySelectorAll(`.balloon[data-glyph="$
   const held = lastLine();
   await finishLine(held);
   await runUntil(clock.now + 3000);
-  assert.equal(texts().filter((t) => t.startsWith('Pop the ')).length, 1, 'stop() cancels the pending next goal');
+  assert.equal(goals().length, 1, 'stop() cancels the pending next goal');
 
   console.log('PASS: pop ABC — the popped letter is heard before the next goal; stop() cancels the waiter');
 })().catch((e) => { console.error(e); process.exit(1); });
