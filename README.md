@@ -115,10 +115,14 @@ The **More** drawer holds themed hub cards, each opening a small menu:
 ## Accessibility
 
 - **Keyboard + screen readers**: every tile, tool, choice and score badge
-  is a named button. Opening a game moves focus onto that screen (a
-  labelled region); Home puts it back on the tile you came from. Mode
-  tabs expose their pressed state; Memory cards say "Hidden card" until
-  flipped.
+  is a named button — and so is every animal, pot, balloon, hole, cloud
+  and sun you can tap: `onTap()` turns any plain tap target into a
+  focusable `role="button"`, so the sandbox and arcade games can be
+  played with Tab and Enter. Names carry state where it matters ("Pot 2:
+  seed planted, water it", "Hole 4: mole!"). Opening a game moves focus
+  onto that screen (a labelled region); Home puts it back on the tile you
+  came from. Mode tabs expose their pressed state; Memory cards say
+  "Hidden card" until flipped.
 - **Captions / live region**: see Settings above.
 - **Reduced motion**: with the OS "reduce motion" preference on, CSS
   animations collapse and the sparkle / confetti particle bursts are

@@ -16,9 +16,11 @@
 //      the live region, mode-tab pressed state, badge names, the
 //      reduced-motion switch for particle effects, the transient
 //      overlays (first-visit tutorial hint, sticker toast, all-stickers
-//      finale, new-best celebration), and the tap alternatives to every
+//      finale, new-best celebration), the tap alternatives to every
 //      drag (WCAG 2.2 §2.5.7): Garden, Farm, Baby Dino and Ice Cream are
-//      each played through by single taps, and the drag path still works.
+//      each played through by single taps, and the drag path still works;
+//      and keyboard play: every tap target is a focusable, named button,
+//      so Farm, Garden, Whack! and Pop! can be played with Tab + Enter.
 //
 // Run:  node tests/a11y.js
 // Exit: 0 pass · 1 violations or failed checks · 99 runner crashed.
@@ -161,6 +163,20 @@ async function structuralChecks(page) {
       }
     });
 
+    // Every visible role="button" is reachable by keyboard, and no button
+    // sits inside another (nested interactive controls confuse everyone).
+    document.querySelectorAll('[role="button"]').forEach((el) => {
+      if (!visible(el) || el.closest('[aria-hidden="true"]')) return;
+      if (el.tabIndex < 0) out.push(`role=button ${el.tagName.toLowerCase()}#${el.id}.${[...el.classList].join(".")} is not focusable`);
+    });
+    document.querySelectorAll('button, [role="button"]').forEach((el) => {
+      if (!visible(el)) return;
+      const inner = el.querySelector('button, [role="button"]');
+      if (inner && !inner.closest('[aria-hidden="true"]')) {
+        out.push(`nested interactive: ${el.tagName.toLowerCase()}#${el.id}.${[...el.classList].join(".")} contains ${inner.tagName.toLowerCase()}.${[...inner.classList].join(".")}`);
+      }
+    });
+
     // Anything with the `hidden` attribute must really be gone from layout
     // (a display rule on the element's class can otherwise beat it).
     document.querySelectorAll("[hidden]").forEach((el) => {
@@ -214,6 +230,8 @@ async function captionOverlapCheck(page) {
     document.querySelectorAll('button, [role="button"], .story-bubble, .mode-tabs').forEach((el) => {
       if (!(el.offsetParent || el.getClientRects().length)) return;
       if (el.closest("#captions")) return;
+      if (getComputedStyle(el).animationName !== "none") return; // drifting balloons etc. pass under the header
+      if (el.closest('[aria-hidden="true"]')) return;
       const r = el.getBoundingClientRect();
       if (r.width < 2 || r.height < 2) return;
       if (hits(cap, r)) {
@@ -549,6 +567,68 @@ async function dragAlternatives(page) {
   check((await page.$$eval(".icecream-scoop", (els) => els.length)) === 1, where, "ice cream: tapping a tub should add its scoop to the cone");
 }
 
+// Every tap target is a real button: the sandbox and arcade games can be
+// played from the keyboard alone.
+async function keyboardPlay(page) {
+  const where = "keyboard play";
+  const said = () => page.evaluate(() => window.__said.slice());
+  const isButton = (sel) => page.$eval(sel, (el) => el.getAttribute("role") === "button" && el.tabIndex === 0 && /[\p{L}\p{N}]/u.test(el.getAttribute("aria-label") || el.textContent));
+
+  // Farm: Enter on the cow makes it react; carrot then horse by keyboard feeds it.
+  await openScreen(page, { id: "farm", kind: "game" });
+  check(await isButton("#farmCow"), where, "farm: the cow should be a named, focusable button");
+  await page.evaluate(() => { window.__said.length = 0; });
+  await page.focus("#farmCow"); await page.keyboard.press("Enter");
+  await page.waitForTimeout(250);
+  check((await said()).length > 0, where, "farm: Enter on the cow should trigger its tap reaction");
+  await page.evaluate(() => { window.__said.length = 0; });
+  await page.focus("#farmCarrot"); await page.keyboard.press("Enter");
+  await page.focus("#farmHorse"); await page.keyboard.press("Enter");
+  await page.waitForTimeout(300);
+  check((await said()).includes("Munch munch!"), where, "farm: carrot then horse, all by keyboard, should feed the horse");
+  check(await page.$eval("#farmTree", (el) => el.getAttribute("role") !== "button"), where, "farm: the tree (which holds the apple buttons) must not itself be a button");
+
+  // Garden: plant, pick up the can, water — Tab/Enter only.
+  await openScreen(page, { id: "garden", kind: "game" });
+  const pot = '.garden-pot-wrap[data-pot="1"]';
+  check(await isButton(pot), where, "garden: a pot should be a named, focusable button");
+  check(/tap to plant/.test(await page.$eval(pot, (el) => el.getAttribute("aria-label"))), where, "garden: an empty pot's name should say it can be planted");
+  await page.focus(pot); await page.keyboard.press("Enter");
+  await page.waitForTimeout(150);
+  check(/water it/.test(await page.$eval(pot, (el) => el.getAttribute("aria-label"))), where, "garden: a planted pot's name should ask for water");
+  await page.focus("#gardenWaterCan"); await page.keyboard.press("Enter");
+  await page.focus(pot); await page.keyboard.press("Enter");
+  await page.waitForTimeout(450);
+  check(await page.$eval(`${pot} .garden-plant`, (el) => el.classList.contains("stage-sprout")), where, "garden: keyboard can-then-pot should water the plant");
+
+  // Whack!: the holes are the buttons and say who is up; Enter whacks.
+  await openScreen(page, { id: "whack", kind: "game" });
+  check((await page.$$eval(".whack-hole", (els) => els.filter((h) => h.getAttribute("role") === "button" && h.tabIndex === 0 && /^Hole \d+: /.test(h.getAttribute("aria-label"))).length)) === 6, where, "whack: all six holes should be named, focusable buttons");
+  check(await page.$eval(".whack-critter", (el) => el.getAttribute("aria-hidden") === "true" && el.tabIndex < 0), where, "whack: the critter inside a hole must not be a second control");
+  let upHole = null;
+  for (let i = 0; i < 40 && !upHole; i++) {
+    upHole = await page.evaluate(() => {
+      const holes = [...document.querySelectorAll(".whack-hole")];
+      const k = holes.findIndex((h) => !/: empty$/.test(h.getAttribute("aria-label")));
+      return k >= 0 ? k : null;
+    });
+    if (upHole === null) await page.waitForTimeout(100);
+  }
+  check(upHole !== null, where, "whack: a critter should pop up and be named in its hole");
+  if (upHole !== null) {
+    await page.focus(`.whack-hole:nth-child(${upHole + 1})`); await page.keyboard.press("Enter");
+    await page.waitForTimeout(150);
+    check(Number(await page.$eval("#whackScoreVal", (el) => el.textContent)) >= 1, where, "whack: Enter on the hole with a critter up should score");
+  }
+
+  // Pop!: balloons are named buttons; Enter pops one.
+  await openScreen(page, { id: "pop", kind: "game" });
+  check(await isButton(".balloon"), where, "pop: a balloon should be a named, focusable button");
+  await page.focus(".balloon"); await page.keyboard.press("Enter");
+  await page.waitForTimeout(200);
+  check(Number(await page.$eval("#popScoreVal", (el) => el.textContent)) >= 1, where, "pop: Enter on a balloon should pop it");
+}
+
 // ---- main -----------------------------------------------------------------
 
 async function main() {
@@ -589,6 +669,7 @@ async function main() {
   await reducedMotion(first);
   await overlays(first);
   await dragAlternatives(first);
+  await keyboardPlay(first);
 
   await browser.close();
   pageErrors.forEach((m) => fail("page", `uncaught error: ${m}`));
@@ -604,7 +685,7 @@ async function main() {
     failures.forEach((f) => console.log(`  FAIL  ${f.where.padEnd(34)} ${f.what}`));
     process.exit(1);
   }
-  console.log("  behaviour: keyboard nav, settings modal, captions, mode tabs, badges, reduced motion, overlays, tap-instead-of-drag — all pass");
+  console.log("  behaviour: keyboard nav, settings modal, captions, mode tabs, badges, reduced motion, overlays, tap-instead-of-drag, keyboard play — all pass");
 }
 
 main().catch((e) => { console.error(e); process.exit(99); });

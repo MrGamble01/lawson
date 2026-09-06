@@ -99,7 +99,13 @@ and a real mouse drag still waters), Farm (bucket → cow milks it without
 the cow's moo; tapping a held tool again, Escape and leaving the screen
 all put it down; Enter on a tool then activating a target works), Baby
 Dino (one tap each on soap, shower and towel walks all three phases) and
-Ice Cream (a tap on a tub adds the scoop).
+Ice Cream (a tap on a tub adds the scoop). Then keyboard play: every tap
+target must be a named, focusable button and no button may sit inside
+another; Farm (Enter on the cow reacts; carrot then horse by keyboard
+feeds it), Garden (plant, pick up the can and water a pot by Enter, with
+the pot's name tracking its state), Whack! (the six holes are the buttons
+and say who is up; Enter scores) and Pop! (Enter pops a balloon) are
+played with the keyboard alone.
 
 Exit code 1 lists every failing screen/check; 99 means the runner crashed.
 

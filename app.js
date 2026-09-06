@@ -344,6 +344,23 @@ function onTap(el, fn) {
     if (handled) return;
     fn(e);
   });
+  makeTappableAccessible(el);
+}
+
+// A plain <div>/<span> that takes taps becomes a real button for keyboards
+// and screen readers: role="button" + tabindex="0" (Enter/Space are mapped
+// to click() below, and click() runs the tap handler). Games give these
+// a name with aria-label. Skipped: elements a game has already given a
+// role or tabindex, aria-hidden decorations, and containers that hold
+// their own controls (a button inside a button is invalid).
+function makeTappableAccessible(el) {
+  if (!el || !el.tagName) return;
+  if (el.tagName !== "DIV" && el.tagName !== "SPAN") return;
+  if (el.hasAttribute("role") || el.hasAttribute("tabindex")) return;
+  if (el.getAttribute("aria-hidden") === "true") return;
+  if (el.querySelector('button, input, select, a[href], [tabindex]:not([tabindex="-1"]), [role="button"]')) return;
+  el.setAttribute("role", "button");
+  el.setAttribute("tabindex", "0");
 }
 
 // Same as onTap but no-ops if this element already has a tap handler
