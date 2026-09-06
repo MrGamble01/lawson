@@ -198,6 +198,7 @@ Smoke + visual baseline checks for every game live in `tests/`.
 ```bash
 node tests/voice.js                # speech engine + caption event (no browser)
 node tests/story.js                # Story Time pacing (no browser)
+node tests/memory.js               # Memory last-card name before the win cheer (no browser)
 node tests/smoke.js                # errors-free / renders / restart-safe
 node tests/smoke.js --baseline     # + diff every screen against tests/baseline/
 node tests/smoke.js --update-baseline   # accept new baselines after UI changes

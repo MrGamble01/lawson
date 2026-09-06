@@ -8,6 +8,7 @@ Smoke, visual baseline and accessibility checks for every game and key screen.
 node tests/pacing-lint.js          # no bare timer right after a cheer, no chime right after a line, no block timer that calls a speaker after a short name (static check, no browser); --self-test checks the checker
 node tests/voice.js                # speech: voice choice, speed, name "sounds like", mute/volume, completion promise, caption event (no browser)
 node tests/story.js                # Story Time pacing on real narration end (no browser)
+node tests/memory.js               # Memory: last card name heard before the win cheer (no browser)
 node tests/stickers.js             # sticker announcement: jingle first, then waits for the cheer (no browser)
 node tests/nav-speech.js           # hub welcome line never spoken over a screen the kid tapped on to (Playwright)
 node tests/smoke.js                # smoke pass only (errors-free / screen renders / restart safe)
@@ -53,7 +54,9 @@ speech engine and an interrupted audio context, and that story pages flip
 after the narration finishes — never before the word-count floor, never
 after the no-`end`-event ceiling — freeze while the app is hidden, and
 pick the line back up after a character poke cuts it off, and let "The
-end!" and the sticker announcement finish before the next story.
+end!" and the sticker announcement finish before the next story, and
+that Memory holds the win cheer until the last card's name has been
+heard (`tests/memory.js`).
 
 For each of the 24 games (`tests/smoke.js: GAMES`):
 
