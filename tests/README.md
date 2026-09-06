@@ -5,8 +5,10 @@ Smoke, visual baseline and accessibility checks for every game and key screen.
 ## Run
 
 ```bash
+node tests/pacing-lint.js          # no game schedules a bare timer right after a cheer (static check, no browser)
 node tests/voice.js                # speech: voice choice, mute/volume, completion promise, caption event (no browser)
 node tests/story.js                # Story Time pacing on real narration end (no browser)
+node tests/nav-speech.js           # hub welcome line never spoken over a screen the kid tapped on to (Playwright)
 node tests/smoke.js                # smoke pass only (errors-free / screen renders / restart safe)
 node tests/smoke.js --baseline     # smoke + diff every screen against tests/baseline/
 node tests/smoke.js --update-baseline   # write fresh baseline PNGs (use after intentional visual changes)

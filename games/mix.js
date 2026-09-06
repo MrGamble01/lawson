@@ -26,6 +26,8 @@
 
   let score = 0;
   let activeTimer = null;
+  let cancelNext = null;
+  function clearNext() { if (cancelNext) cancelNext(); cancelNext = null; }
   let target = null;
   let selected = [];
   let busy = false;
@@ -130,14 +132,18 @@
           r.top + r.height / 2 + (Math.random() - 0.5) * 120,
         ), k * 50);
       }
-      activeTimer = setTimeout(newRound, 2000);
+      // Next round once the result and the cheer have been heard.
+      clearNext();
+      cancelNext = L.afterSpeech(newRound, { minMs: 2000 });
     } else {
       bowl.classList.add("wrong");
       L.buzzSound();
       L.say(`Oops, that's not ${target.result}. Try again!`);
       score = 0;
       L.bumpBadge("mixScoreVal", 0);
-      activeTimer = setTimeout(newRound, 1800);
+      // Let "try again" finish before the next "Make ...!" prompt.
+      clearNext();
+      cancelNext = L.afterSpeech(newRound, { minMs: 1800 });
     }
   }
 
@@ -153,6 +159,7 @@
   function stop() {
     clearTimeout(activeTimer);
     activeTimer = null;
+    clearNext();
   }
 
   L.games.mix = { screen: "mixGame", start, stop };

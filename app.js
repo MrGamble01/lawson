@@ -1001,16 +1001,32 @@ const HUB_INTROS = {
   brainHub: "Brain games!",
   libraryHub: "Welcome to the library!",
 };
+// The hub intro is spoken a beat after the screen change. If the kid has
+// already tapped on to a game (or another hub, or Home) by then, it must
+// not talk over that screen's own prompt.
+let _hubIntroTimer = null;
+function cancelHubIntro() {
+  clearTimeout(_hubIntroTimer);
+  _hubIntroTimer = null;
+}
 document.querySelectorAll("[data-hub]").forEach((btn) => {
   onTap(btn, () => {
     unlockAudio();
     unlockSpeech();
     navChime(true);
     leaveActiveGame();
+    cancelHubIntro();
     _lastNavTrigger = btn;
-    show(btn.dataset.hub);
-    const intro = HUB_INTROS[btn.dataset.hub];
-    if (intro) setTimeout(() => say(intro), 380);
+    const hub = btn.dataset.hub;
+    show(hub);
+    const intro = HUB_INTROS[hub];
+    if (intro) {
+      _hubIntroTimer = setTimeout(() => {
+        _hubIntroTimer = null;
+        const screen = document.getElementById(hub);
+        if (screen && screen.classList.contains("active")) say(intro);
+      }, 380);
+    }
   });
 });
 
@@ -1018,6 +1034,7 @@ document.querySelectorAll("[data-go]").forEach((btn) => {
   onTap(btn, () => {
     unlockAudio();
     unlockSpeech();
+    cancelHubIntro();
     const where = btn.dataset.go;
     navChime(true);
     _lastNavTrigger = btn;
@@ -1054,6 +1071,7 @@ document.querySelectorAll("[data-go]").forEach((btn) => {
 document.querySelectorAll("[data-home]").forEach((btn) => {
   onTap(btn, () => {
     leaveActiveGame();
+    cancelHubIntro();
     cancelSpeech();
     show("menu");
     navChime(false);

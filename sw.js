@@ -1,5 +1,5 @@
 // Service worker for offline play. Bump CACHE when assets change.
-const CACHE = "lawson-v50-keyboard-targets";
+const CACHE = "lawson-v51-keyboard-targets";
 const ASSETS = [
   "./",
   "./index.html",
