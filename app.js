@@ -1038,6 +1038,8 @@ document.addEventListener("touchmove", (e) => {
   const voiceTgl   = document.getElementById("settingsVoice");
   const voiceChoice = document.getElementById("settingsVoiceChoice");
   const voicePreview = document.getElementById("settingsVoicePreview");
+  const voiceHint = document.getElementById("settingsVoiceHint");
+  const VOICE_HINT = "Choose a voice, then listen. Voices marked online need an internet connection.";
   function refreshVoices() {
     const automatic = new Option("Automatic (recommended)", "");
     const voices = availableVoices();
@@ -1046,6 +1048,11 @@ document.addEventListener("touchmove", (e) => {
     voiceChoice.value = voices.some(v => v.voiceURI === savedVoiceURI) ? savedVoiceURI : "";
     voiceChoice.disabled = !synth;
     voicePreview.disabled = !synth || isVoiceMuted() || getVolume() === 0;
+    // The chosen voice stays chosen; say who is reading in the meantime.
+    const fallback = speechFallback();
+    if (voiceHint) voiceHint.textContent = fallback
+      ? `${fallback.failed.name} can't speak right now${fallback.failed.localService ? "" : " (no internet?)"}, so ${fallback.using.name} is reading instead.`
+      : VOICE_HINT;
   }
   voiceChoice.addEventListener("change", () => setSpeechVoice(voiceChoice.value));
   voicePreview.addEventListener("click", () => say("Hi! Let's play and discover something wonderful together."));
