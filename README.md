@@ -75,10 +75,15 @@ The **More** drawer holds themed hub cards, each opening a small menu:
 - Choose and preview a storyteller voice. Automatic prefers local English
   voices with enhanced quality when available, using their natural pitch.
   The choice is saved on this device. Available voices depend on the device;
-  voices marked online require a connection. On iPad, additional voices can
+  voices marked online require a connection. If the chosen voice can't
+  speak (an online voice with no connection, say), the storyteller reads
+  with the best local voice instead and goes back to the chosen one when
+  it can; Settings says who is standing in. On iPad, additional voices can
   be downloaded in the device's accessibility speech settings. Story Time
   paces its pages on the chosen voice: each page turns once the line has
-  actually been read, plus a beat to poke the scene.
+  actually been read, plus a beat to poke the scene. Poking a character
+  answers with its sound, then the storyteller picks the line back up if
+  it was cut off.
 - Locking the iPad or switching apps silences the storyteller and the menu
   music straight away. Coming back wakes the speech and sound engines
   (iOS leaves both muted after a lock or a phone call) and Story Time
