@@ -57,9 +57,14 @@ const document = { getElementById: id => ids[id] || null, createElement: () => e
 // ---- Lawson stub ----
 const spoken = [];      // [text, resolve]
 let stickers = 0;
+let inFlight = null;    // like lib/audio.js: a new line cuts off (settles) the one in flight
 const L = {
   games: {},
-  say: (text) => new Promise(resolve => spoken.push({ text, resolve })),
+  say: (text) => new Promise(resolve => {
+    if (inFlight) inFlight.resolve();
+    inFlight = { text, resolve };
+    spoken.push(inFlight);
+  }),
   onTap: (node, fn) => node.handlers.push(fn),
   beep() {}, haptic() {}, happySound() {}, sparkleAt() {},
   cheer: () => 'Yay!', earnSticker: () => { stickers++; },
@@ -211,5 +216,107 @@ const ceilFor = s => floorFor(s) * 2 + 4000;
   assert.equal(spoken.length, spokenAfterStop, 'no narration from a closed game');
   assert.deepEqual(pendingTimers(), []);
 
-  console.log('PASS: story pacing — floor, slow-voice wait, no-end ceiling, single ending, muted, tap-ahead, stop, lock/unlock freeze + resume');
+  // ---- Character pokes ----
+  const pokeChar = (i = 0) => ids.storyStage.children[i].handlers[0]({ stopPropagation() {} });
+  const linesSaid = text => spoken.filter(s => s.text === text).length;
+
+  // 11. Poke mid-line: the character answers (cutting the storyteller
+  //     off), then the line is read again from the top, and the page
+  //     paces off the re-read — never off the cut-off attempt.
+  story.start();
+  const p11 = lastLine();
+  const p11Shown = clock.now;
+  await runUntil(clock.now + 500);
+  pokeChar(0);
+  await flush();
+  const sound11 = lastLine();
+  assert.notEqual(sound11.text, p11.text, 'character sound spoken');
+  assert.deepEqual(pendingTimers(), [p11Shown + ceilFor(p11.text)], 'cut-off reading scheduled nothing');
+  await finishLine(sound11);
+  assert.equal(lastLine().text, p11.text, 'line read again after the poke');
+  assert.equal(linesSaid(p11.text), 2);
+  assert.deepEqual(pendingTimers(), [p11Shown + ceilFor(p11.text)], 'still waiting on the re-read');
+  await runUntil(clock.now + 1500);
+  await finishLine(lastLine());
+  assert.deepEqual(pendingTimers(), [p11Shown + floorFor(p11.text)], 'floor scheduled once the re-read ended');
+  await runUntil(p11Shown + floorFor(p11.text));
+  assert.equal(counter(), '2 / 4');
+
+  // 12. Poke after the line was heard: the sound plays, nothing is re-read.
+  const p12 = lastLine();
+  await runUntil(clock.now + 300);
+  await finishLine(p12);
+  const timersAfterHeard = pendingTimers();
+  pokeChar(1);
+  await flush();
+  await finishLine(lastLine());
+  assert.equal(linesSaid(p12.text), 1, 'heard line not re-read');
+  assert.deepEqual(pendingTimers(), timersAfterHeard, 'pacing untouched by a late poke');
+  await runUntil(timersAfterHeard[0]);
+  assert.equal(counter(), '3 / 4');
+
+  // 13. Rapid pokes: the newest poke owns the re-read, so the line is
+  //     read again exactly once, after the last sound.
+  const p13 = lastLine();
+  await runUntil(clock.now + 200);
+  pokeChar(0);
+  await flush();
+  pokeChar(1);          // cuts off the first sound
+  await flush();
+  assert.equal(linesSaid(p13.text), 1, 'no re-read while a newer poke is still sounding');
+  await finishLine(lastLine());
+  assert.equal(linesSaid(p13.text), 2, 'one re-read after the last poke');
+  await finishLine(lastLine());
+  await runUntil(clock.now + 5000);
+  assert.equal(linesSaid(p13.text), 2, 'no second re-read');
+  assert.equal(counter(), '4 / 4');
+
+  // 14. Poke, then tap ahead before the sound ends: the old page's line
+  //     is not read over the new page.
+  const p14 = lastLine();
+  await runUntil(clock.now + 200);
+  pokeChar(0);
+  await flush();
+  const readsOfP14 = linesSaid(p14.text);
+  ids.storyGame.handlers[0]({ target: { closest: () => null } }); // → The end! (cuts the sound off)
+  await flush();
+  await runUntil(clock.now + 2400);                              // → next story rendered exactly now
+  assert.equal(counter(), '1 / 4');
+  assert.equal(linesSaid(p14.text), readsOfP14, 'stale poke did not re-read the old page');
+
+  // 15. A page that keeps getting poked still turns at the ceiling.
+  const p15 = lastLine();
+  const p15Shown = clock.now;
+  const p15Ceil = p15Shown + ceilFor(p15.text);
+  while (clock.now + 1000 < p15Ceil) {
+    await runUntil(clock.now + 1000);
+    pokeChar(0);
+    await flush();
+    await finishLine(lastLine());   // sound done → re-read starts, never finishes
+  }
+  assert.equal(counter(), '1 / 4');
+  await runUntil(p15Ceil);
+  assert.equal(counter(), '2 / 4', 'ceiling bounded the endlessly poked page');
+
+  // 16. Tap straight to the ending with the last line unheard, then poke
+  //     during the "The end!" pause: no re-read, no second ending.
+  const tapAhead = () => ids.storyGame.handlers[0]({ target: { closest: () => null } });
+  tapAhead(); tapAhead();            // → 4 / 4, its line in flight
+  assert.equal(counter(), '4 / 4');
+  const p16 = lastLine();
+  const endsBefore16 = spoken.filter(s => s.text.startsWith('The end!')).length;
+  const stickersBefore16 = stickers;
+  tapAhead();                        // → The end! (last line never heard)
+  await flush();
+  pokeChar(0);
+  await flush();
+  await finishLine(lastLine());
+  await runUntil(clock.now + 2400);  // the next-story beat; a re-read would have landed inside it
+  assert.equal(linesSaid(p16.text), 1, 'last line not re-read over the ending');
+  assert.equal(spoken.filter(s => s.text.startsWith('The end!')).length, endsBefore16 + 1, 'ending fired once');
+  assert.equal(stickers, stickersBefore16 + 1);
+  assert.equal(counter(), '1 / 4', 'next story started');
+  story.stop();
+
+  console.log('PASS: story pacing — floor, slow-voice wait, no-end ceiling, single ending, muted, tap-ahead, stop, lock/unlock freeze + resume, poke-then-resume');
 })().catch(e => { console.error(e); process.exit(1); });
