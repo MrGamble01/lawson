@@ -106,7 +106,10 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   word is never masked — every game triggers its chime before the line
   (the farm, garden, train and scene sounds included), and a check keeps
   it that way — and "New best!" and "Sticker!" announcements wait for
-  the cheer to finish instead of cutting it off.
+  the cheer to finish instead of cutting it off. Short lines that lead
+  into another ("Flip!" then "Yummy!", the counted number then the total,
+  "Squirt squirt!" then "Bucket full of milk!") are heard in full before
+  the next one starts.
 - Locking the iPad or switching apps silences the storyteller and the menu
   music straight away. Coming back wakes the speech and sound engines
   (iOS leaves both muted after a lock or a phone call) and Story Time
