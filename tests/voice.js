@@ -12,9 +12,17 @@ const synth = { getVoices: () => voices, addEventListener: events.addEventListen
   speak: u => spoken.push(u), cancel: () => { canceled++; if (onCancel) onCancel(); } };
 let resumedSynth = 0, resumedCtx = 0, intervalsStarted = 0, intervalsCleared = 0;
 synth.resume = () => { resumedSynth++; synth.paused = false; };
+// Every gain node ever made, in order: the master bus first, the music bus
+// second. Ramps land on `value` at once and are recorded as [target, at].
+const gains = [];
 class AudioContext {
   constructor() { this.state = 'running'; }
-  createGain() { return { gain: { value: 1 }, connect() {} }; }
+  createGain() {
+    const g = { gain: { value: 1, ramps: [], cancelScheduledValues() {}, setValueAtTime() {},
+      linearRampToValueAtTime(v, t) { this.value = v; this.ramps.push([v, t]); } }, connect() {} };
+    gains.push(g);
+    return g;
+  }
   resume() { resumedCtx++; this.state = 'running'; return Promise.resolve(); }
 }
 const windowEvents = new EventTarget();
@@ -899,5 +907,53 @@ assert.equal(said.at(-1), 'Pop the N!');
   bee.onend(); await flush();
   run('setSoundMuted(false)');
 
-  console.log('PASS: delayed voices, natural pitch, local quality preference, saved choice, language, volume, mute, missing voice fallback, speech completion promise, caption event, hide/show lifecycle, unusable-voice fallback, speechDone, afterSpeech, swallowed utterances, speech diagnostics, chime then cheer, announcements wait their turn, storyteller speed, name sounds-like, prompt reminder');
+  // ---------- Menu music ducks under the storyteller ----------
+  // The music loop plays through its own bus. A line in flight pulls the
+  // bus down to a third over 150 ms; the end of the line eases it back
+  // over 600 ms. Nothing to say (muted voice, volume 0, hidden) means
+  // nothing to duck for.
+  const music = gains[1].gain;
+  assert.equal(music.value, 1, 'music bus starts at full level');
+  assert.equal(run('isMusicDucked()'), false);
+  speak('say("Welcome to Town!")');
+  assert.equal(music.value, 0.3, 'ducked while the line is in flight');
+  assert.deepEqual(music.ramps.at(-1), [0.3, 0.15], 'quick ramp down');
+  assert.equal(run('isMusicDucked()'), true);
+  spoken.at(-1).onend(); await flush();
+  assert.equal(music.value, 1, 'back up once the line has ended');
+  assert.deepEqual(music.ramps.at(-1), [1, 0.6], 'gentle ramp back up');
+  assert.equal(run('isMusicDucked()'), false);
+  // A line cut off by the next one: still ducked, no flicker up in between
+  // on the audio clock (the restore is cancelled by the new ramp down).
+  speak('say("Brain games!")');
+  const rampsBefore = music.ramps.length;
+  speak('say("Welcome to the library!")');
+  assert.equal(music.value, 0.3, 'stays ducked across a cut-off');
+  assert.deepEqual(music.ramps.slice(rampsBefore), [[1, 0.6], [0.3, 0.15]], 'restore then re-duck, both scheduled');
+  run('cancelSpeech()');
+  assert.equal(music.value, 1, 'a cancelled line restores the music');
+  // A line the engine swallows and re-reads keeps the music down throughout.
+  speak('say("Swallowed under music")');
+  fireWatchdogs(); fireDeferred();
+  assert.equal(music.value, 0.3, 'still ducked while the line is read again');
+  spoken.at(-1).onstart(); spoken.at(-1).onend(); await flush();
+  assert.equal(music.value, 1);
+  // Nothing spoken, nothing ducked.
+  run('setVoiceMuted(true)'); speak('say("Muted")'); assert.equal(music.value, 1, 'muted voice: no duck');
+  run('setVoiceMuted(false); setVolume(0)'); speak('say("Silent")'); assert.equal(music.value, 1, 'volume 0: no duck');
+  run('setVolume(1)');
+  // Volume turned down to nothing mid-line: the line is cut, the music comes back.
+  speak('say("Cut by the slider")');
+  assert.equal(music.value, 0.3);
+  run('setVolume(0)'); assert.equal(music.value, 1, 'volume 0 mid-line restores the music');
+  run('setVolume(1)');
+  // A screen lock mid-line restores it too (the music itself stops on lock).
+  speak('say("Cut by the lock")');
+  assert.equal(music.value, 0.3);
+  document.hidden = true; document.dispatchEvent(new Event('visibilitychange')); await flush();
+  assert.equal(music.value, 1, 'lock mid-line restores the music');
+  document.hidden = false; document.dispatchEvent(new Event('visibilitychange')); await flush();
+  assert.equal(run('isMusicDucked()'), false);
+
+  console.log('PASS: delayed voices, natural pitch, local quality preference, saved choice, language, volume, mute, missing voice fallback, speech completion promise, caption event, hide/show lifecycle, unusable-voice fallback, speechDone, afterSpeech, swallowed utterances, speech diagnostics, chime then cheer, announcements wait their turn, storyteller speed, name sounds-like, prompt reminder, music ducks under speech');
 })().catch(e => { console.error(e); process.exit(1); });

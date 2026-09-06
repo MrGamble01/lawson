@@ -912,7 +912,7 @@ window.Lawson = {
   audioCtx, unlockAudio, masterGain, setVolume, getVolume, isAudioHidden,
   getHighScore, setHighScore, bumpHighScore, tryNewHighScore,
   setVoiceMuted, setSoundMuted, isVoiceMuted, isSoundMuted,
-  setMusicEnabled, isMusicEnabled, startMusic, stopMusic,
+  setMusicEnabled, isMusicEnabled, startMusic, stopMusic, isMusicDucked,
   earnSticker, isStickerEarned, listStickers, resetStickers,
   KID_NAME, cheer, shuffled, celebrateNewHigh, confettiRain, boboCheer,
   setCaptionsEnabled, isCaptionsEnabled, prefersReducedMotion,
