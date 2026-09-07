@@ -13,6 +13,7 @@ const path = require("node:path");
 const assert = require("node:assert/strict");
 
 const GARDEN = path.join(__dirname, "../games/garden.js");
+const STYLES = path.join(__dirname, "../styles.css");
 
 function check(src, file) {
   const problems = [];
@@ -41,6 +42,27 @@ function check(src, file) {
     }
   });
 
+  return problems;
+}
+
+// Under reduced motion (the OS preference or the in-app "Less motion"
+// setting) the drift collapses and a cloud rests at its animation start,
+// left: -20% — an 8px sliver on a phone that fails the 24px target-size
+// rule and cannot be poked. Each cloud needs a resting spot inside the
+// sky for both switches.
+function checkStyles(css, file) {
+  const problems = [];
+  const label = file || "styles.css";
+  const media = css.match(/@media \(prefers-reduced-motion: reduce\)\s*\{[^}]*\.garden-cloud--1[\s\S]*?\n\s*\}/);
+  for (let i = 1; i <= 3; i++) {
+    const rest = new RegExp(`\\.garden-cloud--${i}\\s*\\{[^}]*left:\\s*\\d+%`);
+    if (!media || !rest.test(media[0])) {
+      problems.push(`${label}: .garden-cloud--${i} has no resting left under @media (prefers-reduced-motion: reduce)`);
+    }
+    if (!new RegExp(`html\\.reduce-motion \\.garden-cloud--${i}\\s*\\{[^}]*left:\\s*\\d+%`).test(css)) {
+      problems.push(`${label}: .garden-cloud--${i} has no resting left under html.reduce-motion`);
+    }
+  }
   return problems;
 }
 
@@ -88,6 +110,24 @@ function selfTest() {
   `;
   assert.ok(!check(stars, "fixture-stars.js").some((p) => /aria-hidden/.test(p)), "unrelated aria-hidden must not be reported as a garden-cloud");
 
+  // Resting spots: both switches, all three clouds.
+  const restCss = `
+    .garden-cloud--1 { --y: 10%; --dur: 36s; --delay: 0s; }
+    @media (prefers-reduced-motion: reduce) {
+      .garden-cloud--1 { left: 24%; --y: 13%; }
+      .garden-cloud--2 { left: 62%; }
+      .garden-cloud--3 { left: 46%; }
+    }
+    html.reduce-motion .garden-cloud--1 { left: 24%; --y: 13%; }
+    html.reduce-motion .garden-cloud--2 { left: 62%; }
+    html.reduce-motion .garden-cloud--3 { left: 46%; }
+  `;
+  assert.deepEqual(checkStyles(restCss, "fixture-css.css"), [], "resting spots for every cloud must pass");
+  const driftOnly = ".garden-cloud--1 { --y: 10%; --dur: 36s; --delay: 0s; }\n.garden-cloud--2 { --y: 22%; }\n.garden-cloud--3 { --y: 6%; }";
+  assert.equal(checkStyles(driftOnly, "fixture-main.css").length, 6, "main-shaped css (no resting spots) must be reported for both switches");
+  const oneMissing = restCss.replace("html.reduce-motion .garden-cloud--3 { left: 46%; }", "");
+  assert.ok(checkStyles(oneMissing, "fixture-one.css").some((p) => /cloud--3 has no resting left under html\.reduce-motion/.test(p)), "a cloud missing one switch must be reported");
+
   console.log("PASS: garden-sky self-test");
 }
 
@@ -98,16 +138,17 @@ if (require.main === module) {
       process.exit(0);
     }
     const src = fs.readFileSync(GARDEN, "utf8");
-    const problems = check(src, "games/garden.js");
+    const css = fs.readFileSync(STYLES, "utf8");
+    const problems = check(src, "games/garden.js").concat(checkStyles(css, "styles.css"));
     if (problems.length) {
       console.error("FAIL: Garden sky:\n" + problems.map((p) => "  " + p).join("\n"));
       process.exit(1);
     }
-    console.log("PASS: garden-sky — sun and clouds are named buttons");
+    console.log("PASS: garden-sky — sun and clouds are named buttons; clouds rest inside the sky under reduced motion");
   } catch (err) {
     console.error(err);
     process.exit(99);
   }
 }
 
-module.exports = { check };
+module.exports = { check, checkStyles };
