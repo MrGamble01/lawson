@@ -1063,6 +1063,11 @@ html.dark .hub-title {
   -webkit-appearance: none;
   -webkit-tap-highlight-color: transparent;
 }
+.match-target-item:focus-visible {
+  outline: 4px solid var(--c-brand);
+  outline-offset: 8px;
+  border-radius: 30px;
+}
 .match-choices {
   display: flex;
   gap: clamp(16px, 3vw, 40px);
