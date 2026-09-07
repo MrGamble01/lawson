@@ -3154,6 +3154,9 @@ html.dark .hub-title {
   right: 6%;
   width: clamp(60px, 14vw, 90px);
   height: clamp(60px, 14vw, 90px);
+  padding: 0;
+  appearance: none;
+  -webkit-appearance: none;
   background: transparent;
   border: none;
   cursor: pointer;
@@ -3196,6 +3199,9 @@ html.dark .hub-title {
   width: clamp(80px, 22vw, 160px);
   top: var(--y, 14%);
   left: -20%;
+  padding: 0;
+  appearance: none;
+  -webkit-appearance: none;
   background: transparent;
   border: none;
   z-index: 7;
