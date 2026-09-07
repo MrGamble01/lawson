@@ -9,6 +9,7 @@ node tests/pacing-lint.js          # no bare timer right after a cheer, no chime
 node tests/voice.js                # speech: voice choice, speed, name "sounds like", mute/volume, completion promise, caption event (no browser)
 node tests/story.js                # Story Time pacing on real narration end (no browser)
 node tests/stickers.js             # sticker announcement: jingle first, then waits for the cheer (no browser)
+node tests/garden-sky.js           # Garden sky: sun and clouds are named buttons; --self-test checks the checker (no browser)
 node tests/nav-speech.js           # hub welcome line never spoken over a screen the kid tapped on to (Playwright)
 node tests/smoke.js                # smoke pass only (errors-free / screen renders / restart safe)
 node tests/smoke.js --baseline     # smoke + diff every screen against tests/baseline/
@@ -27,8 +28,15 @@ Exit codes:
 
 ## What it checks
 
-`tests/voice.js` and `tests/story.js` are plain Node scripts with no
-Playwright dependency. They load `lib/audio.js` / `games/story.js` into a
+`tests/voice.js`, `tests/story.js` and `tests/garden-sky.js` are plain Node
+scripts with no Playwright dependency. `tests/garden-sky.js` is a static
+scan: a Garden cloud marked `aria-hidden` then given `onTap`, an unnamed
+cloud button, or a sun that is no longer a `<button>`, is reported — the
+`aria-hidden` shape left the clouds off the Tab order
+(`makeTappableAccessible` will not overwrite `aria-hidden`). `--self-test`
+covers the checker.
+
+`tests/voice.js` and `tests/story.js` load `lib/audio.js` / `games/story.js` into a
 `vm` sandbox with a fake speech engine, DOM and clock, so they check exact
 behaviour: which voice gets picked, that `say()` resolves when a line
 really ends (or is interrupted, muted, or silenced), that `afterSpeech()`
