@@ -32,6 +32,9 @@ baselines that are re-committed on any visual change.
   SW registration), then the 24 game scripts. `styles.css` is 5,143 lines. `sw.js`
   precaches 34 files under a hand-named cache key. `manifest.json` + `icon.svg` make it
   installable.
+- **Hosting**: a Vercel GitHub integration deploys every push (the audit PR got a
+  preview deployment within a minute of opening). So a push to `main` is a production
+  deploy, and the service-worker cache-name hazard in section 4 applies to every merge.
 - **Run it**: open `index.html` directly, or serve the folder (`python3 -m http.server`)
   for service-worker / add-to-home-screen. Verified: served with `http-server`, every
   path in the SW `ASSETS` list returns 200.
