@@ -176,8 +176,11 @@
 
   let songIndex = 0;
   let songTimeouts = [];
+  let cancelStart = null;
   let whiteEls = [];
   let blackEls = [];
+
+  function clearStart() { if (cancelStart) cancelStart(); cancelStart = null; }
 
   // Nicer piano-ish tone: triangle fundamental + soft sine harmonic + envelope.
   function playNote(freq, dur = 0.5) {
@@ -274,23 +277,15 @@
   }
 
   function stopSong() {
+    clearStart();
     songTimeouts.forEach((t) => clearTimeout(t));
     songTimeouts = [];
     const btn = document.getElementById("pianoSong");
     if (btn) btn.classList.remove("playing");
   }
 
-  function playSong() {
-    stopSong();
-    L.earnSticker && L.earnSticker("pianoSong");
-    const song = SONGS[songIndex % SONGS.length];
-    songIndex += 1;
-    const beat = 60 / song.bpm; // seconds per beat
-    L.say(song.name);
-    const btn = document.getElementById("pianoSong");
-    if (btn) btn.classList.add("playing");
-
-    let t = 500; // leading delay so the song name can finish
+  function scheduleNotes(song, beat) {
+    let t = 0;
     song.notes.forEach(({ w, d }) => {
       const dur = d * beat;
       const key = whiteEls[w];
@@ -302,6 +297,20 @@
       t += dur * 1000;
     });
     songTimeouts.push(setTimeout(stopSong, t + 200));
+  }
+
+  function playSong() {
+    stopSong();
+    L.earnSticker && L.earnSticker("pianoSong");
+    const song = SONGS[songIndex % SONGS.length];
+    songIndex += 1;
+    const beat = 60 / song.bpm; // seconds per beat
+    L.say(song.name);
+    const btn = document.getElementById("pianoSong");
+    if (btn) btn.classList.add("playing");
+    // First note once the name has been heard (never sooner than the old
+    // 500 ms lead, so a muted voice feels the same).
+    cancelStart = L.afterSpeech(() => scheduleNotes(song, beat), { beatMs: 150, minMs: 500, maxMs: 3000 });
   }
 
   function start() {

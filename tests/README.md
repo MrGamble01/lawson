@@ -11,6 +11,9 @@ node tests/pacing-lint.js          # no bare timer after a cheer, no chime right
 node tests/pacing-lint.js          # no bare timer right after a cheer, no chime right after a line, no named follow-on timer over a short line (static check, no browser); --self-test checks the checker
 node tests/pacing-lint.js          # no bare timer after a cheer, no chime right after a line, no arrow timer calling a speaker over a short line (static check, no browser); --self-test checks the checker
 node tests/pacing-lint.js          # no bare timer after a cheer, no chime right after a line, no setT(ms, name) speaking over a line (static check, no browser); --self-test checks the checker
+node tests/pacing-lint.js          # no bare timer right after a cheer, no chime right after a line, no notes on a fixed timer after a song name (static check, no browser); --self-test checks the checker
+node tests/piano.js                # Piano Song: first note waits for the name (no browser)
+node tests/music.js                # Music Studio Song: first note waits for the name (no browser)
 node tests/voice.js                # speech: voice choice, speed, name "sounds like", mute/volume, completion promise, caption event (no browser)
 node tests/story.js                # Story Time pacing on real narration end (no browser)
 node tests/doodle.js               # Doodle brushes / sizes / Stamp expose aria-pressed; stamp timeout says "Draw!" (no browser); --self-test checks the checker
@@ -116,6 +119,10 @@ a helper which already spoke is not followed by another line in the same
 tick — Sticker Scene's `build()` then welcome),
 `tests/scene.js` holds the opening "The park!" past the old same-tick
 cut-off and checks the welcome starts one beat after it ends,
+the line, not after it, where it would land on the first word, and that
+Piano / Music Studio do not start a song's notes on a fixed timer after
+the name), that a Song button's first note waits for "Twinkle Twinkle"
+(`tests/piano.js`, `tests/music.js`),
 that a quiz prompt is repeated once after a quiet spell and dropped by any
 other line, a screen change, a lock or a muted voice, that the menu music
 ducks under a line in flight and eases back once it ends (or is cut off,
