@@ -166,6 +166,9 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   Opening a game moves focus onto that screen (a labelled region); Home
   puts it back on the tile you came from. Mode tabs expose their pressed
   state; Memory cards say "Hidden card" until flipped.
+  came from. Mode tabs expose their pressed state; Doodle's brushes,
+  sizes and Stamp do too (and Stamp says "Draw!" when the 8-second
+  stamp window ends). Memory cards say "Hidden card" until flipped.
 - **Captions / live region**: see Settings above.
 - **Reduced motion**: with the OS "reduce motion" preference on, or the
   in-app **Less motion** setting, CSS animations collapse and the sparkle /
@@ -222,6 +225,7 @@ node tests/voice.js                # speech engine + caption event (no browser)
 node tests/story.js                # Story Time pacing (no browser)
 node tests/garden-sky.js           # Garden sky: sun and clouds are named buttons, clouds rest in view under reduced motion (no browser)
 node tests/match.js                # Match example is a named button that re-hears the prompt (no browser)
+node tests/doodle.js               # Doodle tool pressed state + stamp timeout (no browser)
 node tests/smoke.js                # errors-free / renders / restart-safe
 node tests/smoke.js --baseline     # + diff every screen against tests/baseline/
 node tests/smoke.js --update-baseline   # accept new baselines after UI changes

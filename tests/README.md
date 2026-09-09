@@ -9,6 +9,7 @@ node tests/sw-assets.js            # sw.js ASSETS matches index.html and the fil
 node tests/pacing-lint.js          # no bare timer right after a cheer, no chime right after a line (static check, no browser); --self-test checks the checker
 node tests/voice.js                # speech: voice choice, speed, name "sounds like", mute/volume, completion promise, caption event (no browser)
 node tests/story.js                # Story Time pacing on real narration end (no browser)
+node tests/doodle.js               # Doodle brushes / sizes / Stamp expose aria-pressed; stamp timeout says "Draw!" (no browser); --self-test checks the checker
 node tests/stickers.js             # sticker announcement: jingle first, then waits for the cheer (no browser)
 node tests/garden-sky.js           # Garden sky: sun and clouds are named buttons, clouds rest in view under reduced motion; --self-test checks the checker (no browser)
 node tests/match.js                # Match example is a named button that re-hears the prompt (no browser); --self-test checks the role=img-then-onTap checker
@@ -60,6 +61,8 @@ the line, not after it, where it would land on the first word),
 that Match's example picture is a named button that re-hears the prompt
 (`tests/match.js` also fails a `role="img"` then `onTap` in any game —
 that combination skips the keyboard upgrade),
+that Doodle's brushes, sizes and Stamp expose `aria-pressed` and that
+the 8-second stamp window says "Draw!" when it ends (`tests/doodle.js`),
 that a quiz prompt is repeated once after a quiet spell and dropped by any
 other line, a screen change, a lock or a muted voice, that the menu music
 ducks under a line in flight and eases back once it ends (or is cut off,

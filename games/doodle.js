@@ -200,18 +200,19 @@
     const row = document.getElementById("doodleSizes");
     if (!row) return;
     row.innerHTML = "";
+    row.setAttribute("role", "group");
+    row.setAttribute("aria-label", "Brush size");
     SIZES.forEach((s) => {
       const sw = document.createElement("button");
       sw.className = "doodle-size";
       sw.title = s.name;
       sw.setAttribute("aria-label", s.name);
       sw.innerHTML = `<span class="doodle-size-dot" style="--d:${Math.round(s.paint * 1.4)}px"></span>`;
-      if (s.name === size.name) sw.classList.add("active");
+      markChoice(sw, s.name === size.name);
       L.onTap(sw, (e) => {
         if (e.stopPropagation) e.stopPropagation();
         size = s;
-        row.querySelectorAll(".doodle-size").forEach((x) => x.classList.remove("active"));
-        sw.classList.add("active");
+        row.querySelectorAll(".doodle-size").forEach((x) => markChoice(x, x === sw));
         L.beep(380 + Math.random() * 120, 0.08, "sine");
         L.say(s.name);
       });
@@ -223,6 +224,8 @@
     const row = document.getElementById("doodleBrushes");
     if (!row) return;
     row.innerHTML = "";
+    row.setAttribute("role", "group");
+    row.setAttribute("aria-label", "Brush");
     BRUSHES.forEach((b) => {
       const sw = document.createElement("button");
       sw.className = "doodle-brush";
@@ -241,12 +244,11 @@
         sw.style.background = "conic-gradient(from 0deg, #ff3b30, #ff9500, #ffd60a, #34c759, #007aff, #af52de, #ff3b30)";
         sw.textContent = b.label;
       }
-      if (b.name === brush.name) sw.classList.add("active");
+      markChoice(sw, b.name === brush.name);
       L.onTap(sw, (e) => {
         if (e.stopPropagation) e.stopPropagation();
         brush = b;
-        row.querySelectorAll(".doodle-brush").forEach((x) => x.classList.remove("active"));
-        sw.classList.add("active");
+        row.querySelectorAll(".doodle-brush").forEach((x) => markChoice(x, x === sw));
         L.beep(450 + Math.random() * 200, 0.08, "sine");
         L.say(b.name);
       });
@@ -300,17 +302,33 @@
     }, "image/png");
   }
 
+  // Brushes, sizes and Stamp are toggles. Coloring's swatches already
+  // expose aria-pressed; Doodle's pickers only flipped a CSS class, so
+  // a keyboard / screen-reader pass could not tell which tool was on.
+  function markChoice(el, on) {
+    if (!el) return;
+    el.classList.toggle("active", on);
+    el.setAttribute("aria-pressed", String(on));
+  }
+
   function toggleStamp(btn) {
-    mode = mode === "stamp" ? "paint" : "stamp";
-    btn.classList.toggle("active", mode === "stamp");
-    L.beep(mode === "stamp" ? 700 : 400, 0.1);
-    L.say(mode === "stamp" ? "Stamp!" : "Draw!");
+    const stamping = mode !== "stamp";
+    mode = stamping ? "stamp" : "paint";
+    markChoice(btn, stamping);
+    L.beep(stamping ? 700 : 400, 0.1);
+    L.say(stamping ? "Stamp!" : "Draw!");
     clearTimeout(stampTimeout);
-    if (mode === "stamp") {
+    stampTimeout = null;
+    if (stamping) {
       // Auto-return to paint after 8 seconds so he doesn't get stuck.
+      // Speak the same "Draw!" as a manual toggle — a silent switch
+      // left toddlers (and the caption) thinking stamps were still on.
       stampTimeout = setTimeout(() => {
         mode = "paint";
-        btn.classList.remove("active");
+        stampTimeout = null;
+        markChoice(btn, false);
+        L.beep(400, 0.1);
+        L.say("Draw!");
       }, 8000);
     }
   }
@@ -351,7 +369,7 @@
     mode = "paint";
     brush = BRUSHES[0];
     size = SIZES[1];
-    stampBtn.classList.remove("active");
+    markChoice(stampBtn, false);
     undoStack = [];
     updateUndoBtn();
     renderBrushes();
