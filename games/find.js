@@ -225,10 +225,13 @@
       L.buzzSound();
       el.classList.add("wrong");
       setTimeout(() => el.classList.remove("wrong"), 400);
-      // Name what they tapped (reinforces learning), then repeat the goal.
+      // Name what they tapped (reinforces learning), then repeat the goal
+      // once that short name has been heard — a 700 ms timer used to cut
+      // "cow" off when the engine started late.
       if (mode === "free") L.say(item.n);
       else L.say(`That's ${sayGlyph(item.glyph)}.`, undefined, `That's ${item.glyph}.`);
-      setTimeout(speakTarget, 700);
+      clearNext();
+      cancelNext = L.afterSpeech(speakTarget, { minMs: 700, beatMs: 150, maxMs: 3000 });
     }
   }
 
@@ -250,6 +253,7 @@
     L.bumpBadge("findScoreVal", 0);
     updateBest();
     clearTimeout(activeTimer);
+    clearNext();
     newScene();
   }
 
