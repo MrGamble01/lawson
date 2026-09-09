@@ -10,6 +10,7 @@ node tests/pacing-lint.js          # no bare timer right after a cheer, no chime
 node tests/pacing-lint.js          # no bare timer after a cheer, no chime right after a line, no fixed timer speaking over a line (static check, no browser); --self-test checks the checker
 node tests/pacing-lint.js          # no bare timer right after a cheer, no chime right after a line, no named follow-on timer over a short line (static check, no browser); --self-test checks the checker
 node tests/pacing-lint.js          # no bare timer after a cheer, no chime right after a line, no arrow timer calling a speaker over a short line (static check, no browser); --self-test checks the checker
+node tests/pacing-lint.js          # no bare timer after a cheer, no chime right after a line, no setT(ms, name) speaking over a line (static check, no browser); --self-test checks the checker
 node tests/voice.js                # speech: voice choice, speed, name "sounds like", mute/volume, completion promise, caption event (no browser)
 node tests/story.js                # Story Time pacing on real narration end (no browser)
 node tests/doodle.js               # Doodle brushes / sizes / Stamp expose aria-pressed; stamp timeout says "Draw!" (no browser); --self-test checks the checker
@@ -70,6 +71,9 @@ the line, not after it, where it would land on the first word, and that
 a short line is not followed by a named timer whose callback speaks),
 the line, not after it, where it would land on the first word, and that
 a short line is not followed by `setTimeout(() => speaker(), ms)`),
+the line, not after it, where it would land on the first word, and that
+a short line is not followed by `setT(ms, name)` whose body speaks the
+next one),
 that a quiz prompt is repeated once after a quiet spell and dropped by any
 other line, a screen change, a lock or a muted voice, that the menu music
 ducks under a line in flight and eases back once it ends (or is cut off,

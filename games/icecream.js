@@ -45,9 +45,12 @@
   let bestAtStart = 0;
   let celebrated = false;
   let timers = [];
+  // The next bite (or the cheer) waits for "Mmm!" to be heard.
+  let cancelNext = null;
+  function clearNext() { if (cancelNext) cancelNext(); cancelNext = null; }
 
   function setT(ms, fn) { const t = setTimeout(fn, ms); timers.push(t); return t; }
-  function clearAll() { timers.forEach(clearTimeout); timers = []; }
+  function clearAll() { timers.forEach(clearTimeout); timers = []; clearNext(); }
   function $(id) { return document.getElementById(id); }
 
   // ====================================================================
@@ -383,10 +386,12 @@
 
   function tryEat() {
     if (scoops.length === 0) return;
+    if (cancelNext) return; // already chewing — don't stack a second chain
     eatBite();
   }
 
   function eatBite() {
+    cancelNext = null; // this waiter fired (or we're starting a fresh eat)
     if (scoops.length === 0) {
       finishSundae();
       return;
@@ -411,7 +416,10 @@
     });
     placedToppings = remaining;
     renderStack();
-    setT(450, eatBite);
+    // Next bite (or the cheer) once "Mmm!" has been heard; never sooner
+    // than the old 450 ms, never much later if the engine stays quiet.
+    clearNext();
+    cancelNext = L.afterSpeech(eatBite, { beatMs: 150, minMs: 450, maxMs: 3000 });
   }
 
   function finishSundae() {
