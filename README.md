@@ -108,6 +108,10 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   tap in Find It! names what you hit and waits for that name before
   repeating the goal; Color Mix waits for the second colour's name
   before announcing the mix. A quiz
+  let the cheer — or "try again" — finish before the next prompt. Memory
+  also waits for the last card's name ("bee") before "You matched them
+  all!", so a late-starting iPad voice is not cut off. A hub's welcome
+  line is skipped if the kid has already tapped on. A quiz
   prompt ("Find the cow!") is repeated once if nothing has happened for
   twelve seconds, so a kid who looked away gets a nudge, never a nag. A cheer
   starts as its chime rings out rather than underneath it, so the first
@@ -238,6 +242,7 @@ node tests/story.js                # Story Time pacing (no browser)
 node tests/garden-sky.js           # Garden sky: sun and clouds are named buttons, clouds rest in view under reduced motion (no browser)
 node tests/match.js                # Match example is a named button that re-hears the prompt (no browser)
 node tests/doodle.js               # Doodle tool pressed state + stamp timeout (no browser)
+node tests/memory.js               # Memory last-card name before the win cheer (no browser)
 node tests/smoke.js                # errors-free / renders / restart-safe
 node tests/smoke.js --baseline     # + diff every screen against tests/baseline/
 node tests/smoke.js --update-baseline   # accept new baselines after UI changes

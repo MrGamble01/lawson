@@ -95,7 +95,13 @@
         // milestones, so each match deserves a celebration.
         L.boboCheer && L.boboCheer();
         lock = false;
-        if (matchedCount === board.children.length) winRound();
+        // Cards flip on their own timer; the win cheer waits for the
+        // last card's name ("bee") so a late-starting iPad voice is
+        // heard before "You matched them all!".
+        if (matchedCount === board.children.length) {
+          clearNext();
+          cancelNext = L.afterSpeech(winRound, { beatMs: 150, minMs: 350, maxMs: 3000 });
+        }
       }, 320);
     } else {
       const a = firstPick, b = card;
@@ -112,11 +118,8 @@
     }
   }
 
-  let winTimer = null;
   let cancelNext = null;
   function clearNext() {
-    clearTimeout(winTimer);
-    winTimer = null;
     if (cancelNext) cancelNext();
     cancelNext = null;
   }
@@ -129,21 +132,17 @@
     const bestEl = document.getElementById("memoryBestVal");
     if (bestEl) bestEl.textContent = L.getHighScore("memoryBest");
 
-    clearNext();
-    winTimer = setTimeout(() => {
-      winTimer = null;
-      L.say(`${L.cheer()} You matched them all!`);
-      const r = board.getBoundingClientRect();
-      for (let k = 0; k < 14; k++) {
-        setTimeout(() => L.sparkleAt(
-          r.left + r.width / 2 + (Math.random() - 0.5) * 220,
-          r.top  + r.height / 2 + (Math.random() - 0.5) * 220,
-        ), k * 55);
-      }
-      // New board once the cheer has been heard (and not on a screen the
-      // kid has already left).
-      cancelNext = L.afterSpeech(setupRound, { minMs: 2200 });
-    }, 350);
+    L.say(`${L.cheer()} You matched them all!`);
+    const r = board.getBoundingClientRect();
+    for (let k = 0; k < 14; k++) {
+      setTimeout(() => L.sparkleAt(
+        r.left + r.width / 2 + (Math.random() - 0.5) * 220,
+        r.top  + r.height / 2 + (Math.random() - 0.5) * 220,
+      ), k * 55);
+    }
+    // New board once the cheer has been heard (and not on a screen the
+    // kid has already left).
+    cancelNext = L.afterSpeech(setupRound, { minMs: 2200 });
   }
 
   function setupRound() {
