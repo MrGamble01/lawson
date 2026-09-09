@@ -43,7 +43,6 @@ function el(tag, id) {
     children: [],
     _classes: new Set(),
     textContent: '',
-    innerHTML: '',
     offsetWidth: 40,
     handlers: [],
     attrs: {},
