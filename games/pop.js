@@ -37,6 +37,11 @@
   let bestAtStart = 0;        // snapshot so the record celebration fires ONCE
   let celebrated = false;
   let spawnTimer = null;
+  let cancelNext = null;
+  function clearNext() {
+    if (cancelNext) cancelNext();
+    cancelNext = null;
+  }
 
   function sayGlyph(g) {
     if (mode === "numbers") return NUMBER_SAY[+g] || g;
@@ -89,7 +94,7 @@
     return area.querySelectorAll(`.balloon[data-glyph="${target}"]`).length;
   }
 
-  function newTarget(area) {
+  function pickTarget() {
     do {
       const pool = mode === "numbers" ? NUMBERS : LETTERS;
       target = pool[Math.floor(Math.random() * pool.length)];
@@ -97,7 +102,16 @@
     lastTarget = target;
     const prompt = document.getElementById("popPrompt");
     if (prompt) prompt.textContent = `Pop the ${target}!`;
+  }
+
+  function speakTarget() {
+    if (!target) return;
     L.say(`Pop the ${sayGlyph(target)}!`, undefined, `Pop the ${target}!`);
+  }
+
+  function newTarget(area) {
+    pickTarget();
+    speakTarget();
     // Guarantee one findable target right away.
     spawn(area, target);
   }
@@ -208,7 +222,12 @@
         L.say(`${sayGlyph(glyph)}!${tail}`, undefined, `${glyph}!${tail}`);
         burst("⭐");
         b.remove();
-        newTarget(area);
+        // Banner and a fresh balloon update now; the next "Pop the X!"
+        // waits so it cannot cut the letter (or the cheer) off.
+        pickTarget();
+        spawn(area, target);
+        clearNext();
+        cancelNext = L.afterSpeech(speakTarget, { beatMs: 150, minMs: 400, maxMs: 3000 });
       } else {
         // Popping is still fun — name what they hit, nudge back to target.
         L.beep(240, 0.14, "triangle");
@@ -242,6 +261,7 @@
   }
 
   function setMode(m, area) {
+    clearNext();
     mode = m;
     score = 0;
     streak = 0;
@@ -290,6 +310,7 @@
 
   function stop() {
     if (mode === "free" && streak > 0) L.bumpHighScore("popBest", streak);
+    clearNext();
     clearInterval(spawnTimer);
     spawnTimer = null;
     const area = document.getElementById("popArea");

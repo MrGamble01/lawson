@@ -118,6 +118,9 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   let the cheer — or "try again" — finish before the next prompt, and
   Baby Dino waits for "All clean!" before the next wash. A
   hub's welcome line is skipped if the kid has already tapped on. A quiz
+  hub's welcome line is skipped if the kid has already tapped on. Pop!
+  and Whack! ABC / 123 hear the popped letter (and its cheer) before the
+  next goal, so a slow voice never loses the name. A quiz
   prompt ("Find the cow!") is repeated once if nothing has happened for
   twelve seconds, so a kid who looked away gets a nudge, never a nag. A cheer
   starts as its chime rings out rather than underneath it, so the first
@@ -250,6 +253,8 @@ node tests/match.js                # Match example is a named button that re-hea
 node tests/doodle.js               # Doodle tool pressed state + stamp timeout (no browser)
 node tests/memory.js               # Memory last-card name before the win cheer (no browser)
 node tests/dino.js                 # Baby Dino cheer pacing (no browser)
+node tests/pop.js                  # Pop! ABC: letter heard before the next goal (no browser)
+node tests/whack.js                # Whack! ABC: hit heard before the next goal (no browser)
 node tests/smoke.js                # errors-free / renders / restart-safe
 node tests/smoke.js --baseline     # + diff every screen against tests/baseline/
 node tests/smoke.js --update-baseline   # accept new baselines after UI changes

@@ -39,6 +39,11 @@
   let bestKey = "whackBest";
   let bestAtStart = 0;
   let celebrated = false;
+  let cancelNext = null;
+  function clearNext() {
+    if (cancelNext) cancelNext();
+    cancelNext = null;
+  }
 
   function sayGlyph(g) {
     if (mode === "numbers") return NUMBER_SAY[+g] || g;
@@ -113,7 +118,12 @@
           updateBadges();
           maybeCelebrateRecord(score);
           popInterval = Math.max(750, 1300 - Math.floor(score / 5) * 60);
-          newTarget();
+          // Next letter is on the banner now; the spoken goal waits so
+          // it cannot cut the hit (or the cheer) off.
+          pickTarget();
+          if (!targetIsUp()) popRandom();
+          clearNext();
+          cancelNext = L.afterSpeech(speakTarget, { beatMs: 150, minMs: 400, maxMs: 3000 });
         } else {
           L.beep(240, 0.12, "triangle");
           L.say(`That's ${sayGlyph(c.glyph)}. Whack the ${sayGlyph(target)}!`);
@@ -184,7 +194,7 @@
     h.pop({ glyph });
   }
 
-  function newTarget() {
+  function pickTarget() {
     do {
       const pool = mode === "numbers" ? NUMBERS : LETTERS;
       target = pool[Math.floor(Math.random() * pool.length)];
@@ -192,7 +202,16 @@
     lastTarget = target;
     const prompt = document.getElementById("whackPrompt");
     if (prompt) prompt.textContent = `Whack the ${target}!`;
+  }
+
+  function speakTarget() {
+    if (!target) return;
     L.say(`Whack the ${sayGlyph(target)}!`);
+  }
+
+  function newTarget() {
+    pickTarget();
+    speakTarget();
     if (!targetIsUp()) popRandom();
   }
 
@@ -203,6 +222,7 @@
   }
 
   function setMode(m) {
+    clearNext();
     mode = m;
     score = 0;
     popInterval = mode === "free" ? 1200 : 1300;
@@ -239,6 +259,7 @@
   }
 
   function stop() {
+    clearNext();
     clearTimeout(cycleTimer);
     cycleTimer = null;
     holes.forEach((h) => h.reset());
