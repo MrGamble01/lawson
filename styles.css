@@ -3990,6 +3990,10 @@ html.dark .hub-title {
   cursor: pointer;
   background: transparent;
   border: none;
+  padding: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
   z-index: 4;
   filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.15));
   animation: gardenCloudDrift var(--dur, 36s) linear infinite var(--delay, 0s);
@@ -3998,6 +4002,18 @@ html.dark .hub-title {
 .garden-cloud--1 { --y: 10%; --dur: 36s; --delay: 0s; }
 .garden-cloud--2 { --y: 22%; --dur: 48s; --delay: 12s; }
 .garden-cloud--3 { --y: 6%;  --dur: 42s; --delay: 24s; }
+/* Without the drift (the OS reduce-motion preference or the in-app "Less
+   motion" setting collapses the animation) every cloud would rest at its
+   start, off the left edge — an 8px sliver nobody could poke. Park them
+   in the sky instead, clear of each other, the sun and the badges. */
+@media (prefers-reduced-motion: reduce) {
+  .garden-cloud--1 { left: 24%; --y: 13%; }
+  .garden-cloud--2 { left: 62%; }
+  .garden-cloud--3 { left: 46%; }
+}
+html.reduce-motion .garden-cloud--1 { left: 24%; --y: 13%; }
+html.reduce-motion .garden-cloud--2 { left: 62%; }
+html.reduce-motion .garden-cloud--3 { left: 46%; }
 @keyframes gardenCloudDrift {
   from { transform: translateX(0); }
   to   { transform: translateX(140vw); }

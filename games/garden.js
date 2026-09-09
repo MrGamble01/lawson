@@ -249,9 +249,9 @@
     const stage = $("gardenStage");
     stage.innerHTML = `
       <div id="gardenSky" class="garden-sky">
-        <div class="garden-cloud garden-cloud--1" aria-hidden="true">${cloudSvg()}</div>
-        <div class="garden-cloud garden-cloud--2" aria-hidden="true">${cloudSvg()}</div>
-        <div class="garden-cloud garden-cloud--3" aria-hidden="true">${cloudSvg()}</div>
+        <button type="button" class="garden-cloud garden-cloud--1" aria-label="Cloud">${cloudSvg()}</button>
+        <button type="button" class="garden-cloud garden-cloud--2" aria-label="Cloud">${cloudSvg()}</button>
+        <button type="button" class="garden-cloud garden-cloud--3" aria-label="Cloud">${cloudSvg()}</button>
         <button id="gardenSun" class="garden-sun" aria-label="Sun">${sunSvg()}</button>
       </div>
       <div id="gardenInsects" class="garden-insects"></div>
@@ -546,6 +546,9 @@
     });
   }
 
+  // The clouds are real <button>s (like the sun): they used to be
+  // aria-hidden divs, which onTap's button upgrade skips, so "Cloud!"
+  // was pointer-only — off the Tab order and unnamed for a screen reader.
   function setupClouds() {
     document.querySelectorAll(".garden-cloud").forEach((c) => {
       L.onTap(c, (e) => {
