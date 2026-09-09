@@ -503,8 +503,19 @@
         if (!e.target || !e.target.closest) return;
         if (e.target.closest(".home-btn")) return;
         if (e.target.closest(".story-character")) return;
+        if (e.target.closest("#storyNext")) return; // the button below advances itself
         advance();
       });
+      // Keyboard / switch users: the "Next page" button is in the tab
+      // order, and Enter or Space on the screen itself (where focus lands
+      // when the story opens) turns the page too.
+      const next = document.getElementById("storyNext");
+      if (next) L.onTap(next, (e) => { if (e.stopPropagation) e.stopPropagation(); advance(); });
+      if (typeof screen.addEventListener === "function") {
+        screen.addEventListener("keydown", (e) => {
+          if ((e.key === "Enter" || e.key === " ") && e.target === screen) { e.preventDefault(); advance(); }
+        });
+      }
       tapAttached = true;
     }
     renderPage();

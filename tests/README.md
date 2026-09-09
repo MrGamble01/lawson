@@ -129,6 +129,12 @@ Match and How Many? correctly by keyboard leaves focus on a choice of the
 rebuilt round (the answered button is gone); popping a balloon with Enter
 leaves focus on another balloon or the Pop! screen; Escape from a game
 still lands focus on the menu.
+tool down, and Escape again goes Home. Then Dots and Story Time by
+keyboard: every SVG dot is a named, focusable button whose name says who
+is next; Enter on the wrong dot calls out the right one without
+connecting; Enter on the right dot connects it and the names move on;
+Story Time turns the page from the "keep going" button and from Enter on
+the screen, but not from Enter on a character.
 
 Exit code 1 lists every failing screen/check; 99 means the runner crashed.
 
