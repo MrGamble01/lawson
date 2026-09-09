@@ -1051,11 +1051,22 @@ html.dark .hub-title {
 }
 .match-target-item {
   font-size: clamp(100px, 20vw, 220px);
+  font-family: inherit;
+  color: inherit;
   background: #fff;
   border: 8px dashed #ff4081;
   border-radius: 30px;
   padding: 10px 30px;
   box-shadow: 0 8px 0 rgba(0,0,0,0.12);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.match-target-item:focus-visible {
+  outline: 4px solid var(--c-brand);
+  outline-offset: 8px;
+  border-radius: 30px;
 }
 .match-choices {
   display: flex;
@@ -2542,6 +2553,9 @@ html.dark .hub-title {
   width: clamp(60px, 14vw, 96px);
   height: clamp(60px, 14vw, 96px);
   z-index: 5;
+  padding: 0;
+  appearance: none;
+  -webkit-appearance: none;
   background: transparent;
   border: none;
   cursor: pointer;
@@ -2557,6 +2571,9 @@ html.dark .hub-title {
   position: absolute;
   width: clamp(70px, 20vw, 140px);
   height: clamp(34px, 10vw, 64px);
+  padding: 0;
+  appearance: none;
+  -webkit-appearance: none;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.95);
   filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.15));
@@ -2567,6 +2584,19 @@ html.dark .hub-title {
 .train-cloud--1 { top: 10%; left: -20%;  animation: trainCloudDrift 50s linear infinite; }
 .train-cloud--2 { top: 18%; left: -50%;  animation: trainCloudDrift 60s linear 15s infinite; }
 .train-cloud--3 { top: 6%;  left: -30%;  animation: trainCloudDrift 70s linear 30s infinite; }
+/* Under reduced motion the drift collapses and each cloud would rest at
+   its animation start, off the sky's left edge — a button nobody can
+   reach. Park them inside the sky, clear of the sun and of each other. */
+@media (prefers-reduced-motion: reduce) {
+  .train-cloud { animation: none; }
+  .train-cloud--1 { left: 16%; }
+  .train-cloud--2 { left: 50%; }
+  .train-cloud--3 { left: 34%; }
+}
+html.reduce-motion .train-cloud { animation: none; }
+html.reduce-motion .train-cloud--1 { left: 16%; }
+html.reduce-motion .train-cloud--2 { left: 50%; }
+html.reduce-motion .train-cloud--3 { left: 34%; }
 @keyframes trainCloudDrift { from { transform: translateX(0); } to { transform: translateX(140vw); } }
 
 .train-hills {
@@ -3150,10 +3180,15 @@ html.dark .hub-title {
 
 .farm-sun {
   position: absolute;
-  top: 4%;
-  right: 6%;
+  top: 3%;
+  /* Centred in the sky: the top-right corner belongs to the score badges,
+     and a button under a badge fails the 24px target-size rule. */
+  left: calc(50% - clamp(30px, 7vw, 45px));
   width: clamp(60px, 14vw, 90px);
   height: clamp(60px, 14vw, 90px);
+  padding: 0;
+  appearance: none;
+  -webkit-appearance: none;
   background: transparent;
   border: none;
   cursor: pointer;
@@ -3196,6 +3231,9 @@ html.dark .hub-title {
   width: clamp(80px, 22vw, 160px);
   top: var(--y, 14%);
   left: -20%;
+  padding: 0;
+  appearance: none;
+  -webkit-appearance: none;
   background: transparent;
   border: none;
   z-index: 7;
@@ -3206,6 +3244,15 @@ html.dark .hub-title {
 .farm-cloud svg { width: 100%; height: auto; display: block; }
 .farm-cloud--1 { --y: 8%;  --dur: 48s; --delay: 0s; }
 .farm-cloud--2 { --y: 18%; --dur: 56s; --delay: 18s; }
+/* Same resting spots as Garden and Train under reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  .farm-cloud { animation: none; }
+  .farm-cloud--1 { left: 22%; }
+  .farm-cloud--2 { left: 60%; }
+}
+html.reduce-motion .farm-cloud { animation: none; }
+html.reduce-motion .farm-cloud--1 { left: 22%; }
+html.reduce-motion .farm-cloud--2 { left: 60%; }
 @keyframes farmCloudDrift {
   from { transform: translateX(0); }
   to   { transform: translateX(140vw); }
@@ -3990,6 +4037,10 @@ html.dark .hub-title {
   cursor: pointer;
   background: transparent;
   border: none;
+  padding: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
   z-index: 4;
   filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.15));
   animation: gardenCloudDrift var(--dur, 36s) linear infinite var(--delay, 0s);
@@ -3998,6 +4049,18 @@ html.dark .hub-title {
 .garden-cloud--1 { --y: 10%; --dur: 36s; --delay: 0s; }
 .garden-cloud--2 { --y: 22%; --dur: 48s; --delay: 12s; }
 .garden-cloud--3 { --y: 6%;  --dur: 42s; --delay: 24s; }
+/* Without the drift (the OS reduce-motion preference or the in-app "Less
+   motion" setting collapses the animation) every cloud would rest at its
+   start, off the left edge — an 8px sliver nobody could poke. Park them
+   in the sky instead, clear of each other, the sun and the badges. */
+@media (prefers-reduced-motion: reduce) {
+  .garden-cloud--1 { left: 24%; --y: 13%; }
+  .garden-cloud--2 { left: 62%; }
+  .garden-cloud--3 { left: 46%; }
+}
+html.reduce-motion .garden-cloud--1 { left: 24%; --y: 13%; }
+html.reduce-motion .garden-cloud--2 { left: 62%; }
+html.reduce-motion .garden-cloud--3 { left: 46%; }
 @keyframes gardenCloudDrift {
   from { transform: translateX(0); }
   to   { transform: translateX(140vw); }
@@ -4880,6 +4943,7 @@ body[data-dino-phase="towel"] .dino-towel {
   width: 100%;
   text-align: center;
   transition: background 0.6s ease;
+  cursor: pointer;
 }
 .story-text {
   font-size: clamp(20px, 3.4vw, 30px);
@@ -4897,6 +4961,24 @@ body[data-dino-phase="towel"] .dino-towel {
   color: #6741d9;
   margin-top: 6px;
 }
+/* The hint is a real "Next page" button for keyboard and switch users,
+   styled as the same quiet line of text. */
+button.story-hint {
+  display: block;
+  margin: 6px auto 0;
+  background: none;
+  border: 0;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: clamp(13px, 2vw, 16px);
+  font-weight: 700;
+  cursor: pointer;
+}
+button.story-hint:active { background: rgba(103, 65, 217, 0.12); }
+/* Connect-the-dots: the focused dot thickens its ring as well as showing
+   the outline, so it reads on any puzzle background. */
+.dots-svg g.dot:focus-visible circle { stroke-width: 7; }
 
 /* ---------- Welcome toast (top, app-load only) ---------- */
 .welcome-toast {

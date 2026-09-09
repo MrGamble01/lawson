@@ -29,6 +29,7 @@
   const MAX_N = 5;
 
   let score = 0;
+  let answered = false;   // the round is won; late taps wait for the next one
   let activeTimer = null;
   let cancelNext = null;
   function clearNext() { if (cancelNext) cancelNext(); cancelNext = null; }
@@ -68,6 +69,7 @@
   }
 
   function newRound() {
+    answered = false;
     const { item, n } = pickRound();
     answer = n;
 
@@ -88,6 +90,7 @@
       btn.className = "howmany-choice";
       btn.textContent = c;
       L.onTap(btn, (e) => {
+        if (answered) return;   // the cheer and the next round are already on their way
         if (e.stopPropagation) e.stopPropagation();
         if (c === answer) {
           L.happySound();
@@ -103,12 +106,26 @@
           L.sparkleAt(p.x, p.y);
           clearTimeout(activeTimer);
           clearNext();
+          answered = true;
           cancelNext = L.afterSpeech(newRound, { minMs: 1800 });
         } else {
           L.buzzSound();
           btn.classList.add("wrong");
           setTimeout(() => btn.classList.remove("wrong"), 500);
+          // Drop the opening "How many …?" if it hasn't spoken yet —
+          // that 450 ms timer used to land on this nag whenever a
+          // toddler tapped before it fired (an enhanced iPad voice
+          // takes 300 ms to a second to begin).
+          clearTimeout(activeTimer);
+          activeTimer = null;
+          clearNext();
           L.say("Count them again!");
+          // Then ask the question again once the nag has been heard
+          // (same 450 ms floor when the voice is muted).
+          cancelNext = L.afterSpeech(
+            () => L.sayPrompt(`How many ${n === 1 ? item.name : item.plural}?`),
+            { minMs: 450, beatMs: 150, maxMs: 3000 },
+          );
           score = 0;
           L.bumpBadge("howmanyScoreVal", 0);
         }

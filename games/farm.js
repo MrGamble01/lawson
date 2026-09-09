@@ -52,7 +52,11 @@
   let rainStart = 0;
 
   function setT(ms, fn) { const t = setTimeout(fn, ms); timers.push(t); return t; }
-  function clearAll() { timers.forEach(clearTimeout); timers = []; }
+  function clearAll() { timers.forEach(clearTimeout); timers = []; clearNext(); }
+  // A line that waits for the one before it ("Bucket full of milk!"
+  // after "Squirt squirt!"); cancelled with the timers.
+  let cancelNext = null;
+  function clearNext() { if (cancelNext) cancelNext(); cancelNext = null; }
   function $(id) { return document.getElementById(id); }
   function rand(a, b) { return a + Math.random() * (b - a); }
 
@@ -478,10 +482,10 @@
     const stage = $("farmStage");
     stage.innerHTML = `
       <div id="farmSky" class="farm-sky">
-        <div id="farmSunMoon" class="farm-sun" aria-hidden="true">${sunSvg()}</div>
+        <button type="button" id="farmSunMoon" class="farm-sun" aria-label="Sun">${sunSvg()}</button>
         <div class="farm-stars" id="farmStars" aria-hidden="true"></div>
-        <div class="farm-cloud farm-cloud--1" aria-hidden="true">${cloudSvg()}</div>
-        <div class="farm-cloud farm-cloud--2" aria-hidden="true">${cloudSvg()}</div>
+        <button type="button" class="farm-cloud farm-cloud--1" aria-label="Cloud">${cloudSvg()}</button>
+        <button type="button" class="farm-cloud farm-cloud--2" aria-label="Cloud">${cloudSvg()}</button>
       </div>
       <div id="farmRain" class="farm-rain"></div>
       <div class="farm-mountain"></div>
@@ -599,10 +603,12 @@
     setT(420, () => cow.el.classList.remove("farm-react"));
     bumpCare();
     if (bucketMilkLevel >= COW_MILK_PER_FILL) {
-      setT(400, () => {
+      // Once "Squirt squirt!" has been heard, not over it.
+      clearNext();
+      cancelNext = L.afterSpeech(() => {
         L.happySound();
         L.say("Bucket full of milk!");
-      });
+      }, { beatMs: 150, minMs: 400, maxMs: 3000 });
     }
   }
 
@@ -1052,6 +1058,7 @@
     const p = phases[dayPhase % phases.length];
     sky.style.background = p.bg;
     sun.innerHTML = p.body;
+    sun.setAttribute("aria-label", dayPhase >= 2 ? "Stars" : "Sun");
     if (stars) {
       stars.innerHTML = "";
       if (p.stars) {

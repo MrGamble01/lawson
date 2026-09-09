@@ -91,7 +91,13 @@
   let puzzleIndex = -1;
   let nextDot = 1;
   let solved = 0;
-  let advanceTimer = null;
+  // The reveal line waits for the last number; the next puzzle waits for
+  // the reveal. Both are cancelled on stop().
+  let cancelNext = null;
+  function clearNext() {
+    if (cancelNext) cancelNext();
+    cancelNext = null;
+  }
   let bestAtStart = 0;
   let celebrated = false;
 
@@ -127,9 +133,17 @@
     });
     svg.appendChild(poly);
 
+    // Each dot is a keyboard target (onTap upgrades SVG groups to buttons);
+    // its name says whether it is done, next, or still waiting.
+    const dotEls = [];
+    const labelDots = () => dotEls.forEach((el, idx) => {
+      const n = idx + 1;
+      el.setAttribute("aria-label", n < nextDot ? `Dot ${n}, connected` : n === nextDot ? `Dot ${n}, next` : `Dot ${n}`);
+    });
     p.dots.forEach((d, i) => {
       const num = i + 1;
       const g = svgEl("g", { transform: `translate(${d.x},${d.y})`, class: "dot" });
+      dotEls.push(g);
       const circle = svgEl("circle", { r: "22", fill: "#fff", stroke: "#ff4081", "stroke-width": "4" });
       const label  = svgEl("text", {
         "text-anchor": "middle", "dominant-baseline": "central",
@@ -166,12 +180,18 @@
         L.beep(380 + num * 25, 0.1, "triangle");
         L.say(String(num));
         nextDot += 1;
+        labelDots();
 
         if (nextDot > p.dots.length) {
-          advanceTimer = setTimeout(() => winPuzzle(p, svg), 450);
+          // Once the last number has been heard, reveal the picture —
+          // a beat after the line ends, never sooner than the old 450 ms,
+          // and bounded in case the engine never says.
+          clearNext();
+          cancelNext = L.afterSpeech(() => winPuzzle(p, svg), { beatMs: 150, minMs: 450, maxMs: 3000 });
         }
       });
     });
+    labelDots();
 
     stage.appendChild(svg);
     L.say(`Connect the dots! Start with 1.`);
@@ -185,7 +205,12 @@
     maybeCelebrateRecord(solved);
     document.getElementById("dotsBestVal").textContent = L.getHighScore("dotsBest");
 
-    setTimeout(() => L.say(`It's a ${p.name}! ${L.cheer()}`), 300);
+    // The chime is already ringing; say() waits for it, so the reveal
+    // starts as it rings out rather than on a guess. Next puzzle once
+    // the line has been heard (never sooner than the old wait).
+    L.say(`It's a ${p.name}! ${L.cheer()}`);
+    clearNext();
+    cancelNext = L.afterSpeech(setupPuzzle, { minMs: 2800 });
 
     // Fade a giant reveal emoji over the connected outline.
     const reveal = svgEl("text", {
@@ -205,8 +230,6 @@
         rect.top  + rect.height / 2 + (Math.random() - 0.5) * 220,
       ), k * 55);
     }
-
-    advanceTimer = setTimeout(setupPuzzle, 2800);
   }
 
   function start() {
@@ -222,8 +245,7 @@
   }
 
   function stop() {
-    clearTimeout(advanceTimer);
-    advanceTimer = null;
+    clearNext();
     if (stage) stage.innerHTML = "";
   }
 

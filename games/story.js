@@ -461,6 +461,28 @@
     }
   }
 
+  // The kid tapped the words: read the page's line again from the top.
+  // A tap on the bubble asks for the line, not for the next page, so it
+  // never advances — and it is not a poke: it re-reads even a line that
+  // has already been heard. The page's pending turn is pushed back to
+  // the ceiling; readLine() brings it forward again once the re-read
+  // has been heard, plus the usual beat. A poke whose re-read is still
+  // pending yields to this one. At "The end!" there is no page line to
+  // hear, so the tap falls through to advance() like any other.
+  function hearAgain() {
+    const story = STORIES[storyIdx];
+    const page = story && story.pages[pageIdx];
+    if (!active || !page || atEnd || advanceTimer === null) return false;
+    L.beep(520, 0.08, "triangle");
+    L.haptic(8);
+    pokeId += 1;
+    const { minMs, maxMs } = pacing(page.text);
+    clearTimeout(advanceTimer);
+    advanceTimer = setTimeout(advance, maxMs);
+    readLine(page.text, pageSeq, pageShownAt, minMs);
+    return true;
+  }
+
   function nextStory() {
     clearNext();
     storyIdx = (storyIdx + 1) % STORIES.length;
@@ -499,12 +521,25 @@
       // Tap the background to advance. Tapping a story-character
       // stopPropagation()s, so the screen handler never fires for
       // character pokes — those just play the character's sound.
+      // Tapping the words hears the line again instead.
       L.onTap(screen, (e) => {
         if (!e.target || !e.target.closest) return;
         if (e.target.closest(".home-btn")) return;
         if (e.target.closest(".story-character")) return;
+        if (e.target.closest("#storyNext")) return; // the button below advances itself
+        if (e.target.closest(".story-bubble") && hearAgain()) return;
         advance();
       });
+      // Keyboard / switch users: the "Next page" button is in the tab
+      // order, and Enter or Space on the screen itself (where focus lands
+      // when the story opens) turns the page too.
+      const next = document.getElementById("storyNext");
+      if (next) L.onTap(next, (e) => { if (e.stopPropagation) e.stopPropagation(); advance(); });
+      if (typeof screen.addEventListener === "function") {
+        screen.addEventListener("keydown", (e) => {
+          if ((e.key === "Enter" || e.key === " ") && e.target === screen) { e.preventDefault(); advance(); }
+        });
+      }
       tapAttached = true;
     }
     renderPage();

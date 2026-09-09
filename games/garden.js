@@ -74,9 +74,11 @@
   let rainPieces = [];
   let dayTimer = null;
   let dayPhase = 0; // 0..3 sliding around the day
+  let cancelPower = null;
 
   function setT(ms, fn) { const t = setTimeout(fn, ms); timers.push(t); return t; }
   function clearAllTimers() { timers.forEach(clearTimeout); timers = []; }
+  function clearPower() { if (cancelPower) { cancelPower(); cancelPower = null; } }
   function $(id) { return document.getElementById(id); }
 
   // ====================================================================
@@ -249,9 +251,9 @@
     const stage = $("gardenStage");
     stage.innerHTML = `
       <div id="gardenSky" class="garden-sky">
-        <div class="garden-cloud garden-cloud--1" aria-hidden="true">${cloudSvg()}</div>
-        <div class="garden-cloud garden-cloud--2" aria-hidden="true">${cloudSvg()}</div>
-        <div class="garden-cloud garden-cloud--3" aria-hidden="true">${cloudSvg()}</div>
+        <button type="button" class="garden-cloud garden-cloud--1" aria-label="Cloud">${cloudSvg()}</button>
+        <button type="button" class="garden-cloud garden-cloud--2" aria-label="Cloud">${cloudSvg()}</button>
+        <button type="button" class="garden-cloud garden-cloud--3" aria-label="Cloud">${cloudSvg()}</button>
         <button id="gardenSun" class="garden-sun" aria-label="Sun">${sunSvg()}</button>
       </div>
       <div id="gardenInsects" class="garden-insects"></div>
@@ -348,7 +350,9 @@
     updatePotGlows();
   }
 
-  function growPot(pot) {
+  // quiet: the sunshine bonus grows every plant at once; "Sunshine power!"
+  // is the line for that, not twelve "Sprout!"s cancelling each other.
+  function growPot(pot, quiet) {
     if (!pot.plant) return;
     pot.growth += 1;
     const p = pot.plant;
@@ -358,20 +362,20 @@
       pot.plantEl.innerHTML = sproutSvg(p.stem);
       pot.plantEl.classList.add("stage-sprout");
       L.beep(600, 0.10, "triangle");
-      L.say("Sprout!");
+      if (!quiet) L.say("Sprout!");
     } else if (pot.growth === 2) {
       pot.state = STATE.YOUNG;
       pot.plantEl.innerHTML = youngSvg(p.stem);
       pot.plantEl.classList.add("stage-young");
       L.beep(680, 0.10, "triangle");
-      L.say("Growing!");
+      if (!quiet) L.say("Growing!");
     } else if (pot.growth >= 3) {
       pot.state = STATE.MATURE;
       pot.plantEl.innerHTML = matureSvg(p.stem, p.emoji, p.fruitColor);
       pot.plantEl.classList.add("stage-mature");
       L.beep(760, 0.16, "triangle");
       L.haptic(8);
-      L.say(p.say);
+      if (!quiet) L.say(p.say);
       // Sparkle the moment of ripeness.
       const r = pot.plantEl.getBoundingClientRect();
       L.sparkleAt(r.left + r.width / 2, r.top + r.height / 2);
@@ -527,6 +531,9 @@
       taps += 1;
       L.beep(880, 0.10, "sine");
       L.haptic(6);
+      // A new tap cancels a pending "Sunshine power!" so a sixth tap
+      // does not speak the easter egg over the next "Sunshine!".
+      clearPower();
       L.say("Sunshine!");
       sun.classList.remove("spinning");
       void sun.offsetWidth;
@@ -535,17 +542,25 @@
       const r = sun.getBoundingClientRect();
       L.sparkleAt(r.left + r.width / 2, r.top + r.height / 2);
       // Easter egg: every 5 taps, briefly accelerate every plant by one.
+      // "Sunshine power!" used to start in the same tick and cut the
+      // first word off (an enhanced iPad voice can take 300 ms–1 s to
+      // begin). Wait for it, same 400 ms floor when the voice is muted.
       if (taps % 5 === 0) {
-        L.say("Sunshine power!");
+        // The plants grow now — a kid tapping fast must never lose the
+        // bonus. Only the spoken line waits (a later tap cancels just that).
         pots.forEach((pot) => {
           if (pot.state !== STATE.EMPTY && pot.state !== STATE.MATURE) {
-            setT(120 + pot.idx * 80, () => growPot(pot));
+            setT(120 + pot.idx * 80, () => growPot(pot, true));
           }
         });
+        cancelPower = L.afterSpeech(() => L.say("Sunshine power!"), { beatMs: 150, minMs: 400, maxMs: 3000 });
       }
     });
   }
 
+  // The clouds are real <button>s (like the sun): they used to be
+  // aria-hidden divs, which onTap's button upgrade skips, so "Cloud!"
+  // was pointer-only — off the Tab order and unnamed for a screen reader.
   function setupClouds() {
     document.querySelectorAll(".garden-cloud").forEach((c) => {
       L.onTap(c, (e) => {
@@ -811,6 +826,7 @@
     celebrated = false;
     dayPhase = 0;
     bestAtStart = L.getHighScore("gardenBest");
+    clearPower();
     clearAllTimers();
     if (weatherTimer) { clearTimeout(weatherTimer); weatherTimer = null; }
     if (rainTimer)    { clearTimeout(rainTimer); rainTimer = null; }
@@ -822,6 +838,7 @@
   }
 
   function stop() {
+    clearPower();
     clearAllTimers();
     if (weatherTimer) { clearTimeout(weatherTimer); weatherTimer = null; }
     if (rainTimer)    { clearTimeout(rainTimer); rainTimer = null; }

@@ -30,20 +30,26 @@ behind the **More** card.
   clean.
 - **Garden!** — plant a seed, drag the watering can (or tap the can, then
   the pot) to grow it, harvest the fruit. 12 plants; bees, butterflies, a bird, surprise rain, and a
-  slow day/night cycle.
+  slow day/night cycle. The sun and clouds are named buttons (in Farm and
+  Train too), so Tab / a screen reader can poke them the same way a finger
+  does, and under "Less motion" the clouds rest inside the sky instead of
+  parking off its left edge.
 
 ## More → hubs
 
 The **More** drawer holds themed hub cards, each opening a small menu:
 
 - **Art Studio** — Doodle, Coloring, Color Mix, Sticker Scene
-- **Music** — Piano, Music Studio (drums + xylophone + bells), Listen
+- **Music** — Piano, Music Studio (drums + xylophone + bells), Listen.
+  Each Song button names the tune and waits for the name to be heard
+  before the first note.
 - **Brain Games** — Match, Memory, Pattern, Dots
 - **Numbers** — 1 2 3, Count, How Many?
 - **Wonder World** — ABC + 8 flashcard topics (Colors, Shapes, Animals,
   Vehicles, Dinos, Weather, Food, Family)
 - **Town** — Train, Farm, Ice Cream (illustrated sandbox scenes)
-- **Library** — Story, Sticker book
+- **Library** — Story (tap anywhere, the "keep going" line, or press
+  Enter to turn the page), Sticker book
 
 **Sandboxes** (open-ended, no scoring):
 
@@ -52,13 +58,16 @@ The **More** drawer holds themed hub cards, each opening a small menu:
 - **Farm** — care for animals: milk the cow, shear the sheep, feed the
   pig/horse, fetch with the dog, collect eggs, pick apples, fish, drive
   the tractor. Drag a tool onto an animal, or tap the tool and then the
-  animal. Day/night + weather.
+  animal. Day/night + weather. The sun and clouds are named buttons, so
+  Tab / a screen reader can poke them the same way a finger does.
 - **Ice Cream** — build a sundae: drag scoops onto a cone (or tap a tub),
   add toppings, tap Eat!
 - **Train** — drive a chuffing train between three stations; passengers
-  hop on and off.
+  hop on and off. The sun and clouds are named buttons, so Tab / a
+  screen reader can poke them the same way a finger does.
 - **Music Studio** — drum kit, rainbow xylophone, jingle bells, plus a
-  Song button that plays familiar tunes.
+  Song button that names the tune and waits for the name to be heard
+  before the first note, so "Twinkle Twinkle" is never played over.
 - **Doodle** — rainbow / solid brushes, eraser, sizes, save as PNG.
 
 **Collection:**
@@ -95,18 +104,34 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   paces its pages on the chosen voice: each page turns once the line has
   actually been read, plus a beat to poke the scene. Poking a character
   answers with its sound, then the storyteller picks the line back up if
-  it was cut off. "The end!" and the cheer are heard in full before the
-  sticker is announced and the next story begins. The quiz games (Listen,
-  Match, Pattern, How Many?, Count, Find It!, Color Mix, Memory) likewise
-  let the cheer — or "try again" — finish before the next prompt, and a
-  hub's welcome line is skipped if the kid has already tapped on. A quiz
-  prompt ("Find the cow!") is repeated once if nothing has happened for
-  twelve seconds, so a kid who looked away gets a nudge, never a nag. A cheer
-  starts as its chime rings out rather than underneath it, so the first
-  word is never masked — every game triggers its chime before the line
-  (the farm, garden, train and scene sounds included), and a check keeps
-  it that way — and "New best!" and "Sticker!" announcements wait for
-  the cheer to finish instead of cutting it off.
+  it was cut off. Tapping the words hears the line again from the top
+  (the page waits for it); tapping anywhere else, the "keep going"
+  button, or Enter turns the page. "The end!" and the cheer are heard in
+  full before the sticker is announced and the next story begins. The
+  quiz games (Listen, Match, Pattern, How Many?, Count, Find It!, Color
+  Mix, Memory) likewise let the cheer — or "try again" — finish before
+  the next prompt, and a hub's welcome line is skipped if the kid has
+  already tapped on. A quiz prompt ("Find the cow!") is repeated once if
+  nothing has happened for twelve seconds, so a kid who looked away gets
+  a nudge, never a nag. A cheer starts as its chime rings out rather than
+  underneath it, so the first word is never masked — every game triggers
+  its chime before the line (the farm, garden, train and scene sounds
+  included), and a check keeps it that way — and "New best!" and
+  "Sticker!" announcements wait for the cheer to finish instead of
+  cutting it off. Every short line that leads into another is heard in
+  full before the next one starts, whatever the game: "Flip!" then
+  "Yummy!", the counted number then the total, "Squirt squirt!" then
+  "Bucket full of milk!", a wrong tap's name in Find It! before the goal
+  repeats, the second colour in Color Mix before the mix, the last
+  number in Connect-the-dots before "It's a house!" (and that reveal
+  before the next puzzle), each "Mmm!" in Ice Cream before the next
+  bite, Memory's last card ("bee") before "You matched them all!", Baby
+  Dino's "All clean!" before the next wash, the popped letter in Pop! and
+  Whack! ABC / 123 before the next goal, "Station 2!" on the train before
+  the passenger's "Woof!", Sticker Scene's "The park!" before the how-to
+  (and its chime before a new scene's name), Garden's "Sunshine!" before
+  "Sunshine power!", and a Song button's tune name in Piano and Music
+  Studio before the first note.
 - Locking the iPad or switching apps silences the storyteller and the menu
   music straight away. Coming back wakes the speech and sound engines
   (iOS leaves both muted after a lock or a phone call) and Story Time
@@ -143,11 +168,31 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   is a named button — and so is every animal, pot, balloon, hole, cloud
   and sun you can tap: `onTap()` turns any plain tap target into a
   focusable `role="button"`, so the sandbox and arcade games can be
-  played with Tab and Enter. Names carry state where it matters ("Pot 2:
-  seed planted, water it", "Hole 4: mole!"). Opening a game moves focus
+  played with Tab and Enter. The Farm, Train and Garden skies used to
+  hide their sun and clouds (`aria-hidden` then `onTap`), which skipped
+  that upgrade — they are real named buttons now, and the sun's name
+  follows day and night ("Moon", or "Stars" once the spoken line is
+  "Stars!"). Names carry state where it matters ("Pot 2: seed planted,
+  water it", "Hole 4: mole!"). Opening a game moves focus
   onto that screen (a labelled region); Home puts it back on the tile you
   came from. Mode tabs expose their pressed state; Memory cards say
-  "Hidden card" until flipped.
+  "Hidden card" until flipped. When a quiz round rebuilds its choices or a
+  popped balloon disappears, focus moves to the next control in the game
+  instead of falling back to the top of the page, so Tab + Enter play
+  keeps its place.
+  "Hidden card" until flipped. Connect-the-dots' SVG dots are buttons
+  too, named "Dot 3, next" / "Dot 2, connected", and so are Coloring's
+  regions ("roof", "left top wing"); Story Time turns the page from its
+  "keep going" button or Enter on the screen.
+  seed planted, water it", "Hole 4: mole!"). Match's example picture is
+  a button named like the prompt ("Find the dog"), so Tab and Enter
+  hear it again — a `role="img"` here used to skip the button upgrade.
+  Opening a game moves focus onto that screen (a labelled region); Home
+  puts it back on the tile you came from. Mode tabs expose their pressed
+  state; Memory cards say "Hidden card" until flipped.
+  came from. Mode tabs expose their pressed state; Doodle's brushes,
+  sizes and Stamp do too (and Stamp says "Draw!" when the 8-second
+  stamp window ends). Memory cards say "Hidden card" until flipped.
 - **Captions / live region**: see Settings above.
 - **Reduced motion**: with the OS "reduce motion" preference on, or the
   in-app **Less motion** setting, CSS animations collapse and the sparkle /
@@ -202,6 +247,21 @@ npm test                           # everything below, in order
 node tests/sw-assets.js            # sw.js ASSETS matches index.html and disk (no browser)
 node tests/voice.js                # speech engine + caption event (no browser)
 node tests/story.js                # Story Time pacing (no browser)
+node tests/garden-sky.js           # Garden sky: sun and clouds are named buttons, clouds rest in view under reduced motion (no browser)
+node tests/match.js                # Match example is a named button that re-hears the prompt (no browser)
+node tests/doodle.js               # Doodle tool pressed state + stamp timeout (no browser)
+node tests/memory.js               # Memory last-card name before the win cheer (no browser)
+node tests/dino.js                 # Baby Dino cheer pacing (no browser)
+node tests/pop.js                  # Pop! ABC: letter heard before the next goal (no browser)
+node tests/whack.js                # Whack! ABC: hit heard before the next goal (no browser)
+node tests/train.js                # Train: station heard before the passenger (no browser)
+node tests/scene.js                # Sticker Scene: name then welcome (no browser)
+node tests/piano.js                # Piano Song: first note waits for the name (no browser)
+node tests/music.js                # Music Studio Song: first note waits for the name (no browser)
+node tests/garden.js               # Garden sun: "Sunshine!" before "Sunshine power!" (no browser)
+node tests/listen.js               # Listen leftover opening clue (no browser)
+node tests/train-sky.js            # Train sky: sun and clouds are named buttons (no browser)
+node tests/farm-sky.js             # Farm sky: sun and clouds are named buttons (no browser)
 node tests/smoke.js                # errors-free / renders / restart-safe
 node tests/smoke.js --baseline     # + diff every screen against tests/baseline/
 node tests/smoke.js --update-baseline   # accept new baselines after UI changes

@@ -26,6 +26,7 @@
   ];
 
   let score = 0;
+  let answered = false;   // the round is won; late taps wait for the next one
   let activeTimer = null;
   let cancelNext = null;
   function clearNext() { if (cancelNext) cancelNext(); cancelNext = null; }
@@ -41,6 +42,7 @@
   }
 
   function newRound() {
+    answered = false;
     const set = ITEM_SETS[Math.floor(Math.random() * ITEM_SETS.length)];
     const order = L.shuffled(set.map((_, i) => i));
     const tmpl = PATTERNS[Math.floor(Math.random() * PATTERNS.length)];
@@ -80,6 +82,7 @@
       btn.textContent = it.e;
       btn.setAttribute("aria-label", it.n);
       L.onTap(btn, (e) => {
+        if (answered) return;   // the cheer and the next round are already on their way
         if (e.stopPropagation) e.stopPropagation();
         if (it.e === answer.e) {
           L.happySound();
@@ -97,12 +100,26 @@
           L.sparkleAt(p.x, p.y);
           clearTimeout(activeTimer);
           clearNext();
+          answered = true;
           cancelNext = L.afterSpeech(newRound, { minMs: 1700 });
         } else {
           L.buzzSound();
           btn.classList.add("wrong");
           setTimeout(() => btn.classList.remove("wrong"), 500);
+          // Drop the opening "What comes next?" if it hasn't spoken
+          // yet — that 380 ms timer used to land on this nag whenever
+          // a toddler tapped before it fired (an enhanced iPad voice
+          // takes 300 ms to a second to begin).
+          clearTimeout(activeTimer);
+          activeTimer = null;
+          clearNext();
           L.say("Try again!");
+          // Then ask the question again once the nag has been heard
+          // (same 380 ms floor when the voice is muted).
+          cancelNext = L.afterSpeech(
+            () => L.sayPrompt("What comes next?"),
+            { minMs: 380, beatMs: 150, maxMs: 3000 },
+          );
           score = 0;
           L.bumpBadge("patternScoreVal", 0);
         }

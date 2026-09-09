@@ -38,9 +38,14 @@
   let trainPosPct = 22;          // 0..100 across the track; starts at station 1
   let cars = [];                 // [{ passenger or null }] for engine + 3 cars
   let trainMoveTimer = null;
+  let cancelBoard = null;
 
   function setT(ms, fn) { const t = setTimeout(fn, ms); timers.push(t); return t; }
   function clearAll() { timers.forEach(clearTimeout); timers = []; }
+  function clearBoard() {
+    if (cancelBoard) cancelBoard();
+    cancelBoard = null;
+  }
   function $(id) { return document.getElementById(id); }
 
   // ====================================================================
@@ -153,10 +158,10 @@
     const stage = $("trainStage");
     stage.innerHTML = `
       <div id="trainSky" class="train-sky">
-        <div id="trainSun" class="train-sun" aria-label="Sun">${bigSunSvg()}</div>
-        <div class="train-cloud train-cloud--1" aria-hidden="true"></div>
-        <div class="train-cloud train-cloud--2" aria-hidden="true"></div>
-        <div class="train-cloud train-cloud--3" aria-hidden="true"></div>
+        <button type="button" id="trainSun" class="train-sun" aria-label="Sun">${bigSunSvg()}</button>
+        <button type="button" class="train-cloud train-cloud--1" aria-label="Cloud"></button>
+        <button type="button" class="train-cloud train-cloud--2" aria-label="Cloud"></button>
+        <button type="button" class="train-cloud train-cloud--3" aria-label="Cloud"></button>
       </div>
       <div class="train-hills"></div>
       <div class="train-ground"></div>
@@ -334,7 +339,11 @@
     refreshBestBadge();
     if (stationsVisited >= 1)  L.earnSticker && L.earnSticker("trainEngineer");
     if (stationsVisited >= 10) L.earnSticker && L.earnSticker("trainConductor");
-    boardOrLeave(idx);
+    // Passenger hops now; "Bye bye!" / "Woof!" waits so it cannot cut
+    // "Station N!" off when the engine starts late.
+    const line = hopPassenger();
+    clearBoard();
+    if (line) cancelBoard = L.afterSpeech(() => L.say(line), { beatMs: 150, minMs: 400, maxMs: 3000 });
     // Hang around the station, then continue.
     setT(STATION_DWELL_MS, () => {
       if (!running) return;
@@ -347,27 +356,25 @@
     if (bestEl) bestEl.textContent = L.getHighScore("trainBest");
   }
 
-  function boardOrLeave(stationIdx) {
+  function hopPassenger() {
     // Pick a car at random: if empty, a passenger boards; if full, leaves.
+    // Visual hop + beep now; the spoken line is returned for afterSpeech.
     const carIdx = Math.floor(Math.random() * cars.length);
     const car = cars[carIdx];
     const carEl = document.querySelector(`.train-car[data-car="${carIdx}"] .train-pass`);
-    if (!carEl) return;
+    if (!carEl) return null;
     if (car.passenger) {
-      // Leaving
       carEl.innerHTML = "";
       L.beep(880, 0.06, "sine");
-      L.say(`Bye bye!`);
       car.passenger = null;
-    } else {
-      // Boarding
-      const p = PASSENGERS[Math.floor(Math.random() * PASSENGERS.length)];
-      car.passenger = p;
-      carEl.textContent = p.e;
-      L.beep(640, 0.06, "triangle");
-      L.beep(720, 0.06, "triangle", 0.06);
-      L.say(p.say);
+      return "Bye bye!";
     }
+    const p = PASSENGERS[Math.floor(Math.random() * PASSENGERS.length)];
+    car.passenger = p;
+    carEl.textContent = p.e;
+    L.beep(640, 0.06, "triangle");
+    L.beep(720, 0.06, "triangle", 0.06);
+    return p.say;
   }
 
   // ====================================================================
@@ -412,6 +419,8 @@
       "linear-gradient(180deg, #1c1138 0%, #2e1b5b 50%, #4a1b5e 100%)",
     ];
     sky.style.background = phases[dayPhase % phases.length];
+    const sun = $("trainSun");
+    if (sun) sun.setAttribute("aria-label", dayPhase >= 2 ? "Moon" : "Sun");
   }
 
   // ====================================================================
@@ -425,6 +434,7 @@
     celebrated = false;
     dayPhase = 0;
     bestAtStart = L.getHighScore("trainBest");
+    clearBoard();
     clearAll();
     if (chugTimer) { clearInterval(chugTimer); chugTimer = null; }
     if (dayTimer)  { clearInterval(dayTimer); dayTimer = null; }
@@ -437,6 +447,7 @@
 
   function stop() {
     running = false;
+    clearBoard();
     clearAll();
     if (chugTimer) { clearInterval(chugTimer); chugTimer = null; }
     if (dayTimer)  { clearInterval(dayTimer); dayTimer = null; }

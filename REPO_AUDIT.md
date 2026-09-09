@@ -3,6 +3,30 @@
 Audited at `main` = `83bcd97` on 2026-09-08, in a fresh clone. Every claim below was
 checked by running it in this container unless marked **unverified**.
 
+## Status (2026-09-09, after the plan was approved)
+
+Everything in the Blockers and Quick-wins lists below has been done, except
+the branch deletions and the PNG icon:
+
+- **Foundation** (on the audit branch, PR #55): `package.json` pinning
+  Playwright 1.56.1 and ESLint, `eslint.config.js`, a CI workflow that runs
+  lint and every suite on each PR, root `.gitignore`, `CLAUDE.md`, the
+  `lib/audio.js` name-escaping fix with a test, and a service worker that
+  refreshes assets in the background and fetches the page network-first
+  under a fixed cache name (`tests/sw-assets.js`, `tests/sw-update.js`).
+- **The 21 open PRs** were merged into one batch branch on top of that
+  foundation: the 16 sound ones as reviewed (with their small fixes applied),
+  the 5 with regressions after fixing them (#43 growth bonus, #47/#48 stray
+  taps during the cheer, #52/#53 clouds parked in view and the Farm sun moved
+  off the badges). The thirteen per-PR pacing-lint additions became one rule
+  that reports every one of their sites on the old `main` and nothing on the
+  batch. The union-merged READMEs were rewritten as one text.
+- **Verified on the batch**: lint clean, 22 Node suites and 6 self-tests
+  pass, smoke 24/24 with 27/27 baselines, nav-speech, the service-worker
+  test, and the full a11y suite.
+- **Still open**: deleting the 11 stale branches (Q6), the PNG
+  `apple-touch-icon` (Q7), and everything under Cleanup.
+
 ## Verdict
 
 This is a working, well-tested, zero-dependency PWA. A fresh clone runs by opening

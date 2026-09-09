@@ -48,9 +48,12 @@
   let timers = [];
   let lastLatherTime = 0;
   let showerActive = false;
+  // Cancels a pending "next wash" that is waiting for the cheer to finish.
+  let cancelNext = null;
+  function clearNext() { if (cancelNext) cancelNext(); cancelNext = null; }
 
   function setT(ms, fn) { const t = setTimeout(fn, ms); timers.push(t); return t; }
-  function clearAll() { timers.forEach(clearTimeout); timers = []; }
+  function clearAll() { timers.forEach(clearTimeout); timers = []; clearNext(); }
   function $(id) { return document.getElementById(id); }
 
   function build() {
@@ -415,7 +418,10 @@
         setTimeout(() => h.remove(), 1900);
       });
     }
-    setT(2400, newRound);
+    // Next wash once the cheer has been heard (never sooner than the
+    // old 2.4 s, so a muted voice feels the same).
+    clearNext();
+    cancelNext = L.afterSpeech(() => { if (phase === "happy") newRound(); }, { minMs: 2400 });
   }
 
   function newRound() {

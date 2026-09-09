@@ -26,7 +26,10 @@
   let timers = [];
 
   function setT(ms, fn) { const t = setTimeout(fn, ms); timers.push(t); return t; }
-  function clearAll() { timers.forEach(clearTimeout); timers = []; }
+  function clearAll() { timers.forEach(clearTimeout); timers = []; clearNext(); }
+  // The "Yummy!" that follows "Flip!" waits for the line to be heard.
+  let cancelNext = null;
+  function clearNext() { if (cancelNext) cancelNext(); cancelNext = null; }
   function $(id) { return document.getElementById(id); }
 
   // -------- SVG art --------
@@ -185,9 +188,14 @@
     setT(780, () => {
       p.className = "cook-pancake cook-pancake--cooked";
       setState(STATES.COOKED);
+    });
+    // "Yummy!" once "Flip!" has been heard (the pancake lands on its own
+    // timer above); never sooner than the flip, never much later than it.
+    clearNext();
+    cancelNext = L.afterSpeech(() => {
       L.beep(720, 0.08, "triangle");
       L.say("Yummy!");
-    });
+    }, { beatMs: 150, minMs: 780, maxMs: 3000 });
   }
 
   // -------- Plate --------
