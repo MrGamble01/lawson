@@ -27,6 +27,10 @@ node tests/voice.js                # speech: voice choice, speed, name "sounds l
 node tests/story.js                # Story Time pacing on real narration end (no browser)
 node tests/pop.js                  # Pop! ABC: the popped letter is heard before the next goal (no browser)
 node tests/whack.js                # Whack! ABC: the hit is heard before the next goal (no browser)
+node tests/pacing-lint.js          # no bare timer right after a cheer, no chime right after a line, no boardOrLeave() in the same tick as a line (static check, no browser); --self-test checks the checker
+node tests/voice.js                # speech: voice choice, speed, name "sounds like", mute/volume, completion promise, caption event (no browser)
+node tests/story.js                # Story Time pacing on real narration end (no browser)
+node tests/train.js                # Train: the station is heard before the passenger hops on (no browser)
 node tests/stickers.js             # sticker announcement: jingle first, then waits for the cheer (no browser)
 node tests/garden-sky.js           # Garden sky: sun and clouds are named buttons, clouds rest in view under reduced motion; --self-test checks the checker (no browser)
 node tests/match.js                # Match example is a named button that re-hears the prompt (no browser); --self-test checks the role=img-then-onTap checker
@@ -99,6 +103,10 @@ the line, not after it, where it would land on the first word, and that
 Pop! / Whack! never call `newTarget()` in the same tick as the popped
 letter — `tests/pop.js` and `tests/whack.js` hold the name past the old
 cut-off and check the next goal starts one beat after it ends),
+the line, not after it, where it would land on the first word, and that
+Train never calls `boardOrLeave()` in the same tick as "Station N!" —
+`tests/train.js` holds the station past the old cut-off and checks the
+passenger line starts one beat after it ends),
 that a quiz prompt is repeated once after a quiet spell and dropped by any
 other line, a screen change, a lock or a muted voice, that the menu music
 ducks under a line in flight and eases back once it ends (or is cut off,
