@@ -58,7 +58,8 @@ The **More** drawer holds themed hub cards, each opening a small menu:
 - **Farm** — care for animals: milk the cow, shear the sheep, feed the
   pig/horse, fetch with the dog, collect eggs, pick apples, fish, drive
   the tractor. Drag a tool onto an animal, or tap the tool and then the
-  animal. Day/night + weather.
+  animal. Day/night + weather. The sun and clouds are named buttons, so
+  Tab / a screen reader can poke them the same way a finger does.
 - **Ice Cream** — build a sundae: drag scoops onto a cone (or tap a tub),
   add toppings, tap Eat!
 - **Train** — drive a chuffing train between three stations; passengers
@@ -188,6 +189,10 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   played with Tab and Enter. Train's sky used to hide its clouds
   (`aria-hidden` then `onTap`), which skipped that upgrade — they are
   real named buttons now, and the sun's name follows day and night. Names carry state where it matters ("Pot 2:
+  played with Tab and Enter. Farm's sky used to hide its sun and clouds
+  (`aria-hidden` then `onTap`), which skipped that upgrade — they are
+  real named buttons now, and the sun's name follows day and night
+  ("Stars" once the spoken line is "Stars!"). Names carry state where it matters ("Pot 2:
   seed planted, water it", "Hole 4: mole!"). Opening a game moves focus
   onto that screen (a labelled region); Home puts it back on the tile you
   came from. Mode tabs expose their pressed state; Memory cards say
@@ -276,6 +281,7 @@ node tests/music.js                # Music Studio Song: first note waits for the
 node tests/garden.js               # Garden sun: "Sunshine!" before "Sunshine power!" (no browser)
 node tests/listen.js               # Listen leftover opening clue (no browser)
 node tests/train-sky.js            # Train sky: sun and clouds are named buttons (no browser)
+node tests/farm-sky.js             # Farm sky: sun and clouds are named buttons (no browser)
 node tests/smoke.js                # errors-free / renders / restart-safe
 node tests/smoke.js --baseline     # + diff every screen against tests/baseline/
 node tests/smoke.js --update-baseline   # accept new baselines after UI changes

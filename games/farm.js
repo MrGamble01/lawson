@@ -482,10 +482,10 @@
     const stage = $("farmStage");
     stage.innerHTML = `
       <div id="farmSky" class="farm-sky">
-        <div id="farmSunMoon" class="farm-sun" aria-hidden="true">${sunSvg()}</div>
+        <button type="button" id="farmSunMoon" class="farm-sun" aria-label="Sun">${sunSvg()}</button>
         <div class="farm-stars" id="farmStars" aria-hidden="true"></div>
-        <div class="farm-cloud farm-cloud--1" aria-hidden="true">${cloudSvg()}</div>
-        <div class="farm-cloud farm-cloud--2" aria-hidden="true">${cloudSvg()}</div>
+        <button type="button" class="farm-cloud farm-cloud--1" aria-label="Cloud">${cloudSvg()}</button>
+        <button type="button" class="farm-cloud farm-cloud--2" aria-label="Cloud">${cloudSvg()}</button>
       </div>
       <div id="farmRain" class="farm-rain"></div>
       <div class="farm-mountain"></div>
@@ -1058,6 +1058,7 @@
     const p = phases[dayPhase % phases.length];
     sky.style.background = p.bg;
     sun.innerHTML = p.body;
+    sun.setAttribute("aria-label", dayPhase >= 2 ? "Stars" : "Sun");
     if (stars) {
       stars.innerHTML = "";
       if (p.stars) {

@@ -33,6 +33,7 @@ node tests/match.js                # Match example is a named button that re-hea
 node tests/doodle.js               # Doodle brushes / sizes / Stamp expose aria-pressed; stamp timeout says "Draw!" (no browser); --self-test checks the checker
 node tests/garden-sky.js           # Garden sky: sun and clouds are named buttons, clouds rest in view under reduced motion (no browser); --self-test checks the checker
 node tests/train-sky.js            # Train sky: sun and clouds are named buttons; --self-test checks the checker (no browser)
+node tests/farm-sky.js             # Farm sky: sun and clouds are named buttons; --self-test checks the checker (no browser)
 node tests/nav-speech.js           # hub welcome line never spoken over a screen the kid tapped on to (Playwright)
 node tests/smoke.js                # smoke pass only (errors-free / screen renders / restart safe)
 node tests/smoke.js --baseline     # smoke + diff every screen against tests/baseline/
@@ -71,6 +72,10 @@ playthrough where the game allows it. `tests/voice.js` and
 scripts with no Playwright dependency. `tests/train-sky.js` is a static
 scan: a Train cloud marked `aria-hidden` then given `onTap`, or a sun
 that is still a `<div>`, is reported — that combination left the sky
+`tests/voice.js`, `tests/story.js` and `tests/farm-sky.js` are plain Node
+scripts with no Playwright dependency. `tests/farm-sky.js` is a static
+scan: a Farm cloud or sun marked `aria-hidden` then given `onTap`, or a
+sun that is still a `<div>`, is reported — that combination left the sky
 off the Tab order (`makeTappableAccessible` will not overwrite
 `aria-hidden`). `--self-test` covers the checker.
 
