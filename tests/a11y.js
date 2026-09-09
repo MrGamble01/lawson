@@ -842,6 +842,8 @@ async function focusRetention(page) {
   await page.keyboard.press("Escape");
   await page.waitForTimeout(400);
   check(await page.evaluate(() => document.querySelector(".screen.active").id === "menu" && document.getElementById("menu").contains(document.activeElement)), where, `leaving a game should leave focus on the menu, got ${await activeDesc()}`);
+}
+
 // Dots (SVG targets) and Story Time (whole-screen tap) by keyboard.
 async function svgAndStoryKeyboard(page) {
   const where = "dots + story keyboard";
