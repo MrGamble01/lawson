@@ -836,6 +836,10 @@ assert.equal(said.at(-1), 'Pop the N!');
   assert.equal(vm.runInContext('getSpokenName()', fresh3), 'Shi-vawn', 'saved form restored on load');
   vm.runInContext('setSpokenName("Siobhan", getSpokenName())', fresh3);
   assert.equal(vm.runInContext('spokenForm("Bye, Siobhan!")', fresh3), 'Bye, Shi-vawn!');
+  // A spoken form with a "$" is plain text, not a replacement pattern.
+  vm.runInContext('setSpokenName("Al", "$&-$1-$`")', fresh3);
+  assert.equal(vm.runInContext('spokenForm("Yay Al! Always.")', fresh3), 'Yay $&-$1-$`! Always.', 'dollar signs in the spoken name are literal');
+  vm.runInContext('setSpokenName("Siobhan", "Shi-vawn")', fresh3);
   windowEvents.removeEventListener('lawson:say', onSay2);
   run('setSpokenName("", ""); setSoundMuted(false)');
 

@@ -5,6 +5,7 @@ Smoke, visual baseline and accessibility checks for every game and key screen.
 ## Run
 
 ```bash
+node tests/sw-assets.js            # sw.js ASSETS matches index.html and the files on disk; cache name is fixed (no browser)
 node tests/pacing-lint.js          # no bare timer right after a cheer, no chime right after a line (static check, no browser); --self-test checks the checker
 node tests/voice.js                # speech: voice choice, speed, name "sounds like", mute/volume, completion promise, caption event (no browser)
 node tests/story.js                # Story Time pacing on real narration end (no browser)
@@ -14,6 +15,7 @@ node tests/smoke.js                # smoke pass only (errors-free / screen rende
 node tests/smoke.js --baseline     # smoke + diff every screen against tests/baseline/
 node tests/smoke.js --update-baseline   # write fresh baseline PNGs (use after intentional visual changes)
 node tests/a11y.js                 # accessibility: axe-core on every screen (4 configs) + keyboard / modal / captions / overlay behaviour
+node tests/sw-update.js            # service worker: a changed asset runs on the second open, a changed page on the next, offline still boots (Playwright)
 ```
 
 Exit codes:
@@ -137,9 +139,6 @@ Playwright + Chromium. The script reads:
 - `PLAYWRIGHT_BROWSERS_PATH` — already exported on the dev host to
   `/opt/pw-browsers`.
 
-If you don't have Playwright locally, install it once:
-
-```bash
-npm install -g playwright
-npx playwright install chromium
-```
+Playwright is pinned in `package.json`; `npm ci && npx playwright install chromium`
+installs the exact version the baselines were made with. The scripts prefer a
+local `node_modules/playwright` and fall back to the dev-host path above.

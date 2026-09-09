@@ -16,9 +16,12 @@
 const path = require("path");
 const fs   = require("fs");
 
-const PW_PATH = process.env.PLAYWRIGHT_MODULE
-  || "/opt/node22/lib/node_modules/playwright";
-const { chromium } = require(PW_PATH);
+const { chromium } = require(resolvePlaywright());
+function resolvePlaywright() {
+  if (process.env.PLAYWRIGHT_MODULE) return process.env.PLAYWRIGHT_MODULE;
+  try { return require.resolve("playwright"); } catch (_) { /* no local install */ }
+  return "/opt/node22/lib/node_modules/playwright";
+}
 
 const ROOT     = path.resolve(__dirname, "..");
 const INDEX    = "file://" + path.join(ROOT, "index.html");
