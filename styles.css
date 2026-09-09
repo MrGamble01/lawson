@@ -1051,11 +1051,22 @@ html.dark .hub-title {
 }
 .match-target-item {
   font-size: clamp(100px, 20vw, 220px);
+  font-family: inherit;
+  color: inherit;
   background: #fff;
   border: 8px dashed #ff4081;
   border-radius: 30px;
   padding: 10px 30px;
   box-shadow: 0 8px 0 rgba(0,0,0,0.12);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.match-target-item:focus-visible {
+  outline: 4px solid var(--c-brand);
+  outline-offset: 8px;
+  border-radius: 30px;
 }
 .match-choices {
   display: flex;

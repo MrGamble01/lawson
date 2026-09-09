@@ -11,6 +11,7 @@ node tests/voice.js                # speech: voice choice, speed, name "sounds l
 node tests/story.js                # Story Time pacing on real narration end (no browser)
 node tests/stickers.js             # sticker announcement: jingle first, then waits for the cheer (no browser)
 node tests/garden-sky.js           # Garden sky: sun and clouds are named buttons, clouds rest in view under reduced motion; --self-test checks the checker (no browser)
+node tests/match.js                # Match example is a named button that re-hears the prompt (no browser); --self-test checks the role=img-then-onTap checker
 node tests/nav-speech.js           # hub welcome line never spoken over a screen the kid tapped on to (Playwright)
 node tests/smoke.js                # smoke pass only (errors-free / screen renders / restart safe)
 node tests/smoke.js --baseline     # smoke + diff every screen against tests/baseline/
@@ -56,6 +57,9 @@ is logged with its start latency and outcome for the Settings voice report,
 that a line spoken right after a chime waits for the chime to ring out
 (`tests/pacing-lint.js` makes sure every game triggers its chime before
 the line, not after it, where it would land on the first word),
+that Match's example picture is a named button that re-hears the prompt
+(`tests/match.js` also fails a `role="img"` then `onTap` in any game —
+that combination skips the keyboard upgrade),
 that a quiz prompt is repeated once after a quiet spell and dropped by any
 other line, a screen change, a lock or a muted voice, that the menu music
 ducks under a line in flight and eases back once it ends (or is cut off,

@@ -74,11 +74,15 @@
     const [answer, d1, d2] = pickRandom(POOL, 3);
     const options = [answer, d1, d2].sort(() => Math.random() - 0.5);
 
-    const targetEl = document.createElement("div");
+    // A real button, not a role=img div: onTap() will not overwrite an
+    // existing role, so marking the example as an image left it tappable
+    // but off the keyboard. The name matches the spoken prompt so a
+    // screen reader and the storyteller say the same thing.
+    const targetEl = document.createElement("button");
+    targetEl.type = "button";
     targetEl.className = "match-target-item";
     targetEl.textContent = answer.emoji;
-    targetEl.setAttribute("role", "img");
-    targetEl.setAttribute("aria-label", answer.name);
+    targetEl.setAttribute("aria-label", `Find the ${answer.name}`);
     L.onTap(targetEl, () => L.sayPrompt(`Find the ${answer.name}`));
     target.appendChild(targetEl);
 

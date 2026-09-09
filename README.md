@@ -160,6 +160,12 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   too, named "Dot 3, next" / "Dot 2, connected", and so are Coloring's
   regions ("roof", "left top wing"); Story Time turns the page from its
   "keep going" button or Enter on the screen.
+  seed planted, water it", "Hole 4: mole!"). Match's example picture is
+  a button named like the prompt ("Find the dog"), so Tab and Enter
+  hear it again — a `role="img"` here used to skip the button upgrade.
+  Opening a game moves focus onto that screen (a labelled region); Home
+  puts it back on the tile you came from. Mode tabs expose their pressed
+  state; Memory cards say "Hidden card" until flipped.
 - **Captions / live region**: see Settings above.
 - **Reduced motion**: with the OS "reduce motion" preference on, or the
   in-app **Less motion** setting, CSS animations collapse and the sparkle /
@@ -215,6 +221,7 @@ node tests/sw-assets.js            # sw.js ASSETS matches index.html and disk (n
 node tests/voice.js                # speech engine + caption event (no browser)
 node tests/story.js                # Story Time pacing (no browser)
 node tests/garden-sky.js           # Garden sky: sun and clouds are named buttons, clouds rest in view under reduced motion (no browser)
+node tests/match.js                # Match example is a named button that re-hears the prompt (no browser)
 node tests/smoke.js                # errors-free / renders / restart-safe
 node tests/smoke.js --baseline     # + diff every screen against tests/baseline/
 node tests/smoke.js --update-baseline   # accept new baselines after UI changes
