@@ -81,8 +81,11 @@
         document.getElementById("countBestVal").textContent = L.getHighScore("countBest");
 
         if (tappedSoFar === n) {
-          // Wait for the spoken number, then announce the total + cheer.
-          activeTimer = setTimeout(() => {
+          // Once the spoken number has been heard, announce the total +
+          // cheer: a beat after the line ends, never sooner than the old
+          // fixed wait, and bounded in case the engine never says.
+          clearNext();
+          cancelNext = L.afterSpeech(() => {
             L.happySound();
             L.say(`There ${n === 1 ? "is" : "are"} ${NUMBER_WORDS[n]} ${n === 1 ? item.name : item.plural}. ${L.cheer()}`);
             // Confetti from the center of the stage.
@@ -96,7 +99,7 @@
             // Next round, once the total and the cheer have been heard.
             clearNext();
             cancelNext = L.afterSpeech(() => startRound(item), { minMs: 2400 });
-          }, 600);
+          }, { beatMs: 150, minMs: 600, maxMs: 3000 });
         }
       });
 

@@ -7,6 +7,7 @@ Smoke, visual baseline and accessibility checks for every game and key screen.
 ```bash
 node tests/sw-assets.js            # sw.js ASSETS matches index.html and the files on disk; cache name is fixed (no browser)
 node tests/pacing-lint.js          # no bare timer right after a cheer, no chime right after a line (static check, no browser); --self-test checks the checker
+node tests/pacing-lint.js          # no bare timer after a cheer, no chime right after a line, no fixed timer speaking over a line (static check, no browser); --self-test checks the checker
 node tests/voice.js                # speech: voice choice, speed, name "sounds like", mute/volume, completion promise, caption event (no browser)
 node tests/story.js                # Story Time pacing on real narration end (no browser)
 node tests/doodle.js               # Doodle brushes / sizes / Stamp expose aria-pressed; stamp timeout says "Draw!" (no browser); --self-test checks the checker
