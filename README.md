@@ -140,6 +140,10 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   the cheer to finish instead of cutting it off. Ice Cream hears each
   "Mmm!" before the next bite — or the cheer — starts, so a late-starting
   voice is not cut off by the nibble after it.
+  it that way. Sticker Scene names the picture ("The park!") and only
+  then the how-to, so the name is heard; switching scenes rings the
+  chime before the new name. "New best!" and "Sticker!" announcements
+  wait for the cheer to finish instead of cutting it off.
 - Locking the iPad or switching apps silences the storyteller and the menu
   music straight away. Coming back wakes the speech and sound engines
   (iOS leaves both muted after a lock or a phone call) and Story Time
@@ -259,6 +263,7 @@ node tests/dino.js                 # Baby Dino cheer pacing (no browser)
 node tests/pop.js                  # Pop! ABC: letter heard before the next goal (no browser)
 node tests/whack.js                # Whack! ABC: hit heard before the next goal (no browser)
 node tests/train.js                # Train: station heard before the passenger (no browser)
+node tests/scene.js                # Sticker Scene: name then welcome (no browser)
 node tests/smoke.js                # errors-free / renders / restart-safe
 node tests/smoke.js --baseline     # + diff every screen against tests/baseline/
 node tests/smoke.js --update-baseline   # accept new baselines after UI changes
