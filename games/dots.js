@@ -92,6 +92,15 @@
   let nextDot = 1;
   let solved = 0;
   let advanceTimer = null;
+  // The reveal line waits for the last number; the next puzzle waits for
+  // the reveal. Both are cancelled with the leftover timer on stop().
+  let cancelNext = null;
+  function clearNext() {
+    clearTimeout(advanceTimer);
+    advanceTimer = null;
+    if (cancelNext) cancelNext();
+    cancelNext = null;
+  }
   let bestAtStart = 0;
   let celebrated = false;
 
@@ -177,7 +186,11 @@
         labelDots();
 
         if (nextDot > p.dots.length) {
-          advanceTimer = setTimeout(() => winPuzzle(p, svg), 450);
+          // Once the last number has been heard, reveal the picture —
+          // a beat after the line ends, never sooner than the old 450 ms,
+          // and bounded in case the engine never says.
+          clearNext();
+          cancelNext = L.afterSpeech(() => winPuzzle(p, svg), { beatMs: 150, minMs: 450, maxMs: 3000 });
         }
       });
     });
@@ -195,7 +208,12 @@
     maybeCelebrateRecord(solved);
     document.getElementById("dotsBestVal").textContent = L.getHighScore("dotsBest");
 
-    setTimeout(() => L.say(`It's a ${p.name}! ${L.cheer()}`), 300);
+    // The chime is already ringing; say() waits for it, so the reveal
+    // starts as it rings out rather than on a guess. Next puzzle once
+    // the line has been heard (never sooner than the old wait).
+    L.say(`It's a ${p.name}! ${L.cheer()}`);
+    clearNext();
+    cancelNext = L.afterSpeech(setupPuzzle, { minMs: 2800 });
 
     // Fade a giant reveal emoji over the connected outline.
     const reveal = svgEl("text", {
@@ -215,8 +233,6 @@
         rect.top  + rect.height / 2 + (Math.random() - 0.5) * 220,
       ), k * 55);
     }
-
-    advanceTimer = setTimeout(setupPuzzle, 2800);
   }
 
   function start() {
@@ -232,8 +248,7 @@
   }
 
   function stop() {
-    clearTimeout(advanceTimer);
-    advanceTimer = null;
+    clearNext();
     if (stage) stage.innerHTML = "";
   }
 

@@ -118,6 +118,9 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   into another ("Flip!" then "Yummy!", the counted number then the total,
   "Squirt squirt!" then "Bucket full of milk!") are heard in full before
   the next one starts.
+  the cheer to finish instead of cutting it off. Connect-the-dots hears
+  the last number ("5") before "It's a house!", and that reveal before
+  the next puzzle, instead of cutting either off on a fixed timer.
 - Locking the iPad or switching apps silences the storyteller and the menu
   music straight away. Coming back wakes the speech and sound engines
   (iOS leaves both muted after a lock or a phone call) and Story Time
