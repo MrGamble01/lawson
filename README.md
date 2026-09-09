@@ -129,27 +129,9 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   Dino's "All clean!" before the next wash, the popped letter in Pop! and
   Whack! ABC / 123 before the next goal, "Station 2!" on the train before
   the passenger's "Woof!", Sticker Scene's "The park!" before the how-to
-  (and its chime before a new scene's name), and a Song button's tune
-  name in Piano and Music Studio before the first note.
-  it was cut off. "The end!" and the cheer are heard in full before the
-  sticker is announced and the next story begins.   The quiz games (Listen,
-  Match, Pattern, How Many?, Count, Find It!, Color Mix, Memory) likewise
-  let the cheer — or "try again" / "Count them again!" — finish before
-  the next prompt (a fast wrong tap no longer lets the leftover opening
-  question cut the nag off), and a
-  hub's welcome line is skipped if the kid has already tapped on. A quiz
-  prompt ("Find the cow!") is repeated once if nothing has happened for
-  twelve seconds, so a kid who looked away gets a nudge, never a nag. Listen's
-  opening clue is cancelled if the kid taps a choice or Hear it again before
-  it starts, and a wrong tap waits for a clue already in flight before asking
-  again. A cheer
-  starts as its chime rings out rather than underneath it, so the first
-  word is never masked — every game triggers its chime before the line
-  (  the farm, garden, train and scene sounds included), and a check keeps
-  it that way — and "New best!" and "Sticker!" announcements wait for
-  the cheer to finish instead of cutting it off. Garden's sun easter egg
-  waits for "Sunshine!" before "Sunshine power!" so the first word is
-  heard.
+  (and its chime before a new scene's name), Garden's "Sunshine!" before
+  "Sunshine power!", and a Song button's tune name in Piano and Music
+  Studio before the first note.
 - Locking the iPad or switching apps silences the storyteller and the menu
   music straight away. Coming back wakes the speech and sound engines
   (iOS leaves both muted after a lock or a phone call) and Story Time
@@ -186,14 +168,12 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   is a named button — and so is every animal, pot, balloon, hole, cloud
   and sun you can tap: `onTap()` turns any plain tap target into a
   focusable `role="button"`, so the sandbox and arcade games can be
-  played with Tab and Enter. Train's sky used to hide its clouds
-  (`aria-hidden` then `onTap`), which skipped that upgrade — they are
-  real named buttons now, and the sun's name follows day and night. Names carry state where it matters ("Pot 2:
-  played with Tab and Enter. Farm's sky used to hide its sun and clouds
-  (`aria-hidden` then `onTap`), which skipped that upgrade — they are
-  real named buttons now, and the sun's name follows day and night
-  ("Stars" once the spoken line is "Stars!"). Names carry state where it matters ("Pot 2:
-  seed planted, water it", "Hole 4: mole!"). Opening a game moves focus
+  played with Tab and Enter. The Farm, Train and Garden skies used to
+  hide their sun and clouds (`aria-hidden` then `onTap`), which skipped
+  that upgrade — they are real named buttons now, and the sun's name
+  follows day and night ("Moon", or "Stars" once the spoken line is
+  "Stars!"). Names carry state where it matters ("Pot 2: seed planted,
+  water it", "Hole 4: mole!"). Opening a game moves focus
   onto that screen (a labelled region); Home puts it back on the tile you
   came from. Mode tabs expose their pressed state; Memory cards say
   "Hidden card" until flipped. When a quiz round rebuilds its choices or a

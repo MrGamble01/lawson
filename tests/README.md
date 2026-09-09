@@ -7,19 +7,11 @@ Smoke, visual baseline and accessibility checks for every game and key screen.
 ```bash
 node tests/sw-assets.js            # sw.js ASSETS matches index.html and the files on disk; cache name is fixed (no browser)
 node tests/pacing-lint.js          # no bare timer after a cheer, no chime right after a line, no timer or same-tick line speaking over a short line (static check, no browser); --self-test checks the checker
-node tests/pacing-lint.js          # no bare timer right after a cheer, no chime right after a line, no second say() in the same tick (static check, no browser); --self-test checks the checker
-node tests/pacing-lint.js          # no bare timer right after a cheer, no chime right after a line (static check, no browser); --self-test checks the checker
 node tests/voice.js                # speech: voice choice, speed, name "sounds like", mute/volume, completion promise, caption event (no browser)
 node tests/story.js                # Story Time pacing on real narration end (no browser)
 node tests/garden.js               # Garden sun easter egg: "Sunshine!" is heard before "Sunshine power!" (no browser)
-node tests/pacing-lint.js          # no bare timer right after a cheer, no chime right after a line, no leftover opening prompt after a wrong-answer nag (static check, no browser); --self-test checks the checker
-node tests/voice.js                # speech: voice choice, speed, name "sounds like", mute/volume, completion promise, caption event (no browser)
-node tests/story.js                # Story Time pacing on real narration end (no browser)
 node tests/howmany.js              # How Many? wrong-answer nag heard before the leftover opening prompt (no browser)
 node tests/pattern.js              # Pattern wrong-answer nag heard before the leftover opening prompt (no browser)
-node tests/pacing-lint.js          # no bare timer right after a cheer, no chime right after a line, no leftover speakClue timer (static check, no browser); --self-test checks the checker
-node tests/voice.js                # speech: voice choice, speed, name "sounds like", mute/volume, completion promise, caption event (no browser)
-node tests/story.js                # Story Time pacing on real narration end (no browser)
 node tests/listen.js               # Listen leftover opening clue: wrong tap / replay cancel it; re-ask waits (no browser)
 node tests/stickers.js             # sticker announcement: jingle first, then waits for the cheer (no browser)
 node tests/memory.js               # Memory: last card name heard before the win cheer (no browser)
