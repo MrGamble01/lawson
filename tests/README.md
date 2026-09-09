@@ -11,6 +11,11 @@ node tests/pacing-lint.js          # no bare timer right after a cheer, no chime
 node tests/voice.js                # speech: voice choice, speed, name "sounds like", mute/volume, completion promise, caption event (no browser)
 node tests/story.js                # Story Time pacing on real narration end (no browser)
 node tests/garden.js               # Garden sun easter egg: "Sunshine!" is heard before "Sunshine power!" (no browser)
+node tests/pacing-lint.js          # no bare timer right after a cheer, no chime right after a line, no leftover opening prompt after a wrong-answer nag (static check, no browser); --self-test checks the checker
+node tests/voice.js                # speech: voice choice, speed, name "sounds like", mute/volume, completion promise, caption event (no browser)
+node tests/story.js                # Story Time pacing on real narration end (no browser)
+node tests/howmany.js              # How Many? wrong-answer nag heard before the leftover opening prompt (no browser)
+node tests/pattern.js              # Pattern wrong-answer nag heard before the leftover opening prompt (no browser)
 node tests/stickers.js             # sticker announcement: jingle first, then waits for the cheer (no browser)
 node tests/memory.js               # Memory: last card name heard before the win cheer (no browser)
 node tests/dino.js                 # Baby Dino: "All clean!" heard before the next wash (no browser)
@@ -77,7 +82,10 @@ a game does not speak a second line in the same tick as the first),
 that Garden's fifth sun tap hears "Sunshine!" before "Sunshine power!"
 (`tests/garden.js`),
 that a quiz prompt is repeated once after a quiet spell and dropped by any
-other line, a screen change, a lock or a muted voice, that the menu music
+other line, a screen change, a lock or a muted voice, that a How Many? /
+Pattern wrong tap's nag is heard before the leftover opening prompt
+(`tests/howmany.js`, `tests/pattern.js`; `tests/pacing-lint.js` keeps the
+pending `sayPrompt` timer from surviving the nag), that the menu music
 ducks under a line in flight and eases back once it ends (or is cut off,
 muted or silenced), that a screen lock or
 app switch silences speech and music and that coming back wakes a paused
