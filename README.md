@@ -174,7 +174,10 @@ The **More** drawer holds themed hub cards, each opening a small menu:
 ## Behind the scenes
 
 - **PWA**: `manifest.json` + `sw.js` cache every asset so the
-  playground keeps working when the iPad's offline.
+  playground keeps working when the iPad's offline. The worker refreshes
+  assets in the background and fetches the page network-first, so a
+  deploy is picked up on the next open without editing `sw.js`
+  (`tests/sw-update.js` checks this in Chromium).
 - **Welcome toast**: time-of-day greeting on app load with a daily
   streak counter once it's 2+ days in a row.
 - **Tutorials**: `lib/tutorial.js` shows a one-time hint the first time
@@ -194,13 +197,20 @@ The **More** drawer holds themed hub cards, each opening a small menu:
 Smoke + visual baseline checks for every game live in `tests/`.
 
 ```bash
+npm ci && npx playwright install chromium   # once
+npm test                           # everything below, in order
+node tests/sw-assets.js            # sw.js ASSETS matches index.html and disk (no browser)
 node tests/voice.js                # speech engine + caption event (no browser)
 node tests/story.js                # Story Time pacing (no browser)
 node tests/smoke.js                # errors-free / renders / restart-safe
 node tests/smoke.js --baseline     # + diff every screen against tests/baseline/
 node tests/smoke.js --update-baseline   # accept new baselines after UI changes
 node tests/a11y.js                 # axe-core (light, dark, phone, iPad) + keyboard / modal / captions / overlay checks
+node tests/sw-update.js            # service worker picks up a deploy without a cache bump; offline boot
 ```
+
+`npm run lint` runs ESLint over the app and tests; CI (`.github/workflows/test.yml`)
+runs lint and every suite on each PR.
 
 See `tests/README.md` for details (needs Playwright + Chromium).
 
@@ -211,7 +221,8 @@ See `tests/README.md` for details (needs Playwright + Chromium).
 2. Add a `<section id="mynameGame" class="screen">` in `index.html`
    and a tile in the relevant hub (or the home menu).
 3. Drop the script tag at the bottom of `index.html` and add the path
-   to `ASSETS` in `sw.js` (bump the cache version).
+   to `ASSETS` in `sw.js` (`node tests/sw-assets.js` checks the list;
+   the cache name never changes).
 4. Add a smoke entry in `tests/smoke.js` (`GAMES` array) and refresh
    the baseline with `node tests/smoke.js --update-baseline`.
 5. Give every tappable thing a readable name (`aria-label` for

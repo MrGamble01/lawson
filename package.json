@@ -1,0 +1,22 @@
+{
+  "name": "lawsons-playground",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A toddler-friendly learning playground for iPad. Plain HTML/CSS/JS, no build step.",
+  "scripts": {
+    "lint": "eslint .",
+    "test:unit": "node tests/pacing-lint.js && node tests/pacing-lint.js --self-test && node tests/sw-assets.js && node tests/voice.js && node tests/story.js && node tests/stickers.js",
+    "test:smoke": "node tests/smoke.js --baseline",
+    "test:a11y": "node tests/a11y.js",
+    "test:nav": "node tests/nav-speech.js",
+    "test:sw": "node tests/sw-update.js",
+    "test": "npm run lint && npm run test:unit && npm run test:smoke && npm run test:nav && npm run test:sw && npm run test:a11y"
+  },
+  "devDependencies": {
+    "eslint": "^10.1.0",
+    "playwright": "1.56.1"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
