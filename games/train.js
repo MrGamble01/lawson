@@ -158,10 +158,10 @@
     const stage = $("trainStage");
     stage.innerHTML = `
       <div id="trainSky" class="train-sky">
-        <div id="trainSun" class="train-sun" aria-label="Sun">${bigSunSvg()}</div>
-        <div class="train-cloud train-cloud--1" aria-hidden="true"></div>
-        <div class="train-cloud train-cloud--2" aria-hidden="true"></div>
-        <div class="train-cloud train-cloud--3" aria-hidden="true"></div>
+        <button type="button" id="trainSun" class="train-sun" aria-label="Sun">${bigSunSvg()}</button>
+        <button type="button" class="train-cloud train-cloud--1" aria-label="Cloud"></button>
+        <button type="button" class="train-cloud train-cloud--2" aria-label="Cloud"></button>
+        <button type="button" class="train-cloud train-cloud--3" aria-label="Cloud"></button>
       </div>
       <div class="train-hills"></div>
       <div class="train-ground"></div>
@@ -419,6 +419,8 @@
       "linear-gradient(180deg, #1c1138 0%, #2e1b5b 50%, #4a1b5e 100%)",
     ];
     sky.style.background = phases[dayPhase % phases.length];
+    const sun = $("trainSun");
+    if (sun) sun.setAttribute("aria-label", dayPhase >= 2 ? "Moon" : "Sun");
   }
 
   // ====================================================================

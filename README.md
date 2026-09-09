@@ -62,7 +62,8 @@ The **More** drawer holds themed hub cards, each opening a small menu:
 - **Ice Cream** — build a sundae: drag scoops onto a cone (or tap a tub),
   add toppings, tap Eat!
 - **Train** — drive a chuffing train between three stations; passengers
-  hop on and off.
+  hop on and off. The sun and clouds are named buttons, so Tab / a
+  screen reader can poke them the same way a finger does.
 - **Music Studio** — drum kit, rainbow xylophone, jingle bells, plus a
   Song button that names the tune and waits for the name to be heard
   before the first note, so "Twinkle Twinkle" is never played over.
@@ -184,7 +185,9 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   is a named button — and so is every animal, pot, balloon, hole, cloud
   and sun you can tap: `onTap()` turns any plain tap target into a
   focusable `role="button"`, so the sandbox and arcade games can be
-  played with Tab and Enter. Names carry state where it matters ("Pot 2:
+  played with Tab and Enter. Train's sky used to hide its clouds
+  (`aria-hidden` then `onTap`), which skipped that upgrade — they are
+  real named buttons now, and the sun's name follows day and night. Names carry state where it matters ("Pot 2:
   seed planted, water it", "Hole 4: mole!"). Opening a game moves focus
   onto that screen (a labelled region); Home puts it back on the tile you
   came from. Mode tabs expose their pressed state; Memory cards say
@@ -272,6 +275,7 @@ node tests/piano.js                # Piano Song: first note waits for the name (
 node tests/music.js                # Music Studio Song: first note waits for the name (no browser)
 node tests/garden.js               # Garden sun: "Sunshine!" before "Sunshine power!" (no browser)
 node tests/listen.js               # Listen leftover opening clue (no browser)
+node tests/train-sky.js            # Train sky: sun and clouds are named buttons (no browser)
 node tests/smoke.js                # errors-free / renders / restart-safe
 node tests/smoke.js --baseline     # + diff every screen against tests/baseline/
 node tests/smoke.js --update-baseline   # accept new baselines after UI changes

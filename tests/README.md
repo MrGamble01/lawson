@@ -32,6 +32,7 @@ node tests/music.js                # Music Studio Song: first note waits for the
 node tests/match.js                # Match example is a named button that re-hears the prompt (no browser); --self-test checks the role=img-then-onTap checker
 node tests/doodle.js               # Doodle brushes / sizes / Stamp expose aria-pressed; stamp timeout says "Draw!" (no browser); --self-test checks the checker
 node tests/garden-sky.js           # Garden sky: sun and clouds are named buttons, clouds rest in view under reduced motion (no browser); --self-test checks the checker
+node tests/train-sky.js            # Train sky: sun and clouds are named buttons; --self-test checks the checker (no browser)
 node tests/nav-speech.js           # hub welcome line never spoken over a screen the kid tapped on to (Playwright)
 node tests/smoke.js                # smoke pass only (errors-free / screen renders / restart safe)
 node tests/smoke.js --baseline     # smoke + diff every screen against tests/baseline/
@@ -66,6 +67,16 @@ keyboard upgrade; pickers must expose `aria-pressed`; clouds need a
 resting position under both reduced-motion switches) with a small
 playthrough where the game allows it. `tests/voice.js` and
 `tests/story.js` check: which voice gets picked, that `say()` resolves when a line
+`tests/voice.js`, `tests/story.js` and `tests/train-sky.js` are plain Node
+scripts with no Playwright dependency. `tests/train-sky.js` is a static
+scan: a Train cloud marked `aria-hidden` then given `onTap`, or a sun
+that is still a `<div>`, is reported — that combination left the sky
+off the Tab order (`makeTappableAccessible` will not overwrite
+`aria-hidden`). `--self-test` covers the checker.
+
+`tests/voice.js` and `tests/story.js` load `lib/audio.js` / `games/story.js` into a
+`vm` sandbox with a fake speech engine, DOM and clock, so they check exact
+behaviour: which voice gets picked, that `say()` resolves when a line
 really ends (or is interrupted, muted, or silenced), that `afterSpeech()`
 runs a game's next step once the engine is idle plus a beat — bounded by a
 floor and a ceiling, cancellable — that a voice which
