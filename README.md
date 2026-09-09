@@ -103,52 +103,32 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   actually been read, plus a beat to poke the scene. Poking a character
   answers with its sound, then the storyteller picks the line back up if
   it was cut off. Tapping the words hears the line again from the top
-  (the page waits for it); tapping anywhere else turns the page. "The end!" and the cheer are heard in full before the
-  sticker is announced and the next story begins. The quiz games (Listen,
-  Match, Pattern, How Many?, Count, Find It!, Color Mix, Memory) likewise
-  let the cheer — or "try again" — finish before the next prompt, and a
-  hub's welcome line is skipped if the kid has already tapped on. A wrong
-  tap in Find It! names what you hit and waits for that name before
-  repeating the goal; Color Mix waits for the second colour's name
-  before announcing the mix. A quiz
-  let the cheer — or "try again" — finish before the next prompt. Memory
-  also waits for the last card's name ("bee") before "You matched them
-  all!", so a late-starting iPad voice is not cut off. A hub's welcome
-  line is skipped if the kid has already tapped on. A quiz
-  it was cut off. "The end!" and the cheer are heard in full before the
-  sticker is announced and the next story begins.   The quiz games (Listen,
-  Match, Pattern, How Many?, Count, Find It!, Color Mix, Memory) likewise
-  let the cheer — or "try again" — finish before the next prompt, and
-  Baby Dino waits for "All clean!" before the next wash. A
-  hub's welcome line is skipped if the kid has already tapped on. A quiz
-  hub's welcome line is skipped if the kid has already tapped on. Pop!
-  and Whack! ABC / 123 hear the popped letter (and its cheer) before the
-  next goal, so a slow voice never loses the name. A quiz
-  hub's welcome line is skipped if the kid has already tapped on. Train
-  hears "Station 2!" before the passenger's "Woof!" or "Bye bye!", so a
-  slow voice never loses the stop. A quiz
-  prompt ("Find the cow!") is repeated once if nothing has happened for
-  twelve seconds, so a kid who looked away gets a nudge, never a nag. A cheer
-  starts as its chime rings out rather than underneath it, so the first
-  word is never masked — every game triggers its chime before the line
-  (  the farm, garden, train and scene sounds included), and a check keeps
-  it that way — and "New best!" and "Sticker!" announcements wait for
-  the cheer to finish instead of cutting it off. Short lines that lead
-  into another ("Flip!" then "Yummy!", the counted number then the total,
-  "Squirt squirt!" then "Bucket full of milk!") are heard in full before
-  the next one starts.
-  the cheer to finish instead of cutting it off. Connect-the-dots hears
-  the last number ("5") before "It's a house!", and that reveal before
-  the next puzzle, instead of cutting either off on a fixed timer.
-  the cheer to finish instead of cutting it off. Ice Cream hears each
-  "Mmm!" before the next bite — or the cheer — starts, so a late-starting
-  voice is not cut off by the nibble after it.
-  it that way. Sticker Scene names the picture ("The park!") and only
-  then the how-to, so the name is heard; switching scenes rings the
-  chime before the new name. "New best!" and "Sticker!" announcements
-  wait for the cheer to finish instead of cutting it off.
-  the cheer to finish instead of cutting it off. Piano and Music Studio
-  wait for the song name the same way before the first note.
+  (the page waits for it); tapping anywhere else, the "keep going"
+  button, or Enter turns the page. "The end!" and the cheer are heard in
+  full before the sticker is announced and the next story begins. The
+  quiz games (Listen, Match, Pattern, How Many?, Count, Find It!, Color
+  Mix, Memory) likewise let the cheer — or "try again" — finish before
+  the next prompt, and a hub's welcome line is skipped if the kid has
+  already tapped on. A quiz prompt ("Find the cow!") is repeated once if
+  nothing has happened for twelve seconds, so a kid who looked away gets
+  a nudge, never a nag. A cheer starts as its chime rings out rather than
+  underneath it, so the first word is never masked — every game triggers
+  its chime before the line (the farm, garden, train and scene sounds
+  included), and a check keeps it that way — and "New best!" and
+  "Sticker!" announcements wait for the cheer to finish instead of
+  cutting it off. Every short line that leads into another is heard in
+  full before the next one starts, whatever the game: "Flip!" then
+  "Yummy!", the counted number then the total, "Squirt squirt!" then
+  "Bucket full of milk!", a wrong tap's name in Find It! before the goal
+  repeats, the second colour in Color Mix before the mix, the last
+  number in Connect-the-dots before "It's a house!" (and that reveal
+  before the next puzzle), each "Mmm!" in Ice Cream before the next
+  bite, Memory's last card ("bee") before "You matched them all!", Baby
+  Dino's "All clean!" before the next wash, the popped letter in Pop! and
+  Whack! ABC / 123 before the next goal, "Station 2!" on the train before
+  the passenger's "Woof!", Sticker Scene's "The park!" before the how-to
+  (and its chime before a new scene's name), and a Song button's tune
+  name in Piano and Music Studio before the first note.
 - Locking the iPad or switching apps silences the storyteller and the menu
   music straight away. Coming back wakes the speech and sound engines
   (iOS leaves both muted after a lock or a phone call) and Story Time

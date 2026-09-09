@@ -91,13 +91,10 @@
   let puzzleIndex = -1;
   let nextDot = 1;
   let solved = 0;
-  let advanceTimer = null;
   // The reveal line waits for the last number; the next puzzle waits for
-  // the reveal. Both are cancelled with the leftover timer on stop().
+  // the reveal. Both are cancelled on stop().
   let cancelNext = null;
   function clearNext() {
-    clearTimeout(advanceTimer);
-    advanceTimer = null;
     if (cancelNext) cancelNext();
     cancelNext = null;
   }

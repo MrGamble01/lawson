@@ -821,10 +821,13 @@ async function focusRetention(page) {
   await page.evaluate(() => {
     const n = document.querySelectorAll("#howmanyStage .howmany-item").length;
     const btn = [...document.querySelectorAll(".howmany-choice")].find((b) => b.textContent.trim() === String(n));
+    btn.dataset.a11yAnswered = "1";
     btn.focus();
   });
   await page.keyboard.press("Enter");
-  await page.waitForTimeout(1700);
+  // The round rebuilds after the cheer: afterSpeech(newRound, { minMs: 1800 }).
+  await page.waitForTimeout(2300);
+  check(await page.evaluate(() => !document.querySelector("[data-a11y-answered]")), where, "How Many?: the answered button should be gone once the round rebuilds");
   check(await page.evaluate(() => document.activeElement && document.activeElement.classList.contains("howmany-choice")), where, `How Many?: after a correct answer focus should be on a new-round choice, got ${await activeDesc()}`);
 
   // Pop!: Enter pops the focused balloon (it is removed); focus moves to

@@ -6,41 +6,21 @@ Smoke, visual baseline and accessibility checks for every game and key screen.
 
 ```bash
 node tests/sw-assets.js            # sw.js ASSETS matches index.html and the files on disk; cache name is fixed (no browser)
-node tests/pacing-lint.js          # no bare timer right after a cheer, no chime right after a line (static check, no browser); --self-test checks the checker
-node tests/pacing-lint.js          # no bare timer after a cheer, no chime right after a line, no fixed timer speaking over a line (static check, no browser); --self-test checks the checker
-node tests/pacing-lint.js          # no bare timer right after a cheer, no chime right after a line, no named follow-on timer over a short line (static check, no browser); --self-test checks the checker
-node tests/pacing-lint.js          # no bare timer after a cheer, no chime right after a line, no arrow timer calling a speaker over a short line (static check, no browser); --self-test checks the checker
-node tests/pacing-lint.js          # no bare timer after a cheer, no chime right after a line, no setT(ms, name) speaking over a line (static check, no browser); --self-test checks the checker
-node tests/pacing-lint.js          # no bare timer right after a cheer, no chime right after a line, no notes on a fixed timer after a song name (static check, no browser); --self-test checks the checker
-node tests/piano.js                # Piano Song: first note waits for the name (no browser)
-node tests/music.js                # Music Studio Song: first note waits for the name (no browser)
+node tests/pacing-lint.js          # no bare timer after a cheer, no chime right after a line, no timer or same-tick line speaking over a short line (static check, no browser); --self-test checks the checker
 node tests/voice.js                # speech: voice choice, speed, name "sounds like", mute/volume, completion promise, caption event (no browser)
 node tests/story.js                # Story Time pacing on real narration end (no browser)
-node tests/doodle.js               # Doodle brushes / sizes / Stamp expose aria-pressed; stamp timeout says "Draw!" (no browser); --self-test checks the checker
-node tests/pacing-lint.js          # no bare timer right after a cheer, no chime right after a line, no block timer that calls a speaker after a short name (static check, no browser); --self-test checks the checker
-node tests/voice.js                # speech: voice choice, speed, name "sounds like", mute/volume, completion promise, caption event (no browser)
-node tests/story.js                # Story Time pacing on real narration end (no browser)
+node tests/stickers.js             # sticker announcement: jingle first, then waits for the cheer (no browser)
 node tests/memory.js               # Memory: last card name heard before the win cheer (no browser)
-node tests/pacing-lint.js          # no bare timer right after a cheer, no chime right after a line, no setT(name) over a cheer (static check, no browser); --self-test checks the checker
-node tests/voice.js                # speech: voice choice, speed, name "sounds like", mute/volume, completion promise, caption event (no browser)
-node tests/story.js                # Story Time pacing on real narration end (no browser)
 node tests/dino.js                 # Baby Dino: "All clean!" heard before the next wash (no browser)
-node tests/pacing-lint.js          # no bare timer right after a cheer, no chime right after a line, no newTarget() in the same tick as a line (static check, no browser); --self-test checks the checker
-node tests/voice.js                # speech: voice choice, speed, name "sounds like", mute/volume, completion promise, caption event (no browser)
-node tests/story.js                # Story Time pacing on real narration end (no browser)
 node tests/pop.js                  # Pop! ABC: the popped letter is heard before the next goal (no browser)
 node tests/whack.js                # Whack! ABC: the hit is heard before the next goal (no browser)
-node tests/pacing-lint.js          # no bare timer right after a cheer, no chime right after a line, no boardOrLeave() in the same tick as a line (static check, no browser); --self-test checks the checker
-node tests/voice.js                # speech: voice choice, speed, name "sounds like", mute/volume, completion promise, caption event (no browser)
-node tests/story.js                # Story Time pacing on real narration end (no browser)
 node tests/train.js                # Train: the station is heard before the passenger hops on (no browser)
-node tests/pacing-lint.js          # no bare timer right after a cheer, no chime right after a line, no helper-then-line in the same tick (static check, no browser); --self-test checks the checker
-node tests/voice.js                # speech: voice choice, speed, name "sounds like", mute/volume, completion promise, caption event (no browser)
-node tests/story.js                # Story Time pacing on real narration end (no browser)
 node tests/scene.js                # Sticker Scene: hear the scene name before the welcome (no browser)
-node tests/stickers.js             # sticker announcement: jingle first, then waits for the cheer (no browser)
-node tests/garden-sky.js           # Garden sky: sun and clouds are named buttons, clouds rest in view under reduced motion; --self-test checks the checker (no browser)
+node tests/piano.js                # Piano Song: first note waits for the name (no browser)
+node tests/music.js                # Music Studio Song: first note waits for the name (no browser)
 node tests/match.js                # Match example is a named button that re-hears the prompt (no browser); --self-test checks the role=img-then-onTap checker
+node tests/doodle.js               # Doodle brushes / sizes / Stamp expose aria-pressed; stamp timeout says "Draw!" (no browser); --self-test checks the checker
+node tests/garden-sky.js           # Garden sky: sun and clouds are named buttons, clouds rest in view under reduced motion (no browser); --self-test checks the checker
 node tests/nav-speech.js           # hub welcome line never spoken over a screen the kid tapped on to (Playwright)
 node tests/smoke.js                # smoke pass only (errors-free / screen renders / restart safe)
 node tests/smoke.js --baseline     # smoke + diff every screen against tests/baseline/
@@ -60,21 +40,21 @@ Exit codes:
 
 ## What it checks
 
-`tests/voice.js`, `tests/story.js` and `tests/garden-sky.js` are plain Node
-scripts with no Playwright dependency. `tests/garden-sky.js` is a static
-scan: a Garden cloud marked `aria-hidden` then given `onTap`, an unnamed
-cloud button, or a sun that is no longer a `<button>`, is reported — the
-`aria-hidden` shape left the clouds off the Tab order
-(`makeTappableAccessible` will not overwrite `aria-hidden`). It also
-reads `styles.css` for a resting `left` on every cloud under both
-reduced-motion switches (the OS preference and `html.reduce-motion`):
-with the drift collapsed a cloud otherwise rests at `left: -20%`, an 8px
-sliver on a phone that fails axe's 24px target-size rule. `--self-test`
-covers the checker.
-
-`tests/voice.js` and `tests/story.js` load `lib/audio.js` / `games/story.js` into a
-`vm` sandbox with a fake speech engine, DOM and clock, so they check exact
-behaviour: which voice gets picked, that `say()` resolves when a line
+`tests/voice.js`, `tests/story.js`, `tests/stickers.js` and the per-game
+scripts (`memory`, `dino`, `pop`, `whack`, `train`, `scene`, `piano`,
+`music`) are plain Node scripts with no Playwright dependency. They load
+`lib/audio.js` / `games/*.js` into a `vm` sandbox with a fake speech
+engine, DOM and clock, so they check exact behaviour. The per-game
+scripts each hold a short line the way a late-starting iPad voice would
+and check that the line which follows (the next goal, the win cheer, the
+passenger, the welcome, the first note) starts one beat after it ends,
+never on top of it. `tests/match.js`, `tests/doodle.js` and
+`tests/garden-sky.js` are static scans of one game's source (a
+`role="img"` or `aria-hidden` element then given `onTap` skips the
+keyboard upgrade; pickers must expose `aria-pressed`; clouds need a
+resting position under both reduced-motion switches) with a small
+playthrough where the game allows it. `tests/voice.js` and
+`tests/story.js` check: which voice gets picked, that `say()` resolves when a line
 really ends (or is interrupted, muted, or silenced), that `afterSpeech()`
 runs a game's next step once the engine is idle plus a beat — bounded by a
 floor and a ceiling, cancellable — that a voice which
@@ -85,44 +65,12 @@ voice (and the next line waits a beat after a cut-off), that every attempt
 is logged with its start latency and outcome for the Settings voice report,
 that a line spoken right after a chime waits for the chime to ring out
 (`tests/pacing-lint.js` makes sure every game triggers its chime before
-the line, not after it, where it would land on the first word),
-that Match's example picture is a named button that re-hears the prompt
-(`tests/match.js` also fails a `role="img"` then `onTap` in any game —
-that combination skips the keyboard upgrade),
-that Doodle's brushes, sizes and Stamp expose `aria-pressed` and that
-the 8-second stamp window says "Draw!" when it ends (`tests/doodle.js`),
 the line, not after it, where it would land on the first word, and that
-a short line is not followed by a named timer whose callback speaks),
-the line, not after it, where it would land on the first word, and that
-a short line is not followed by `setTimeout(() => speaker(), ms)`),
-the line, not after it, where it would land on the first word, and that
-a short line is not followed by `setT(ms, name)` whose body speaks the
-next one),
-the line, not after it, where it would land on the first word, and that
-a short name is not followed by a block timer that calls a speaker —
-Memory's last card, then "You matched them all!"),
-the line, not after it, where it would land on the first word, and that
-a cheer is not followed by `setT(ms, name)` whose next prompt would
-cut it off — Baby Dino's "All clean!" used to start the next wash that
-way — and `tests/dino.js` holds that cheer the way a late-starting iPad
-voice would and checks the next wash waits),
-the line, not after it, where it would land on the first word, and that
-Pop! / Whack! never call `newTarget()` in the same tick as the popped
-letter — `tests/pop.js` and `tests/whack.js` hold the name past the old
-cut-off and check the next goal starts one beat after it ends),
-the line, not after it, where it would land on the first word, and that
-Train never calls `boardOrLeave()` in the same tick as "Station N!" —
-`tests/train.js` holds the station past the old cut-off and checks the
-passenger line starts one beat after it ends),
-the line, not after it, where it would land on the first word, and that
-a helper which already spoke is not followed by another line in the same
-tick — Sticker Scene's `build()` then welcome),
-`tests/scene.js` holds the opening "The park!" past the old same-tick
-cut-off and checks the welcome starts one beat after it ends,
-the line, not after it, where it would land on the first word, and that
-Piano / Music Studio do not start a song's notes on a fixed timer after
-the name), that a Song button's first note waits for "Twinkle Twinkle"
-(`tests/piano.js`, `tests/music.js`),
+no game follows a line with a timer — or a second line in the same
+tick — whose callback speaks, however the timer is spelled:
+`setTimeout(fn)`, `setTimeout(name)`, `setT(ms, name)`, an arrow that
+calls a speaker, or a block that does; it also refuses `newTarget()` or
+another speaker called straight after a `say()`),
 that a quiz prompt is repeated once after a quiet spell and dropped by any
 other line, a screen change, a lock or a muted voice, that the menu music
 ducks under a line in flight and eases back once it ends (or is cut off,
@@ -134,10 +82,6 @@ after the no-`end`-event ceiling — freeze while the app is hidden, and
 pick the line back up after a character poke cuts it off, read the line
 again when the words are tapped (holding the page for it) and let "The
 end!" and the sticker announcement finish before the next story.
-pick the line back up after a character poke cuts it off, and let "The
-end!" and the sticker announcement finish before the next story, and
-that Memory holds the win cheer until the last card's name has been
-heard (`tests/memory.js`).
 
 For each of the 24 games (`tests/smoke.js: GAMES`):
 
@@ -208,17 +152,16 @@ Doodle (reached via More → Art Studio) steps to Art Studio, then More,
 then the menu; Home from three hops deep unwinds the history depth to 0;
 the ABC flashcards (via More → Wonder World) round-trip through history; Back closes Settings and
 Done unwinds the Settings entry; Escape with a tool held only puts the
-tool down, and Escape again goes Home. Last, focus retention: answering
+tool down, and Escape again goes Home. Then focus retention: answering
 Match and How Many? correctly by keyboard leaves focus on a choice of the
 rebuilt round (the answered button is gone); popping a balloon with Enter
 leaves focus on another balloon or the Pop! screen; Escape from a game
-still lands focus on the menu.
-tool down, and Escape again goes Home. Then Dots and Story Time by
-keyboard: every SVG dot is a named, focusable button whose name says who
-is next; Enter on the wrong dot calls out the right one without
-connecting; Enter on the right dot connects it and the names move on;
-Story Time turns the page from the "keep going" button and from Enter on
-the screen, but not from Enter on a character.
+still lands focus on the menu. Last, Dots and Story Time by keyboard:
+every SVG dot is a named, focusable button whose name says who is next;
+Enter on the wrong dot calls out the right one without connecting; Enter
+on the right dot connects it and the names move on; Story Time turns the
+page from the "Next page" button and from Enter on the screen, but not
+from Enter on a character.
 
 Exit code 1 lists every failing screen/check; 99 means the runner crashed.
 
