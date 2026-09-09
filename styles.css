@@ -4880,6 +4880,7 @@ body[data-dino-phase="towel"] .dino-towel {
   width: 100%;
   text-align: center;
   transition: background 0.6s ease;
+  cursor: pointer;
 }
 .story-text {
   font-size: clamp(20px, 3.4vw, 30px);
