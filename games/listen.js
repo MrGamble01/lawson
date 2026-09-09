@@ -98,7 +98,14 @@
           setTimeout(() => btn.classList.remove("wrong"), 500);
           score = 0;
           L.bumpBadge("listenScoreVal", score);
-          setTimeout(speakClue, 350);
+          // Cancel a leftover opening clue (it would land on this tap)
+          // and wait for one already in flight before asking again.
+          // Same 350 ms floor when the voice is muted, plus a beat
+          // after the leftover line ends; a silent engine never stalls.
+          clearTimeout(activeTimer);
+          activeTimer = null;
+          clearNext();
+          cancelNext = L.afterSpeech(speakClue, { minMs: 350, beatMs: 150, maxMs: 3000 });
         }
       });
       stage.appendChild(btn);
@@ -117,6 +124,11 @@
     if (replay) L.onTapOnce(replay, (e) => {
       if (e.stopPropagation) e.stopPropagation();
       L.beep(620, 0.08, "triangle");
+      // Hear it again is a request: drop a leftover opening clue
+      // (and a pending re-ask) so they cannot land on this one.
+      clearTimeout(activeTimer);
+      activeTimer = null;
+      clearNext();
       speakClue();
     });
     newRound();

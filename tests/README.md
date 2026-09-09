@@ -16,6 +16,10 @@ node tests/voice.js                # speech: voice choice, speed, name "sounds l
 node tests/story.js                # Story Time pacing on real narration end (no browser)
 node tests/howmany.js              # How Many? wrong-answer nag heard before the leftover opening prompt (no browser)
 node tests/pattern.js              # Pattern wrong-answer nag heard before the leftover opening prompt (no browser)
+node tests/pacing-lint.js          # no bare timer right after a cheer, no chime right after a line, no leftover speakClue timer (static check, no browser); --self-test checks the checker
+node tests/voice.js                # speech: voice choice, speed, name "sounds like", mute/volume, completion promise, caption event (no browser)
+node tests/story.js                # Story Time pacing on real narration end (no browser)
+node tests/listen.js               # Listen leftover opening clue: wrong tap / replay cancel it; re-ask waits (no browser)
 node tests/stickers.js             # sticker announcement: jingle first, then waits for the cheer (no browser)
 node tests/memory.js               # Memory: last card name heard before the win cheer (no browser)
 node tests/dino.js                 # Baby Dino: "All clean!" heard before the next wash (no browser)
@@ -86,6 +90,10 @@ other line, a screen change, a lock or a muted voice, that a How Many? /
 Pattern wrong tap's nag is heard before the leftover opening prompt
 (`tests/howmany.js`, `tests/pattern.js`; `tests/pacing-lint.js` keeps the
 pending `sayPrompt` timer from surviving the nag), that the menu music
+other line, a screen change, a lock or a muted voice, that Listen's leftover
+opening clue is cancelled by a wrong tap or Hear it again and the question
+is asked again only after a clue already in flight has been heard
+(`tests/listen.js` plays that race on a virtual clock), that the menu music
 ducks under a line in flight and eases back once it ends (or is cut off,
 muted or silenced), that a screen lock or
 app switch silences speech and music and that coming back wakes a paused
