@@ -29,6 +29,7 @@
   const MAX_N = 5;
 
   let score = 0;
+  let answered = false;   // the round is won; late taps wait for the next one
   let activeTimer = null;
   let cancelNext = null;
   function clearNext() { if (cancelNext) cancelNext(); cancelNext = null; }
@@ -68,6 +69,7 @@
   }
 
   function newRound() {
+    answered = false;
     const { item, n } = pickRound();
     answer = n;
 
@@ -88,6 +90,7 @@
       btn.className = "howmany-choice";
       btn.textContent = c;
       L.onTap(btn, (e) => {
+        if (answered) return;   // the cheer and the next round are already on their way
         if (e.stopPropagation) e.stopPropagation();
         if (c === answer) {
           L.happySound();
@@ -103,6 +106,7 @@
           L.sparkleAt(p.x, p.y);
           clearTimeout(activeTimer);
           clearNext();
+          answered = true;
           cancelNext = L.afterSpeech(newRound, { minMs: 1800 });
         } else {
           L.buzzSound();

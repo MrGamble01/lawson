@@ -26,6 +26,7 @@
   ];
 
   let score = 0;
+  let answered = false;   // the round is won; late taps wait for the next one
   let activeTimer = null;
   let cancelNext = null;
   function clearNext() { if (cancelNext) cancelNext(); cancelNext = null; }
@@ -41,6 +42,7 @@
   }
 
   function newRound() {
+    answered = false;
     const set = ITEM_SETS[Math.floor(Math.random() * ITEM_SETS.length)];
     const order = L.shuffled(set.map((_, i) => i));
     const tmpl = PATTERNS[Math.floor(Math.random() * PATTERNS.length)];
@@ -80,6 +82,7 @@
       btn.textContent = it.e;
       btn.setAttribute("aria-label", it.n);
       L.onTap(btn, (e) => {
+        if (answered) return;   // the cheer and the next round are already on their way
         if (e.stopPropagation) e.stopPropagation();
         if (it.e === answer.e) {
           L.happySound();
@@ -97,6 +100,7 @@
           L.sparkleAt(p.x, p.y);
           clearTimeout(activeTimer);
           clearNext();
+          answered = true;
           cancelNext = L.afterSpeech(newRound, { minMs: 1700 });
         } else {
           L.buzzSound();

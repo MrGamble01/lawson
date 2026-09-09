@@ -350,7 +350,9 @@
     updatePotGlows();
   }
 
-  function growPot(pot) {
+  // quiet: the sunshine bonus grows every plant at once; "Sunshine power!"
+  // is the line for that, not twelve "Sprout!"s cancelling each other.
+  function growPot(pot, quiet) {
     if (!pot.plant) return;
     pot.growth += 1;
     const p = pot.plant;
@@ -360,20 +362,20 @@
       pot.plantEl.innerHTML = sproutSvg(p.stem);
       pot.plantEl.classList.add("stage-sprout");
       L.beep(600, 0.10, "triangle");
-      L.say("Sprout!");
+      if (!quiet) L.say("Sprout!");
     } else if (pot.growth === 2) {
       pot.state = STATE.YOUNG;
       pot.plantEl.innerHTML = youngSvg(p.stem);
       pot.plantEl.classList.add("stage-young");
       L.beep(680, 0.10, "triangle");
-      L.say("Growing!");
+      if (!quiet) L.say("Growing!");
     } else if (pot.growth >= 3) {
       pot.state = STATE.MATURE;
       pot.plantEl.innerHTML = matureSvg(p.stem, p.emoji, p.fruitColor);
       pot.plantEl.classList.add("stage-mature");
       L.beep(760, 0.16, "triangle");
       L.haptic(8);
-      L.say(p.say);
+      if (!quiet) L.say(p.say);
       // Sparkle the moment of ripeness.
       const r = pot.plantEl.getBoundingClientRect();
       L.sparkleAt(r.left + r.width / 2, r.top + r.height / 2);
@@ -544,14 +546,14 @@
       // first word off (an enhanced iPad voice can take 300 ms–1 s to
       // begin). Wait for it, same 400 ms floor when the voice is muted.
       if (taps % 5 === 0) {
-        cancelPower = L.afterSpeech(() => {
-          L.say("Sunshine power!");
-          pots.forEach((pot) => {
-            if (pot.state !== STATE.EMPTY && pot.state !== STATE.MATURE) {
-              setT(120 + pot.idx * 80, () => growPot(pot));
-            }
-          });
-        }, { beatMs: 150, minMs: 400, maxMs: 3000 });
+        // The plants grow now — a kid tapping fast must never lose the
+        // bonus. Only the spoken line waits (a later tap cancels just that).
+        pots.forEach((pot) => {
+          if (pot.state !== STATE.EMPTY && pot.state !== STATE.MATURE) {
+            setT(120 + pot.idx * 80, () => growPot(pot, true));
+          }
+        });
+        cancelPower = L.afterSpeech(() => L.say("Sunshine power!"), { beatMs: 150, minMs: 400, maxMs: 3000 });
       }
     });
   }
