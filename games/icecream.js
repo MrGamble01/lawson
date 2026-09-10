@@ -120,7 +120,7 @@
         <div id="icecreamStack" class="icecream-stack" tabindex="-1"></div>
         <div id="icecreamToppings" class="icecream-toppings-overlay"></div>
       </div>
-      <button id="icecreamEat" class="icecream-eat" disabled>Eat! 🤤</button>
+      <button id="icecreamEat" class="icecream-eat" disabled aria-label="Eat: empty cone">Eat! 🤤</button>
       <div id="icecreamToppingsTray" class="icecream-toppings-tray"></div>`;
     buildTubs();
     buildToppingsTray();
@@ -238,7 +238,7 @@
     stack.classList.remove("icecream-wobble");
     void stack.offsetWidth;
     stack.classList.add("icecream-wobble");
-    enableEatBtn();
+    refreshEatBtn();
   }
 
   function renderStack() {
@@ -384,9 +384,21 @@
     });
   }
 
-  function enableEatBtn() {
+  // Eat is the keyboard target for the sundae. Disabled already says the
+  // cone is empty; the name carries what is on it ("Eat: vanilla sundae"),
+  // because the scoops themselves are pictures only.
+  function eatName() {
+    if (scoops.length === 0) return "Eat: empty cone";
+    const flavors = scoops.map((s) => s.flavor.name);
+    return flavors.length === 1
+      ? `Eat: ${flavors[0]} sundae`
+      : `Eat: ${flavors.join(", ")}`;
+  }
+  function refreshEatBtn() {
     const btn = $("icecreamEat");
-    if (btn) btn.disabled = scoops.length === 0;
+    if (!btn) return;
+    btn.disabled = scoops.length === 0;
+    btn.setAttribute("aria-label", eatName());
   }
 
   function tryEat() {
@@ -421,6 +433,7 @@
     });
     placedToppings = remaining;
     renderStack();
+    refreshEatBtn();
     // Next bite (or the cheer) once "Mmm!" has been heard; never sooner
     // than the old 450 ms, never much later if the engine stays quiet.
     clearNext();
@@ -445,7 +458,7 @@
     placedToppings.forEach((p) => p.el.remove());
     placedToppings = [];
     bites = 0;
-    enableEatBtn();
+    refreshEatBtn();
     // Fresh cone after a beat
     setT(1400, () => {
       const stack = $("icecreamStack");

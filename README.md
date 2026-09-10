@@ -71,7 +71,8 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   Tab / a screen reader can poke them the same way a finger does. The
   pond ducks are named buttons too.
 - **Ice Cream** — build a sundae: drag scoops onto a cone (or tap a tub),
-  add toppings, tap Eat!
+  add toppings, tap Eat! Eat names the sundae ("Eat: vanilla sundae",
+  "Eat: empty cone"), so a screen reader hears what the scoops show.
 - **Train** — drive a chuffing train between three stations; passengers
   hop on and off. The stations say where the train is ("Station 2, train
   here"), so a screen reader follows the journey. The sun and clouds are
