@@ -709,6 +709,15 @@ async function keyboardPlay(page) {
   await page.waitForTimeout(400);
   check((await page.$$eval(".scene-placed-sticker", (els) => els.length)) === 0, where, "scene: Delete on a focused placed sticker should remove it");
   check(await page.evaluate(() => { try { return JSON.parse(localStorage.getItem("lawson:scene") || "{}").items.length === 0; } catch (_) { return false; } }), where, "scene: the removal should be saved, leaving an empty picture");
+  // The picture itself is named after the scene it shows, and the name
+  // follows the Next scene button.
+  const picture = () => page.$eval("#sceneBg", (el) => ({ role: el.getAttribute("role"), name: el.getAttribute("aria-label") }));
+  const before = await picture();
+  check(before.role === "img" && /\w+ scene$/.test(before.name || ""), where, `scene: the picture should be an image named after its scene, got ${JSON.stringify(before)}`);
+  await page.focus("#sceneSwitch"); await page.keyboard.press("Enter");
+  await page.waitForTimeout(200);
+  const after = await picture();
+  check(after.name !== before.name && /\w+ scene$/.test(after.name || ""), where, `scene: Next scene should rename the picture, got ${JSON.stringify(after)}`);
 
   // Ice Cream: toppings are drag sources too; Enter drops one on the stack
   // (the tubs already had the keyboard path).

@@ -45,7 +45,9 @@ function el() {
     },
     appendChild: c => { node.children.push(c); return c; },
     remove() {},
-    setAttribute() {},
+    attrs: {},
+    setAttribute(n, v) { node.attrs[n] = String(v); },
+    getAttribute(n) { return n in node.attrs ? node.attrs[n] : null; },
     addEventListener(type, fn) { node.handlers[type] = fn; },
   };
   return node;
@@ -186,10 +188,13 @@ async function reset() {
   await flush();
   const switcher = taps.get(ids.sceneSwitch);
   assert.ok(switcher, 'scene switch is wired');
+  assert.equal(ids.sceneBg.getAttribute('role'), 'img', 'the picture is an image');
+  assert.equal(ids.sceneBg.getAttribute('aria-label'), 'Park scene', 'the picture is named after the scene it shows');
   const beepsBefore = beeps.length;
   switcher();
   await flush();
   assert.ok(beeps.length > beepsBefore, 'scene switch rings a chime');
+  assert.equal(ids.sceneBg.getAttribute('aria-label'), 'Beach scene', 'switching renames the picture');
   assert.deepEqual(texts(), ['The park!', 'The beach!'],
     'switch speaks the new scene and drops the welcome');
   endCurrent();

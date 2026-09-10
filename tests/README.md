@@ -20,7 +20,7 @@ node tests/dino.js                 # Baby Dino: "All clean!" heard before the ne
 node tests/pop.js                  # Pop! ABC: the popped letter is heard before the next goal (no browser)
 node tests/whack.js                # Whack! ABC: the hit is heard before the next goal (no browser)
 node tests/train.js                # Train: the station is heard before the passenger hops on (no browser)
-node tests/scene.js                # Sticker Scene: hear the scene name before the welcome (no browser)
+node tests/scene.js                # Sticker Scene: hear the scene name before the welcome; the picture is named after its scene (no browser)
 node tests/piano.js                # Piano Song: first note waits for the name (no browser)
 node tests/music.js                # Music Studio Song: first note waits for the name (no browser)
 node tests/match.js                # Match example is a named button that re-hears the prompt (no browser); --self-test checks the role=img-then-onTap checker

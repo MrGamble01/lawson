@@ -59,7 +59,9 @@ The **More** drawer holds themed hub cards, each opening a small menu:
 **Sandboxes** (open-ended, no scoring):
 
 - **Sticker Scene** — drag stickers onto 12 themed backgrounds. Your
-  decorated scene is saved and restored between visits.
+  decorated scene is saved and restored between visits. The picture is
+  named after the scene it shows ("Beach scene"), so a screen reader
+  knows which one is up, a restored one included.
 - **Farm** — care for animals: milk the cow, shear the sheep, feed the
   pig/horse, fetch with the dog, collect eggs, pick apples, fish, drive
   the tractor. Drag a tool onto an animal, or tap the tool and then the
