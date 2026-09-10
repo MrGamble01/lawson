@@ -212,6 +212,9 @@
       maybeCelebrateRecord(score);
       updateBest();
       el.classList.add("found");
+      // The name carries the state: a found thing says so to a screen
+      // reader (the fade is visual only).
+      el.setAttribute("aria-label", `${mode === "free" ? item.n : item.glyph}, found`);
       const p = L.pointOf(e);
       L.sparkleAt(p.x, p.y);
       const c = L.cheer();
