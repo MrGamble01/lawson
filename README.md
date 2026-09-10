@@ -60,7 +60,7 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   the tractor. Drag a tool onto an animal, or tap the tool and then the
   animal. Day/night + weather. The sun and clouds are named buttons, so
   Tab / a screen reader can poke them the same way a finger does. The
-  pond ducks and fish are named buttons too.
+  pond ducks are named buttons too.
 - **Ice Cream** — build a sundae: drag scoops onto a cone (or tap a tub),
   add toppings, tap Eat!
 - **Train** — drive a chuffing train between three stations; passengers
@@ -263,7 +263,7 @@ node tests/garden.js               # Garden sun: "Sunshine!" before "Sunshine po
 node tests/listen.js               # Listen leftover opening clue (no browser)
 node tests/train-sky.js            # Train sky: sun and clouds are named buttons (no browser)
 node tests/farm-sky.js             # Farm sky: sun and clouds are named buttons (no browser)
-node tests/farm-pond.js            # Farm pond: ducks and fish are named buttons (no browser)
+node tests/farm-pond.js            # Farm pond: ducks are named buttons (no browser)
 node tests/smoke.js                # errors-free / renders / restart-safe
 node tests/smoke.js --baseline     # + diff every screen against tests/baseline/
 node tests/smoke.js --update-baseline   # accept new baselines after UI changes

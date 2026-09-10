@@ -1,9 +1,9 @@
-// Farm pond poke-toys are real buttons. The ducks used to be
-// aria-hidden divs given onTap, and each fish used to set
-// aria-hidden then onTap, so makeTappableAccessible skipped them
-// (it will not overwrite aria-hidden) and Tab / a screen reader
-// never reached "Quack quack!" / "Fish!". The sun and clouds
-// already got this treatment; the pond was the leftover.
+// Farm pond ducks are real buttons. They used to be aria-hidden divs
+// given onTap, so makeTappableAccessible skipped them (it will not
+// overwrite aria-hidden) and Tab / a screen reader never reached
+// "Quack quack!". The sun and clouds already got this treatment; the
+// ducks were the leftover that can be named without failing WCAG 2.2
+// target-size (the fish sit on the ducks, so they stay pointer-only).
 //
 // Run:  node tests/farm-pond.js
 //       node tests/farm-pond.js --self-test
@@ -34,7 +34,7 @@ function check(src, file) {
 
   // Ducks must be real <button>s named like the spoken line.
   if (/<div\s[^>]*class="farm-duck"/.test(src)) {
-    problems.push(`${label}: farm-duck is a <div> — use a <button> like the pond fish`);
+    problems.push(`${label}: farm-duck is a <div> — use a <button> like the farm sun`);
   }
   const duckTags = src.match(/<button\b[^>]*class="farm-duck"[^>]*>/g) || [];
   if (duckTags.length < 2) {
@@ -45,22 +45,6 @@ function check(src, file) {
       problems.push(`${label}: farm-duck ${i + 1} is missing aria-label="Duck"`);
     }
   });
-
-  // Fish used to hide themselves after createElement("button").
-  if (/farm-fish[\s\S]{0,240}setAttribute\("aria-hidden",\s*"true"\)/.test(src)
-      || /setAttribute\("aria-hidden",\s*"true"\)[\s\S]{0,240}farm-fish/.test(src)) {
-    problems.push(`${label}: farm-fish sets aria-hidden — onTap will not expose it to Tab / a screen reader`);
-  }
-  if (!/setAttribute\("aria-label",\s*"Fish"\)/.test(src)) {
-    problems.push(`${label}: farm-fish is missing aria-label="Fish"`);
-  }
-  if (!/createElement\("button"\)[\s\S]{0,80}className = "farm-fish"/.test(src)
-      && !/className = "farm-fish"[\s\S]{0,80}createElement\("button"\)/.test(src)) {
-    // spawnFish builds a button then names it; keep that shape.
-    if (!/className = "farm-fish"/.test(src)) {
-      problems.push(`${label}: farm-fish element is missing`);
-    }
-  }
 
   return problems;
 }
@@ -73,19 +57,12 @@ function selfTest() {
         <div class="farm-duck" aria-hidden="true"></div>
       </div>\`;
     L.onTap(d, () => L.say("Quack quack!"));
-    const f = document.createElement("button");
-    f.className = "farm-fish";
-    f.setAttribute("aria-hidden", "true");
-    f.setAttribute("tabindex", "-1");
-    L.onTap(f, () => L.say("Fish!"));
   `;
   const hidden = check(hiddenPond, "fixture-main.js");
   assert.ok(hidden.some((p) => /farm-duck is aria-hidden/.test(p)), "main-shaped ducks must be reported");
   assert.ok(hidden.some((p) => /farmDucks is aria-hidden/.test(p)), "main-shaped flock aria-hidden must be reported");
   assert.ok(hidden.some((p) => /<div>/.test(p)), "main-shaped duck div must be reported");
   assert.ok(hidden.some((p) => /expected 2/.test(p)), "missing duck buttons must be reported");
-  assert.ok(hidden.some((p) => /farm-fish sets aria-hidden/.test(p)), "main-shaped fish aria-hidden must be reported");
-  assert.ok(hidden.some((p) => /missing aria-label="Fish"/.test(p)), "unnamed fish must be reported");
 
   const fixed = `
     stage.innerHTML = \`
@@ -94,10 +71,6 @@ function selfTest() {
         <button type="button" class="farm-duck" aria-label="Duck"></button>
       </div>\`;
     L.onTap(d, () => L.say("Quack quack!"));
-    const f = document.createElement("button");
-    f.className = "farm-fish";
-    f.setAttribute("aria-label", "Fish");
-    L.onTap(f, () => L.say("Fish!"));
   `;
   assert.deepEqual(check(fixed, "fixture-fixed.js"), [], "fixed pond must pass");
 
@@ -107,14 +80,16 @@ function selfTest() {
   );
   assert.ok(check(unnamedDuck, "fixture-unnamed.js").some((p) => /duck 1 is missing aria-label/.test(p)), "an unnamed duck must be reported");
 
-  // Sky leftovers are a different gap and must not trip the pond rules.
-  const sky = `
+  // Sky leftovers and the pointer-only fish are different gaps.
+  const other = `
     <button type="button" id="farmSunMoon" class="farm-sun" aria-hidden="true"></button>
     <div class="farm-cloud farm-cloud--1" aria-hidden="true"></div>
-    L.onTap(c, () => L.say("Cloud!"));
+    f.setAttribute("aria-hidden", "true");
+    f.setAttribute("tabindex", "-1");
+    L.onTap(f, () => L.say("Fish!"));
   `;
-  const skyHits = check(sky, "fixture-sky.js");
-  assert.ok(!skyHits.some((p) => /aria-hidden/.test(p)), "unrelated sky aria-hidden must not be reported as a pond poke-toy");
+  const otherHits = check(other, "fixture-other.js");
+  assert.ok(!otherHits.some((p) => /aria-hidden/.test(p)), "unrelated sky / fish aria-hidden must not be reported as a duck");
 
   console.log("PASS: farm-pond self-test");
 }
@@ -131,7 +106,7 @@ if (require.main === module) {
       console.error("FAIL: Farm pond:\n" + problems.map((p) => "  " + p).join("\n"));
       process.exit(1);
     }
-    console.log("PASS: farm-pond — ducks and fish are named buttons");
+    console.log("PASS: farm-pond — ducks are named buttons");
   } catch (err) {
     console.error(err);
     process.exit(99);

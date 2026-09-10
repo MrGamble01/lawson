@@ -97,8 +97,8 @@ function selfTest() {
   const gardenHits = check(garden, "fixture-garden.js");
   assert.ok(!gardenHits.some((p) => /aria-hidden/.test(p)), "unrelated garden-cloud aria-hidden must not be reported as a farm-cloud");
 
-  // A leftover pond fish (aria-hidden + onTap) is a different gap —
-  // tests/farm-pond.js covers that — and must not trip the sky rules.
+  // Pond fish stay pointer-only (they sit on the ducks). That leftover
+  // must not trip the Farm sky rules.
   const fish = `
     f.setAttribute("aria-hidden", "true");
     f.setAttribute("tabindex", "-1");
