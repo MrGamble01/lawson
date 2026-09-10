@@ -85,6 +85,13 @@
     phase = p;
     autoBusy = false;
     document.body.dataset.dinoPhase = p;
+    // The CSS dims the tools that are not for this phase and their handlers
+    // ignore a tap; say so to a screen reader too, so Enter on the shower
+    // during the soap phase is heard as "dimmed", not as a dead button.
+    [["dinoSoap", "soap"], ["dinoShower", "shower"], ["dinoTowel", "towel"]].forEach(([id, at]) => {
+      const tool = $(id);
+      if (tool) tool.setAttribute("aria-disabled", p === at ? "false" : "true");
+    });
     const prompt = $("dinoPrompt");
     if (p === "soap") {
       if (prompt) prompt.textContent = "Wash him with soap!";

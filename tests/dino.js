@@ -43,7 +43,9 @@ function el(id) {
       remove: c => node._classes.delete(c),
       contains: c => node._classes.has(c),
     },
-    setAttribute() {},
+    attrs: {},
+    setAttribute(n, v) { node.attrs[n] = String(v); },
+    getAttribute(n) { return n in node.attrs ? node.attrs[n] : null; },
     appendChild(c) { node.children.push(c); return c; },
     remove() {},
     addEventListener(type, fn) { (node.listeners[type] || (node.listeners[type] = [])).push(fn); },
@@ -142,17 +144,21 @@ const texts = () => spoken.map(s => s.text);
   dino.start();
   assert.equal(lastLine().text, 'Wash him with soap!');
   await finishLine(lastLine());
+  const disabled = () => ['dinoSoap', 'dinoShower', 'dinoTowel'].map(id => ids[id].getAttribute('aria-disabled'));
+  assert.deepEqual(disabled(), ['false', 'true', 'true'], 'soap phase: only the soap is live; the shower and towel say they are dimmed');
 
   // Keyboard-style tap: soap auto-scrubs, shower rinses, towel dries.
   ids.dinoSoap.click(0);
   await runUntil(clock.now + 4000);
   assert.equal(body.dataset.dinoPhase, 'shower', `soap should move to shower, got ${body.dataset.dinoPhase}`);
+  assert.deepEqual(disabled(), ['true', 'false', 'true'], 'shower phase: only the shower is live');
   await finishLine(lastLine());
 
   ids.dinoShower.click(0);
   await finishLine(lastLine()); // "Splash splash!"
   await runUntil(clock.now + 2600);
   assert.equal(body.dataset.dinoPhase, 'towel', `shower should move to towel, got ${body.dataset.dinoPhase}`);
+  assert.deepEqual(disabled(), ['true', 'true', 'false'], 'towel phase: only the towel is live');
   await finishLine(lastLine()); // "Dry him with the towel!"
 
   ids.dinoTowel.click(0);

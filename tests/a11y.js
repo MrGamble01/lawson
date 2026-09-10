@@ -584,8 +584,16 @@ async function dragAlternatives(page) {
   await openScreen(page, { id: "dino", kind: "game" });
   const phase = () => page.evaluate(() => document.body.dataset.dinoPhase);
   check((await phase()) === "soap", where, `dino: should start in the soap phase, got ${await phase()}`);
+  // The tools that are not for this phase are dimmed by CSS and ignore a
+  // tap; they say so (aria-disabled) so a screen reader hears why.
+  const dimmed = () => page.evaluate(() => ["dinoSoap", "dinoShower", "dinoTowel"].map((id) => document.getElementById(id).getAttribute("aria-disabled")));
+  check(JSON.stringify(await dimmed()) === JSON.stringify(["false", "true", "true"]), where, `dino: in the soap phase the shower and towel should be marked disabled, got ${JSON.stringify(await dimmed())}`);
+  await page.focus("#dinoShower"); await page.keyboard.press("Enter");
+  await page.waitForTimeout(200);
+  check((await phase()) === "soap", where, "dino: Enter on the dimmed shower must not start the rinse");
   await page.click("#dinoSoap");
   check(await waitFor(() => document.body.dataset.dinoPhase === "shower", 6000), where, "dino: tapping the soap should lather him and move to the shower phase");
+  check(JSON.stringify(await dimmed()) === JSON.stringify(["true", "false", "true"]), where, `dino: in the shower phase only the shower should be live, got ${JSON.stringify(await dimmed())}`);
   await page.click("#dinoShower");
   check(await waitFor(() => document.body.dataset.dinoPhase === "towel", 6000), where, "dino: tapping the shower should rinse him and move to the towel phase");
   await page.click("#dinoTowel");

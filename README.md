@@ -214,7 +214,9 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   then tap the plant or animal — the tool hops over, does its job and
   snaps back; tap it again, press Escape or leave the screen to put it
   down. In Baby Dino a tap on the soap, shower or towel performs the
-  whole motion; in Ice Cream a tap on a tub scoops that flavour straight
+  whole motion, and the two tools that are not for the current phase
+  (dimmed on screen) are marked disabled so a screen reader hears why a
+  press does nothing; in Ice Cream a tap on a tub scoops that flavour straight
   onto the cone and a tap on a topping drops it on the stack; in Sticker
   Scene a tap on a tray sticker drops it in the middle of the picture.
   Enter on a focused tool, then on a target, does the same — including
