@@ -159,7 +159,8 @@ make the page behind it `inert`, trap Tab, close on Escape and return
 focus to the gear. Captions must mirror `say()` (even muted), be drawn
 when the setting is on and stay in the accessibility tree when it is off.
 Mode tabs must track `aria-pressed` (so must the Song buttons in Piano and
-Music Studio and Train's Go / Stop, flipped by Enter), score badges must
+Music Studio and Train's Go / Stop, flipped by Enter; and Train's stations
+name the one the train is at, cleared while it is on the way), score badges must
 be named by their value and react to Enter, and particle effects must be skipped under
 `prefers-reduced-motion`. Finally the transient overlays are triggered and
 checked while up: the first-visit tutorial hint (fires from a real tile
