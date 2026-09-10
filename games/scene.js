@@ -259,21 +259,30 @@
       if (!dragging) return;
       moveGhost(e.clientX, e.clientY);
     });
+    // A tap (or Enter / Space) drops the sticker at the centre of the
+    // scene — the single-tap path that stands in for the drag.
+    function placeAtCentre() {
+      const bg = $("sceneBg");
+      if (!bg) return;
+      const r = bg.getBoundingClientRect();
+      placeAt(sticker, r.left + r.width / 2, r.top + r.height / 2 + (Math.random() - 0.5) * 80, r);
+    }
+
     btn.addEventListener("pointerup", (e) => {
       if (!dragging) return;
       dragging = false;
       btn.classList.remove("grabbed");
       const moved = Math.hypot(e.clientX - downX, e.clientY - downY);
       if (moved < 6) {
-        // Treat as a tap — drop a sticker at the center of the scene.
-        const bg = $("sceneBg");
-        const r = bg.getBoundingClientRect();
-        placeAt(sticker, r.left + r.width / 2, r.top + r.height / 2 + (Math.random() - 0.5) * 80, r);
+        placeAtCentre();
         if (ghost) { ghost.remove(); ghost = null; }
       } else {
         dropGhost(e.clientX, e.clientY);
       }
     });
+    // Keyboard: Enter / Space fire a click with detail 0 and no pointer
+    // events, so without this the tray was dead to Tab users.
+    btn.addEventListener("click", (e) => { if (e.detail === 0) placeAtCentre(); });
     btn.addEventListener("pointercancel", () => {
       dragging = false;
       btn.classList.remove("grabbed");
@@ -308,6 +317,8 @@
     const el = document.createElement("button");
     el.className = "scene-placed-sticker";
     el.textContent = sticker.e;
+    el.setAttribute("aria-label", sticker.n);
+    el.setAttribute("aria-keyshortcuts", "Delete");
     el.style.left = px + "%";
     el.style.top  = py + "%";
     el.style.fontSize = `clamp(36px, calc(${8 * scale}vw), 96px)`;
@@ -322,31 +333,42 @@
       if (placed.length >= 12) L.earnSticker && L.earnSticker("sceneMaker");
     }
     // Tap a placed sticker to hear it again, or long-press to remove.
+    // By keyboard: Enter / Space hear it again, Delete / Backspace remove.
+    function hearAgain() {
+      L.beep(720 + Math.random() * 200, 0.05, "sine");
+      L.say(sticker.s);
+      el.classList.remove("scene-wiggle");
+      void el.offsetWidth;
+      el.classList.add("scene-wiggle");
+    }
+    function remove() {
+      el.classList.add("scene-clearing");
+      setT(280, () => el.remove());
+      placed = placed.filter((p) => p.el !== el);
+      L.beep(280, 0.06, "sine");
+      L.haptic(8);
+      saveScene();
+    }
     let pressTimer = null;
     let pressed = false;
-    el.addEventListener("pointerdown", (e) => {
+    el.addEventListener("pointerdown", () => {
       pressed = true;
       pressTimer = setT(500, () => {
-        if (pressed) {
-          el.classList.add("scene-clearing");
-          setT(280, () => el.remove());
-          placed = placed.filter((p) => p.el !== el);
-          L.beep(280, 0.06, "sine");
-          L.haptic(8);
-          saveScene();
-        }
+        if (pressed) remove();
       });
     });
     el.addEventListener("pointerup", () => {
       if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
       if (pressed) {
         pressed = false;
-        L.beep(720 + Math.random() * 200, 0.05, "sine");
-        L.say(sticker.s);
-        el.classList.remove("scene-wiggle");
-        void el.offsetWidth;
-        el.classList.add("scene-wiggle");
+        hearAgain();
       }
+    });
+    el.addEventListener("click", (e) => { if (e.detail === 0) hearAgain(); }); // keyboard
+    el.addEventListener("keydown", (e) => {
+      if (e.key !== "Delete" && e.key !== "Backspace") return;
+      e.preventDefault();
+      remove();
     });
     el.addEventListener("pointercancel", () => {
       pressed = false;

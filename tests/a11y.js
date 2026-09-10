@@ -643,6 +643,41 @@ async function keyboardPlay(page) {
   await page.focus(".balloon"); await page.keyboard.press("Enter");
   await page.waitForTimeout(200);
   check(Number(await page.$eval("#popScoreVal", (el) => el.textContent)) >= 1, where, "pop: Enter on a balloon should pop it");
+
+  // Sticker Scene: the tray and the placed stickers are drag sources whose
+  // only handlers used to be pointer events, so Enter did nothing. Enter on
+  // a tray sticker places it; Enter on a placed sticker hears it again;
+  // Delete removes it.
+  await openScreen(page, { id: "scene", kind: "game" });
+  await page.waitForTimeout(600);
+  const trayName = await page.$eval(".scene-sticker-source", (el) => el.getAttribute("aria-label"));
+  check(/[\p{L}]/u.test(trayName || ""), where, "scene: a tray sticker should be a named button");
+  await page.evaluate(() => { window.__said.length = 0; });
+  await page.focus(".scene-sticker-source"); await page.keyboard.press("Enter");
+  await page.waitForTimeout(250);
+  check((await page.$$eval(".scene-placed-sticker", (els) => els.length)) === 1, where, "scene: Enter on a tray sticker should place it on the picture");
+  const stickerSound = (await said())[0]; // the first placement may also earn the Scene Artist sticker
+  check(Boolean(stickerSound), where, "scene: placing a sticker by keyboard should say its sound");
+  check(await page.$eval(".scene-placed-sticker", (el) => el.tagName === "BUTTON" && el.tabIndex === 0 && el.getAttribute("aria-label") === document.querySelector(".scene-sticker-source").getAttribute("aria-label")),
+    where, "scene: a placed sticker should be a focusable button named like its tray sticker");
+  await page.evaluate(() => { window.__said.length = 0; });
+  await page.focus(".scene-placed-sticker"); await page.keyboard.press("Enter");
+  await page.waitForTimeout(200);
+  check((await said()).includes(stickerSound) && (await page.$$eval(".scene-placed-sticker", (els) => els.length)) === 1, where, "scene: Enter on a placed sticker should hear it again, not place or remove one");
+  await page.keyboard.press("Delete");
+  await page.waitForTimeout(400);
+  check((await page.$$eval(".scene-placed-sticker", (els) => els.length)) === 0, where, "scene: Delete on a focused placed sticker should remove it");
+  check(await page.evaluate(() => { try { return JSON.parse(localStorage.getItem("lawson:scene") || "{}").items.length === 0; } catch (_) { return false; } }), where, "scene: the removal should be saved, leaving an empty picture");
+
+  // Ice Cream: toppings are drag sources too; Enter drops one on the stack
+  // (the tubs already had the keyboard path).
+  await openScreen(page, { id: "icecream", kind: "game" });
+  await page.focus(".icecream-tub"); await page.keyboard.press("Enter");
+  await page.waitForTimeout(200);
+  check((await page.$$eval(".icecream-scoop", (els) => els.length)) === 1, where, "ice cream: Enter on a tub should add its scoop");
+  await page.focus(".icecream-topping-source"); await page.keyboard.press("Enter");
+  await page.waitForTimeout(200);
+  check((await page.$$eval(".icecream-placed-topping", (els) => els.length)) === 1, where, "ice cream: Enter on a topping should drop it on the stack");
 }
 
 // Comfort settings: timing is adjustable and motion can be turned down
