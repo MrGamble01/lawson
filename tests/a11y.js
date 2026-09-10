@@ -693,6 +693,29 @@ async function keyboardPlay(page) {
   await page.focus(".icecream-topping-source"); await page.keyboard.press("Enter");
   await page.waitForTimeout(200);
   check((await page.$$eval(".icecream-placed-topping", (els) => els.length)) === 1, where, "ice cream: Enter on a topping should drop it on the stack");
+
+  // Count and Find It!: a counted tile / a found thing says so in its name,
+  // so a keyboard or screen-reader user knows which ones are done (the tick
+  // and the fade are visual only).
+  await openScreen(page, { id: "count", kind: "game" });
+  const tileName = await page.$eval(".count-item", (el) => el.getAttribute("aria-label"));
+  check(Boolean(tileName) && !/, counted$/.test(tileName), where, "count: a fresh tile is named after its item, not yet counted");
+  await page.focus(".count-item"); await page.keyboard.press("Enter");
+  await page.waitForTimeout(150);
+  check((await page.$eval(".count-item", (el) => el.getAttribute("aria-label"))) === `${tileName}, counted`, where, "count: a counted tile's name should say so");
+  const countAfterOne = await page.$eval("#countScoreVal", (el) => el.textContent);
+  await page.keyboard.press("Enter");
+  await page.waitForTimeout(150);
+  check((await page.$eval("#countScoreVal", (el) => el.textContent)) === countAfterOne, where, "count: Enter on an already counted tile must not count it again");
+
+  await openScreen(page, { id: "find", kind: "game" });
+  await page.waitForTimeout(800); // the first goal is set on a short timer
+  const targetName = await page.$eval("#findPrompt .find-target-name", (el) => el.textContent.trim());
+  const targetSel = `.find-item[aria-label="${targetName}"]`;
+  check(Boolean(targetName) && (await page.$(targetSel)) !== null, where, `find: the named goal should be a button named "${targetName}"`);
+  await page.focus(targetSel); await page.keyboard.press("Enter");
+  await page.waitForTimeout(150);
+  check((await page.$eval(`.find-item[aria-label="${targetName}, found"]`, () => true).catch(() => false)) === true, where, "find: a found thing's name should say so");
 }
 
 // Comfort settings: timing is adjustable and motion can be turned down

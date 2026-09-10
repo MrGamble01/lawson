@@ -73,6 +73,9 @@
         tappedSoFar += 1;
         total += 1;
         tile.classList.add("counted");
+        // The name carries the state, so a screen reader knows which ones
+        // are done (the tick is visual only; a second tap is ignored).
+        tile.setAttribute("aria-label", `${item.name}, counted`);
         L.beep(400 + tappedSoFar * 80, 0.12, "triangle");
         L.say(NUMBER_WORDS[tappedSoFar] || String(tappedSoFar));
         L.bumpBadge("countScoreVal", total);
