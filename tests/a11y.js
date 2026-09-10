@@ -430,6 +430,21 @@ async function modeTabsAndBadges(page) {
   await page.keyboard.press("Enter");
   await page.waitForTimeout(100);
   check((await page.evaluate(() => window.__said)).includes("7"), where, "Enter on a badge should speak its value");
+
+  // Toggle buttons expose their state: the Song buttons (Piano, Music
+  // Studio) and Train's Go / Stop flip aria-pressed with the glow / glyph,
+  // so a screen reader hears whether a song or the train is running.
+  const pressedOf = (sel) => page.$eval(sel, (el) => el.getAttribute("aria-pressed"));
+  for (const [id, sel, what] of [["piano", "#pianoSong", "Piano Song"], ["music", "#musicSong", "Music Studio Song"], ["train", "#trainGoStop", "Train Go / Stop"]]) {
+    await openScreen(page, { id, kind: "game" });
+    check((await pressedOf(sel)) === "false", where, `${what} should start not pressed`);
+    await page.focus(sel); await page.keyboard.press("Enter");
+    await page.waitForTimeout(150);
+    check((await pressedOf(sel)) === "true", where, `${what} should be pressed while running`);
+    await page.keyboard.press("Enter");
+    await page.waitForTimeout(150);
+    check((await pressedOf(sel)) === "false", where, `${what} should not be pressed once stopped`);
+  }
 }
 
 async function reducedMotion(page) {

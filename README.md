@@ -179,8 +179,9 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   "Stars!"). Names carry state where it matters ("Pot 2: seed planted,
   water it", "Hole 4: mole!"). Opening a game moves focus
   onto that screen (a labelled region); Home puts it back on the tile you
-  came from. Mode tabs expose their pressed state; Memory cards say
-  "Hidden card" until flipped. When a quiz round rebuilds its choices or a
+  came from. Mode tabs expose their pressed state, and so do the toggles — the
+  Song buttons in Piano and Music Studio and Train's Go / Stop say
+  whether they are on; Memory cards say "Hidden card" until flipped. When a quiz round rebuilds its choices or a
   popped balloon disappears, focus moves to the next control in the game
   instead of falling back to the top of the page, so Tab + Enter play
   keeps its place.

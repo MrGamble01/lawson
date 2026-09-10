@@ -82,7 +82,7 @@
         <div class="music-row-label">🔔 Bells</div>
         <div id="musicBells" class="music-bells"></div>
       </div>
-      <button id="musicSong" class="music-song-btn">🎵 Song</button>`;
+      <button id="musicSong" class="music-song-btn" aria-pressed="false">🎵 Song</button>`;
     buildDrums();
     buildXylo();
     buildBells();
@@ -218,8 +218,10 @@
     stopSong();
     const song = SONGS[songIdx % SONGS.length];
     songIdx += 1;
+    // A toggle: the same button stops the song, so its pressed state says
+    // whether one is playing (the glow alone is invisible to a screen reader).
     const btn = $("musicSong");
-    if (btn) btn.classList.add("playing");
+    if (btn) { btn.classList.add("playing"); btn.setAttribute("aria-pressed", "true"); }
     L.say(song.name);
     // First note once the name has been heard (never sooner than the old
     // 400 ms lead, so a muted voice feels the same).
@@ -232,7 +234,7 @@
     songTimers.forEach(clearTimeout);
     songTimers = [];
     const btn = $("musicSong");
-    if (btn) btn.classList.remove("playing");
+    if (btn) { btn.classList.remove("playing"); btn.setAttribute("aria-pressed", "false"); }
   }
 
   // ====================================================================
