@@ -72,6 +72,8 @@ const L = {
     inFlight = entry;
     spoken.push(entry);
   })),
+  // A prompt repeats once after a quiet spell; the harness only records which helper a line went through.
+  sayPrompt: (text) => { const p = L.say(text); spoken.at(-1).prompt = true; return p; },
   speechDone: () => lastSaid,
   afterSpeech: (fn, opts) => {
     const { beatMs = 500, minMs = 1200, maxMs = 6000 } = opts || {};
@@ -115,6 +117,7 @@ const tap = (i) => board.children[i].handlers[0]();
 (async () => {
   memory.start();
   assert.match(lastLine().text, /matching pairs/);
+  assert.equal(lastLine().prompt, true, 'the opening goal is a prompt (repeated once after a quiet spell)');
   await finishLine(lastLine());
   assert.equal(board.children.length, 8, 'eight cards on the board');
 

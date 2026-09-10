@@ -123,6 +123,8 @@ const L = {
     inFlight = entry;
     spoken.push(entry);
   })),
+  // A prompt repeats once after a quiet spell; the harness only records which helper a line went through.
+  sayPrompt: (text) => { const p = L.say(text); spoken.at(-1).prompt = true; return p; },
   speechDone: () => lastSaid,
   afterSpeech: (fn, opts) => {
     const { beatMs = 500, minMs = 1200, maxMs = 6000 } = opts || {};
@@ -187,6 +189,8 @@ const targetHole = () => ids.whackGrid.children.find((h) => (h.getAttribute('ari
   tap(lettersTab());
   const goal1 = lastLine();
   assert.match(goal1.text, /^Whack the /);
+  assert.equal(goal1.prompt, true, 'the goal is a prompt (repeated once after a quiet spell)');
+  assert.ok(!spoken[0].prompt, '"Tap the animals!" (free mode) is a how-to, not a prompt');
   const letter = currentGoal();
   assert.ok(letter);
   await finishLine(goal1);

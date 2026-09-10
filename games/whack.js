@@ -204,9 +204,11 @@
     if (prompt) prompt.textContent = `Whack the ${target}!`;
   }
 
+  // The goal is a prompt: repeated once if nothing has been said for a
+  // while, like every other quiz goal. A hit's line drops it.
   function speakTarget() {
     if (!target) return;
-    L.say(`Whack the ${sayGlyph(target)}!`);
+    L.sayPrompt(`Whack the ${sayGlyph(target)}!`);
   }
 
   function newTarget() {

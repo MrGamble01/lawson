@@ -104,9 +104,11 @@
     if (prompt) prompt.textContent = `Pop the ${target}!`;
   }
 
+  // The goal is a prompt: repeated once if nothing has been said for a
+  // while, like every other quiz goal. A pop's letter or cheer drops it.
   function speakTarget() {
     if (!target) return;
-    L.say(`Pop the ${sayGlyph(target)}!`, undefined, `Pop the ${target}!`);
+    L.sayPrompt(`Pop the ${sayGlyph(target)}!`, undefined, `Pop the ${target}!`);
   }
 
   function newTarget(area) {
