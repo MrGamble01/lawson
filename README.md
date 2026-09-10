@@ -209,7 +209,12 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   snaps back; tap it again, press Escape or leave the screen to put it
   down. In Baby Dino a tap on the soap, shower or towel performs the
   whole motion; in Ice Cream a tap on a tub scoops that flavour straight
-  onto the cone. Enter on a focused tool, then on a target, does the same.
+  onto the cone and a tap on a topping drops it on the stack; in Sticker
+  Scene a tap on a tray sticker drops it in the middle of the picture.
+  Enter on a focused tool, then on a target, does the same — including
+  the tray stickers and toppings, which are drag sources: Enter on a
+  placed sticker hears it again and Delete removes it (the keyboard
+  stand-in for the long press).
 - **Touch targets**: every control meets WCAG 2.2's 24px target-size rule
   at phone and iPad sizes, and nothing (mascots, toasts, captions) ever
   floats on top of Home, the tabs, the badges or the tiles.

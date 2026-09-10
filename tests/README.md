@@ -170,8 +170,11 @@ target must be a named, focusable button and no button may sit inside
 another; Farm (Enter on the cow reacts; carrot then horse by keyboard
 feeds it), Garden (plant, pick up the can and water a pot by Enter, with
 the pot's name tracking its state), Whack! (the six holes are the buttons
-and say who is up; Enter scores) and Pop! (Enter pops a balloon) are
-played with the keyboard alone. Finally the comfort settings: "Take it
+and say who is up; Enter scores), Pop! (Enter pops a balloon), Sticker
+Scene (Enter on a tray sticker places it, Enter on the placed sticker
+hears it again, Delete removes it and the picture is saved without it)
+and Ice Cream (Enter on a tub adds the scoop, Enter on a topping drops
+it on the stack) are played with the keyboard alone. Finally the comfort settings: "Take it
 slow" turned on through the panel persists, doubles the pace scale, makes
 Pop! balloons take ≥10 s (normal ≤9 s) and keeps a Whack! critter up
 ≥1.75 s (normal ≤1.6 s); "Less motion" turned on through the panel, with

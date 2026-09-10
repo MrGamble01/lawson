@@ -302,24 +302,29 @@
       if (!dragging) return;
       moveGhost(e.clientX, e.clientY);
     });
+    // A tap (or Enter / Space) drops the topping near the top of the
+    // stack — the single-tap path that stands in for the drag.
+    function placeOnTop() {
+      if (scoops.length === 0) return;
+      const stack = $("icecreamStack");
+      const r = stack.getBoundingClientRect();
+      placeTopping(topping, r.left + r.width / 2 + (Math.random() - 0.5) * 80,
+        r.top + (scoops.length * 42 + 30));
+    }
+
     btn.addEventListener("pointerup", (e) => {
       if (!dragging) return;
       dragging = false;
       btn.classList.remove("grabbed");
       const moved = Math.hypot(e.clientX - downX, e.clientY - downY);
       if (moved < 6) {
-        // Tap → drop topping near the top of the stack.
-        if (scoops.length > 0) {
-          const stack = $("icecreamStack");
-          const r = stack.getBoundingClientRect();
-          placeTopping(topping, r.left + r.width / 2 + (Math.random() - 0.5) * 80,
-            r.top + (scoops.length * 42 + 30));
-        }
+        placeOnTop();
         if (ghost) { ghost.remove(); ghost = null; }
       } else {
         dropGhost(e.clientX, e.clientY);
       }
     });
+    btn.addEventListener("click", (e) => { if (e.detail === 0) placeOnTop(); }); // keyboard, like the tubs
     btn.addEventListener("pointercancel", () => {
       dragging = false;
       btn.classList.remove("grabbed");
