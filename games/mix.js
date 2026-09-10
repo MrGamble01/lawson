@@ -64,7 +64,9 @@
     document.getElementById("mixTargetName").textContent = `Make ${target.result}!`;
 
     renderPalette();
-    activeTimer = setTimeout(() => L.say(`Make ${target.result}!`), 350);
+    // A prompt: repeated once if nothing has happened for a while, like
+    // the other quiz games. The first drop's colour name drops the reminder.
+    activeTimer = setTimeout(() => L.sayPrompt(`Make ${target.result}!`), 350);
   }
 
   function renderPalette() {

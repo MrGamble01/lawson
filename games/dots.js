@@ -160,7 +160,7 @@
 
         if (num !== nextDot) {
           L.buzzSound();
-          L.say(`Find ${nextDot}!`);
+          L.sayPrompt(`Find ${nextDot}!`);
           // Pulse the correct dot so he sees where to look. nth-of-type
           // counts among <g> only, so dot N is exactly the Nth <g>.
           const target = svg.querySelector(`g.dot:nth-of-type(${nextDot})`);
@@ -194,7 +194,9 @@
     labelDots();
 
     stage.appendChild(svg);
-    L.say(`Connect the dots! Start with 1.`);
+    // Prompts repeat once after a quiet spell (the other quiz games do the
+    // same); a connected dot's number drops the reminder.
+    L.sayPrompt(`Connect the dots! Start with 1.`);
   }
 
   function winPuzzle(p, svg) {
