@@ -111,9 +111,9 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   quiz games (Listen, Match, Pattern, How Many?, Count, Find It!, Color
   Mix, Memory) likewise let the cheer — or "try again" — finish before
   the next prompt, and a hub's welcome line is skipped if the kid has
-  already tapped on. A quiz prompt ("Find the cow!") is repeated once if
-  nothing has happened for twelve seconds, so a kid who looked away gets
-  a nudge, never a nag. A cheer starts as its chime rings out rather than
+  already tapped on. A quiz prompt ("Find the cow!", "Make orange!",
+  "Find 3!") is repeated once if nothing has happened for twelve seconds,
+  so a kid who looked away gets a nudge, never a nag. A cheer starts as its chime rings out rather than
   underneath it, so the first word is never masked — every game triggers
   its chime before the line (the farm, garden, train and scene sounds
   included), and a check keeps it that way — and "New best!" and

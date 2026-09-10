@@ -5,7 +5,7 @@
   "description": "A toddler-friendly learning playground for iPad. Plain HTML/CSS/JS, no build step.",
   "scripts": {
     "lint": "eslint .",
-    "test:unit": "node tests/pacing-lint.js && node tests/pacing-lint.js --self-test && node tests/sw-assets.js && node tests/voice.js && node tests/story.js && node tests/stickers.js",
+    "test:unit": "node tests/pacing-lint.js && node tests/pacing-lint.js --self-test && node tests/sw-assets.js && node tests/voice.js && node tests/story.js && node tests/stickers.js && node tests/prompts.js",
     "test:smoke": "node tests/smoke.js --baseline",
     "test:a11y": "node tests/a11y.js",
     "test:nav": "node tests/nav-speech.js",

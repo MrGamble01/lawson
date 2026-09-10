@@ -12,6 +12,7 @@ node tests/story.js                # Story Time pacing on real narration end (no
 node tests/garden.js               # Garden sun easter egg: "Sunshine!" is heard before "Sunshine power!" (no browser)
 node tests/howmany.js              # How Many? wrong-answer nag heard before the leftover opening prompt (no browser)
 node tests/pattern.js              # Pattern wrong-answer nag heard before the leftover opening prompt (no browser)
+node tests/prompts.js              # Color Mix "Make …!" and Dots "Connect the dots!" / "Find N!" are prompts that repeat once (no browser)
 node tests/listen.js               # Listen leftover opening clue: wrong tap / replay cancel it; re-ask waits (no browser)
 node tests/stickers.js             # sticker announcement: jingle first, then waits for the cheer (no browser)
 node tests/memory.js               # Memory: last card name heard before the win cheer (no browser)
@@ -95,7 +96,10 @@ a game does not speak a second line in the same tick as the first),
 that Garden's fifth sun tap hears "Sunshine!" before "Sunshine power!"
 (`tests/garden.js`),
 that a quiz prompt is repeated once after a quiet spell and dropped by any
-other line, a screen change, a lock or a muted voice, that a How Many? /
+other line, a screen change, a lock or a muted voice (`tests/prompts.js`
+checks that Color Mix's "Make orange!" and Dots' "Connect the dots!" /
+"Find 3!" are such prompts, while a colour name or a connected dot's
+number is a plain line), that a How Many? /
 Pattern wrong tap's nag is heard before the leftover opening prompt
 (`tests/howmany.js`, `tests/pattern.js`; `tests/pacing-lint.js` keeps the
 pending `sayPrompt` timer from surviving the nag), that the menu music
