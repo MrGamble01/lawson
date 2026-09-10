@@ -178,7 +178,8 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   that upgrade — they are real named buttons now, and the sun's name
   follows day and night ("Moon", or "Stars" once the spoken line is
   "Stars!"). Names carry state where it matters ("Pot 2: seed planted,
-  water it", "Hole 4: mole!", "cow, counted" in Count, "duck, found" in
+  water it", "Hole 4: mole!", "cow, counted" in Count, "Red, used" in
+  Color Mix, "roof, red" in Coloring, "bee, matched" in Memory, "duck, found" in
   Find It!). Opening a game moves focus
   onto that screen (a labelled region); Home puts it back on the tile you
   came from. Mode tabs expose their pressed state, and so do the toggles — the

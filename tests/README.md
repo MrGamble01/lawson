@@ -179,7 +179,8 @@ another; Farm (Enter on the cow reacts; carrot then horse by keyboard
 feeds it), Garden (plant, pick up the can and water a pot by Enter, with
 the pot's name tracking its state), Count and Find It! (a counted tile and
 a found thing say so in their names; a counted tile ignores a second
-Enter), Whack! (the six holes are the buttons
+Enter), Color Mix, Coloring and Memory (a used drop, a coloured part with
+its colour, and a matched pair say so in their names), Whack! (the six holes are the buttons
 and say who is up; Enter scores), Pop! (Enter pops a balloon), Sticker
 Scene (Enter on a tray sticker places it, Enter on the placed sticker
 hears it again, Delete removes it and the picture is saved without it)

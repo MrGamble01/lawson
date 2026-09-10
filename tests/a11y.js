@@ -724,6 +724,36 @@ async function keyboardPlay(page) {
   await page.focus(targetSel); await page.keyboard.press("Enter");
   await page.waitForTimeout(150);
   check((await page.$eval(`.find-item[aria-label="${targetName}, found"]`, () => true).catch(() => false)) === true, where, "find: a found thing's name should say so");
+
+  // Color Mix, Coloring and Memory carry their state the same way: a used
+  // drop, a coloured part ("roof, red") and a matched pair say so.
+  await openScreen(page, { id: "mix", kind: "game" });
+  const dropName = await page.$eval(".mix-drop", (el) => el.getAttribute("aria-label"));
+  await page.focus(".mix-drop"); await page.keyboard.press("Enter");
+  await page.waitForTimeout(150);
+  check((await page.$eval(".mix-drop", (el) => el.getAttribute("aria-label"))) === `${dropName}, used`, where, "mix: a used drop's name should say so");
+
+  await openScreen(page, { id: "color", kind: "game" });
+  const part = await page.$eval(".region", (el) => el.getAttribute("data-name"));
+  const colour = await page.$eval('#colorPalette [aria-pressed="true"]', (el) => el.dataset.name);
+  check(Boolean(part) && Boolean(colour), where, "color: a region has a part name and a swatch is active");
+  await page.focus(".region"); await page.keyboard.press("Enter");
+  await page.waitForTimeout(150);
+  check((await page.$eval(".region", (el) => el.getAttribute("aria-label"))) === `${part}, ${colour}`, where, `color: a coloured part's name should carry its colour, got ${JSON.stringify(await page.$eval(".region", (el) => el.getAttribute("aria-label")))}`);
+
+  await openScreen(page, { id: "memory", kind: "game" });
+  const pair = await page.$$eval(".memory-card", (cards) => {
+    const byName = {};
+    cards.forEach((c, i) => { (byName[c.dataset.name] = byName[c.dataset.name] || []).push(i); });
+    return Object.values(byName).find((ix) => ix.length === 2) || null;
+  });
+  check(Array.isArray(pair), where, "memory: the board should hold a pair");
+  if (pair) {
+    for (const i of pair) { await page.focus(`.memory-card:nth-child(${i + 1})`); await page.keyboard.press("Enter"); await page.waitForTimeout(100); }
+    await page.waitForTimeout(500);
+    const names = await page.$$eval(".memory-card", (cards, ix) => ix.map((i) => cards[i].getAttribute("aria-label")), pair);
+    check(names.every((n) => /, matched$/.test(n)), where, `memory: a matched pair should say so in its names, got ${JSON.stringify(names)}`);
+  }
 }
 
 // Comfort settings: timing is adjustable and motion can be turned down
