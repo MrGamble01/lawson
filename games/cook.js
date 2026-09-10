@@ -119,6 +119,16 @@
     document.body.dataset.cookState = s;
     const p = $("cookPancake");
     if (p) p.setAttribute("aria-label", PANCAKE_NAMES[s] || "Pancake");
+    // The batter bottle ignores a pour while a pancake is in the pan
+    // (pour() returns unless idle). Say so: the spatula already uses
+    // native disabled, and the pancake's name follows its step — the
+    // bottle's name was always "Pour batter".
+    const batter = $("cookBatter");
+    if (batter) {
+      const ready = s === STATES.IDLE;
+      batter.setAttribute("aria-disabled", ready ? "false" : "true");
+      batter.setAttribute("aria-label", ready ? "Pour batter" : "Pour batter, wait");
+    }
   }
 
   function updateBadge() {

@@ -29,7 +29,9 @@ behind the **More** card.
   park, sky). Free / ABC / 123 modes.
 - **Cook!** — pancakes: pour batter, watch it bubble, flip, plate, stack.
   The pancake's name follows along ("Pancake: ready, flip it"), so a
-  keyboard or screen-reader user knows what a press will do.
+  keyboard or screen-reader user knows what a press will do. The batter
+  bottle says "Pour batter, wait" (and reads as dimmed) while a pancake
+  is in the pan — a press does nothing until the pan is empty again.
 - **Baby Dino** — bath time: drag (or tap) soap to lather, pull (or tap)
   the shower to rinse, drag (or tap) the towel to dry. Hearts when he's
   clean.

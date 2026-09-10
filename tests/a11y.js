@@ -800,18 +800,24 @@ async function cookKeyboard(page) {
     return false;
   };
   const name = () => page.$eval("#cookPancake", (el) => el.getAttribute("aria-label"));
+  const batter = () => page.$eval("#cookBatter", (el) => ({ name: el.getAttribute("aria-label"), dim: el.getAttribute("aria-disabled") }));
   await openScreen(page, { id: "cook", kind: "game" });
   check(await page.$eval("#cookPancake", (el) => el.getAttribute("role") === "button" && el.tabIndex === 0), where, "the pancake should be a focusable button");
   check(/empty.*pour/i.test(await name()), where, `before pouring the pan should say it is empty, got ${JSON.stringify(await name())}`);
+  check((await batter()).name === "Pour batter" && (await batter()).dim === "false", where, `an empty pan should leave the batter ready, got ${JSON.stringify(await batter())}`);
   await page.focus("#cookBatter"); await page.keyboard.press("Enter");
   check(await waitState("flippable", 7000), where, "Enter on the batter should pour and cook the pancake");
   check(/flip it/.test(await name()), where, `a cooked-enough pancake should say flip it, got ${JSON.stringify(await name())}`);
+  check((await batter()).name === "Pour batter, wait" && (await batter()).dim === "true", where, `while a pancake is in the pan the batter should say wait, got ${JSON.stringify(await batter())}`);
+  await page.focus("#cookBatter"); await page.keyboard.press("Enter");
+  check((await page.evaluate(() => document.body.dataset.cookState)) === "flippable", where, "Enter on the waiting batter must not pour another pancake");
   await page.focus("#cookPancake"); await page.keyboard.press("Enter");
   check(await waitState("cooked", 3000), where, "Enter on the ready pancake should flip it");
   check(/plate it/.test(await name()), where, `a flipped pancake should say plate it, got ${JSON.stringify(await name())}`);
   await page.keyboard.press("Enter");
   check(await waitState("idle", 3000), where, "Enter on the cooked pancake should plate it");
   check((await page.$eval("#cookScoreVal", (el) => el.textContent)) === "1" && /empty/.test(await name()), where, `plating should stack one pancake and name the empty pan again, got ${JSON.stringify(await name())}`);
+  check((await batter()).name === "Pour batter" && (await batter()).dim === "false", where, `plating should make the batter ready again, got ${JSON.stringify(await batter())}`);
 }
 
 // Comfort settings: timing is adjustable and motion can be turned down
