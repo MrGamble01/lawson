@@ -445,6 +445,19 @@ async function modeTabsAndBadges(page) {
     await page.waitForTimeout(150);
     check((await pressedOf(sel)) === "false", where, `${what} should not be pressed once stopped`);
   }
+
+  // Train: the stations say where the train is ("Station 2, train here"),
+  // cleared while it is on the way — the position alone is visual.
+  await openScreen(page, { id: "train", kind: "game" });
+  const stationNames = () => page.$$eval(".train-station", (els) => els.map((s) => s.getAttribute("aria-label")));
+  check(JSON.stringify(await stationNames()) === JSON.stringify(["Station 1, train here", "Station 2", "Station 3"]), where, `train: should start parked at station 1 by name, got ${JSON.stringify(await stationNames())}`);
+  await page.focus("#trainGoStop"); await page.keyboard.press("Enter");
+  await page.waitForTimeout(300);
+  check((await stationNames()).every((n) => !/train here/.test(n)), where, "train: on the way no station should claim the train");
+  let arrived = false;
+  for (let i = 0; i < 60 && !arrived; i++) { arrived = (await stationNames())[1] === "Station 2, train here"; if (!arrived) await page.waitForTimeout(100); }
+  check(arrived, where, `train: arriving should name station 2 as where the train is, got ${JSON.stringify(await stationNames())}`);
+  await page.keyboard.press("Enter"); // stop
 }
 
 async function reducedMotion(page) {

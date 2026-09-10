@@ -71,8 +71,10 @@ The **More** drawer holds themed hub cards, each opening a small menu:
 - **Ice Cream** — build a sundae: drag scoops onto a cone (or tap a tub),
   add toppings, tap Eat!
 - **Train** — drive a chuffing train between three stations; passengers
-  hop on and off. The sun and clouds are named buttons, so Tab / a
-  screen reader can poke them the same way a finger does.
+  hop on and off. The stations say where the train is ("Station 2, train
+  here"), so a screen reader follows the journey. The sun and clouds are
+  named buttons, so Tab / a screen reader can poke them the same way a
+  finger does.
 - **Music Studio** — drum kit, rainbow xylophone, jingle bells, plus a
   Song button that names the tune and waits for the name to be heard
   before the first note, so "Twinkle Twinkle" is never played over.

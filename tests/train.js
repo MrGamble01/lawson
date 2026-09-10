@@ -246,14 +246,19 @@ const boarded = () => {
   assert.ok(ids.trainGoStop, 'Go / Stop control is built');
   assert.ok(document.querySelector('.train-car[data-car="0"] .train-pass'), 'cars are in the DOM');
 
+  const stationNames = () => document.querySelectorAll('.train-station').map(s => s.getAttribute('aria-label'));
+  assert.deepEqual(stationNames(), ['Station 1, train here', 'Station 2', 'Station 3'], 'the train starts parked at station 1, and its name says so');
+
   tap(goBtn());
   assert.equal(lastLine().text, 'All aboard!');
+  assert.deepEqual(stationNames(), ['Station 1', 'Station 2', 'Station 3'], 'on the way, no station has the train');
   await finishLine(lastLine());
 
   // 22% → 50% at 0.45% / 32 ms ≈ 1991 ms.
   await runUntil(clock.now + 2100);
   const stop = lastLine();
   assert.equal(stop.text, 'Station 2!', 'arrival speaks the station');
+  assert.deepEqual(stationNames(), ['Station 1', 'Station 2, train here', 'Station 3'], 'arrival moves "train here" to station 2');
   assert.equal(stations().length, 1);
   assert.equal(passengers().length, 0, 'passenger must not start in the same tick');
   assert.ok(boarded(), 'passenger hops on immediately');

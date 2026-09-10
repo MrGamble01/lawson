@@ -210,6 +210,14 @@
 
   function stationXs() { return [22, 50, 78]; }
 
+  // The train's position is visual; the station names say where it is
+  // ("Station 2, train here"), cleared while it is on the way.
+  function refreshStationNames() {
+    document.querySelectorAll(".train-station").forEach((s, i) => {
+      s.setAttribute("aria-label", `Station ${i + 1}${i === currentStation ? ", train here" : ""}`);
+    });
+  }
+
   function setupEngine() {
     const eng = $("trainEngine");
     L.onTap(eng, () => {
@@ -290,6 +298,9 @@
 
   function advanceTrain() {
     if (!running) return;
+    // Leaving: no station has the train until the next arrival.
+    currentStation = -1;
+    refreshStationNames();
     // Move 0.4% per frame at ~30fps until next station.
     const targetX = nextStationX();
     const dir = targetX > trainPosPct ? 1 : -1;
@@ -327,6 +338,7 @@
     const xs = stationXs();
     const idx = xs.indexOf(trainPosPct);
     currentStation = idx;
+    refreshStationNames();
     L.beep(620, 0.10, "triangle");
     L.beep(720, 0.12, "triangle", 0.10);
     L.haptic([8, 30, 8]);
@@ -441,6 +453,7 @@
     if (chugTimer) { clearInterval(chugTimer); chugTimer = null; }
     if (dayTimer)  { clearInterval(dayTimer); dayTimer = null; }
     build();
+    refreshStationNames();   // parked at station 1, and its name says so
     L.bumpBadge("trainScoreVal", 0);
     refreshBestBadge();
     positionTrain();
