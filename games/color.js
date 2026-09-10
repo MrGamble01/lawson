@@ -183,6 +183,9 @@
         region.setAttribute("fill", currentColor.hex);
         L.beep(400 + Math.random() * 300, 0.08, "triangle");
         const part = region.getAttribute("data-name");
+        // The name carries the colour, so a screen reader knows which parts
+        // are done and in what ("roof, red"); the fill alone is visual.
+        region.setAttribute("aria-label", `${part || "part"}, ${currentColor.name}`);
         L.say(part ? `${currentColor.name} ${part}` : currentColor.name);
         // Count only first-time fills per region so re-coloring the same
         // spot doesn't farm the sticker.

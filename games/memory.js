@@ -89,6 +89,9 @@
       setTimeout(() => {
         a.classList.add("matched");
         b.classList.add("matched");
+        // A matched pair stays face up and ignores taps; say so in the name.
+        a.setAttribute("aria-label", `${a.dataset.name}, matched`);
+        b.setAttribute("aria-label", `${b.dataset.name}, matched`);
         L.happySound();
         matchedCount += 2;
         // Bobo cheers on every successful pair — short games, fewer

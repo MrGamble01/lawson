@@ -126,7 +126,10 @@ const tap = (i) => board.children[i].handlers[0]();
   for (const [a, b] of pairs) {
     tap(a);
     tap(b);
+    assert.equal(board.children[a].ariaLabel, board.children[a].dataset.name, 'a flipped card is named after its picture');
     await runUntil(clock.now + 320);
+    assert.equal(board.children[a].ariaLabel, `${board.children[a].dataset.name}, matched`, 'a matched card says so in its name');
+    assert.equal(board.children[b].ariaLabel, `${board.children[b].dataset.name}, matched`);
     await finishLine(lastLine());
   }
 

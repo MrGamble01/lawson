@@ -91,6 +91,9 @@
     if (busy || selected.length >= 2 || btn.classList.contains("used")) return;
     selected.push(color);
     btn.classList.add("used");
+    // The name carries the state: a second tap on a used drop is ignored,
+    // so a screen reader should hear why.
+    btn.setAttribute("aria-label", `${color.name}, used`);
     L.beep(450 + selected.length * 120, 0.1, "triangle");
     L.say(color.name, 1.05);
 
