@@ -51,7 +51,7 @@ function el() {
   };
   return node;
 }
-const ids = { storyStage: el(), storyText: el(), storyCounter: el(), storyGame: el() };
+const ids = { storyStage: el(), storyText: el(), storyCounter: el(), storyGame: el(), storyAgain: el(), storyNext: el() };
 const document = { getElementById: id => ids[id] || null, createElement: () => el() };
 
 // ---- Lawson stub ----
@@ -447,5 +447,21 @@ const ceilFor = s => floorFor(s) * 2 + 4000;
   assert.equal(counter(), '4 / 4');
   story.stop();
 
-  console.log('PASS: story pacing — floor, slow-voice wait, no-end ceiling, single ending, muted, tap-ahead, stop, lock/unlock freeze + resume, poke-then-resume, ending heard before sticker + next story, tap the words to hear the line again');
+  // 22. The "Hear the words again" button is the keyboard path to the
+  //     words tap: same re-read, page held; at "The end!" it keeps going.
+  story.stop();
+  story.start();
+  const p22 = lastLine();
+  const said22 = linesSaid(p22.text);
+  await runUntil(clock.now + 600);
+  assert.equal(ids.storyAgain.handlers.length, 1, 'the hear-again button has one tap handler');
+  ids.storyAgain.handlers[0]({ stopPropagation() {} });
+  await flush();
+  assert.equal(lastLine().text, p22.text, 'Enter on "Hear the words again" reads the line again');
+  assert.equal(linesSaid(p22.text), said22 + 1);
+  assert.equal(counter(), '1 / 4', 'the hear-again button never turns the page');
+  await finishLine(lastLine());
+  assert.equal(counter(), '1 / 4', 'the page waits for the re-read to be heard (pacing as in 18)');
+
+  console.log('PASS: story pacing — floor, slow-voice wait, no-end ceiling, single ending, muted, tap-ahead, stop, lock/unlock freeze + resume, poke-then-resume, ending heard before sticker + next story, tap the words to hear the line again, hear-again button');
 })().catch(e => { console.error(e); process.exit(1); });

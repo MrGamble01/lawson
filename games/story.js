@@ -526,7 +526,7 @@
         if (!e.target || !e.target.closest) return;
         if (e.target.closest(".home-btn")) return;
         if (e.target.closest(".story-character")) return;
-        if (e.target.closest("#storyNext")) return; // the button below advances itself
+        if (e.target.closest("#storyNext") || e.target.closest("#storyAgain")) return; // the buttons below handle themselves
         if (e.target.closest(".story-bubble") && hearAgain()) return;
         advance();
       });
@@ -535,6 +535,10 @@
       // when the story opens) turns the page too.
       const next = document.getElementById("storyNext");
       if (next) L.onTap(next, (e) => { if (e.stopPropagation) e.stopPropagation(); advance(); });
+      // "Hear the words again" is the keyboard path to the words tap: the
+      // same re-read, and at "The end!" (no page line) it keeps going.
+      const again = document.getElementById("storyAgain");
+      if (again) L.onTap(again, (e) => { if (e.stopPropagation) e.stopPropagation(); if (!hearAgain()) advance(); });
       if (typeof screen.addEventListener === "function") {
         screen.addEventListener("keydown", (e) => {
           if ((e.key === "Enter" || e.key === " ") && e.target === screen) { e.preventDefault(); advance(); }

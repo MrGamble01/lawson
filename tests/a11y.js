@@ -957,6 +957,14 @@ async function svgAndStoryKeyboard(page) {
   const counter = () => page.$eval("#storyCounter", (el) => el.textContent.trim());
   check((await counter()) === "1 / 4", where, `story: should open on page 1, got ${await counter()}`);
   check(await page.$eval("#storyNext", (b) => b.tagName === "BUTTON" && /[\p{L}]/u.test(b.textContent)), where, "story: the hint should be a real, labelled Next button");
+  // "Hear the words again" is the keyboard path to the words tap: Enter on
+  // it reads the page's line again and does not turn the page.
+  check(await page.$eval("#storyAgain", (b) => b.tagName === "BUTTON" && /[\p{L}]/u.test(b.getAttribute("aria-label") || "")), where, "story: the hear-again hint should be a real, labelled button");
+  const pageLine = await page.evaluate(() => window.__said.at(-1));
+  await page.focus("#storyAgain"); await page.keyboard.press("Enter");
+  await page.waitForTimeout(250);
+  check((await page.evaluate(() => window.__said.at(-1))) === pageLine && (await page.evaluate(() => window.__said.filter((l) => l === window.__said.at(-1)).length)) >= 2, where, "story: Enter on Hear the words again should read the page's line again");
+  check((await counter()) === "1 / 4", where, `story: Hear the words again must not turn the page, got ${await counter()}`);
   await page.focus("#storyNext"); await page.keyboard.press("Enter");
   await page.waitForTimeout(250);
   check((await counter()) === "2 / 4", where, `story: Enter on Next should turn the page, got ${await counter()}`);

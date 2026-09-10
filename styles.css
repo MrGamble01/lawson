@@ -4961,11 +4961,24 @@ body[data-dino-phase="towel"] .dino-towel {
   color: #6741d9;
   margin-top: 6px;
 }
-/* The hint is a real "Next page" button for keyboard and switch users,
-   styled as the same quiet line of text. */
+/* The hint is two real buttons for keyboard and switch users — "Hear the
+   words again" and "Next page" — styled as the same quiet line of text. */
+.story-hints {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 2px 4px;
+  margin-top: 6px;
+}
+.story-hint-sep {
+  color: #6741d9;
+  font-weight: 700;
+  font-size: clamp(13px, 2vw, 16px);
+}
 button.story-hint {
-  display: block;
-  margin: 6px auto 0;
+  display: inline-block;
+  margin: 0;
   background: none;
   border: 0;
   padding: 6px 12px;

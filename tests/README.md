@@ -114,7 +114,7 @@ app switch silences speech and music and that coming back wakes a paused
 speech engine and an interrupted audio context, and that story pages flip
 after the narration finishes — never before the word-count floor, never
 after the no-`end`-event ceiling — freeze while the app is hidden, and
-pick the line back up after a character poke cuts it off, read the line
+pick the line back up after a character poke cuts it off, are read again from the top when the words or the "hear them again" button are tapped (the keyboard path; the page waits for the re-read), read the line
 again when the words are tapped (holding the page for it) and let "The
 end!" and the sticker announcement finish before the next story.
 
