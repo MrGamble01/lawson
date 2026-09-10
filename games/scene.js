@@ -158,6 +158,11 @@
     if (bg) {
       bg.style.background = scene.bg;
       bg.dataset.scene = scene.id;
+      // The picture is a gradient with no text: name it after the scene so
+      // a screen reader knows which of the twelve is showing — including a
+      // restored picture, whose greeting does not say the scene.
+      bg.setAttribute("role", "img");
+      bg.setAttribute("aria-label", `${scene.label} scene`);
     }
     if (!silent) L.say(scene.say);
   }
