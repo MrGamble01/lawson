@@ -281,7 +281,7 @@
     songTimeouts.forEach((t) => clearTimeout(t));
     songTimeouts = [];
     const btn = document.getElementById("pianoSong");
-    if (btn) btn.classList.remove("playing");
+    if (btn) { btn.classList.remove("playing"); btn.setAttribute("aria-pressed", "false"); }
   }
 
   function scheduleNotes(song, beat) {
@@ -306,8 +306,10 @@
     songIndex += 1;
     const beat = 60 / song.bpm; // seconds per beat
     L.say(song.name);
+    // A toggle: the same button stops the song, so its pressed state says
+    // whether one is playing (the glow alone is invisible to a screen reader).
     const btn = document.getElementById("pianoSong");
-    if (btn) btn.classList.add("playing");
+    if (btn) { btn.classList.add("playing"); btn.setAttribute("aria-pressed", "true"); }
     // First note once the name has been heard (never sooner than the old
     // 500 ms lead, so a muted voice feels the same).
     cancelStart = L.afterSpeech(() => scheduleNotes(song, beat), { beatMs: 150, minMs: 500, maxMs: 3000 });
