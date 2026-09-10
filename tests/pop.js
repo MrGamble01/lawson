@@ -157,6 +157,8 @@ const L = {
     inFlight = entry;
     spoken.push(entry);
   })),
+  // A prompt repeats once after a quiet spell; the harness only records which helper a line went through.
+  sayPrompt: (text) => { const p = L.say(text); spoken.at(-1).prompt = true; return p; },
   speechDone: () => lastSaid,
   afterSpeech: (fn, opts) => {
     const { beatMs = 500, minMs = 1200, maxMs = 6000 } = opts || {};
@@ -225,6 +227,8 @@ const targetBalloon = () => ids.popArea.querySelectorAll(`.balloon[data-glyph="$
   tap(lettersTab());
   const goal1 = lastLine();
   assert.match(goal1.text, /^Pop the /);
+  assert.equal(goal1.prompt, true, 'the goal is a prompt (repeated once after a quiet spell)');
+  assert.ok(!spoken[0].prompt, '"Pop the balloons!" (free mode) is a how-to, not a prompt');
   const letter = currentGoal();
   assert.ok(letter, 'banner should name the letter');
   await finishLine(goal1);
@@ -234,6 +238,7 @@ const targetBalloon = () => ids.popArea.querySelectorAll(`.balloon[data-glyph="$
   tap(balloon);
   const hit = lastLine();
   assert.ok(!hit.text.startsWith('Pop the '), 'the popped letter is spoken, not the next goal');
+  assert.ok(!hit.prompt, 'the popped letter is a plain line (it drops the reminder)');
   assert.match(hit.text, /!$/);
   assert.ok(currentGoal() && currentGoal() !== letter, 'banner moves on immediately');
   assert.equal(goals().length, 1, 'next goal must not start in the same tick');

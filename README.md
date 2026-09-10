@@ -20,8 +20,11 @@ behind the **More** card.
 
 - **Pop!** — pop floating balloons. Three modes: Free (streaks + rare
   rainbow), ABC ("Pop the B!"), 123 ("Pop the 3!") — letters and
-  numbers ride on the balloons.
-- **Whack!** — whack critters as they pop out of six holes.
+  numbers ride on the balloons. The ABC / 123 goal is a quiz prompt:
+  said once more if the kid goes quiet for twelve seconds.
+- **Whack!** — whack critters as they pop out of six holes. Its ABC /
+  123 goal ("Whack the B!") is a quiz prompt too, as is Memory's "Find
+  the matching pairs!".
 - **Find It!** — hidden-object hunt across themed scenes (farm, ocean,
   park, sky). Free / ABC / 123 modes.
 - **Cook!** — pancakes: pour batter, watch it bubble, flip, plate, stack.

@@ -166,7 +166,8 @@
     const bestEl = document.getElementById("memoryBestVal");
     if (bestEl) bestEl.textContent = bestAtStart;
     setupRound();
-    L.say("Find the matching pairs!");
+    // A prompt: repeated once after a quiet spell; the first card's name drops it.
+    L.sayPrompt("Find the matching pairs!");
   }
 
   function stop() {
