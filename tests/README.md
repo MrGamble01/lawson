@@ -170,7 +170,9 @@ taps: Garden (pot → can → pot waters it, the pot's own nag is swallowed,
 and a real mouse drag still waters), Farm (bucket → cow milks it without
 the cow's moo; tapping a held tool again, Escape and leaving the screen
 all put it down; Enter on a tool then activating a target works), Baby
-Dino (one tap each on soap, shower and towel walks all three phases) and
+Dino (one tap each on soap, shower and towel walks all three phases; the
+tools not for the current phase are marked disabled and Enter on one of
+them does nothing) and
 Ice Cream (a tap on a tub adds the scoop). Then keyboard play: every tap
 target must be a named, focusable button and no button may sit inside
 another; Farm (Enter on the cow reacts; carrot then horse by keyboard
