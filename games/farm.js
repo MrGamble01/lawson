@@ -505,9 +505,9 @@
       <div class="farm-sheep" id="farmSheep" aria-label="Sheep">${sheepSvg()}</div>
       <div class="farm-pig"  id="farmPig" aria-label="Pig">${pigSvg()}</div>
       <div class="farm-dog"  id="farmDog" aria-label="Dog">${dogSvg()}</div>
-      <div class="farm-ducks" id="farmDucks" aria-hidden="true">
-        <div class="farm-duck" aria-hidden="true">${duckSvg()}</div>
-        <div class="farm-duck" aria-hidden="true">${duckSvg()}</div>
+      <div class="farm-ducks" id="farmDucks">
+        <button type="button" class="farm-duck" aria-label="Duck">${duckSvg()}</button>
+        <button type="button" class="farm-duck" aria-label="Duck">${duckSvg()}</button>
       </div>
       <div class="farm-chickens" id="farmChickens">
         <div class="farm-chicken" aria-label="Chicken">${chickenSvg("#fff")}</div>
@@ -924,7 +924,9 @@
     const colors = ["#ff8ab0", "#fab005", "#74c0fc", "#da77f2", "#fa5252"];
     const f = document.createElement("button");
     f.className = "farm-fish";
-    // A swimming poke-toy under the horse/tractor/ducks: pointer-only.
+    // Pointer-only: the swim lanes sit on the ducks, so a named
+    // button fails WCAG 2.2 target-size (axe: unobscured space
+    // under 24px). The ducks are the named pond poke-toys.
     f.setAttribute("aria-hidden", "true");
     f.setAttribute("tabindex", "-1");
     f.innerHTML = fishSvg(colors[i % colors.length]);

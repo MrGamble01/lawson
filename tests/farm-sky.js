@@ -97,8 +97,8 @@ function selfTest() {
   const gardenHits = check(garden, "fixture-garden.js");
   assert.ok(!gardenHits.some((p) => /aria-hidden/.test(p)), "unrelated garden-cloud aria-hidden must not be reported as a farm-cloud");
 
-  // Farm fish stay pointer-only (aria-hidden + tabindex=-1). Same leftover
-  // as before; the Farm sky rules must not trip on them.
+  // Pond fish stay pointer-only (they sit on the ducks). That leftover
+  // must not trip the Farm sky rules.
   const fish = `
     f.setAttribute("aria-hidden", "true");
     f.setAttribute("tabindex", "-1");
