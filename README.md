@@ -28,6 +28,8 @@ behind the **More** card.
 - **Find It!** — hidden-object hunt across themed scenes (farm, ocean,
   park, sky). Free / ABC / 123 modes.
 - **Cook!** — pancakes: pour batter, watch it bubble, flip, plate, stack.
+  The pancake's name follows along ("Pancake: ready, flip it"), so a
+  keyboard or screen-reader user knows what a press will do.
 - **Baby Dino** — bath time: drag (or tap) soap to lather, pull (or tap)
   the shower to rinse, drag (or tap) the towel to dry. Hearts when he's
   clean.

@@ -90,7 +90,7 @@
       </div>
       <div class="cook-pan" id="cookPan">
         ${PAN_SVG}
-        <div class="cook-pancake" id="cookPancake" aria-label="Pancake"></div>
+        <div class="cook-pancake" id="cookPancake" aria-label="Pan: empty, pour the batter"></div>
         <div class="cook-bubbles" id="cookBubbles"></div>
       </div>
       <div class="cook-plate-area">
@@ -102,9 +102,23 @@
     L.onTap($("cookPancake"), onPancakeTap);
   }
 
+  // The pancake is the keyboard target for flipping and plating, so its
+  // name says what state it is in and what a press will do (the CSS class
+  // alone is visual): "Pancake: ready, flip it".
+  const PANCAKE_NAMES = {
+    idle: "Pan: empty, pour the batter",
+    pouring: "Pancake: pouring",
+    raw: "Pancake: cooking, wait for the bubbles",
+    flippable: "Pancake: ready, flip it",
+    flipping: "Pancake: flipping",
+    cooked: "Pancake: cooked, plate it",
+    plating: "Pancake: going on the plate",
+  };
   function setState(s) {
     state = s;
     document.body.dataset.cookState = s;
+    const p = $("cookPancake");
+    if (p) p.setAttribute("aria-label", PANCAKE_NAMES[s] || "Pancake");
   }
 
   function updateBadge() {
@@ -249,6 +263,7 @@
     bestAtStart = L.getHighScore("cookBest");
     clearAll();
     build();
+    setState(STATES.IDLE);
     updateBadge();
     L.say("Let's make pancakes! Tap the batter.");
   }
