@@ -518,7 +518,7 @@
       <div class="farm-tractor" id="farmTractor" aria-label="Tractor">${tractorSvg()}</div>
 
       <div class="farm-tools">
-        <button id="farmBucket"   class="farm-tool farm-tool--bucket" aria-label="Milk bucket">${bucketSvg(0)}</button>
+        <button id="farmBucket"   class="farm-tool farm-tool--bucket" aria-label="Milk bucket: empty">${bucketSvg(0)}</button>
         <button id="farmShears"   class="farm-tool farm-tool--shears" aria-label="Shears">${shearsSvg()}</button>
         <button id="farmCarrot"   class="farm-tool farm-tool--carrot" aria-label="Carrot">${carrotSvg()}</button>
         <button id="farmSlop"     class="farm-tool farm-tool--slop"   aria-label="Pig food">${slopBowlSvg()}</button>
@@ -612,9 +612,18 @@
     }
   }
 
+  // The bucket fills over three milkings and then stays full; the drawing
+  // shows the level, so the name says it too ("Milk bucket: 1 of 3").
+  function bucketName() {
+    if (bucketMilkLevel <= 0) return "Milk bucket: empty";
+    if (bucketMilkLevel >= COW_MILK_PER_FILL) return "Milk bucket: full";
+    return `Milk bucket: ${bucketMilkLevel} of ${COW_MILK_PER_FILL}`;
+  }
   function refreshBucket() {
     const b = $("farmBucket");
-    if (b) b.innerHTML = bucketSvg(bucketMilkLevel);
+    if (!b) return;
+    b.innerHTML = bucketSvg(bucketMilkLevel);
+    b.setAttribute("aria-label", bucketName());
   }
 
   function setupBucket() {

@@ -560,6 +560,11 @@ async function dragAlternatives(page) {
   check(farmSaid.includes("Squirt squirt!"), where, `farm: bucket then cow should milk the cow, said ${JSON.stringify(farmSaid)}`);
   check(!farmSaid.some((s) => /moo/i.test(s)), where, "farm: the cow's own tap must be swallowed while a tool is in use");
   check(await page.$eval("#farmScoreVal", (el) => el.textContent === "1"), where, "farm: the care counter should bump");
+  // The bucket's name counts the milk (the drawing alone is visual): empty
+  // before, "1 of 3" after one milking, "full" after three.
+  check((await page.$eval("#farmBucket", (el) => el.getAttribute("aria-label"))) === "Milk bucket: 1 of 3", where, `farm: after one milking the bucket should say 1 of 3, got ${JSON.stringify(await page.$eval("#farmBucket", (el) => el.getAttribute("aria-label")))}`);
+  for (let i = 0; i < 2; i++) { await page.click("#farmBucket"); await page.click("#farmCow"); await page.waitForTimeout(450); }
+  check((await page.$eval("#farmBucket", (el) => el.getAttribute("aria-label"))) === "Milk bucket: full", where, `farm: after three milkings the bucket should say full, got ${JSON.stringify(await page.$eval("#farmBucket", (el) => el.getAttribute("aria-label")))}`);
   // Tapping the tool again puts it down; Escape and leaving the screen do too.
   await page.click("#farmShears"); await page.click("#farmShears");
   await page.waitForTimeout(100);
