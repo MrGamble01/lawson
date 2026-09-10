@@ -61,7 +61,9 @@ The **More** drawer holds themed hub cards, each opening a small menu:
 - **Farm** — care for animals: milk the cow, shear the sheep, feed the
   pig/horse, fetch with the dog, collect eggs, pick apples, fish, drive
   the tractor. Drag a tool onto an animal, or tap the tool and then the
-  animal. Day/night + weather. The sun and clouds are named buttons, so
+  animal. The milk bucket's name counts what is in it ("Milk bucket: 1 of
+  3", then "full"), so a screen reader hears the level the drawing shows.
+  Day/night + weather. The sun and clouds are named buttons, so
   Tab / a screen reader can poke them the same way a finger does. The
   pond ducks are named buttons too.
 - **Ice Cream** — build a sundae: drag scoops onto a cone (or tap a tub),

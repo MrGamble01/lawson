@@ -168,7 +168,8 @@ all-stickers finale and the new-best celebration. Last, the tap
 alternatives to dragging (WCAG 2.2 §2.5.7) are played through with single
 taps: Garden (pot → can → pot waters it, the pot's own nag is swallowed,
 and a real mouse drag still waters), Farm (bucket → cow milks it without
-the cow's moo; tapping a held tool again, Escape and leaving the screen
+the cow's moo and the bucket's name counts the milk — "1 of 3", then
+"full" after three; tapping a held tool again, Escape and leaving the screen
 all put it down; Enter on a tool then activating a target works), Baby
 Dino (one tap each on soap, shower and towel walks all three phases; the
 tools not for the current phase are marked disabled and Enter on one of
