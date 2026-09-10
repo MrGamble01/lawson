@@ -184,7 +184,10 @@ and say who is up; Enter scores), Pop! (Enter pops a balloon), Sticker
 Scene (Enter on a tray sticker places it, Enter on the placed sticker
 hears it again, Delete removes it and the picture is saved without it)
 and Ice Cream (Enter on a tub adds the scoop, Enter on a topping drops
-it on the stack) are played with the keyboard alone. Finally the comfort settings: "Take it
+it on the stack) are played with the keyboard alone, and Cook is cooked
+through by Enter alone — batter, flip, plate — with the pancake's name
+following its state ("Pan: empty, pour the batter", "Pancake: ready, flip
+it", "Pancake: cooked, plate it"). Finally the comfort settings: "Take it
 slow" turned on through the panel persists, doubles the pace scale, makes
 Pop! balloons take ≥10 s (normal ≤9 s) and keeps a Whack! critter up
 ≥1.75 s (normal ≤1.6 s); "Less motion" turned on through the panel, with
