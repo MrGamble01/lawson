@@ -175,7 +175,7 @@ all put it down; Enter on a tool then activating a target works), Baby
 Dino (one tap each on soap, shower and towel walks all three phases; the
 tools not for the current phase are marked disabled and Enter on one of
 them does nothing) and
-Ice Cream (a tap on a tub adds the scoop). Then keyboard play: every tap
+Ice Cream (a tap on a tub adds the scoop and Eat names the sundae). Then keyboard play: every tap
 target must be a named, focusable button and no button may sit inside
 another; Farm (Enter on the cow reacts; carrot then horse by keyboard
 feeds it), Garden (plant, pick up the can and water a pot by Enter, with
@@ -186,8 +186,9 @@ its colour, and a matched pair say so in their names), Whack! (the six holes are
 and say who is up; Enter scores), Pop! (Enter pops a balloon), Sticker
 Scene (Enter on a tray sticker places it, Enter on the placed sticker
 hears it again, Delete removes it and the picture is saved without it)
-and Ice Cream (Enter on a tub adds the scoop, Enter on a topping drops
-it on the stack) are played with the keyboard alone, and Cook is cooked
+and Ice Cream (Enter on a tub adds the scoop and Eat names that sundae;
+Enter on a topping drops it on the stack) are played with the keyboard
+alone, and Cook is cooked
 through by Enter alone — batter, flip, plate — with the pancake's name
 following its state ("Pan: empty, pour the batter", "Pancake: ready, flip
 it", "Pancake: cooked, plate it"). Finally the comfort settings: "Take it

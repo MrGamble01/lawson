@@ -617,11 +617,14 @@ async function dragAlternatives(page) {
   await page.click("#dinoTowel");
   check(await waitFor(() => document.body.dataset.dinoPhase === "happy", 6000), where, "dino: tapping the towel should dry him");
 
-  // Ice Cream: tapping a tub adds that scoop.
+  // Ice Cream: tapping a tub adds that scoop. Eat names the sundae so
+  // a screen reader hears what the stack shows.
   await openScreen(page, { id: "icecream", kind: "game" });
+  const flavor = await page.$eval(".icecream-tub", (el) => (el.getAttribute("aria-label") || "").replace(/ ice cream$/, ""));
   await page.click(".icecream-tub");
   await page.waitForTimeout(200);
   check((await page.$$eval(".icecream-scoop", (els) => els.length)) === 1, where, "ice cream: tapping a tub should add its scoop to the cone");
+  check((await page.$eval("#icecreamEat", (el) => el.getAttribute("aria-label"))) === `Eat: ${flavor} sundae`, where, `ice cream: after a scoop Eat should name the sundae, got ${JSON.stringify(await page.$eval("#icecreamEat", (el) => el.getAttribute("aria-label")))}`);
 }
 
 // Every tap target is a real button: the sandbox and arcade games can be
@@ -720,11 +723,15 @@ async function keyboardPlay(page) {
   check(after.name !== before.name && /\w+ scene$/.test(after.name || ""), where, `scene: Next scene should rename the picture, got ${JSON.stringify(after)}`);
 
   // Ice Cream: toppings are drag sources too; Enter drops one on the stack
-  // (the tubs already had the keyboard path).
+  // (the tubs already had the keyboard path). Eat names the sundae — the
+  // scoops are pictures only — so a screen reader hears what is on the cone.
   await openScreen(page, { id: "icecream", kind: "game" });
+  check((await page.$eval("#icecreamEat", (el) => el.disabled && el.getAttribute("aria-label"))) === "Eat: empty cone", where, `ice cream: an empty cone's Eat should say so, got ${JSON.stringify(await page.$eval("#icecreamEat", (el) => el.getAttribute("aria-label")))}`);
+  const scoopFlavor = await page.$eval(".icecream-tub", (el) => (el.getAttribute("aria-label") || "").replace(/ ice cream$/, ""));
   await page.focus(".icecream-tub"); await page.keyboard.press("Enter");
   await page.waitForTimeout(200);
   check((await page.$$eval(".icecream-scoop", (els) => els.length)) === 1, where, "ice cream: Enter on a tub should add its scoop");
+  check((await page.$eval("#icecreamEat", (el) => !el.disabled && el.getAttribute("aria-label"))) === `Eat: ${scoopFlavor} sundae`, where, `ice cream: Eat should name the sundae after its scoop, got ${JSON.stringify(await page.$eval("#icecreamEat", (el) => el.getAttribute("aria-label")))}`);
   await page.focus(".icecream-topping-source"); await page.keyboard.press("Enter");
   await page.waitForTimeout(200);
   check((await page.$$eval(".icecream-placed-topping", (els) => els.length)) === 1, where, "ice cream: Enter on a topping should drop it on the stack");
