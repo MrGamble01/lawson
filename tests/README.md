@@ -27,6 +27,7 @@ node tests/doodle.js               # Doodle brushes / sizes / Stamp expose aria-
 node tests/garden-sky.js           # Garden sky: sun and clouds are named buttons, clouds rest in view under reduced motion (no browser); --self-test checks the checker
 node tests/train-sky.js            # Train sky: sun and clouds are named buttons; --self-test checks the checker (no browser)
 node tests/farm-sky.js             # Farm sky: sun and clouds are named buttons; --self-test checks the checker (no browser)
+node tests/farm-pond.js            # Farm pond: ducks and fish are named buttons; --self-test checks the checker (no browser)
 node tests/nav-speech.js           # hub welcome line never spoken over a screen the kid tapped on to (Playwright)
 node tests/smoke.js                # smoke pass only (errors-free / screen renders / restart safe)
 node tests/smoke.js --baseline     # smoke + diff every screen against tests/baseline/

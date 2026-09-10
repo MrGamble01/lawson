@@ -505,9 +505,9 @@
       <div class="farm-sheep" id="farmSheep" aria-label="Sheep">${sheepSvg()}</div>
       <div class="farm-pig"  id="farmPig" aria-label="Pig">${pigSvg()}</div>
       <div class="farm-dog"  id="farmDog" aria-label="Dog">${dogSvg()}</div>
-      <div class="farm-ducks" id="farmDucks" aria-hidden="true">
-        <div class="farm-duck" aria-hidden="true">${duckSvg()}</div>
-        <div class="farm-duck" aria-hidden="true">${duckSvg()}</div>
+      <div class="farm-ducks" id="farmDucks">
+        <button type="button" class="farm-duck" aria-label="Duck">${duckSvg()}</button>
+        <button type="button" class="farm-duck" aria-label="Duck">${duckSvg()}</button>
       </div>
       <div class="farm-chickens" id="farmChickens">
         <div class="farm-chicken" aria-label="Chicken">${chickenSvg("#fff")}</div>
@@ -924,9 +924,10 @@
     const colors = ["#ff8ab0", "#fab005", "#74c0fc", "#da77f2", "#fa5252"];
     const f = document.createElement("button");
     f.className = "farm-fish";
-    // A swimming poke-toy under the horse/tractor/ducks: pointer-only.
-    f.setAttribute("aria-hidden", "true");
-    f.setAttribute("tabindex", "-1");
+    // Named like the spoken "Fish!" so Tab / a screen reader can poke
+    // it the same way a finger does. Used to be aria-hidden + onTap,
+    // which makeTappableAccessible will not upgrade.
+    f.setAttribute("aria-label", "Fish");
     f.innerHTML = fishSvg(colors[i % colors.length]);
     f.style.setProperty("--delay", (i * 1.5) + "s");
     // Fixed lanes (row + start column) so the three fish never stack on
