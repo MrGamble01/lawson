@@ -121,6 +121,8 @@
       down = { x: e.clientX, y: e.clientY };
       soap.setPointerCapture?.(e.pointerId);
       soap.classList.add("grabbed");
+      const label = soap.getAttribute("aria-label");
+      if (!label.endsWith(", held")) soap.setAttribute("aria-label", label + ", held");
       e.preventDefault();
     }
     function onMove(e) {
@@ -135,6 +137,8 @@
       if (!dragging) return;
       dragging = false;
       soap.classList.remove("grabbed");
+      const label = soap.getAttribute("aria-label");
+      if (label.endsWith(", held")) soap.setAttribute("aria-label", label.slice(0, -6));
       releaseFloating(soap);
       // A tap (no drag) scrubs for him — see autoScrub.
       if (down && e && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 8) { down = null; autoScrub(); return; }
@@ -160,6 +164,8 @@
     if (!soap || !wrap) return;
     autoBusy = true;
     soap.classList.add("grabbed");
+    const label = soap.getAttribute("aria-label");
+    if (!label.endsWith(", held")) soap.setAttribute("aria-label", label + ", held");
     // 5×5 zigzag, 17.5% apart: well over LATHER_MIN_DIST_PCT, so every dab
     // lands (25 ≥ LATHER_GOAL) and one pass is enough.
     const path = [];
@@ -186,7 +192,13 @@
       }
       setT(90, step);
     };
-    const finish = () => { autoBusy = false; soap.classList.remove("grabbed"); releaseFloating(soap); };
+    const finish = () => {
+      autoBusy = false;
+      soap.classList.remove("grabbed");
+      const label = soap.getAttribute("aria-label");
+      if (label.endsWith(", held")) soap.setAttribute("aria-label", label.slice(0, -6));
+      releaseFloating(soap);
+    };
     step();
   }
 
@@ -316,6 +328,8 @@
       down = { x: e.clientX, y: e.clientY };
       towel.setPointerCapture?.(e.pointerId);
       towel.classList.add("grabbed");
+      const label = towel.getAttribute("aria-label");
+      if (!label.endsWith(", held")) towel.setAttribute("aria-label", label + ", held");
       e.preventDefault();
     }
     function onMove(e) {
@@ -327,6 +341,8 @@
       if (!dragging) return;
       dragging = false;
       towel.classList.remove("grabbed");
+      const label = towel.getAttribute("aria-label");
+      if (label.endsWith(", held")) towel.setAttribute("aria-label", label.slice(0, -6));
       releaseFloating(towel);
       // A tap (no drag) dries him — see autoDry.
       if (down && e && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 8) autoDry();
@@ -347,7 +363,15 @@
     if (!towel || !wrap) return;
     autoBusy = true;
     towel.classList.add("grabbed");
-    const finish = () => { autoBusy = false; towel.classList.remove("grabbed"); releaseFloating(towel); };
+    const label = towel.getAttribute("aria-label");
+    if (!label.endsWith(", held")) towel.setAttribute("aria-label", label + ", held");
+    const finish = () => {
+      autoBusy = false;
+      towel.classList.remove("grabbed");
+      const label = towel.getAttribute("aria-label");
+      if (label.endsWith(", held")) towel.setAttribute("aria-label", label.slice(0, -6));
+      releaseFloating(towel);
+    };
     const step = () => {
       const d = droplets[0];
       if (!d || phase !== "towel") { finish(); return; }
