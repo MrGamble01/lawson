@@ -176,7 +176,7 @@
       </div>
       <div class="train-controls">
         <button id="trainWhistle" class="train-ctl" aria-label="Whistle">🚂</button>
-        <button id="trainGoStop"  class="train-ctl" aria-label="Go / Stop" aria-pressed="false">▶︎</button>
+        <button id="trainGoStop"  class="train-ctl" aria-label="Go" aria-pressed="false">▶︎</button>
       </div>`;
     cars = [{ passenger: null }, { passenger: null }, { passenger: null }];
     buildStations();
@@ -254,10 +254,9 @@
   function startTrain() {
     if (running) return;
     running = true;
-    // Go / Stop is a toggle: the glyph flips, and so does its pressed state,
-    // so a screen reader hears whether the train is running.
+    // The name follows the toggle's next action, alongside its glyph and pressed state.
     const b = $("trainGoStop");
-    if (b) { b.textContent = "⏸"; b.setAttribute("aria-pressed", "true"); }
+    if (b) { b.textContent = "⏸"; b.setAttribute("aria-pressed", "true"); b.setAttribute("aria-label", "Stop"); }
     L.beep(420, 0.1, "triangle");
     L.say("All aboard!");
     chugTimer = setInterval(() => {
@@ -270,7 +269,7 @@
   function stopTrain() {
     running = false;
     const b = $("trainGoStop");
-    if (b) { b.textContent = "▶︎"; b.setAttribute("aria-pressed", "false"); }
+    if (b) { b.textContent = "▶︎"; b.setAttribute("aria-pressed", "false"); b.setAttribute("aria-label", "Go"); }
     if (chugTimer) { clearInterval(chugTimer); chugTimer = null; }
     if (trainMoveTimer) { clearTimeout(trainMoveTimer); trainMoveTimer = null; }
   }
@@ -461,12 +460,10 @@
   }
 
   function stop() {
-    running = false;
+    stopTrain();
     clearBoard();
     clearAll();
-    if (chugTimer) { clearInterval(chugTimer); chugTimer = null; }
     if (dayTimer)  { clearInterval(dayTimer); dayTimer = null; }
-    if (trainMoveTimer) { clearTimeout(trainMoveTimer); trainMoveTimer = null; }
   }
 
   L.games.train = { screen: "trainGame", start, stop };

@@ -244,6 +244,7 @@ const boarded = () => {
   assert.equal(lastLine().text, 'Tap the engine to go!');
   await finishLine(lastLine());
   assert.ok(ids.trainGoStop, 'Go / Stop control is built');
+  assert.equal(goBtn().getAttribute('aria-label'), 'Go');
   assert.ok(document.querySelector('.train-car[data-car="0"] .train-pass'), 'cars are in the DOM');
 
   const stationNames = () => document.querySelectorAll('.train-station').map(s => s.getAttribute('aria-label'));
@@ -251,6 +252,7 @@ const boarded = () => {
 
   tap(goBtn());
   assert.equal(lastLine().text, 'All aboard!');
+  assert.equal(goBtn().getAttribute('aria-label'), 'Stop');
   assert.deepEqual(stationNames(), ['Station 1', 'Station 2', 'Station 3'], 'on the way, no station has the train');
   await finishLine(lastLine());
 
@@ -276,6 +278,9 @@ const boarded = () => {
 
   // stop() cancels a pending waiter.
   train.stop();
+  assert.equal(goBtn().getAttribute('aria-label'), 'Go');
+  assert.equal(goBtn().getAttribute('aria-pressed'), 'false');
+  assert.equal(goBtn().textContent, '▶︎');
   spoken.length = 0;
   inFlight = null;
   lastSaid = Promise.resolve();
