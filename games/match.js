@@ -72,6 +72,9 @@
     choices.innerHTML = "";
 
     const [answer, d1, d2] = pickRandom(POOL, 3);
+    const question = `Find the ${answer.name}`;
+    const prompt = document.getElementById("matchPrompt");
+    if (prompt) prompt.textContent = question;
     const options = [answer, d1, d2].sort(() => Math.random() - 0.5);
 
     // A real button, not a role=img div: onTap() will not overwrite an
@@ -82,11 +85,11 @@
     targetEl.type = "button";
     targetEl.className = "match-target-item";
     targetEl.textContent = answer.emoji;
-    targetEl.setAttribute("aria-label", `Find the ${answer.name}`);
-    L.onTap(targetEl, () => L.sayPrompt(`Find the ${answer.name}`));
+    targetEl.setAttribute("aria-label", question);
+    L.onTap(targetEl, () => L.sayPrompt(question));
     target.appendChild(targetEl);
 
-    if (speakPrompt) L.sayPrompt(`Find the ${answer.name}`);
+    if (speakPrompt) L.sayPrompt(question);
 
     options.forEach((item) => {
       const btn = document.createElement("button");
@@ -117,7 +120,7 @@
           cancelNext = L.afterSpeech(() => newRound(true), { minMs: 1300 });
         } else {
           L.buzzSound();
-          L.sayPrompt(`Find the ${answer.name}`);
+          L.sayPrompt(question);
           btn.classList.add("wrong");
           setTimeout(() => btn.classList.remove("wrong"), 500);
         }
