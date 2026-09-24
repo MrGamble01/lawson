@@ -1,4 +1,4 @@
-// Music Studio Song-button pacing; no browser required.
+// Music Studio drum names and Song-button pacing; no browser required.
 // Tapping Song used to say "Twinkle Twinkle" and start the first note
 // on a 400 ms timer, so the melody cut the name off whenever the engine
 // started late. Now the notes wait on afterSpeech — floor 400 ms, beat
@@ -191,6 +191,16 @@ const tapSong = () => ids.musicSong.handlers.at(-1)();
   await finishLine(lastLine());
   assert.ok(ids.musicSong, 'Song button built');
 
+  const drumNames = { kick: 'Kick', snare: 'Snare', hat: 'Hi-hat', tom: 'Tom', cymb: 'Cymbal' };
+  const pads = queryAll(ids.musicDrums, '.music-drum');
+  assert.deepEqual(pads.map(pad => pad.dataset.drum), Object.keys(drumNames), 'all five drum ids are preserved');
+  for (const pad of pads) {
+    const id = pad.dataset.drum;
+    assert.equal(pad.attrs['aria-label'], drumNames[id], `${id} pad has a clear English name`);
+    assert.notEqual(pad.attrs['aria-label'], id, `${id} pad does not use the raw catalog id as its name`);
+    assert.ok(pad.classList.contains(`music-drum--${id}`), `${id} pad preserves its CSS class`);
+  }
+
   assert.equal(ids.musicSong.attrs['aria-pressed'], 'false', 'Song button starts unpressed');
   assert.equal(ids.musicSong.attrs['aria-label'], 'Play song', 'Song button initially names the play action');
 
@@ -242,7 +252,7 @@ const tapSong = () => ids.musicSong.handlers.at(-1)();
   await runUntil(clock.now + 4000);
   assert.equal(beepsAt.length, 0, 'second Song tap cancelled the waiter');
 
-  console.log('PASS: music — song name held past 400 ms; first note one beat after it ends; stop / second tap cancel');
+  console.log('PASS: music — clear drum names; song name held past 400 ms; first note one beat after it ends; stop / second tap cancel');
 })().catch((err) => {
   console.error(err);
   process.exit(1);

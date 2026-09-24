@@ -14,11 +14,11 @@
   // ====================================================================
   // Drum kit — each pad triggers a noise burst at a specific freq.
   const DRUMS = [
-    { id: "kick",  emoji: "🥁",  freq: 90,   dur: 0.18, type: "sine",   say: "Boom!" },
-    { id: "snare", emoji: "🥁",  freq: 220,  dur: 0.10, type: "square", say: "Crack!" },
-    { id: "hat",   emoji: "🎩",  freq: 880,  dur: 0.05, type: "triangle", say: "Tss!" },
-    { id: "tom",   emoji: "🪘",  freq: 150,  dur: 0.16, type: "sine",   say: "Bom!" },
-    { id: "cymb",  emoji: "🎶",  freq: 1400, dur: 0.30, type: "sawtooth", say: "Crash!" },
+    { id: "kick",  name: "Kick",   emoji: "🥁",  freq: 90,   dur: 0.18, type: "sine",   say: "Boom!" },
+    { id: "snare", name: "Snare",  emoji: "🥁",  freq: 220,  dur: 0.10, type: "square", say: "Crack!" },
+    { id: "hat",   name: "Hi-hat", emoji: "🎩",  freq: 880,  dur: 0.05, type: "triangle", say: "Tss!" },
+    { id: "tom",   name: "Tom",    emoji: "🪘",  freq: 150,  dur: 0.16, type: "sine",   say: "Bom!" },
+    { id: "cymb",  name: "Cymbal", emoji: "🎶",  freq: 1400, dur: 0.30, type: "sawtooth", say: "Crash!" },
   ];
 
   // Xylophone — C-D-E-F-G-A-B-C', rainbow keys (like the piano).
@@ -96,7 +96,7 @@
       const pad = document.createElement("button");
       pad.className = `music-drum music-drum--${d.id}`;
       pad.dataset.drum = d.id;
-      pad.setAttribute("aria-label", d.id);
+      pad.setAttribute("aria-label", d.name);
       pad.innerHTML = `<span class="music-drum-emoji">${d.emoji}</span>`;
       cont.appendChild(pad);
       L.onTap(pad, () => playDrum(d, pad));
