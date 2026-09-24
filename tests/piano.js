@@ -1,4 +1,4 @@
-// Piano Song-button pacing; no browser required.
+// Piano key names and Song-button pacing; no browser required.
 // Tapping Song used to say "Twinkle Twinkle" and start the first note
 // on a 500 ms timer, so the melody cut the name off whenever the engine
 // started late. Now the notes wait on afterSpeech — floor 500 ms, beat
@@ -135,6 +135,16 @@ const tapSong = () => ids.pianoSong.handlers.at(-1)();
   assert.equal(lastLine().text, 'Piano time!');
   await finishLine(lastLine());
 
+  const whiteKeys = ids.pianoBoard.children.find(row => row.className === 'piano-whites').children;
+  const whiteNotes = ['C', 'D', 'E', 'F', 'G', 'A', 'B', 'C'];
+  assert.equal(whiteKeys.length, whiteNotes.length, 'all eight white keys are built');
+  whiteKeys.forEach((key, i) => {
+    assert.equal(key.attrs['aria-label'], i === 7 ? 'High C' : whiteNotes[i], `white key ${i} has a clear name`);
+    assert.equal(key.innerHTML, `<span class="piano-label">${whiteNotes[i]}</span>`, `white key ${i} keeps its visible note`);
+  });
+  const blackKeys = ids.pianoBoard.children.find(row => row.className === 'piano-blacks').children;
+  assert.equal(blackKeys[0].attrs['aria-label'], 'C sharp', 'black key keeps its sharp name');
+
   assert.equal(ids.pianoSong.attrs['aria-pressed'], 'false', 'Song button starts unpressed');
   assert.equal(ids.pianoSong.attrs['aria-label'], 'Play song', 'Song button initially names the play action');
 
@@ -187,7 +197,7 @@ const tapSong = () => ids.pianoSong.handlers.at(-1)();
   await runUntil(clock.now + 4000);
   assert.equal(notesAt.length, 0, 'second Song tap cancelled the waiter');
 
-  console.log('PASS: piano — song name held past 500 ms; first note one beat after it ends; stop / second tap cancel');
+  console.log('PASS: piano — clear key names; song name held past 500 ms; first note one beat after it ends; stop / second tap cancel');
 })().catch((err) => {
   console.error(err);
   process.exit(1);
