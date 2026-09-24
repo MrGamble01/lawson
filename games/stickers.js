@@ -66,7 +66,10 @@
       grid.appendChild(card);
     });
 
-    if (counter) counter.textContent = `${earned} / ${all.length}`;
+    if (counter) {
+      counter.textContent = `${earned} / ${all.length}`;
+      counter.setAttribute("aria-label", `${earned} of ${all.length} stickers`);
+    }
     const bar = document.getElementById("stickerProgress");
     if (bar) {
       const pct = all.length ? Math.round((earned / all.length) * 100) : 0;
