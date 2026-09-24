@@ -82,7 +82,7 @@
         <div class="music-row-label">🔔 Bells</div>
         <div id="musicBells" class="music-bells"></div>
       </div>
-      <button id="musicSong" class="music-song-btn" aria-pressed="false">🎵 Song</button>`;
+      <button id="musicSong" class="music-song-btn" aria-pressed="false" aria-label="Play song">🎵 Song</button>`;
     buildDrums();
     buildXylo();
     buildBells();
