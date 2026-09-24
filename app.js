@@ -1375,6 +1375,17 @@ document.querySelectorAll("[data-home]").forEach((btn) => {
   });
 })();
 
+(function setupPlaceAndTileNames() {
+  document.querySelectorAll("button.place, button.tile").forEach((btn) => {
+    const label = btn.querySelector(".place-label, .label");
+    const name = (label && label.textContent.trim()) || stripLeadingEmoji(btn.textContent);
+    if (name) btn.setAttribute("aria-label", name);
+    if (btn.matches('[data-go="stickers"]')) {
+      btn.setAttribute("aria-describedby", "stickerTileCount");
+    }
+  });
+})();
+
 // Every score / best badge is tappable — speaks the current value.
 // Helps a pre-reader hear what the number is without parental help.
 (function setupBadgeTaps() {
