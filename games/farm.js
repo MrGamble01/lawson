@@ -1132,6 +1132,8 @@
       dragging = true;
       tool.setPointerCapture?.(e.pointerId);
       tool.classList.add("grabbed");
+      const name = tool.getAttribute("aria-label") || "";
+      if (!name.endsWith(", held")) tool.setAttribute("aria-label", `${name}, held`);
       e.preventDefault();
     });
     tool.addEventListener("pointermove", (e) => {
@@ -1147,6 +1149,8 @@
       if (!dragging) return;
       dragging = false;
       tool.classList.remove("grabbed");
+      const name = tool.getAttribute("aria-label") || "";
+      if (!tool.classList.contains("held") && name.endsWith(", held")) tool.setAttribute("aria-label", name.slice(0, -6));
       tool.style.position = "";
       tool.style.left = "";
       tool.style.top = "";
