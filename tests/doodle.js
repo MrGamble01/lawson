@@ -212,6 +212,7 @@ async function playthrough() {
   assert.ok(sizes.filter(s => s[1] === 'true').length === 1, 'exactly one size pressed');
 
   assert.equal(ids.doodleStamp.getAttribute('aria-pressed'), 'false', 'Stamp starts unpressed');
+  assert.equal(ids.doodleStamp.getAttribute('aria-label'), 'Stamp', 'Stamp starts named for its next action');
   assert.equal(ids.doodleBrushes.getAttribute('aria-label'), 'Brush');
   assert.equal(ids.doodleSizes.getAttribute('aria-label'), 'Brush size');
 
@@ -229,6 +230,7 @@ async function playthrough() {
 
   tap(ids.doodleStamp);
   assert.equal(ids.doodleStamp.getAttribute('aria-pressed'), 'true', 'Stamp tap presses it');
+  assert.equal(ids.doodleStamp.getAttribute('aria-label'), 'Stop stamp', 'Stamp tap names the stop action');
   assert.ok(ids.doodleStamp.classList.contains('active'));
   assert.equal(spoken.at(-1), 'Stamp!');
 
@@ -239,10 +241,16 @@ async function playthrough() {
   await runUntil(8000);
   assert.equal(spoken.at(-1), 'Draw!', 'stamp timeout says Draw!');
   assert.equal(ids.doodleStamp.getAttribute('aria-pressed'), 'false', 'stamp timeout unpresses');
+  assert.equal(ids.doodleStamp.getAttribute('aria-label'), 'Stamp', 'stamp timeout restores the Stamp name');
   assert.ok(!ids.doodleStamp.classList.contains('active'));
 
   tap(ids.doodleStamp);
   assert.equal(spoken.at(-1), 'Stamp!');
+  tap(ids.doodleStamp);
+  assert.equal(ids.doodleStamp.getAttribute('aria-pressed'), 'false', 'second tap unpresses Stamp');
+  assert.equal(ids.doodleStamp.getAttribute('aria-label'), 'Stamp', 'second tap restores the Stamp name');
+  assert.equal(spoken.at(-1), 'Draw!');
+  tap(ids.doodleStamp);
   L.games.doodle.stop();
   const afterStop = spoken.length;
   await runUntil(clock.now + 8000);
