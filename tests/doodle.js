@@ -201,6 +201,10 @@ async function playthrough() {
   const { L, spoken, ids, tap } = loadDoodle(src);
   L.games.doodle.start();
 
+  assert.equal(ids.doodleClear.getAttribute('aria-label'), 'Clear doodle');
+  assert.equal(ids.doodleUndo.getAttribute('aria-label'), 'Undo');
+  assert.equal(ids.doodleSave.getAttribute('aria-label'), 'Save doodle');
+
   const brushes = pressedOf(ids.doodleBrushes);
   assert.ok(brushes.length >= 3, 'brushes rendered');
   assert.deepEqual(brushes.find(b => b[0] === 'Rainbow'), ['Rainbow', 'true', true], 'Rainbow starts pressed');

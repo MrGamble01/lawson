@@ -374,6 +374,9 @@
     size = SIZES[1];
     markChoice(stampBtn, false);
     stampBtn.setAttribute("aria-label", "Stamp");
+    clearBtn.setAttribute("aria-label", "Clear doodle");
+    undoBtn.setAttribute("aria-label", "Undo");
+    saveBtn.setAttribute("aria-label", "Save doodle");
     undoStack = [];
     updateUndoBtn();
     renderBrushes();
