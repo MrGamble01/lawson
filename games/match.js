@@ -109,6 +109,8 @@
           else                 L.say(c);
 
           btn.classList.add("correct");
+          // The name carries the correct state during the cheer.
+          btn.setAttribute("aria-label", `${item.name}, correct`);
           const p = L.pointOf(e);
           L.sparkleAt(p.x, p.y);
           clearNext();

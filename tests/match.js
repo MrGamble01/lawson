@@ -86,6 +86,7 @@ function playthrough() {
     boboCheer() {},
     say: (t) => said.push(t),
     sayPrompt: (t) => said.push(t),
+    afterSpeech: () => () => {},
     onTap(node, fn) { node._tap = fn; },
     onTapOnce(node, fn) { node._tap = fn; },
   };
@@ -118,7 +119,12 @@ function playthrough() {
     assert.ok(c.getAttribute('aria-label'), 'each choice is named');
   });
 
-  console.log('PASS: match — example is a named button that re-hears the prompt');
+  const answerName = example.getAttribute('aria-label').replace(/^Find the /, '');
+  const winner = choiceBtns.find(btn => btn.getAttribute('aria-label') === answerName);
+  winner._tap({});
+  assert.equal(winner.getAttribute('aria-label'), `${answerName}, correct`, 'winning choice names its correct state during the cheer');
+
+  console.log('PASS: match — example is a named button that re-hears the prompt; correct choice is named');
 }
 
 if (require.main === module) {
