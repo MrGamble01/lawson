@@ -194,6 +194,8 @@
   // ====================================================================
   function setupSongBtn() {
     const btn = $("musicSong");
+    btn.setAttribute("aria-pressed", "false");
+    btn.setAttribute("aria-label", "Play song");
     L.onTapOnce(btn, () => {
       if (btn.classList.contains("playing")) {
         stopSong();
@@ -218,10 +220,9 @@
     stopSong();
     const song = SONGS[songIdx % SONGS.length];
     songIdx += 1;
-    // A toggle: the same button stops the song, so its pressed state says
-    // whether one is playing (the glow alone is invisible to a screen reader).
+    // The name follows the toggle too: pressed tracks playback; the label names the next action.
     const btn = $("musicSong");
-    if (btn) { btn.classList.add("playing"); btn.setAttribute("aria-pressed", "true"); }
+    if (btn) { btn.classList.add("playing"); btn.setAttribute("aria-pressed", "true"); btn.setAttribute("aria-label", "Stop song"); }
     L.say(song.name);
     // First note once the name has been heard (never sooner than the old
     // 400 ms lead, so a muted voice feels the same).
@@ -234,7 +235,7 @@
     songTimers.forEach(clearTimeout);
     songTimers = [];
     const btn = $("musicSong");
-    if (btn) { btn.classList.remove("playing"); btn.setAttribute("aria-pressed", "false"); }
+    if (btn) { btn.classList.remove("playing"); btn.setAttribute("aria-pressed", "false"); btn.setAttribute("aria-label", "Play song"); }
   }
 
   // ====================================================================

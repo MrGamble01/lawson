@@ -135,11 +135,15 @@ const tapSong = () => ids.pianoSong.handlers.at(-1)();
   assert.equal(lastLine().text, 'Piano time!');
   await finishLine(lastLine());
 
+  assert.equal(ids.pianoSong.attrs['aria-pressed'], 'false', 'Song button starts unpressed');
+  assert.equal(ids.pianoSong.attrs['aria-label'], 'Play song', 'Song button initially names the play action');
+
   tapSong();
   const name = lastLine();
   assert.equal(name.text, 'Twinkle Twinkle');
   assert.ok(ids.pianoSong.classList.contains('playing'), 'Song button shows playing during the name');
   assert.equal(ids.pianoSong.attrs['aria-pressed'], 'true', 'Song button exposes the playing state (aria-pressed)');
+  assert.equal(ids.pianoSong.attrs['aria-label'], 'Stop song', 'Song button names the next action');
 
   // Hold the name past the old 500 ms lead. Main's Piano plays the first
   // note here; this branch must not.
@@ -178,6 +182,7 @@ const tapSong = () => ids.pianoSong.handlers.at(-1)();
   tapSong();
   assert.equal(ids.pianoSong.classList.contains('playing'), false);
   assert.equal(ids.pianoSong.attrs['aria-pressed'], 'false', 'stopping the song clears the pressed state');
+  assert.equal(ids.pianoSong.attrs['aria-label'], 'Play song', 'Song button names the next action');
   await finishLine(again);
   await runUntil(clock.now + 4000);
   assert.equal(notesAt.length, 0, 'second Song tap cancelled the waiter');
