@@ -203,8 +203,9 @@ const L = {
   pointOf: () => ({ x: 20, y: 20 }),
 };
 const window = { Lawson: L, innerWidth: 800 };
+const testMath = Object.create(Math);
 vm.runInNewContext(source, {
-  window, document, Math, Array,
+  window, document, Math: testMath, Array,
   setTimeout: vSetTimeout, clearTimeout: vClearTimeout,
   setInterval: vSetInterval, clearInterval: vClearInterval,
   Date: { now: () => clock.now },
@@ -224,18 +225,35 @@ const targetBalloon = () => ids.popArea.querySelectorAll(`.balloon[data-glyph="$
   assert.equal(lastLine().text, 'Pop the balloons!');
   await finishLine(lastLine());
 
+  testMath.random = () => 0.1;
   tap(lettersTab());
   const goal1 = lastLine();
   assert.match(goal1.text, /^Pop the /);
   assert.equal(goal1.prompt, true, 'the goal is a prompt (repeated once after a quiet spell)');
   assert.ok(!spoken[0].prompt, '"Pop the balloons!" (free mode) is a how-to, not a prompt');
   const letter = currentGoal();
-  assert.ok(letter, 'banner should name the letter');
+  assert.equal(letter, 'C', 'banner should name the pinned target');
   await finishLine(goal1);
 
   const balloon = targetBalloon();
   assert.ok(balloon, 'a balloon with the named letter should be up');
+  assert.equal(balloon.getAttribute('aria-label'), `Balloon ${letter}, next`);
+  await runUntil(clock.now + 1300);
+  const oldTarget = ids.popArea.querySelectorAll('.balloon').find((b) => b !== balloon);
+  assert.equal(oldTarget.getAttribute('aria-label'), `Balloon ${letter}, next`);
+  testMath.random = () => 0.8;
+  await runUntil(clock.now + 1300);
+  const distractor = ids.popArea.querySelectorAll('.balloon').find((b) => b.dataset.glyph !== letter);
+  assert.ok(distractor, 'a non-target balloon should be up');
+  assert.equal(distractor.getAttribute('aria-label'), `Balloon ${distractor.dataset.glyph}`);
   tap(balloon);
+  delete testMath.random;
+  assert.equal(currentGoal(), distractor.dataset.glyph, 'the existing distractor becomes the target');
+  assert.equal(oldTarget.getAttribute('aria-label'), `Balloon ${letter}`, 'the old target loses next');
+  assert.equal(distractor.getAttribute('aria-label'), `Balloon ${currentGoal()}, next`, 'the new target gains next');
+  for (const b of ids.popArea.querySelectorAll('.balloon')) {
+    assert.equal(b.getAttribute('aria-label'), `Balloon ${b.dataset.glyph}${b.dataset.glyph === currentGoal() ? ', next' : ''}`);
+  }
   const hit = lastLine();
   assert.ok(!hit.text.startsWith('Pop the '), 'the popped letter is spoken, not the next goal');
   assert.ok(!hit.prompt, 'the popped letter is a plain line (it drops the reminder)');
