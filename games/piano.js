@@ -281,7 +281,7 @@
     songTimeouts.forEach((t) => clearTimeout(t));
     songTimeouts = [];
     const btn = document.getElementById("pianoSong");
-    if (btn) { btn.classList.remove("playing"); btn.setAttribute("aria-pressed", "false"); }
+    if (btn) { btn.classList.remove("playing"); btn.setAttribute("aria-pressed", "false"); btn.setAttribute("aria-label", "Play song"); }
   }
 
   function scheduleNotes(song, beat) {
@@ -306,10 +306,9 @@
     songIndex += 1;
     const beat = 60 / song.bpm; // seconds per beat
     L.say(song.name);
-    // A toggle: the same button stops the song, so its pressed state says
-    // whether one is playing (the glow alone is invisible to a screen reader).
+    // The name follows the toggle too: pressed tracks playback; the label names the next action.
     const btn = document.getElementById("pianoSong");
-    if (btn) { btn.classList.add("playing"); btn.setAttribute("aria-pressed", "true"); }
+    if (btn) { btn.classList.add("playing"); btn.setAttribute("aria-pressed", "true"); btn.setAttribute("aria-label", "Stop song"); }
     // First note once the name has been heard (never sooner than the old
     // 500 ms lead, so a muted voice feels the same).
     cancelStart = L.afterSpeech(() => scheduleNotes(song, beat), { beatMs: 150, minMs: 500, maxMs: 3000 });
@@ -318,6 +317,8 @@
   function start() {
     build();
     const songBtn = document.getElementById("pianoSong");
+    songBtn.setAttribute("aria-pressed", "false");
+    songBtn.setAttribute("aria-label", "Play song");
     L.onTapOnce(songBtn, () => {
       if (songBtn.classList.contains("playing")) stopSong();
       else playSong();
