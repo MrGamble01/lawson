@@ -58,6 +58,9 @@
     const bowl = document.getElementById("mixBowl");
     bowl.style.background = "#fff";
     bowl.classList.remove("filled", "correct", "wrong");
+    // The bowl name carries the result state; drops already say "used".
+    bowl.setAttribute("role", "status");
+    bowl.setAttribute("aria-label", "Mixing bowl");
 
     const swatch = document.getElementById("mixTarget");
     swatch.style.background = target.rHex;
@@ -100,9 +103,11 @@
     const bowl = document.getElementById("mixBowl");
     if (selected.length === 1) {
       bowl.style.background = color.hex;
+      bowl.setAttribute("aria-label", `Bowl: ${color.name}`);
     } else {
       bowl.style.background = mixColors(selected[0].hex, selected[1].hex);
       bowl.classList.add("filled");
+      bowl.setAttribute("aria-label", `Bowl: ${selected[0].name} and ${selected[1].name}`);
       busy = true;
       // The bowl already shows the mix; wait for the second colour's
       // name ("Blue") before the result line, so a late-starting engine
@@ -135,6 +140,7 @@
       document.getElementById("mixBestVal").textContent = L.getHighScore("mixBest");
 
       bowl.classList.add("correct");
+      bowl.setAttribute("aria-label", `${target.result}, correct`);
       L.say(`${target.result}! ${L.cheer()}`);
       const r = bowl.getBoundingClientRect();
       for (let k = 0; k < 8; k++) {
@@ -148,6 +154,7 @@
       cancelNext = L.afterSpeech(newRound, { minMs: 2000 });
     } else {
       bowl.classList.add("wrong");
+      bowl.setAttribute("aria-label", "Bowl, wrong");
       L.buzzSound();
       L.say(`Oops, that's not ${target.result}. Try again!`);
       score = 0;
