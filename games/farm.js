@@ -624,6 +624,7 @@
     if (!b) return;
     b.innerHTML = bucketSvg(bucketMilkLevel);
     b.setAttribute("aria-label", bucketName());
+    if (b.classList.contains("held")) b.setAttribute("aria-label", `${bucketName()}, held`);
   }
 
   function setupBucket() {
