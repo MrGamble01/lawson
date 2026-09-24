@@ -74,6 +74,7 @@ function el(tag, id, cls) {
     offsetWidth: 80,
     offsetHeight: 80,
     handlers: [],
+    listeners: {},
     attrs: {},
     classList: {
       add(c) { node._classes.add(c); },
@@ -95,7 +96,7 @@ function el(tag, id, cls) {
     appendChild(c) { node.children.push(c); c.parent = node; return c; },
     querySelector(sel) { return queryAll(node, sel)[0] || null; },
     querySelectorAll(sel) { return queryAll(node, sel); },
-    addEventListener() {},
+    addEventListener(type, fn) { node.listeners[type] = fn; },
     setPointerCapture() {},
     remove() {
       if (!node.parent) return;
@@ -209,6 +210,31 @@ const tapSun = () => {
 
 (async () => {
   garden.start();
+  const can = ids.gardenWaterCan;
+  const pointer = { pointerId: 1, preventDefault() {} };
+  for (const end of ['pointerup', 'pointercancel']) {
+    can.listeners.pointerdown(pointer);
+    assert.equal(can.getAttribute('aria-label'), 'Watering can, held');
+    assert.equal(can.classList.contains('held'), false, 'drag must not pick up the can via held');
+    can.listeners[end](pointer);
+    assert.equal(can.getAttribute('aria-label'), 'Watering can', `${end} restores the can name`);
+    assert.equal(can.classList.contains('held'), false);
+  }
+
+  // A drag preserves an existing tap-to-use pickup without duplicating its suffix.
+  can.classList.add('held');
+  can.setAttribute('aria-label', 'Watering can, held');
+  can.setAttribute('aria-pressed', 'true');
+  can.listeners.pointerdown(pointer);
+  assert.equal(can.getAttribute('aria-label'), 'Watering can, held');
+  can.listeners.pointerup(pointer);
+  assert.equal(can.getAttribute('aria-label'), 'Watering can, held');
+  assert.equal(can.classList.contains('held'), true);
+  assert.equal(can.getAttribute('aria-pressed'), 'true');
+  can.classList.remove('held');
+  can.setAttribute('aria-label', 'Watering can');
+  can.setAttribute('aria-pressed', 'false');
+
   const welcome = lastLine();
   assert.equal(welcome.text, 'Welcome to the garden! Tap a pot to plant a seed.');
   await finishLine(welcome);

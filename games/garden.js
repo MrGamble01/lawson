@@ -453,6 +453,8 @@
       dragging = true;
       can.setPointerCapture?.(e.pointerId);
       can.classList.add("grabbed");
+      const name = can.getAttribute("aria-label") || "";
+      if (!name.endsWith(", held")) can.setAttribute("aria-label", `${name}, held`);
       e.preventDefault();
     }
     function onMove(e) {
@@ -468,6 +470,8 @@
       if (!dragging) return;
       dragging = false;
       can.classList.remove("grabbed");
+      const name = can.getAttribute("aria-label") || "";
+      if (!can.classList.contains("held") && name.endsWith(", held")) can.setAttribute("aria-label", name.slice(0, -6));
       can.style.position = "";
       can.style.left = "";
       can.style.top = "";
