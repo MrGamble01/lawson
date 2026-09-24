@@ -83,6 +83,13 @@
 
       let current = null; // { emoji?, name?, glyph?, gold? }
       let downTimer = null;
+      const refreshLabel = () => {
+        if (!current) return;
+        // The name carries the next-target state, as in Pop and Dots.
+        labelHole(current.glyph
+          ? `${current.glyph}${current.glyph === target ? ", next" : ""}`
+          : `${current.gold ? "gold " : ""}${current.name || "critter"}!`);
+      };
 
       const hit = () => {
         if (!current) return;
@@ -136,6 +143,7 @@
       holes.push({
         glyph: () => (current ? current.glyph : null),
         isUp: () => !!current,
+        refreshLabel,
         pop(content) {
           if (current) return false;
           current = content;
@@ -148,7 +156,7 @@
           }
           critter.classList.toggle("gold", !!content.gold);
           critter.classList.add("up");
-          labelHole(content.glyph ? `${content.glyph}!` : `${content.gold ? "gold " : ""}${content.name || "critter"}!`);
+          refreshLabel();
           const upFor = (mode === "free"
             ? 900 + Math.random() * 700
             : 1500 + Math.random() * 1100) * L.paceScale(); // "Take it slow" doubles it
@@ -200,6 +208,7 @@
       target = pool[Math.floor(Math.random() * pool.length)];
     } while (target === lastTarget);
     lastTarget = target;
+    holes.forEach((h) => h.refreshLabel());
     const prompt = document.getElementById("whackPrompt");
     if (prompt) prompt.textContent = `Whack the ${target}!`;
   }
