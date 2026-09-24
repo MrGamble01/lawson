@@ -122,11 +122,21 @@ const tap = (i) => board.children[i].handlers[0]();
   assert.equal(board.children.length, 8, 'eight cards on the board');
 
   // Identity shuffle: [dog, cat, cow, bee, dog, cat, cow, bee] — pairs 0-4, 1-5, 2-6, 3-7.
+  tap(0);
+  assert.equal(board.children[0].ariaLabel, `${board.children[0].dataset.name}, flipped`, 'a waiting card says it is flipped');
+  tap(1);
+  assert.equal(board.children[1].ariaLabel, `${board.children[1].dataset.name}, flipped`);
+  await runUntil(clock.now + 1100);
+  assert.equal(board.children[0].ariaLabel, 'Hidden card', 'a mismatched card hides its name again');
+  assert.equal(board.children[1].ariaLabel, 'Hidden card');
+  await finishLine(lastLine());
+
   const pairs = [[0, 4], [1, 5], [2, 6]];
   for (const [a, b] of pairs) {
     tap(a);
+    assert.equal(board.children[a].ariaLabel, `${board.children[a].dataset.name}, flipped`, 'a waiting card says it is flipped');
     tap(b);
-    assert.equal(board.children[a].ariaLabel, board.children[a].dataset.name, 'a flipped card is named after its picture');
+    assert.equal(board.children[b].ariaLabel, `${board.children[b].dataset.name}, flipped`);
     await runUntil(clock.now + 320);
     assert.equal(board.children[a].ariaLabel, `${board.children[a].dataset.name}, matched`, 'a matched card says so in its name');
     assert.equal(board.children[b].ariaLabel, `${board.children[b].dataset.name}, matched`);

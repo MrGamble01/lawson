@@ -73,7 +73,8 @@
     if (card.classList.contains("flipped")) return;
 
     card.classList.add("flipped");
-    card.setAttribute("aria-label", card.dataset.name);
+    // The name carries the flipped state, as it does for matched cards.
+    card.setAttribute("aria-label", `${card.dataset.name}, flipped`);
     L.beep(500 + Math.random() * 250, 0.08, "triangle");
     L.say(card.dataset.name, 1.05);
 
