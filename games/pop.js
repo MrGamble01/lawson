@@ -94,12 +94,21 @@
     return area.querySelectorAll(`.balloon[data-glyph="${target}"]`).length;
   }
 
+  // Like Dots, the accessible name carries the next-target state.
+  function glyphLabel(glyph) {
+    return `Balloon ${glyph}${glyph === target ? ", next" : ""}`;
+  }
+
   function pickTarget() {
     do {
       const pool = mode === "numbers" ? NUMBERS : LETTERS;
       target = pool[Math.floor(Math.random() * pool.length)];
     } while (target === lastTarget);
     lastTarget = target;
+    const area = document.getElementById("popArea");
+    if (area) area.querySelectorAll(".balloon").forEach((b) => {
+      if (b.dataset.glyph) b.setAttribute("aria-label", glyphLabel(b.dataset.glyph));
+    });
     const prompt = document.getElementById("popPrompt");
     if (prompt) prompt.textContent = `Pop the ${target}!`;
   }
@@ -139,7 +148,7 @@
     const b = document.createElement("div");
     b.className = "balloon" + (rainbow ? " balloon--rainbow" : "");
     if (glyph) b.dataset.glyph = glyph;
-    b.setAttribute("aria-label", glyph ? `Balloon ${glyph}` : rainbow ? "Rainbow balloon" : "Balloon");
+    b.setAttribute("aria-label", glyph ? glyphLabel(glyph) : rainbow ? "Rainbow balloon" : "Balloon");
     b.innerHTML = balloonSvg(hex, glyph, rainbow);
     const still = L.prefersReducedMotion();
     const alive = Array.from(area.querySelectorAll(".balloon"));
