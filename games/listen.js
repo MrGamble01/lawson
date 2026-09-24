@@ -85,6 +85,8 @@
 
           L.say(`${L.cheer()} It's a ${answer.n}!`);
           btn.classList.add("correct");
+          // The name carries the correct state during the cheer.
+          btn.setAttribute("aria-label", `${item.n}, correct`);
           const p = L.pointOf(e);
           L.sparkleAt(p.x, p.y);
           // Next round once the cheer has been heard (never sooner than

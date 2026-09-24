@@ -190,7 +190,15 @@ function reset() {
   await runUntil(400);
   assert.equal(spoken.length, 1, 'leftover opening clue must not land on Hear it again');
 
-  console.log('PASS: listen — leftover opening clue cancelled by wrong tap / replay; re-ask waits for a clue in flight; stop() cancels');
+  // 5. A correct choice names its state while the cheer is in flight.
+  reset();
+  listen.start();
+  const winner = ids.listenChoices.children.find(btn => btn.getAttribute('aria-label') === 'dog');
+  tap(winner);
+  assert.equal(lastLine().done, false, 'cheer is still in flight');
+  assert.equal(winner.getAttribute('aria-label'), 'dog, correct', 'winning choice names its correct state');
+
+  console.log('PASS: listen — leftover opening clue cancelled by wrong tap / replay; re-ask waits for a clue in flight; stop() cancels; correct choice is named');
 })().catch((err) => {
   console.error('FAIL: listen\n' + (err && err.stack || err));
   process.exit(1);
