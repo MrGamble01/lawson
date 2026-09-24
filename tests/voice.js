@@ -791,6 +791,19 @@ assert.equal(said.at(-1), 'Pop the N!');
   assert.equal(vm.runInContext('getSpeechSpeed()', fresh2), 'normal', 'a bad saved value falls back to normal');
   run('setSpeechSpeed("normal"); setSoundMuted(false)');
 
+  // ---- Saved volume restores without letting corrupt values mute ----
+  for (const [saved, expected] of [['0.4', 0.4], ['bogus', 1], ['', 1], ['Infinity', 1], ['0', 0]]) {
+    stored.set('lawson:volume', saved);
+    const freshVolume = vm.createContext({ window: { speechSynthesis: synth, AudioContext, addEventListener() {}, dispatchEvent() {} },
+      document: { hidden: false, addEventListener() {} }, Event, CustomEvent, Date: { now: () => clockNow },
+      SpeechSynthesisUtterance: function(text) { this.text = text; },
+      localStorage: { getItem: k => stored.get(k) ?? null, setItem: (k, v) => stored.set(k, v) },
+      setInterval: () => 1, clearInterval() {}, setTimeout: () => 1, clearTimeout() {} });
+    vm.runInContext(source, freshVolume);
+    assert.equal(vm.runInContext('getVolume()', freshVolume), expected, `saved volume ${JSON.stringify(saved)} restores to ${expected}`);
+  }
+  stored.delete('lawson:volume');
+
   // ---- The kid's name, as the storyteller should say it ----
   run('setSpeechVoice("enhanced"); setSoundMuted(true)');
   const heard = [];
@@ -959,5 +972,5 @@ assert.equal(said.at(-1), 'Pop the N!');
   document.hidden = false; document.dispatchEvent(new Event('visibilitychange')); await flush();
   assert.equal(run('isMusicDucked()'), false);
 
-  console.log('PASS: delayed voices, natural pitch, local quality preference, saved choice, language, volume, mute, missing voice fallback, speech completion promise, caption event, hide/show lifecycle, unusable-voice fallback, speechDone, afterSpeech, swallowed utterances, speech diagnostics, chime then cheer, announcements wait their turn, storyteller speed, name sounds-like, prompt reminder, music ducks under speech');
+  console.log('PASS: delayed voices, natural pitch, local quality preference, saved choice, language, volume, corrupt saved volume fallback, mute, missing voice fallback, speech completion promise, caption event, hide/show lifecycle, unusable-voice fallback, speechDone, afterSpeech, swallowed utterances, speech diagnostics, chime then cheer, announcements wait their turn, storyteller speed, name sounds-like, prompt reminder, music ducks under speech');
 })().catch(e => { console.error(e); process.exit(1); });
