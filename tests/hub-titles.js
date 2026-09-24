@@ -11,7 +11,7 @@ assert.ok(helper, 'stripLeadingEmoji helper exists');
 assert.ok(setup, 'setupHubTitles initializer exists');
 
 const titles = ['  ✨ More to Explore  ', '🧠 Brain Games', '   ', '✨'].map(textContent => ({
-  tagName: 'H2',
+  tagName: 'BUTTON',
   className: 'hub-title',
   textContent,
   attributes: {},
@@ -34,8 +34,6 @@ vm.runInNewContext(`${helper[0]}\n${setup[0]}`, {
 });
 
 for (const title of titles) {
-  assert.equal(title.attributes.role, 'button');
-  assert.equal(title.attributes.tabindex, '0');
   assert.ok(taps.has(title), 'each title has a tap handler');
   taps.get(title)();
 }

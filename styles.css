@@ -709,6 +709,12 @@ body.on-lobby .mascot { display: block; }
   -webkit-overflow-scrolling: touch;
 }
 .hub-title {
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  cursor: pointer;
+  display: block;
+  width: 100%;
   font-size: clamp(28px, 5vw, 44px);
   color: var(--c-brand);
   text-shadow: 2px 2px 0 #fff, 4px 4px 0 rgba(0,0,0,0.08);
