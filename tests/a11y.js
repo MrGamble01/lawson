@@ -702,8 +702,8 @@ async function keyboardPlay(page) {
   check((await page.$$eval(".scene-placed-sticker", (els) => els.length)) === 1, where, "scene: Enter on a tray sticker should place it on the picture");
   const stickerSound = (await said())[0]; // the first placement may also earn the Scene Artist sticker
   check(Boolean(stickerSound), where, "scene: placing a sticker by keyboard should say its sound");
-  check(await page.$eval(".scene-placed-sticker", (el) => el.tagName === "BUTTON" && el.tabIndex === 0 && el.getAttribute("aria-label") === document.querySelector(".scene-sticker-source").getAttribute("aria-label")),
-    where, "scene: a placed sticker should be a focusable button named like its tray sticker");
+  check(await page.$eval(".scene-placed-sticker", (el) => el.tagName === "BUTTON" && el.tabIndex === 0 && el.getAttribute("aria-label") === `${document.querySelector(".scene-sticker-source").getAttribute("aria-label")}, delete to remove`),
+    where, "scene: a placed sticker should be a focusable button named with its tray name and delete to remove");
   await page.evaluate(() => { window.__said.length = 0; });
   await page.focus(".scene-placed-sticker"); await page.keyboard.press("Enter");
   await page.waitForTimeout(200);
