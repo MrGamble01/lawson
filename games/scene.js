@@ -322,7 +322,8 @@
     const el = document.createElement("button");
     el.className = "scene-placed-sticker";
     el.textContent = sticker.e;
-    el.setAttribute("aria-label", sticker.n);
+    // The name carries the remove action; Delete already works.
+    el.setAttribute("aria-label", `${sticker.n}, delete to remove`);
     el.setAttribute("aria-keyshortcuts", "Delete");
     el.style.left = px + "%";
     el.style.top  = py + "%";
