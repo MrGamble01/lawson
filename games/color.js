@@ -244,8 +244,13 @@
     fillsThisSession = 0;
     renderPalette();
     renderPage();
-    L.onTapOnce(document.getElementById("colorClear"), clearAll);
-    L.onTapOnce(document.getElementById("colorNext"), nextPage);
+    const clear = document.getElementById("colorClear");
+    const next = document.getElementById("colorNext");
+    // Match Story's clear action labels; emoji stays on the button face.
+    clear.setAttribute("aria-label", "Clear coloring");
+    next.setAttribute("aria-label", "Next page");
+    L.onTapOnce(clear, clearAll);
+    L.onTapOnce(next, nextPage);
   }
 
   function stop() {}
