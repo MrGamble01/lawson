@@ -145,6 +145,15 @@ const tapSong = () => ids.pianoSong.handlers.at(-1)();
   const blackKeys = ids.pianoBoard.children.find(row => row.className === 'piano-blacks').children;
   assert.equal(blackKeys[0].attrs['aria-label'], 'C sharp', 'black key keeps its sharp name');
 
+  const highC = whiteKeys.at(-1);
+  const spokenBeforeTap = spoken.length;
+  highC.handlers.at(-1)();
+  assert.equal(spoken.length, spokenBeforeTap + 1, 'tapping high C speaks a note');
+  assert.equal(lastLine().text, 'High C', 'tapping high C speaks its accessible name');
+  assert.equal(highC.attrs['aria-label'], 'High C', 'high C keeps its accessible name after tapping');
+  await finishLine(lastLine());
+  notesAt.length = 0;
+
   assert.equal(ids.pianoSong.attrs['aria-pressed'], 'false', 'Song button starts unpressed');
   assert.equal(ids.pianoSong.attrs['aria-label'], 'Play song', 'Song button initially names the play action');
 

@@ -242,12 +242,13 @@
     WHITE.forEach((k, i) => {
       const key = document.createElement("button");
       key.className = "piano-white";
-      key.setAttribute("aria-label", i === WHITE.length - 1 ? "High C" : k.note);
+      const label = i === WHITE.length - 1 ? "High C" : k.note;
+      key.setAttribute("aria-label", label);
       key.style.setProperty("--c", k.color);
       key.innerHTML = `<span class="piano-label">${k.note}</span>`;
       L.onTap(key, () => {
         playNote(k.freq, 0.55);
-        sayNote(k.note);
+        sayNote(label);
         flash(key);
       });
       whiteRow.appendChild(key);
