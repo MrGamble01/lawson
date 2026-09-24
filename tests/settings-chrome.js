@@ -17,4 +17,22 @@ for (const [id, label] of Object.entries(labels)) {
     `#${id} must have aria-label="${label}"`);
 }
 
-console.log('PASS: Settings chrome buttons have clear names');
+const checkboxLabels = {
+  settingsVoice: 'Voice',
+  settingsCaptions: 'Captions',
+  settingsSound: 'Sound effects',
+  settingsMusic: 'Music on menu',
+  settingsDark: 'Dark mode',
+  settingsSlow: 'Take it slow',
+  settingsMotion: 'Less motion',
+};
+
+for (const [id, label] of Object.entries(checkboxLabels)) {
+  const input = html.match(new RegExp(`<input\\b[^>]*\\sid="${id}"[^>]*>`));
+  assert.ok(input, `Missing checkbox #${id}`);
+  assert.match(input[0], /\stype="checkbox"/, `#${id} must be a checkbox`);
+  assert.match(input[0], new RegExp(`\\saria-label="${label}"`),
+    `#${id} must have aria-label="${label}"`);
+}
+
+console.log('PASS: Settings chrome buttons and checkboxes have clear names');
