@@ -98,8 +98,9 @@
       if (prompt) prompt.textContent = "Wash him with soap!";
       L.say("Wash him with soap!");
     } else if (p === "shower") {
-      if (prompt) prompt.textContent = "Pull the shower to rinse!";
-      L.say("Now rinse him off!");
+      const line = "Pull the shower to rinse!";
+      if (prompt) prompt.textContent = line;
+      L.say(line);
     } else if (p === "towel") {
       if (prompt) prompt.textContent = "Dry him with the towel!";
       L.say("Dry him with the towel!");

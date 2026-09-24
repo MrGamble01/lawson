@@ -169,6 +169,8 @@ function checkDragName(tool, name) {
   assert.equal(ids.dinoSoap.getAttribute('aria-label'), 'Soap, held', 'auto-scrub holds the soap');
   await runUntil(clock.now + 4000);
   assert.equal(body.dataset.dinoPhase, 'shower', `soap should move to shower, got ${body.dataset.dinoPhase}`);
+  assert.equal(ids.dinoPrompt.textContent, 'Pull the shower to rinse!');
+  assert.equal(lastLine().text, ids.dinoPrompt.textContent, 'shower speech matches the visible prompt');
   assert.deepEqual(disabled(), ['true', 'false', 'true'], 'shower phase: only the shower is live');
   assert.deepEqual(labels(), ['Soap, dimmed', 'Pull the shower', 'Towel, dimmed'], 'shower phase: names include the dimmed state');
   await finishLine(lastLine());
