@@ -481,12 +481,15 @@ function tapToUse(tool, opts) {
   // Keyboard: Enter/Space produce a click with no pointer events.
   tool.addEventListener("click", (e) => { if (e.detail === 0) toggle(); });
 }
+// The name carries held state too; pressed alone does not give it a spoken name.
 function pickUpTool(tool, onUse, hint) {
   putDownTool();
   _heldTool = tool;
   _heldUse = onUse;
   tool.classList.add("held");
   tool.setAttribute("aria-pressed", "true");
+  const name = tool.getAttribute("aria-label");
+  if (name && !name.endsWith(", held")) tool.setAttribute("aria-label", `${name}, held`);
   haptic(8);
   beep(660, 0.06, "triangle");
   if (hint) say(hint);
@@ -495,6 +498,8 @@ function putDownTool() {
   if (!_heldTool) return;
   _heldTool.classList.remove("held");
   _heldTool.setAttribute("aria-pressed", "false");
+  const name = _heldTool.getAttribute("aria-label");
+  if (name && name.endsWith(", held")) _heldTool.setAttribute("aria-label", name.slice(0, -6));
   _heldTool = null;
   _heldUse = null;
 }
