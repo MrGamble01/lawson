@@ -807,6 +807,13 @@ const ACTIVITIES = {
   },
 };
 
+function flashcardAccessibleName(cfg, item) {
+  if (item && typeof item === "object" && item.name) return item.name;
+  if (cfg.caption) return cfg.caption(item);
+  if (typeof item === "number") return NUMBER_WORD[item] || String(item);
+  return String(item);
+}
+
 function buildFlashcards(name) {
   const cfg = ACTIVITIES[name];
   if (!cfg) return;
@@ -820,6 +827,7 @@ function buildFlashcards(name) {
     el.className = "item";
     const lbl = cfg.label(item, i);
     if (cfg.labelHtml) el.innerHTML = lbl; else el.textContent = lbl;
+    el.setAttribute("aria-label", flashcardAccessibleName(cfg, item));
     const c = cfg.color(item, i);
     el.style.setProperty("--c", c);
     if (cfg.background) el.style.background = cfg.background(item);
