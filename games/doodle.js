@@ -315,6 +315,8 @@
     const stamping = mode !== "stamp";
     mode = stamping ? "stamp" : "paint";
     markChoice(btn, stamping);
+    // The name carries the next action, like Music's Play/Stop song.
+    btn.setAttribute("aria-label", stamping ? "Stop stamp" : "Stamp");
     L.beep(stamping ? 700 : 400, 0.1);
     L.say(stamping ? "Stamp!" : "Draw!");
     clearTimeout(stampTimeout);
@@ -327,6 +329,7 @@
         mode = "paint";
         stampTimeout = null;
         markChoice(btn, false);
+        btn.setAttribute("aria-label", "Stamp");
         L.beep(400, 0.1);
         L.say("Draw!");
       }, 8000);
@@ -370,6 +373,7 @@
     brush = BRUSHES[0];
     size = SIZES[1];
     markChoice(stampBtn, false);
+    stampBtn.setAttribute("aria-label", "Stamp");
     undoStack = [];
     updateUndoBtn();
     renderBrushes();
