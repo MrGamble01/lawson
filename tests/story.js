@@ -38,6 +38,7 @@ const pendingTimers = () => [...clock.timers.values()].map(t => t.at).sort((a, b
 
 // ---- DOM stub ----
 function el() {
+  const attributes = new Map();
   const node = {
     style: {}, children: [], _classes: new Set(), textContent: '', offsetWidth: 1, handlers: [],
     classList: {
@@ -47,7 +48,9 @@ function el() {
     },
     set innerHTML(_) { node.children = []; },
     appendChild: c => { node.children.push(c); return c; },
-    setAttribute() {}, getBoundingClientRect: () => ({ left: 0, top: 0, width: 300, height: 300 }),
+    setAttribute: (name, value) => attributes.set(name, String(value)),
+    getAttribute: name => attributes.get(name) ?? null,
+    getBoundingClientRect: () => ({ left: 0, top: 0, width: 300, height: 300 }),
   };
   return node;
 }
@@ -121,6 +124,7 @@ const ceilFor = s => floorFor(s) * 2 + 4000;
   //    the word-count floor so a toddler has time to look.
   story.start();
   assert.equal(counter(), '1 / 4');
+  assert.equal(ids.storyCounter.getAttribute('aria-label'), 'Page 1 of 4');
   const p1 = lastLine();
   assert.equal(pendingTimers().length, 1, 'one ceiling timer armed while narrating');
   assert.deepEqual(pendingTimers(), [ceilFor(p1.text)]);
@@ -131,6 +135,7 @@ const ceilFor = s => floorFor(s) * 2 + 4000;
   assert.equal(counter(), '1 / 4');
   await runUntil(floorFor(p1.text));
   assert.equal(counter(), '2 / 4', 'flipped exactly at the floor');
+  assert.equal(ids.storyCounter.getAttribute('aria-label'), 'Page 2 of 4');
 
   // 2. Slow voice: the line runs past the floor; wait for it, then a beat.
   const p2 = lastLine();
