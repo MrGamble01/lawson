@@ -63,6 +63,7 @@ function el(tag, id) {
   return node;
 }
 ids.howmanyStage = el('div', 'howmanyStage');
+ids.howmanyPrompt = el('div', 'howmanyPrompt');
 ids.howmanyChoices = el('div', 'howmanyChoices');
 ids.howmanyScoreVal = el('span', 'howmanyScoreVal');
 ids.howmanyBestVal = el('span', 'howmanyBestVal');
@@ -158,9 +159,25 @@ function assertChoiceNames() {
   }
 }
 
+function assertPromptNamesItems() {
+  const names = {
+    '🍎': ['apple', 'apples'], '🎈': ['balloon', 'balloons'],
+    '⭐': ['star', 'stars'], '❤️': ['heart', 'hearts'],
+    '🐟': ['fish', 'fish'], '🦆': ['duck', 'ducks'],
+    '🚗': ['car', 'cars'], '🍪': ['cookie', 'cookies'],
+    '🌸': ['flower', 'flowers'], '🍌': ['banana', 'bananas'],
+    '🍰': ['cake', 'cakes'], '⚽': ['ball', 'balls'],
+  };
+  const items = ids.howmanyStage.children;
+  const name = names[items[0].textContent][items.length === 1 ? 0 : 1];
+  assert.match(ids.howmanyPrompt.textContent, /^How many /);
+  assert.equal(ids.howmanyPrompt.textContent, `How many ${name}?`, 'prompt names the displayed items');
+}
+
 (async () => {
   howmany.start();
   assertChoiceNames();
+  assertPromptNamesItems();
   assert.equal(spoken.length, 0, 'opening prompt is on a timer, not the same tick as start');
 
   // Fast wrong tap, before the 450 ms opening prompt.
@@ -179,12 +196,14 @@ function assertChoiceNames() {
   assert.equal(lastLine().text, 'Count them again!', 'still waiting the beat');
   await runUntil(clock.now + 1);
   assert.match(lastLine().text, /^How many /, 'question asked one beat after the nag ended');
+  assert.equal(lastLine().text, ids.howmanyPrompt.textContent, 'repeated speech matches the visible prompt');
   await finishLine(lastLine());
 
   // A later tap / stop() cancels a pending re-prompt.
   howmany.stop();
   howmany.start();
   assertChoiceNames();
+  assertPromptNamesItems();
   await runUntil(200);
   tapWrong();
   assert.equal(lastLine().text, 'Count them again!');
@@ -192,6 +211,22 @@ function assertChoiceNames() {
   const spokenAtStop = spoken.length;
   await runUntil(clock.now + 4000);
   assert.equal(spoken.length, spokenAtStop, 'stop() cancelled the waiter');
+
+  // The opening speech and the next round both use the visible question.
+  howmany.start();
+  assertPromptNamesItems();
+  const firstQuestion = ids.howmanyPrompt.textContent;
+  await runUntil(clock.now + 450);
+  assert.equal(lastLine().text, firstQuestion, 'opening speech matches the visible prompt');
+  const correct = ids.howmanyChoices.children.find((b) => Number(b.textContent) === ids.howmanyStage.children.length);
+  correct.handlers.forEach((fn) => fn({ stopPropagation() {} }));
+  await finishLine(lastLine());
+  await runUntil(clock.now + 1800);
+  assertPromptNamesItems();
+  assert.notEqual(ids.howmanyPrompt.textContent, firstQuestion, 'next round updates the visible question');
+  await runUntil(clock.now + 450);
+  assert.equal(lastLine().text, ids.howmanyPrompt.textContent, 'next round speech matches the visible prompt');
+  howmany.stop();
 
   console.log('PASS: howmany pacing — Count them again! held past the old 450 ms prompt; question one beat after it ends; stop() cancels');
 })().catch((e) => { console.error(e); process.exit(1); });

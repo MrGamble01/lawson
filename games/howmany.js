@@ -71,6 +71,9 @@
   function newRound() {
     answered = false;
     const { item, n } = pickRound();
+    const prompt = document.getElementById("howmanyPrompt");
+    const question = `How many ${n === 1 ? item.name : item.plural}?`;
+    if (prompt) prompt.textContent = question;
     answer = n;
 
     const stage = document.getElementById("howmanyStage");
@@ -125,7 +128,7 @@
           // Then ask the question again once the nag has been heard
           // (same 450 ms floor when the voice is muted).
           cancelNext = L.afterSpeech(
-            () => L.sayPrompt(`How many ${n === 1 ? item.name : item.plural}?`),
+            () => L.sayPrompt(question),
             { minMs: 450, beatMs: 150, maxMs: 3000 },
           );
           score = 0;
@@ -136,7 +139,7 @@
     });
 
     activeTimer = setTimeout(
-      () => L.sayPrompt(`How many ${n === 1 ? item.name : item.plural}?`),
+      () => L.sayPrompt(question),
       450
     );
   }
