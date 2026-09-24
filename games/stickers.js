@@ -76,6 +76,11 @@
     if (bar) {
       const pct = all.length ? Math.round((earned / all.length) * 100) : 0;
       bar.style.width = pct + "%";
+      bar.setAttribute("role", "progressbar");
+      bar.setAttribute("aria-valuemin", "0");
+      bar.setAttribute("aria-valuemax", "100");
+      bar.setAttribute("aria-valuenow", pct);
+      bar.setAttribute("aria-label", `${earned} of ${all.length} stickers`);
     }
   }
 
