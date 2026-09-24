@@ -108,6 +108,13 @@
   function nextTarget() {
     busy = false;
     currentTarget = targets.shift() || null;
+    // The name carries the next-target state for screen readers.
+    document.querySelectorAll("#findStage .find-item").forEach((el) => {
+      if (el.classList.contains("found")) return;
+      const item = el._findItem;
+      const base = mode === "free" ? item.n : item.glyph;
+      el.setAttribute("aria-label", base + (item === currentTarget ? ", next" : ""));
+    });
     if (!currentTarget) {
       L.happySound();
       L.say(`${L.cheer()} You found them all!`);
@@ -166,6 +173,7 @@
         const el = document.createElement("button");
         el.className = "find-item";
         el.textContent = item.e;
+        el._findItem = item;
         el.setAttribute("aria-label", item.n);
         el.style.fontSize = `clamp(38px, ${5.5 + Math.random() * 2}vw, 76px)`;
         L.onTap(el, (e) => onTapItem(item, el, e));
@@ -181,6 +189,8 @@
         const el = document.createElement("button");
         el.className = "find-item find-item--glyph";
         el.textContent = item.glyph;
+        el._findItem = item;
+        el.setAttribute("aria-label", item.glyph);
         el.style.background = GLYPH_COLORS[i % GLYPH_COLORS.length];
         el.style.fontSize = `clamp(34px, ${5 + Math.random() * 2}vw, 68px)`;
         L.onTap(el, (e) => onTapItem(item, el, e));

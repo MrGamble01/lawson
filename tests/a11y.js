@@ -753,7 +753,7 @@ async function keyboardPlay(page) {
   await openScreen(page, { id: "find", kind: "game" });
   await page.waitForTimeout(800); // the first goal is set on a short timer
   const targetName = await page.$eval("#findPrompt .find-target-name", (el) => el.textContent.trim());
-  const targetSel = `.find-item[aria-label="${targetName}"]`;
+  const targetSel = `.find-item[aria-label="${targetName}, next"]`;
   check(Boolean(targetName) && (await page.$(targetSel)) !== null, where, `find: the named goal should be a button named "${targetName}"`);
   await page.focus(targetSel); await page.keyboard.press("Enter");
   await page.waitForTimeout(150);
