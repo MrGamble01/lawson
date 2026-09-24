@@ -210,6 +210,7 @@ const tapSun = () => {
 
 (async () => {
   garden.start();
+  assert.equal(ids.gardenSun.getAttribute('aria-label'), 'Sunshine');
   const can = ids.gardenWaterCan;
   const pointer = { pointerId: 1, preventDefault() {} };
   for (const end of ['pointerup', 'pointercancel']) {

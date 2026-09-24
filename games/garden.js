@@ -254,7 +254,7 @@
         <button type="button" class="garden-cloud garden-cloud--1" aria-label="Cloud">${cloudSvg()}</button>
         <button type="button" class="garden-cloud garden-cloud--2" aria-label="Cloud">${cloudSvg()}</button>
         <button type="button" class="garden-cloud garden-cloud--3" aria-label="Cloud">${cloudSvg()}</button>
-        <button id="gardenSun" class="garden-sun" aria-label="Sun">${sunSvg()}</button>
+        <button id="gardenSun" class="garden-sun" aria-label="Sunshine">${sunSvg()}</button>
       </div>
       <div id="gardenInsects" class="garden-insects"></div>
       <div id="gardenRain"    class="garden-rain"></div>

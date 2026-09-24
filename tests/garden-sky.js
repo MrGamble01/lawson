@@ -73,7 +73,7 @@ function selfTest() {
         <div class="garden-cloud garden-cloud--1" aria-hidden="true">\${cloudSvg()}</div>
         <div class="garden-cloud garden-cloud--2" aria-hidden="true">\${cloudSvg()}</div>
         <div class="garden-cloud garden-cloud--3" aria-hidden="true">\${cloudSvg()}</div>
-        <button id="gardenSun" class="garden-sun" aria-label="Sun">\${sunSvg()}</button>
+        <button id="gardenSun" class="garden-sun" aria-label="Sunshine">\${sunSvg()}</button>
       </div>\`;
     document.querySelectorAll(".garden-cloud").forEach((c) => L.onTap(c, () => L.say("Cloud!")));
   `;
@@ -88,7 +88,7 @@ function selfTest() {
         <button type="button" class="garden-cloud garden-cloud--1" aria-label="Cloud">\${cloudSvg()}</button>
         <button type="button" class="garden-cloud garden-cloud--2" aria-label="Cloud">\${cloudSvg()}</button>
         <button type="button" class="garden-cloud garden-cloud--3" aria-label="Cloud">\${cloudSvg()}</button>
-        <button id="gardenSun" class="garden-sun" aria-label="Sun">\${sunSvg()}</button>
+        <button id="gardenSun" class="garden-sun" aria-label="Sunshine">\${sunSvg()}</button>
       </div>\`;
     document.querySelectorAll(".garden-cloud").forEach((c) => L.onTap(c, () => L.say("Cloud!")));
   `;
