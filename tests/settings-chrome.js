@@ -5,6 +5,7 @@ const path = require('node:path');
 
 const html = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8');
 const labels = {
+  settingsVoicePreview: 'Listen to this voice',
   settingsTips: 'Show tips again',
   settingsReset: 'Reset scores',
   settingsClose: 'Done',
