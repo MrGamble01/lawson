@@ -20,11 +20,11 @@ const path = require("node:path");
 const assert = require("node:assert/strict");
 
 const ROOT = path.resolve(__dirname, "..");
-const TYPES = { ".html": "text/html", ".js": "application/javascript", ".css": "text/css", ".json": "application/json", ".svg": "image/svg+xml" };
+const TYPES = { ".html": "text/html", ".js": "application/javascript", ".css": "text/css", ".json": "application/json", ".svg": "image/svg+xml", ".png": "image/png" };
 
 function copySite() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "lawson-sw-"));
-  for (const f of ["index.html", "styles.css", "app.js", "manifest.json", "icon.svg", "sw.js"]) fs.copyFileSync(path.join(ROOT, f), path.join(dir, f));
+  for (const f of ["index.html", "styles.css", "app.js", "manifest.json", "icon.svg", "apple-touch-icon.png", "sw.js"]) fs.copyFileSync(path.join(ROOT, f), path.join(dir, f));
   for (const sub of ["lib", "games"]) {
     fs.mkdirSync(path.join(dir, sub));
     for (const f of fs.readdirSync(path.join(ROOT, sub))) fs.copyFileSync(path.join(ROOT, sub, f), path.join(dir, sub, f));
