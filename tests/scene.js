@@ -120,7 +120,7 @@ const L = {
 
 const context = vm.createContext({
   window: { Lawson: L },
-  document: { getElementById: id => ids[id] || null, createElement: () => el() },
+  document: { body: el(), getElementById: id => ids[id] || null, createElement: () => el() },
   localStorage: {
     getItem: k => stored.get(k) ?? null,
     setItem: (k, v) => stored.set(k, v),
@@ -157,6 +157,15 @@ async function reset() {
   await flush();
   assert.deepEqual(texts(), ['The park!'], 'opening tick names the picture only');
   assert.equal(spoken.length, 1, 'welcome is not spoken in the same tick');
+
+  const traySource = ids.sceneTray.children.flatMap(child => child.children)
+    .find(child => child.className === 'scene-sticker-source');
+  assert.ok(traySource, 'the tray has a sticker source');
+  const name = traySource.getAttribute('aria-label');
+  traySource.handlers.pointerdown({ clientX: 10, clientY: 10, pointerId: 1, preventDefault() {} });
+  assert.equal(traySource.getAttribute('aria-label'), `${name}, held`, 'dragging names the held sticker');
+  traySource.handlers.pointercancel();
+  assert.equal(traySource.getAttribute('aria-label'), name, 'cancelling restores the sticker name');
 
   // Hold the name past the old same-tick cut-off and the 400 ms floor.
   await runUntil(550);
