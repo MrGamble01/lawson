@@ -370,6 +370,7 @@
 
     txt.textContent = page.text;
     counter.textContent = `${pageIdx + 1} / ${story.pages.length}`;
+    counter.setAttribute("aria-label", `Page ${pageIdx + 1} of ${story.pages.length}`);
 
     atEnd = false;
     lineHeard = false;
