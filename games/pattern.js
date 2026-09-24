@@ -67,11 +67,14 @@
       const c = document.createElement("span");
       c.className = "pattern-cell";
       c.textContent = it.e;
+      // Sequence names match the spoken words; the emoji stays on the face.
+      c.setAttribute("aria-label", it.n);
       seqEl.appendChild(c);
     });
     const q = document.createElement("span");
     q.className = "pattern-cell pattern-cell--q";
     q.textContent = "?";
+    q.setAttribute("aria-label", "What comes next?");
     seqEl.appendChild(q);
 
     const choicesEl = document.getElementById("patternChoices");
@@ -93,6 +96,7 @@
           document.getElementById("patternBestVal").textContent = L.getHighScore("patternBest");
 
           q.textContent = it.e;
+          q.setAttribute("aria-label", answer.n);
           q.classList.remove("pattern-cell--q");
           q.classList.add("pattern-cell--found");
           L.say(`${L.cheer()} ${answer.n}!`);

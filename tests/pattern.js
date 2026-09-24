@@ -44,6 +44,7 @@ function el(tag, id) {
     style: {},
     children: [],
     textContent: '',
+    attrs: {},
     _classes: new Set(),
     handlers: [],
     classList: {
@@ -53,7 +54,7 @@ function el(tag, id) {
     },
     set className(v) { node._classes = new Set(String(v).split(/\s+/).filter(Boolean)); },
     get className() { return [...node._classes].join(' '); },
-    setAttribute() {},
+    setAttribute(k, v) { node.attrs[k] = String(v); },
     appendChild(c) { node.children.push(c); return c; },
     set innerHTML(_) { node.children = []; },
     get innerHTML() { return ''; },
@@ -154,6 +155,13 @@ function tapWrong() {
 (async () => {
   pattern.start();
   assert.equal(spoken.length, 0, 'opening prompt is on a timer, not the same tick as start');
+  const mystery = ids.patternSeq.children.find((c) => c.classList.contains('pattern-cell--q'));
+  assert.equal(mystery.attrs['aria-label'], 'What comes next?');
+  for (const cell of ids.patternSeq.children.filter((c) => c !== mystery)) {
+    assert.ok(cell.attrs['aria-label'], 'each shown sequence cell has a name');
+    const choice = ids.patternChoices.children.find((b) => b.textContent === cell.textContent);
+    if (choice) assert.equal(cell.attrs['aria-label'], choice.attrs['aria-label'], 'sequence and choice names match');
+  }
 
   // Fast wrong tap, before the 380 ms opening prompt.
   await runUntil(200);
@@ -183,5 +191,17 @@ function tapWrong() {
   await runUntil(clock.now + 4000);
   assert.equal(spoken.length, spokenAtStop, 'stop() cancelled the waiter');
 
+  pattern.start();
+  const q = ids.patternSeq.children.find((c) => c.classList.contains('pattern-cell--q'));
+  const answer = patternAnswer();
+  const correct = ids.patternChoices.children.find((b) => b.textContent === answer);
+  correct.handlers.forEach((fn) => fn({ stopPropagation() {} }));
+  assert.equal(q.textContent, answer, 'the answer emoji fills the mystery cell');
+  assert.ok(q.classList.contains('pattern-cell--found'));
+  assert.equal(q.attrs['aria-label'], correct.attrs['aria-label'], 'the filled cell names the answer');
+  assert.equal(lastLine().text, `Yay! ${q.attrs['aria-label']}!`, 'the filled cell matches the spoken answer');
+  pattern.stop();
+
+  console.log('PASS: pattern sequence names match choices; mystery asks the prompt and names the revealed answer');
   console.log('PASS: pattern pacing — Try again! held past the old 380 ms prompt; question one beat after it ends; stop() cancels');
 })().catch((e) => { console.error(e); process.exit(1); });
