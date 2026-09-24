@@ -194,6 +194,8 @@
       downY = e.clientY;
       tub.setPointerCapture?.(e.pointerId);
       tub.classList.add("grabbed");
+      const label = tub.getAttribute("aria-label");
+      if (!label.endsWith(", held")) tub.setAttribute("aria-label", label + ", held");
       makeGhost(e.clientX, e.clientY);
       L.beep(620, 0.04, "sine");
       e.preventDefault();
@@ -206,6 +208,8 @@
       if (!dragging) return;
       dragging = false;
       tub.classList.remove("grabbed");
+      const label = tub.getAttribute("aria-label");
+      if (label.endsWith(", held")) tub.setAttribute("aria-label", label.slice(0, -6));
       if (Math.hypot(e.clientX - downX, e.clientY - downY) < 6) {
         // Tap → that scoop goes straight onto the cone (no drag needed).
         if (ghost) { ghost.remove(); ghost = null; }
@@ -218,6 +222,8 @@
     tub.addEventListener("pointercancel", () => {
       dragging = false;
       tub.classList.remove("grabbed");
+      const label = tub.getAttribute("aria-label");
+      if (label.endsWith(", held")) tub.setAttribute("aria-label", label.slice(0, -6));
       if (ghost) { ghost.remove(); ghost = null; }
     });
   }
@@ -294,6 +300,8 @@
       downY = e.clientY;
       btn.setPointerCapture?.(e.pointerId);
       btn.classList.add("grabbed");
+      const label = btn.getAttribute("aria-label");
+      if (!label.endsWith(", held")) btn.setAttribute("aria-label", label + ", held");
       makeGhost(e.clientX, e.clientY);
       L.beep(720, 0.04, "sine");
       e.preventDefault();
@@ -316,6 +324,8 @@
       if (!dragging) return;
       dragging = false;
       btn.classList.remove("grabbed");
+      const label = btn.getAttribute("aria-label");
+      if (label.endsWith(", held")) btn.setAttribute("aria-label", label.slice(0, -6));
       const moved = Math.hypot(e.clientX - downX, e.clientY - downY);
       if (moved < 6) {
         placeOnTop();
@@ -328,6 +338,8 @@
     btn.addEventListener("pointercancel", () => {
       dragging = false;
       btn.classList.remove("grabbed");
+      const label = btn.getAttribute("aria-label");
+      if (label.endsWith(", held")) btn.setAttribute("aria-label", label.slice(0, -6));
       if (ghost) { ghost.remove(); ghost = null; }
     });
   }
