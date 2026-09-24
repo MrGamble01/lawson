@@ -122,6 +122,7 @@
     XYLO.forEach((k, i) => {
       const bar = document.createElement("button");
       bar.className = "music-xylo-bar";
+      bar.setAttribute("aria-label", k.note === "C2" ? "High C" : k.note);
       bar.dataset.xidx = String(i);
       bar.style.background = k.color;
       bar.style.height = (88 - i * 4) + "%";

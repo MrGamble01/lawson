@@ -1,4 +1,4 @@
-// Music Studio drum names and Song-button pacing; no browser required.
+// Music Studio instrument names and Song-button pacing; no browser required.
 // Tapping Song used to say "Twinkle Twinkle" and start the first note
 // on a 400 ms timer, so the melody cut the name off whenever the engine
 // started late. Now the notes wait on afterSpeech — floor 400 ms, beat
@@ -191,6 +191,11 @@ const tapSong = () => ids.musicSong.handlers.at(-1)();
   await finishLine(lastLine());
   assert.ok(ids.musicSong, 'Song button built');
 
+  const bars = queryAll(ids.musicXylo, '.music-xylo-bar');
+  assert.deepEqual(bars.map(bar => bar.textContent), ['C', 'D', 'E', 'F', 'G', 'A', 'B', 'C2'], 'xylophone keeps its visible notes');
+  assert.equal(bars.find(bar => bar.textContent === 'C2').attrs['aria-label'], 'High C', 'top bar has a clear High C name');
+  assert.equal(bars.find(bar => bar.textContent === 'G').attrs['aria-label'], 'G', 'mid bar uses its note name');
+
   const drumNames = { kick: 'Kick', snare: 'Snare', hat: 'Hi-hat', tom: 'Tom', cymb: 'Cymbal' };
   const pads = queryAll(ids.musicDrums, '.music-drum');
   assert.deepEqual(pads.map(pad => pad.dataset.drum), Object.keys(drumNames), 'all five drum ids are preserved');
@@ -252,7 +257,7 @@ const tapSong = () => ids.musicSong.handlers.at(-1)();
   await runUntil(clock.now + 4000);
   assert.equal(beepsAt.length, 0, 'second Song tap cancelled the waiter');
 
-  console.log('PASS: music — clear drum names; song name held past 400 ms; first note one beat after it ends; stop / second tap cancel');
+  console.log('PASS: music — clear instrument names; song name held past 400 ms; first note one beat after it ends; stop / second tap cancel');
 })().catch((err) => {
   console.error(err);
   process.exit(1);
