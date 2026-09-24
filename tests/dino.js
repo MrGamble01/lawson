@@ -140,6 +140,20 @@ const lastLine = () => spoken.at(-1);
 const finishLine = async (entry) => { entry.resolve(); await flush(); };
 const texts = () => spoken.map(s => s.text);
 
+function checkDragName(tool, name) {
+  const down = { clientX: 0, clientY: 0, pointerId: 1, preventDefault() {} };
+  tool.listeners.pointerdown.forEach(fn => fn(down));
+  assert.equal(tool.getAttribute('aria-label'), `${name}, held`);
+  assert.equal(tool.classList.contains('grabbed'), true);
+  assert.equal(tool.classList.contains('held'), false, 'held is only in the accessible name');
+  tool.listeners.pointerdown.forEach(fn => fn(down));
+  assert.equal(tool.getAttribute('aria-label'), `${name}, held`, 'held suffix is not duplicated');
+  // End away from the start so this is a drag, not a tap that starts auto-scrub/dry.
+  tool.listeners.pointerup.forEach(fn => fn({ ...down, clientX: 20 }));
+  assert.equal(tool.getAttribute('aria-label'), name);
+  assert.equal(tool.classList.contains('grabbed'), false);
+}
+
 (async () => {
   dino.start();
   assert.equal(lastLine().text, 'Wash him with soap!');
@@ -148,9 +162,11 @@ const texts = () => spoken.map(s => s.text);
   const labels = () => ['dinoSoap', 'dinoShower', 'dinoTowel'].map(id => ids[id].getAttribute('aria-label'));
   assert.deepEqual(disabled(), ['false', 'true', 'true'], 'soap phase: only the soap is live; the shower and towel say they are dimmed');
   assert.deepEqual(labels(), ['Soap', 'Pull the shower, dimmed', 'Towel, dimmed'], 'soap phase: names include the dimmed state');
+  checkDragName(ids.dinoSoap, 'Soap');
 
   // Keyboard-style tap: soap auto-scrubs, shower rinses, towel dries.
   ids.dinoSoap.click(0);
+  assert.equal(ids.dinoSoap.getAttribute('aria-label'), 'Soap, held', 'auto-scrub holds the soap');
   await runUntil(clock.now + 4000);
   assert.equal(body.dataset.dinoPhase, 'shower', `soap should move to shower, got ${body.dataset.dinoPhase}`);
   assert.deepEqual(disabled(), ['true', 'false', 'true'], 'shower phase: only the shower is live');
@@ -163,9 +179,11 @@ const texts = () => spoken.map(s => s.text);
   assert.equal(body.dataset.dinoPhase, 'towel', `shower should move to towel, got ${body.dataset.dinoPhase}`);
   assert.deepEqual(disabled(), ['true', 'true', 'false'], 'towel phase: only the towel is live');
   assert.deepEqual(labels(), ['Soap, dimmed', 'Pull the shower, dimmed', 'Towel'], 'towel phase: names include the dimmed state');
+  checkDragName(ids.dinoTowel, 'Towel');
   await finishLine(lastLine()); // "Dry him with the towel!"
 
   ids.dinoTowel.click(0);
+  assert.equal(ids.dinoTowel.getAttribute('aria-label'), 'Towel, held', 'auto-dry holds the towel');
   const dryFrom = clock.now;
   let cheer = null;
   for (let t = 0; t <= 4000 && !cheer; t += 50) {
