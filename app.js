@@ -1353,6 +1353,10 @@ document.querySelectorAll("[data-home]").forEach((btn) => {
 // tap on the home menu after the restructure.
 (function setupHubTitles() {
   document.querySelectorAll(".hub-title").forEach((title) => {
+    title.setAttribute("role", "button");
+    title.setAttribute("tabindex", "0");
+    const label = stripLeadingEmoji(title.textContent);
+    if (label) title.setAttribute("aria-label", label);
     title.style.cursor = "pointer";
     onTap(title, () => {
       const text = (title.textContent || "").trim();
