@@ -54,6 +54,8 @@ function playthrough() {
     return node;
   }
   const target = el('div', 'matchTarget');
+  const prompt = el('div', 'matchPrompt');
+  prompt.textContent = 'Find this!';
   const choices = el('div', 'matchChoices');
   nodes.matchScoreVal = el('span', 'matchScoreVal');
   nodes.matchBestVal = el('span', 'matchBestVal');
@@ -106,6 +108,8 @@ function playthrough() {
 
   const opening = said.slice();
   assert.ok(opening.some((t) => /^Find the /.test(t)), 'opening prompt is spoken');
+  assert.equal(prompt.textContent, opening.find((t) => /^Find the /.test(t)), 'visible banner matches the opening spoken prompt');
+  assert.equal(prompt.textContent, example.getAttribute('aria-label'), 'visible banner and example accessible name match');
   said.length = 0;
   example._tap();
   assert.equal(said.length, 1, 'activating the example re-hears one prompt');
