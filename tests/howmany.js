@@ -43,6 +43,7 @@ function el(tag, id) {
     id: id || '',
     style: {},
     children: [],
+    attrs: {},
     textContent: '',
     _classes: new Set(),
     handlers: [],
@@ -53,7 +54,7 @@ function el(tag, id) {
     },
     set className(v) { node._classes = new Set(String(v).split(/\s+/).filter(Boolean)); },
     get className() { return [...node._classes].join(' '); },
-    setAttribute() {},
+    setAttribute(name, value) { node.attrs[name] = String(value); },
     appendChild(c) { node.children.push(c); return c; },
     set innerHTML(_) { node.children = []; },
     get innerHTML() { return ''; },
@@ -146,8 +147,20 @@ function tapWrong() {
   btn.handlers.forEach((fn) => fn({ stopPropagation() {} }));
 }
 
+function assertChoiceNames() {
+  const NUMBER_WORDS = ['', 'one', 'two', 'three', 'four', 'five'];
+  const choices = ids.howmanyChoices.children;
+  assert.ok(choices.length > 0, 'number choices should exist');
+  for (const btn of choices) {
+    const digit = Number(btn.textContent);
+    assert.ok(NUMBER_WORDS[digit], 'the visible choice should remain a digit from 1 to 5');
+    assert.equal(btn.attrs['aria-label'], NUMBER_WORDS[digit], 'choice name should match the spoken number word');
+  }
+}
+
 (async () => {
   howmany.start();
+  assertChoiceNames();
   assert.equal(spoken.length, 0, 'opening prompt is on a timer, not the same tick as start');
 
   // Fast wrong tap, before the 450 ms opening prompt.
@@ -171,6 +184,7 @@ function tapWrong() {
   // A later tap / stop() cancels a pending re-prompt.
   howmany.stop();
   howmany.start();
+  assertChoiceNames();
   await runUntil(200);
   tapWrong();
   assert.equal(lastLine().text, 'Count them again!');

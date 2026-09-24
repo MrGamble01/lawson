@@ -89,6 +89,8 @@
       const btn = document.createElement("button");
       btn.className = "howmany-choice";
       btn.textContent = c;
+      // Name matches the spoken number word; the digit stays on the face.
+      btn.setAttribute("aria-label", NUMBER_WORDS[c] || String(c));
       L.onTap(btn, (e) => {
         if (answered) return;   // the cheer and the next round are already on their way
         if (e.stopPropagation) e.stopPropagation();
