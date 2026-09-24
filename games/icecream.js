@@ -356,6 +356,7 @@
     L.beep(720 + Math.random() * 200, 0.05, "triangle");
     L.haptic(5);
     L.say(topping.say);
+    refreshEatBtn();
   }
 
   // ====================================================================
@@ -386,13 +387,19 @@
 
   // Eat is the keyboard target for the sundae. Disabled already says the
   // cone is empty; the name carries what is on it ("Eat: vanilla sundae"),
-  // because the scoops themselves are pictures only.
+  // because the scoops and toppings themselves are pictures only.
   function eatName() {
     if (scoops.length === 0) return "Eat: empty cone";
     const flavors = scoops.map((s) => s.flavor.name);
-    return flavors.length === 1
+    const name = flavors.length === 1
       ? `Eat: ${flavors[0]} sundae`
       : `Eat: ${flavors.join(", ")}`;
+    const toppings = [...new Set(placedToppings.map((p) => p.topping.name))];
+    if (toppings.length === 0) return name;
+    const toppingNames = toppings.length < 3
+      ? toppings.join(" and ")
+      : `${toppings.slice(0, -1).join(", ")}, and ${toppings[toppings.length - 1]}`;
+    return `${name} with ${toppingNames}`;
   }
   function refreshEatBtn() {
     const btn = $("icecreamEat");
