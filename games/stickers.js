@@ -42,6 +42,8 @@
         </div>
         <div class="sticker-empty-title">Let's find some stickers!</div>
         <div class="sticker-empty-sub">Play any game and Bobo will pop one in for you.</div>`;
+      empty.setAttribute("role", "status");
+      empty.setAttribute("aria-label", "Let's find some stickers! Play any game and Bobo will pop one in for you.");
       grid.appendChild(empty);
     }
 
