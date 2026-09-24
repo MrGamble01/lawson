@@ -256,6 +256,8 @@
       downY = e.clientY;
       btn.setPointerCapture?.(e.pointerId);
       btn.classList.add("grabbed");
+      const label = btn.getAttribute("aria-label");
+      if (!label.endsWith(", held")) btn.setAttribute("aria-label", label + ", held");
       makeGhost(e.clientX, e.clientY);
       L.beep(620, 0.04, "sine");
       e.preventDefault();
@@ -277,6 +279,8 @@
       if (!dragging) return;
       dragging = false;
       btn.classList.remove("grabbed");
+      const label = btn.getAttribute("aria-label");
+      if (label.endsWith(", held")) btn.setAttribute("aria-label", label.slice(0, -6));
       const moved = Math.hypot(e.clientX - downX, e.clientY - downY);
       if (moved < 6) {
         placeAtCentre();
@@ -291,6 +295,8 @@
     btn.addEventListener("pointercancel", () => {
       dragging = false;
       btn.classList.remove("grabbed");
+      const label = btn.getAttribute("aria-label");
+      if (label.endsWith(", held")) btn.setAttribute("aria-label", label.slice(0, -6));
       if (ghost) { ghost.remove(); ghost = null; }
     });
   }
