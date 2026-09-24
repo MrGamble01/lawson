@@ -36,6 +36,12 @@ vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../games/stickers.js'),
 L.games.stickers.start();
 assert.equal(ids.stickerCount.textContent, '0 / 3');
 assert.equal(ids.stickerCount.getAttribute('aria-label'), '0 of 3 stickers');
+assert.equal(ids.stickerProgress.getAttribute('role'), 'progressbar');
+assert.equal(ids.stickerProgress.getAttribute('aria-valuemin'), '0');
+assert.equal(ids.stickerProgress.getAttribute('aria-valuemax'), '100');
+assert.equal(ids.stickerProgress.getAttribute('aria-valuenow'), '0');
+assert.equal(ids.stickerProgress.getAttribute('aria-label'), '0 of 3 stickers');
+assert.equal(ids.stickerProgress.style.width, '0%');
 const empty = ids.stickerGrid.children.find(child => child.className.split(/\s+/).includes('sticker-empty'));
 assert.ok(empty, 'zero earned stickers shows the empty banner');
 assert.equal(empty.getAttribute('role'), 'status');
@@ -46,6 +52,9 @@ earned.add('balloon');
 L.games.stickers.start();
 assert.equal(ids.stickerCount.textContent, '2 / 3');
 assert.equal(ids.stickerCount.getAttribute('aria-label'), '2 of 3 stickers');
+assert.equal(ids.stickerProgress.getAttribute('aria-valuenow'), '67');
+assert.equal(ids.stickerProgress.getAttribute('aria-label'), '2 of 3 stickers');
+assert.equal(ids.stickerProgress.style.width, '67%');
 assert.ok(!ids.stickerGrid.children.some(child => child.className.split(/\s+/).includes('sticker-empty')),
   'some earned stickers shows no empty banner');
 console.log('PASS: sticker book — count names stickers and empty status appears only with zero earned');
