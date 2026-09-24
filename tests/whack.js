@@ -167,8 +167,11 @@ const L = {
   celebrateNewHigh() {},
 };
 const window = { Lawson: L };
+const randomValues = [];
+const testMath = Object.create(Math);
+testMath.random = () => randomValues.length ? randomValues.shift() : Math.random();
 vm.runInNewContext(source, {
-  window, document, Math,
+  window, document, Math: testMath,
   setTimeout: vSetTimeout, clearTimeout: vClearTimeout,
   Date: { now: () => clock.now },
 });
@@ -179,7 +182,8 @@ const finishLine = async (entry) => { entry.resolve(); await flush(); };
 const tap = (node) => node.handlers.forEach((fn) => fn({}));
 const lettersTab = () => ids.whackModes.children.find((c) => c.dataset.mode === 'letters');
 const currentGoal = () => (ids.whackPrompt.textContent.match(/Whack the (.+)!/) || [])[1];
-const targetHole = () => ids.whackGrid.children.find((h) => (h.getAttribute('aria-label') || '').includes(`${currentGoal()}!`));
+const upHoles = () => ids.whackGrid.children.filter((h) => h.querySelector('.whack-critter').classList.contains('up'));
+const targetHole = () => upHoles().find((h) => h.querySelector('.whack-critter').textContent === currentGoal());
 
 (async () => {
   whack.start();
@@ -230,5 +234,33 @@ const targetHole = () => ids.whackGrid.children.find((h) => (h.getAttribute('ari
   await runUntil(clock.now + 3000);
   assert.equal(texts().filter((t) => t.startsWith('Whack the ')).length, 1, 'stop() cancels the pending next goal');
 
+  whack.start();
+  randomValues.push(0, 0, 0.99); // Goal A, first hole, long enough to survive both ticks.
+  tap(lettersTab());
+  assert.equal(currentGoal(), 'A');
+  const firstGoalHole = targetHole();
+  assert.match(firstGoalHole.getAttribute('aria-label'), /^Hole \d+: A, next$/);
+
+  randomValues.push(0, 0, 0.99); // A second A stays up when the first is hit.
+  await runUntil(clock.now + 600);
+  randomValues.push(0, 0.9, 0.04, 0.99); // A non-goal B.
+  await runUntil(clock.now + 1300);
+  const otherGoalHole = upHoles().find((h) => h !== firstGoalHole && h.querySelector('.whack-critter').textContent === 'A');
+  const nonGoalHole = upHoles().find((h) => h.querySelector('.whack-critter').textContent === 'B');
+  assert.ok(otherGoalHole);
+  assert.ok(nonGoalHole);
+  assert.match(otherGoalHole.getAttribute('aria-label'), /, next$/);
+  assert.match(nonGoalHole.getAttribute('aria-label'), /^Hole \d+: B$/);
+
+  randomValues.push(0.04); // Advance to B while A and B are still up.
+  tap(firstGoalHole);
+  assert.equal(currentGoal(), 'B');
+  assert.match(firstGoalHole.getAttribute('aria-label'), /^Hole \d+: empty$/);
+  assert.match(otherGoalHole.getAttribute('aria-label'), /^Hole \d+: A$/);
+  assert.match(nonGoalHole.getAttribute('aria-label'), /^Hole \d+: B, next$/);
+  assert.equal(randomValues.length, 0);
+  whack.stop();
+
   console.log('PASS: whack ABC — the hit is heard before the next goal; stop() cancels the waiter');
+  console.log('PASS: whack ABC — up holes name the next target and refresh when it changes');
 })().catch((e) => { console.error(e); process.exit(1); });
