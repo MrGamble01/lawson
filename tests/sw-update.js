@@ -24,11 +24,17 @@ const TYPES = { ".html": "text/html", ".js": "application/javascript", ".css": "
 
 function copySite() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "lawson-sw-"));
-  for (const f of ["index.html", "styles.css", "app.js", "manifest.json", "icon.svg", "apple-touch-icon.png", "sw.js"]) fs.copyFileSync(path.join(ROOT, f), path.join(dir, f));
-  for (const sub of ["lib", "games"]) {
-    fs.mkdirSync(path.join(dir, sub));
-    for (const f of fs.readdirSync(path.join(ROOT, sub))) fs.copyFileSync(path.join(ROOT, sub, f), path.join(dir, sub, f));
+  const sw = fs.readFileSync(path.join(ROOT, "sw.js"), "utf8");
+  const body = sw.match(/const ASSETS = \[([\s\S]*?)\];/);
+  const assets = body ? [...body[1].matchAll(/"(\.\/[^"]*)"/g)].map((m) => m[1]) : [];
+  for (const rel of assets) {
+    if (rel === "./") continue;
+    const dest = path.join(dir, rel);
+    fs.mkdirSync(path.dirname(dest), { recursive: true });
+    fs.copyFileSync(path.join(ROOT, rel), dest);
   }
+  // The page registers sw.js itself; it is not one of the precached assets.
+  fs.copyFileSync(path.join(ROOT, "sw.js"), path.join(dir, "sw.js"));
   return dir;
 }
 

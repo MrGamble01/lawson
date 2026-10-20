@@ -101,19 +101,19 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   keeps free of game controls, so it never covers a tool or the story
   text. Off or on, every spoken line is also announced to screen readers
   through a live region.
-- Choose and preview a storyteller voice. Automatic prefers local English
-  voices with enhanced quality when available, using their natural pitch.
-  The choice is saved on this device. Available voices depend on the device;
-  voices marked online require a connection. If the chosen voice can't
-  speak (an online voice with no connection, say), the storyteller reads
-  with the best local voice instead and goes back to the chosen one when
-  it can; Settings says who is standing in. A line the device swallows
-  (iPads sometimes drop one right after a cut-off) is read again. After
-  "Listen to this voice", Settings reports how long the engine took to
-  start and how the line ended, plus a tally of the recent lines
-  (swallowed, read again, stand-in voice, cut off) — the way to check the
-  speech timings on a real iPad. On iPad, additional voices can
-  be downloaded in the device's accessibility speech settings. Story Time
+- Choose and preview a storyteller voice. Sarah (soft and friendly) is the
+  default; Lily (warm and bright) is the other choice. Both are ElevenLabs
+  premade voices, saved on this device. Lines the app already knows are
+  pre-generated clips and play instantly. Lines that include the child's
+  name are spoken by the same voice through the server, then remembered in
+  the browser. With no internet, or if that request fails, the iPad's own
+  voice reads instead. Download Ava (Premium) or Samantha (Enhanced) in
+  Settings, Accessibility, Spoken Content, Voices so that backup sounds
+  warm. If the device voice can't speak, the storyteller uses the best
+  local voice and Settings says who is standing in. A line the device
+  swallows (iPads sometimes drop one right after a cut-off) is read again.
+  After "Listen to this voice", Settings reports how long the line took to
+  start and how it ended, plus a tally of the recent lines. Story Time
   paces its pages on the chosen voice: each page turns once the line has
   actually been read, plus a beat to poke the scene. Poking a character
   answers with its sound, then the storyteller picks the line back up if
@@ -261,6 +261,31 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   high-score storage (`lib/storage.js`), sticker collection
   (`lib/achievements.js`), tutorials (`lib/tutorial.js`) — are in `lib/`.
 
+## Storyteller voices
+
+The API key stays on the server (`ELEVENLABS_API_KEY` on the Vercel
+project). `/api/tts` also reads `ELEVENLABS_VOICE_ID` (default
+`EXAVITQu4vr4xnSDxMaL`, Sarah) and `ELEVENLABS_MODEL` (default
+`eleven_flash_v2_5`; `eleven_turbo_v2_5` is the other allowed model).
+Free ElevenLabs accounts can call premade default voices only. Sarah and
+Lily (`pFZP5JQG7iQjIQuC4Bku`) work. A library voice id is ignored, because
+those requests return `402 paid_plan_required`. Leave
+`ELEVENLABS_VOICE_ID` on Sarah so live lines match the prebuilt clips.
+
+Set `TTS_PROVIDER=fish` with `FISH_API_KEY` and `FISH_REFERENCE_ID` to
+swap in Fish Audio. The page does not change.
+
+Fixed lines (prompts, cheers that do not name the child, story pages,
+character sounds) are generated once and served as static MP3s:
+
+```bash
+npm run tts:build
+```
+
+The script reads `ELEVENLABS_API_KEY` from the environment or `.env`,
+skips clips that already exist, and stops cleanly on an auth or quota
+error so it can be re-run. See `.env.example`.
+
 ## Tests
 
 Smoke + visual baseline checks for every game live in `tests/`.
@@ -270,6 +295,8 @@ npm ci && npx playwright install chromium   # once
 npm test                           # everything below, in order
 node tests/sw-assets.js            # sw.js ASSETS matches index.html and disk (no browser)
 node tests/voice.js                # speech engine + caption event (no browser)
+node tests/tts.js                  # ElevenLabs route, premade voices, static clips
+npm run tts:build                  # pre-generate storyteller MP3s (needs ELEVENLABS_API_KEY)
 node tests/story.js                # Story Time pacing (no browser)
 node tests/garden-sky.js           # Garden sky: sun and clouds are named buttons, clouds rest in view under reduced motion (no browser)
 node tests/match.js                # Match example is a named button that re-hears the prompt (no browser)

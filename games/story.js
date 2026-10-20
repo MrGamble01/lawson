@@ -372,6 +372,9 @@
     counter.textContent = `${pageIdx + 1} / ${story.pages.length}`;
     counter.setAttribute("aria-label", `Page ${pageIdx + 1} of ${story.pages.length}`);
 
+    const upcoming = story.pages[pageIdx + 1];
+    if (upcoming && upcoming.text && L.preloadSpeech) L.preloadSpeech(upcoming.text);
+
     atEnd = false;
     lineHeard = false;
     const seq = ++pageSeq;

@@ -13,7 +13,7 @@ function topLevelNames(file) {
   return names;
 }
 const shared = {};
-for (const file of ["lib/audio.js", "lib/storage.js", "lib/achievements.js", "lib/tutorial.js", "app.js"]) {
+for (const file of ["lib/tts-voices.js", "lib/audio.js", "lib/storage.js", "lib/achievements.js", "lib/tutorial.js", "app.js"]) {
   for (const n of topLevelNames(file)) shared[n] = "readonly";
 }
 
@@ -21,7 +21,7 @@ const browser = {};
 for (const n of [
   "window", "document", "navigator", "localStorage", "sessionStorage", "console", "location", "history",
   "setTimeout", "clearTimeout", "setInterval", "clearInterval", "requestAnimationFrame", "cancelAnimationFrame",
-  "queueMicrotask", "performance", "URL", "fetch", "Blob", "FileReader", "Image", "Audio", "Option",
+  "queueMicrotask", "performance", "URL", "URLSearchParams", "fetch", "Blob", "FileReader", "Image", "Audio", "AbortController", "Option",
   "AudioContext", "webkitAudioContext", "SpeechSynthesisUtterance", "speechSynthesis",
   "MutationObserver", "ResizeObserver", "IntersectionObserver", "CustomEvent", "Event", "KeyboardEvent",
   "PointerEvent", "MouseEvent", "TouchEvent", "DOMRect", "getComputedStyle", "matchMedia", "alert", "confirm",
@@ -49,6 +49,15 @@ module.exports = [
   {
     files: ["app.js", "lib/**/*.js", "games/**/*.js"],
     languageOptions: { ecmaVersion: 2022, sourceType: "script", globals: { ...browser, ...shared } },
+    rules,
+  },
+  {
+    files: ["lib/tts-voices.js"],
+    languageOptions: { globals: { module: "writable" } },
+  },
+  {
+    files: ["api/**/*.js", "scripts/**/*.js"],
+    languageOptions: { ecmaVersion: 2022, sourceType: "commonjs", globals: { ...node, ...browser } },
     rules,
   },
   {

@@ -972,5 +972,60 @@ assert.equal(said.at(-1), 'Pop the N!');
   document.hidden = false; document.dispatchEvent(new Event('visibilitychange')); await flush();
   assert.equal(run('isMusicDucked()'), false);
 
-  console.log('PASS: delayed voices, natural pitch, local quality preference, saved choice, language, volume, corrupt saved volume fallback, mute, missing voice fallback, speech completion promise, caption event, hide/show lifecycle, unusable-voice fallback, speechDone, afterSpeech, swallowed utterances, speech diagnostics, chime then cheer, announcements wait their turn, storyteller speed, name sounds-like, prompt reminder, music ducks under speech');
+  // ---- iPad Safari: premium / enhanced en-US over compact and novelty ----
+  run('setSoundMuted(true); setSpeechSpeed("normal"); setVoiceMuted(false); setVolume(1)');
+  voices = [
+    { name: 'Alex', lang: 'en-US', voiceURI: 'alex', localService: true },
+    { name: 'Samantha', lang: 'en-US', voiceURI: 'sam', localService: true },
+    { name: 'Samantha (Enhanced)', lang: 'en-US', voiceURI: 'sam-en', localService: true },
+    { name: 'Evan (Enhanced)', lang: 'en-US', voiceURI: 'evan', localService: true },
+    { name: 'Zoe (Enhanced)', lang: 'en-AU', voiceURI: 'zoe', localService: true },
+    { name: 'Ava (Premium)', lang: 'en-US', voiceURI: 'ava', localService: true },
+  ];
+  run('setSpeechVoice("")');
+  assert.equal(run('preferredVoice.voiceURI'), 'ava', 'Ava (Premium) is the warmest en-US voice');
+  speak('say("Premium line")');
+  assert.equal(spoken.at(-1).pitch, 1, 'premium voices stay at a natural pitch');
+  assert.equal(spoken.at(-1).rate, 0.95, 'premium voices keep the line rate');
+  voices = voices.filter(v => v.voiceURI !== 'ava');
+  events.dispatchEvent(new Event('voiceschanged'));
+  assert.equal(run('preferredVoice.voiceURI'), 'sam-en', 'Samantha (Enhanced) beats Evan, Zoe, and compact Samantha');
+  voices = voices.filter(v => v.voiceURI !== 'sam-en' && v.voiceURI !== 'evan');
+  events.dispatchEvent(new Event('voiceschanged'));
+  assert.equal(run('preferredVoice.voiceURI'), 'zoe', 'an enhanced voice beats compact Samantha');
+  voices = voices.filter(v => v.voiceURI !== 'zoe');
+  events.dispatchEvent(new Event('voiceschanged'));
+  assert.equal(run('preferredVoice.voiceURI'), 'sam', 'compact Samantha still beats robotic Alex');
+  speak('say("Compact line", 1)');
+  assert.equal(spoken.at(-1).pitch, 1.05, 'compact voices get a warmer pitch');
+  assert.ok(Math.abs(spoken.at(-1).rate - 0.94) < 1e-9, 'compact voices are eased a little slower');
+  // Safari clips the last syllable and withholds the voice list. Both are
+  // iPad-only; the desktop path (no navigator) stays unchanged above.
+  context.navigator = {
+    userAgent: 'Mozilla/5.0 (iPad; CPU OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1',
+    platform: 'iPad', maxTouchPoints: 5,
+  };
+  run('setSpeechVoice("sam")');
+  speak('say("Find the cow")');
+  assert.equal(spoken.at(-1).text, 'Find the cow\u200b ', 'iPad lines end with a silent break so the last word is not clipped');
+  // No English voice yet: hold the line until voiceschanged can fill one in.
+  voices = [];
+  events.dispatchEvent(new Event('voiceschanged'));
+  assert.equal(run('preferredVoice'), null);
+  timers.clear();
+  const nApple = spoken.length;
+  run('say("Waiting for voices")');
+  assert.equal(spoken.length, nApple, 'not spoken on the robotic default while the voice list is empty');
+  assert.ok(timerDelays().includes(700), 'waits for voiceschanged');
+  voices = [{ name: 'Samantha (Enhanced)', lang: 'en-US', voiceURI: 'sam-en', localService: true }];
+  events.dispatchEvent(new Event('voiceschanged'));
+  fireWhere(t => t.ms === 700);
+  assert.equal(spoken.at(-1).text, 'Waiting for voices\u200b ');
+  assert.equal(spoken.at(-1).voice.voiceURI, 'sam-en', 'the voice that arrived during the wait is the one that speaks');
+  spoken.at(-1).onstart(); spoken.at(-1).onend();
+  await flush();
+  delete context.navigator;
+  run('setSpeechVoice("sam-en"); setSoundMuted(false)');
+
+  console.log('PASS: delayed voices, natural pitch, premium and enhanced preference, saved choice, language, volume, corrupt saved volume fallback, mute, missing voice fallback, speech completion promise, caption event, hide/show lifecycle, unusable-voice fallback, speechDone, afterSpeech, swallowed utterances, speech diagnostics, chime then cheer, announcements wait their turn, storyteller speed, name sounds-like, prompt reminder, music ducks under speech, iPad voice wait');
 })().catch(e => { console.error(e); process.exit(1); });

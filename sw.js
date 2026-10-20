@@ -17,6 +17,7 @@ const ASSETS = [
   "./manifest.json",
   "./icon.svg",
   "./apple-touch-icon.png",
+  "./lib/tts-voices.js",
   "./lib/audio.js",
   "./lib/storage.js",
   "./lib/achievements.js",
@@ -45,6 +46,7 @@ const ASSETS = [
   "./games/train.js",
   "./games/music.js",
   "./games/stickers.js",
+  "./audio/tts/manifest.json",
 ];
 
 self.addEventListener("install", (e) => {
@@ -73,6 +75,9 @@ self.addEventListener("fetch", (e) => {
   if (req.method !== "GET") return;
   const url = new URL(req.url);
   if (url.origin !== location.origin) return;
+  // Query-string audio (/api/tts?t=...) must skip the cache. ignoreSearch
+  // would replay the first clip for every later line.
+  if (url.pathname.startsWith("/api/")) return;
 
   e.respondWith(caches.open(CACHE).then(async (cache) => {
     const cached = await cache.match(req, { ignoreSearch: true });
