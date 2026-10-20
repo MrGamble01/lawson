@@ -28,8 +28,13 @@
   --dur-fast: 0.12s;
   --dur-base: 0.32s;
 
-  --font-body: "Avenir Next", "Nunito", "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
-  --font-display: "Bradley Hand", "Segoe Print", "Chalkboard SE", "Comic Sans MS", "Marker Felt", cursive;
+  --font-body: Inter, "Avenir Next", "Nunito", "Noto Sans", "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, "Liberation Serif", "DejaVu Serif", Georgia, serif;
+  --c-cloth: #4e2a28;
+  --c-cloth-deep: #3a1e1c;
+  --c-foil: #f6e7c1;
+  --c-brass: #c4a46a;
+  --c-page: #f4ead8;
   /* A few painted fibers, tiled. No bitmap and no turbulence filter. */
   --paper-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><path d='M8 36c28 10 48-14 86-4' stroke='%23b08968' stroke-width='0.7' fill='none' opacity='0.35'/><path d='M16 128c36-14 70 18 120 2' stroke='%239a704e' stroke-width='0.6' fill='none' opacity='0.28'/><path d='M40 86c22 6 30-8 58-2' stroke='%23c4a484' stroke-width='0.5' fill='none' opacity='0.3'/><circle cx='28' cy='70' r='1.1' fill='%23a07858' opacity='0.28'/><circle cx='142' cy='48' r='0.9' fill='%23a07858' opacity='0.22'/><circle cx='96' cy='154' r='1' fill='%238a6848' opacity='0.2'/></svg>");
 }
@@ -265,11 +270,12 @@ html.dark .streak-badge {
   transform-origin: left center;
   /* perspective() lives on the screen, not #app, so position:fixed
      pieces inside a game return to the viewport when the turn ends. */
-  animation: pageTurn 0.68s cubic-bezier(.2,.75,.2,1);
+  animation: pageTurn 0.72s cubic-bezier(.16,.84,.32,1);
 }
 @keyframes pageTurn {
-  0%   { opacity: 0.2; transform: perspective(1500px) rotateY(-68deg); }
-  100% { opacity: 1; transform: none; }
+  0%   { transform: perspective(1800px) rotateY(-78deg); filter: brightness(0.62); }
+  46%  { filter: brightness(0.9); }
+  100% { transform: none; filter: none; }
 }
 
 /* ---------- Menu atmosphere (background bubbles) ---------- */
@@ -5537,3 +5543,444 @@ html.dark body.captions-on .captions.show {
   background: rgba(28, 18, 12, 0.92);
   border-color: rgba(246, 239, 228, 0.7);
 }
+
+/* ============================================================
+   Picture book
+   The app is a cloth-bound book on a reading table. Covers, page
+   gutters, and brass hardware are shared by every screen. Sizes
+   and positions of play pieces stay put.
+   ============================================================ */
+
+html, body {
+  background-color: #3a2618;
+  background-image:
+    radial-gradient(980px 620px at 50% 18%, rgba(255, 220, 170, 0.16), transparent 62%),
+    repeating-linear-gradient(90deg, rgba(255, 236, 210, 0.035) 0 1px, transparent 1px 6px),
+    linear-gradient(180deg, #6a4630 0%, #4a2e1e 38%, #2c1a12 100%);
+  background-size: auto, auto, auto;
+  background-blend-mode: normal, overlay, normal;
+  color: #2c2118;
+}
+
+header {
+  background:
+    linear-gradient(180deg, rgba(255, 236, 210, 0.14), transparent 42%),
+    linear-gradient(180deg, #6b3a32 0%, var(--c-cloth-deep) 100%);
+  border-bottom: 0;
+  box-shadow: 0 3px 0 var(--c-brass), 0 10px 18px rgba(30, 12, 8, 0.28);
+}
+header::after {
+  content: "";
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 6px;
+  height: 1px;
+  background: rgba(246, 231, 193, 0.35);
+  pointer-events: none;
+}
+header h1 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(22px, 3.2vw, 36px);
+  letter-spacing: 0.03em;
+  color: var(--c-foil);
+  text-shadow: 0 2px 0 rgba(40, 14, 10, 0.45);
+}
+.settings-btn {
+  background:
+    radial-gradient(circle at 35% 30%, #f6e7c1, var(--c-brass) 58%, #8a642e);
+  border: 3px solid var(--c-foil);
+  box-shadow: 0 3px 0 rgba(30, 12, 8, 0.35);
+  color: var(--c-cloth-deep);
+}
+.streak-badge {
+  background: linear-gradient(180deg, #f6e7c1, #e2c27a);
+  color: #4a2e12;
+  border-color: #fff8ee;
+}
+
+#app::before {
+  content: "";
+  position: absolute;
+  z-index: 8;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 34px;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(36, 16, 8, 0.38), rgba(36, 16, 8, 0.05) 70%, transparent);
+}
+
+/* Open page for the library and the hubs. The wood table shows
+   around the page. Play screens stay full-bleed so nothing shifts. */
+#menu,
+.hub-screen {
+  inset: 14px 16px 16px 22px;
+  border-radius: 2px 18px 16px 3px;
+  background-color: var(--c-page);
+  background-image:
+    radial-gradient(640px 280px at 8% 0%, rgba(255, 255, 255, 0.55), transparent 60%),
+    radial-gradient(520px 320px at 100% 100%, rgba(196, 140, 90, 0.14), transparent 62%),
+    linear-gradient(180deg, #f8f2e6, #f0e3d0);
+  box-shadow:
+    -12px 0 0 #5c3828,
+    0 0 0 1px rgba(246, 231, 193, 0.28),
+    0 18px 30px rgba(20, 10, 6, 0.32);
+}
+
+/* Cloth-bound covers. The inline --c is the cloth dye. */
+.place {
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.28) 0 13px, transparent 13px),
+    linear-gradient(165deg,
+      color-mix(in srgb, var(--c, #c47a55) 34%, #2a1810),
+      color-mix(in srgb, var(--c, #c47a55) 18%, #1a100c));
+  border: 1px solid rgba(246, 231, 193, 0.55);
+  border-radius: 3px 16px 14px 3px;
+  box-shadow:
+    inset 0 0 0 1px rgba(246, 231, 193, 0.12),
+    0 11px 0 -7px rgba(90, 56, 32, 0.55),
+    0 16px 18px rgba(24, 10, 6, 0.22);
+  color: var(--c-foil);
+}
+.place::before {
+  background: linear-gradient(180deg, rgba(255, 248, 230, 0.2), transparent 38%);
+  opacity: 1;
+  mix-blend-mode: normal;
+}
+.place::after {
+  content: "";
+  position: absolute;
+  inset: 7px 7px 7px 18px;
+  border: 1px solid rgba(246, 231, 193, 0.32);
+  border-radius: 2px 10px 8px 2px;
+  pointer-events: none;
+}
+.place-label {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--c-foil);
+  background: transparent;
+  border: 0;
+  padding: 0;
+  text-shadow: 0 1px 0 rgba(20, 8, 4, 0.35);
+}
+.place-count {
+  font-family: var(--font-body);
+  color: rgba(246, 231, 193, 0.92);
+  background: transparent;
+  padding: 0;
+}
+.place-emoji {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(64px, 8vw, 88px);
+  height: clamp(64px, 8vw, 88px);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 28%, #fffdf8 0%, #f3e2c4 62%, #e4c89a 100%);
+  box-shadow:
+    0 0 0 3px rgba(246, 231, 193, 0.75),
+    0 8px 14px rgba(20, 8, 4, 0.28);
+  font-size: clamp(34px, 4.6vw, 50px);
+  animation: medallionFloat 3.8s ease-in-out infinite;
+}
+@keyframes medallionFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-5px); }
+}
+.place:active {
+  transform: translateY(7px);
+  box-shadow:
+    inset 0 0 0 1px rgba(246, 231, 193, 0.12),
+    0 4px 0 -3px rgba(90, 56, 32, 0.45),
+    0 8px 12px rgba(24, 10, 6, 0.2);
+}
+.place-art {
+  filter: drop-shadow(0 6px 8px rgba(20, 8, 4, 0.28));
+}
+
+.hub-screen[data-hub-theme] {
+  background-color: var(--c-page);
+  background-image:
+    radial-gradient(520px 240px at 0% 0%, rgba(196, 140, 90, 0.16), transparent 60%),
+    linear-gradient(180deg, #f8f2e6, #efe2cf);
+}
+.hub-title,
+.hub-screen[data-hub-theme] .hub-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--c-cloth);
+  text-shadow: none;
+  letter-spacing: 0.02em;
+}
+.tile {
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.28) 0 10px, transparent 10px),
+    linear-gradient(165deg,
+      color-mix(in srgb, var(--c, #c47a55) 34%, #2a1810),
+      color-mix(in srgb, var(--c, #c47a55) 18%, #1a100c));
+  border: 1px solid rgba(246, 231, 193, 0.5);
+  border-radius: 3px 16px 14px 3px;
+  color: var(--c-foil);
+  box-shadow:
+    0 10px 0 -6px rgba(90, 56, 32, 0.5),
+    0 14px 16px rgba(24, 10, 6, 0.22);
+}
+.tile::before {
+  background: linear-gradient(180deg, rgba(255, 248, 230, 0.18), transparent 40%);
+}
+.tile .emoji {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(44px, 12vw, 62px);
+  height: clamp(44px, 12vw, 62px);
+  font-size: clamp(26px, 6vw, 40px);
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, #fffdf8, #f0ddc0 70%);
+  box-shadow: 0 0 0 3px rgba(246, 231, 193, 0.7);
+}
+.tile .label {
+  font-family: var(--font-display);
+  color: var(--c-foil);
+  background: transparent;
+  border: 0;
+  text-shadow: 0 1px 0 rgba(20, 8, 4, 0.35);
+}
+
+.home-btn {
+  border: 3px solid var(--c-foil);
+  background: radial-gradient(circle at 35% 30%, #f6e7c1, var(--c-brass) 55%, #8a642e);
+  box-shadow: 0 0 0 3px var(--c-cloth), 0 5px 0 rgba(30, 12, 8, 0.28);
+}
+.badge {
+  font-family: var(--font-display);
+  background: #fffaf3;
+  color: var(--c-cloth);
+  border: 2px solid var(--c-brass);
+  box-shadow: 0 3px 0 rgba(60, 32, 16, 0.12);
+}
+.mode-tab {
+  font-family: var(--font-body);
+  color: var(--c-cloth);
+  background: #fffaf3;
+  border: 2px solid var(--c-brass);
+  border-radius: 8px 8px 14px 14px;
+}
+.mode-tab.active {
+  color: var(--c-foil);
+  background: var(--c-cloth);
+  border-color: var(--c-foil);
+}
+.target-banner,
+.find-prompt,
+.story-counter,
+.piano-song-btn,
+.welcome-toast,
+.tutorial-pill {
+  font-family: var(--font-display);
+  color: #2c2118;
+  background: #fffaf3;
+  border-color: var(--c-brass);
+}
+.target-banner {
+  border-width: 2px;
+  box-shadow: 0 5px 0 rgba(60, 32, 16, 0.12);
+}
+.game-banner {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--c-foil);
+  text-shadow: 0 2px 0 rgba(40, 16, 10, 0.55), 0 10px 24px rgba(40, 16, 10, 0.35);
+}
+.count-prompt,
+.listen-prompt,
+.pattern-prompt,
+.match-target-label,
+.howmany-prompt,
+.mix-target-name {
+  font-family: var(--font-display);
+  color: var(--c-cloth);
+  text-shadow: none;
+}
+.match-target-item { border-color: var(--c-brass); background: #fffaf3; }
+.story-bubble {
+  background: #fffaf3;
+  border-color: var(--c-brass);
+  border-radius: 18px;
+}
+.story-text {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: #2c2118;
+}
+.find-target-name { color: var(--c-cloth); }
+.farm-tools,
+.garden-tools {
+  background: rgba(255, 248, 238, 0.9);
+  border: 2px solid rgba(196, 164, 106, 0.85);
+  border-radius: 18px;
+}
+.farm-tool,
+.garden-tool,
+.cook-tool,
+.icecream-topping-source,
+.doodle-tool,
+.color-tool {
+  border-color: var(--c-brass);
+  background: #fffaf3;
+}
+.bobo-cheer__bubble,
+.tutorial-text {
+  color: var(--c-cloth);
+  border-color: var(--c-brass);
+}
+
+/* Painted endpapers. Illustrated skies keep the colors their
+   scripts paint (farm, garden, train, story, scene). */
+#popGame {
+  background:
+    radial-gradient(460px 300px at 82% 12%, rgba(224, 112, 78, 0.38), transparent 68%),
+    radial-gradient(420px 280px at 8% 88%, rgba(240, 196, 120, 0.4), transparent 70%),
+    linear-gradient(180deg, #f7ecdf 0%, #f3d7c2 100%);
+}
+#whackGame {
+  background: linear-gradient(180deg, #d7ebe4 0%, #c9d7b4 48%, #7f9a62 100%);
+}
+#cookGame {
+  background:
+    radial-gradient(400px 220px at 50% 0%, rgba(255, 244, 220, 0.7), transparent 60%),
+    linear-gradient(180deg, #f6ead8 0%, #f0d2ae 100%);
+}
+#dinoGame {
+  background: linear-gradient(180deg, #e7f1ef 0%, #d5e4e6 55%, #b7d0d4 100%);
+}
+#countGame,
+#colorGame,
+#memoryGame,
+#listenGame,
+#howmanyGame,
+#patternGame,
+#dotsGame,
+#stickersGame,
+#musicGame,
+#matchGame,
+#mixGame,
+#activity {
+  background:
+    radial-gradient(540px 240px at 12% 0%, rgba(196, 122, 85, 0.16), transparent 62%),
+    radial-gradient(420px 260px at 100% 100%, rgba(110, 140, 120, 0.12), transparent 60%),
+    linear-gradient(180deg, #f7f1e6, #f0e2d0);
+}
+#icecreamGame {
+  background: linear-gradient(180deg, #f8efe6 0%, #f3d5c8 50%, #e7b7aa 100%);
+}
+#pianoGame {
+  background:
+    linear-gradient(180deg, rgba(246, 231, 193, 0.08), transparent 30%),
+    linear-gradient(180deg, #3a2a22 0%, #1c120e 100%);
+}
+#doodleGame { background: #f6efe4; }
+.screen:not(#menu):not(.hub-screen) {
+  box-shadow: inset 26px 0 28px -20px rgba(36, 16, 8, 0.32);
+}
+
+.splash {
+  background:
+    radial-gradient(500px 280px at 50% 18%, rgba(255, 220, 170, 0.18), transparent 60%),
+    linear-gradient(180deg, #6b3a32, #3a1e1c);
+  background-size: auto, auto;
+}
+.splash-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--c-foil);
+  text-shadow: 0 2px 0 rgba(30, 12, 8, 0.45);
+}
+.splash-sub {
+  font-family: var(--font-body);
+  color: rgba(246, 231, 193, 0.82);
+  letter-spacing: 0.28em;
+}
+
+.settings-overlay { background: rgba(28, 16, 10, 0.52); }
+.settings-panel {
+  background: var(--c-page);
+  background-image: none;
+  border: 0;
+  border-radius: 4px 18px 16px 4px;
+  box-shadow:
+    -12px 0 0 var(--c-cloth),
+    0 0 0 1px rgba(246, 231, 193, 0.3),
+    0 22px 48px rgba(20, 10, 6, 0.4);
+}
+.settings-head {
+  background: linear-gradient(180deg, #6b3a32, var(--c-cloth-deep));
+  border-bottom: 3px solid var(--c-brass);
+}
+.settings-panel h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--c-foil);
+}
+.settings-dismiss {
+  background: radial-gradient(circle at 35% 30%, #f6e7c1, var(--c-brass));
+  border-color: var(--c-foil);
+  color: var(--c-cloth-deep);
+}
+.settings-body { scrollbar-color: var(--c-brass) transparent; }
+.settings-field { color: #5c4636; }
+.settings-field input,
+.settings-field select {
+  border-color: #c4a484;
+  background: #fffdf8;
+  color: #2c2118;
+}
+.settings-field input:focus,
+.settings-field select:focus { border-color: var(--c-cloth); }
+.settings-hint { color: #6b5344; }
+.settings-tips {
+  background: #fffaf3;
+  color: var(--c-cloth);
+  border-color: var(--c-brass);
+}
+.settings-close {
+  background: linear-gradient(180deg, #6b3a32, #3a1e1c);
+  color: var(--c-foil);
+  border-color: #e8d09a;
+  box-shadow: 0 4px 0 #2a1614;
+}
+.settings-slider { color: #5c4636; }
+.settings-slider input[type="range"] { accent-color: var(--c-cloth); }
+.settings-toggle { color: #5c4636; }
+.settings-toggle input:checked + .settings-toggle-track { background: #6e8b74; }
+
+html.dark body {
+  background-color: #140e0a;
+  background-image:
+    radial-gradient(800px 480px at 50% 0%, rgba(196, 140, 80, 0.12), transparent 60%),
+    linear-gradient(180deg, #2a1c14, #120c08);
+  color: var(--c-foil);
+}
+html.dark header {
+  background: linear-gradient(180deg, #3a2220, #241412);
+  box-shadow: 0 3px 0 #8a7044, 0 10px 18px rgba(0, 0, 0, 0.4);
+}
+html.dark header h1 { color: var(--c-foil); text-shadow: 0 2px 0 #140c08; }
+html.dark #menu,
+html.dark .hub-screen,
+html.dark .hub-screen[data-hub-theme] {
+  background-color: #2a2118;
+  background-image:
+    radial-gradient(480px 220px at 0% 0%, rgba(196, 150, 90, 0.12), transparent 60%),
+    linear-gradient(180deg, #32261c, #241910);
+  box-shadow: -12px 0 0 #1a100c, 0 18px 30px rgba(0, 0, 0, 0.45);
+}
+html.dark .hub-title,
+html.dark .hub-screen[data-hub-theme] .hub-title { color: var(--c-foil); }
+html.dark .place-label,
+html.dark .tile .label { color: var(--c-foil); }
