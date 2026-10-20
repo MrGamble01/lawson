@@ -707,83 +707,99 @@
   <!-- Settings panel (overlays everything) -->
   <div id="settingsOverlay" class="settings-overlay" aria-hidden="true">
     <div class="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
-      <h2 id="settingsTitle">Settings</h2>
-      <label class="settings-field">
-        <span>Kid's name</span>
-        <input id="settingsName" type="text" maxlength="20" autocomplete="off" autocapitalize="words" spellcheck="false" />
-      </label>
-      <p class="settings-hint">Used in cheers across every game.</p>
-      <label class="settings-field">
-        <span>Sounds like (optional)</span>
-        <input id="settingsNameSpoken" type="text" maxlength="30" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="e.g. Shi-vawn" />
-      </label>
-      <p class="settings-hint">If the storyteller says the name wrong, write how it sounds. Captions keep the real spelling.</p>
+      <div class="settings-head">
+        <h2 id="settingsTitle">Settings</h2>
+        <button type="button" class="settings-dismiss" tabindex="-1" aria-label="Close settings">✕</button>
+      </div>
+      <div class="settings-body">
+        <div class="settings-columns">
+          <div class="settings-col">
+            <label class="settings-field">
+              <span>Kid's name</span>
+              <input id="settingsName" type="text" maxlength="20" autocomplete="off" autocapitalize="words" spellcheck="false" />
+            </label>
+            <p class="settings-hint">Used in cheers across every game.</p>
+            <label class="settings-field">
+              <span>Sounds like (optional)</span>
+              <input id="settingsNameSpoken" type="text" maxlength="30" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="e.g. Shi-vawn" />
+            </label>
+            <p class="settings-hint">If the storyteller says the name wrong, write how it sounds. Captions keep the real spelling.</p>
 
-      <label class="settings-toggle">
-        <input id="settingsVoice" type="checkbox" aria-label="Voice" />
-        <span class="settings-toggle-track" aria-hidden="true"></span>
-        <span class="settings-toggle-label">🗣️ Voice</span>
-      </label>
-      <label class="settings-toggle">
-        <input id="settingsCaptions" type="checkbox" aria-label="Captions" />
-        <span class="settings-toggle-track" aria-hidden="true"></span>
-        <span class="settings-toggle-label">💬 Captions</span>
-      </label>
-      <p class="settings-hint">Shows what the storyteller says as words on screen.</p>
-      <label class="settings-field">
-        <span>Storyteller voice</span>
-        <select id="settingsVoiceChoice" aria-describedby="settingsVoiceHint"></select>
-      </label>
-      <p id="settingsVoiceHint" class="settings-hint">Choose a voice, then listen. Voices marked online need an internet connection.</p>
-      <button id="settingsVoicePreview" class="settings-tips" type="button" aria-label="Listen to this voice">Listen to this voice</button>
-      <p id="settingsVoiceReport" class="settings-hint" role="status" aria-live="polite"></p>
-      <label class="settings-field">
-        <span>Storyteller speed</span>
-        <select id="settingsSpeechSpeed">
-          <option value="slower">Slower</option>
-          <option value="normal" selected>Normal</option>
-          <option value="faster">Faster</option>
-        </select>
-      </label>
-      <p class="settings-hint">Slower is clearer for a kid still learning the words. Applies to every line the storyteller says.</p>
-      <label class="settings-toggle">
-        <input id="settingsSound" type="checkbox" aria-label="Sound effects" />
-        <span class="settings-toggle-track" aria-hidden="true"></span>
-        <span class="settings-toggle-label">🔊 Sound effects</span>
-      </label>
-      <label class="settings-slider">
-        <span class="settings-slider-label">🔉 Volume</span>
-        <input id="settingsVolume" type="range" min="0" max="100" step="5" value="100" aria-label="Volume" />
-      </label>
-      <label class="settings-toggle">
-        <input id="settingsMusic" type="checkbox" aria-label="Music on menu" />
-        <span class="settings-toggle-track" aria-hidden="true"></span>
-        <span class="settings-toggle-label">🎵 Music on menu</span>
-      </label>
-      <label class="settings-toggle">
-        <input id="settingsDark" type="checkbox" aria-label="Dark mode" />
-        <span class="settings-toggle-track" aria-hidden="true"></span>
-        <span class="settings-toggle-label">🌙 Dark mode</span>
-      </label>
-      <label class="settings-toggle">
-        <input id="settingsSlow" type="checkbox" aria-label="Take it slow" />
-        <span class="settings-toggle-track" aria-hidden="true"></span>
-        <span class="settings-toggle-label">🐢 Take it slow</span>
-      </label>
-      <p class="settings-hint">Half speed: critters stay up longer and balloons drift more slowly.</p>
-      <label class="settings-toggle">
-        <input id="settingsMotion" type="checkbox" aria-label="Less motion" />
-        <span class="settings-toggle-track" aria-hidden="true"></span>
-        <span class="settings-toggle-label">🧘 Less motion</span>
-      </label>
-      <p class="settings-hint">Turns off the wiggles, floating and sparkles.</p>
-
-      <button id="settingsTips" class="settings-tips" type="button" aria-label="Show tips again">💡 Show tips again</button>
-      <button id="settingsReset" class="settings-reset" type="button" aria-label="Reset scores">🧹 Reset scores</button>
-      <button id="settingsClose" class="settings-close" type="button" aria-label="Done">✅ Done</button>
+            <label class="settings-toggle">
+              <input id="settingsVoice" type="checkbox" aria-label="Voice" />
+              <span class="settings-toggle-track" aria-hidden="true"></span>
+              <span class="settings-toggle-label">🗣️ Voice</span>
+            </label>
+            <label class="settings-toggle">
+              <input id="settingsCaptions" type="checkbox" aria-label="Captions" />
+              <span class="settings-toggle-track" aria-hidden="true"></span>
+              <span class="settings-toggle-label">💬 Captions</span>
+            </label>
+            <p class="settings-hint">Shows what the storyteller says as words on screen.</p>
+            <label class="settings-field">
+              <span>Storyteller voice</span>
+              <select id="settingsVoiceChoice" aria-describedby="settingsVoiceHint">
+                <option value="sarah" selected>Sarah — soft and friendly (recommended)</option>
+                <option value="lily">Lily — warm and bright</option>
+              </select>
+            </label>
+            <p id="settingsVoiceHint" class="settings-hint">Sarah and Lily are natural storyteller voices. Known lines play right away; lines with your child's name play online. Offline, the iPad's own voice fills in — download Ava (Premium) or Samantha (Enhanced) in Settings, Accessibility, Spoken Content, Voices.</p>
+            <button id="settingsVoicePreview" class="settings-tips" type="button" aria-label="Listen to this voice">Listen to this voice</button>
+            <p id="settingsVoiceReport" class="settings-hint" role="status" aria-live="polite"></p>
+            <label class="settings-field">
+              <span>Storyteller speed</span>
+              <select id="settingsSpeechSpeed">
+                <option value="slower">Slower</option>
+                <option value="normal" selected>Normal</option>
+                <option value="faster">Faster</option>
+              </select>
+            </label>
+            <p class="settings-hint">Slower is clearer for a kid still learning the words. Applies to every line the storyteller says.</p>
+          </div>
+          <div class="settings-col">
+            <label class="settings-toggle">
+              <input id="settingsSound" type="checkbox" aria-label="Sound effects" />
+              <span class="settings-toggle-track" aria-hidden="true"></span>
+              <span class="settings-toggle-label">🔊 Sound effects</span>
+            </label>
+            <label class="settings-slider">
+              <span class="settings-slider-label">🔉 Volume</span>
+              <input id="settingsVolume" type="range" min="0" max="100" step="5" value="100" aria-label="Volume" />
+            </label>
+            <label class="settings-toggle">
+              <input id="settingsMusic" type="checkbox" aria-label="Music on menu" />
+              <span class="settings-toggle-track" aria-hidden="true"></span>
+              <span class="settings-toggle-label">🎵 Music on menu</span>
+            </label>
+            <label class="settings-toggle">
+              <input id="settingsDark" type="checkbox" aria-label="Dark mode" />
+              <span class="settings-toggle-track" aria-hidden="true"></span>
+              <span class="settings-toggle-label">🌙 Dark mode</span>
+            </label>
+            <label class="settings-toggle">
+              <input id="settingsSlow" type="checkbox" aria-label="Take it slow" />
+              <span class="settings-toggle-track" aria-hidden="true"></span>
+              <span class="settings-toggle-label">🐢 Take it slow</span>
+            </label>
+            <p class="settings-hint">Half speed: critters stay up longer and balloons drift more slowly.</p>
+            <label class="settings-toggle">
+              <input id="settingsMotion" type="checkbox" aria-label="Less motion" />
+              <span class="settings-toggle-track" aria-hidden="true"></span>
+              <span class="settings-toggle-label">🧘 Less motion</span>
+            </label>
+            <p class="settings-hint">Turns off the wiggles, floating and sparkles.</p>
+          </div>
+        </div>
+        <div class="settings-actions">
+          <button id="settingsTips" class="settings-tips" type="button" aria-label="Show tips again">💡 Show tips again</button>
+          <button id="settingsReset" class="settings-reset" type="button" aria-label="Reset scores">🧹 Reset scores</button>
+          <button id="settingsClose" class="settings-close" type="button" aria-label="Done">✅ Done</button>
+        </div>
+      </div>
     </div>
   </div>
 
+  <script src="lib/tts-voices.js"></script>
   <script src="lib/audio.js"></script>
   <script src="lib/storage.js"></script>
   <script src="lib/achievements.js"></script>

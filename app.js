@@ -955,7 +955,7 @@ function boboCheer() {
 // the utilities below. Keeping each game self-contained makes it easy to
 // tweak one without touching the others.
 window.Lawson = {
-  say, sayPrompt, cancelPromptRepeat, cancelSpeech, speechDone, afterSpeech, speechLog, speechStats, setSpeechSpeed, getSpeechSpeed, setSpokenName, getSpokenName, beep, happySound, buzzSound, haptic, sparkleAt, onTap, onTapOnce, pointOf, bumpBadge, show,
+  say, sayPrompt, preloadSpeech, cancelPromptRepeat, cancelSpeech, speechDone, afterSpeech, speechLog, speechStats, setSpeechSpeed, getSpeechSpeed, setSpokenName, getSpokenName, setTtsVoice, getTtsVoice, beep, happySound, buzzSound, haptic, sparkleAt, onTap, onTapOnce, pointOf, bumpBadge, show,
   audioCtx, unlockAudio, masterGain, setVolume, getVolume, isAudioHidden,
   getHighScore, setHighScore, bumpHighScore, tryNewHighScore,
   setVoiceMuted, setSoundMuted, isVoiceMuted, isSoundMuted,
@@ -1174,6 +1174,7 @@ document.querySelectorAll("[data-hub]").forEach((btn) => {
     pushScreenState(hub);
     const intro = HUB_INTROS[hub];
     if (intro) {
+      preloadSpeech(intro);
       _hubIntroTimer = setTimeout(() => {
         _hubIntroTimer = null;
         const screen = document.getElementById(hub);
@@ -1486,22 +1487,24 @@ document.addEventListener("touchmove", (e) => {
   const voiceChoice = document.getElementById("settingsVoiceChoice");
   const voicePreview = document.getElementById("settingsVoicePreview");
   const voiceHint = document.getElementById("settingsVoiceHint");
-  const VOICE_HINT = "Choose a voice, then listen. Voices marked online need an internet connection.";
+  const VOICE_HINT = "Sarah and Lily are natural storyteller voices. Known lines play right away; lines with your child's name play online. Offline, the iPad's own voice fills in — download Ava (Premium) or Samantha (Enhanced) in Settings, Accessibility, Spoken Content, Voices.";
   function refreshVoices() {
-    const automatic = new Option("Automatic (recommended)", "");
-    const voices = availableVoices();
-    voiceChoice.replaceChildren(automatic, ...voices.map(v =>
-      new Option(`${v.name} — ${v.lang}${v.localService ? "" : " (online)"}`, v.voiceURI)));
-    voiceChoice.value = voices.some(v => v.voiceURI === savedVoiceURI) ? savedVoiceURI : "";
-    voiceChoice.disabled = !synth;
-    voicePreview.disabled = !synth || isVoiceMuted() || getVolume() === 0;
-    // The chosen voice stays chosen; say who is reading in the meantime.
+    if (typeof TTS_VOICES !== "undefined" && TTS_VOICES.length) {
+      voiceChoice.replaceChildren(...TTS_VOICES.map((v) =>
+        new Option(`${v.name} — ${v.blurb}${v.recommended ? " (recommended)" : ""}`, v.key)));
+      const current = getTtsVoice();
+      voiceChoice.value = TTS_VOICES.some((v) => v.key === current) ? current : "sarah";
+      voiceChoice.disabled = false;
+    }
+    voicePreview.disabled = isVoiceMuted() || getVolume() === 0;
+    // The device voice is only the offline stand-in. Say who is reading
+    // if the iPad had to swap one.
     const fallback = speechFallback();
     if (voiceHint) voiceHint.textContent = fallback
       ? `${fallback.failed.name} can't speak right now${fallback.failed.localService ? "" : " (no internet?)"}, so ${fallback.using.name} is reading instead.`
       : VOICE_HINT;
   }
-  voiceChoice.addEventListener("change", () => setSpeechVoice(voiceChoice.value));
+  voiceChoice.addEventListener("change", () => setTtsVoice(voiceChoice.value));
   // Storyteller speed: pick, then hear a short line at that pace.
   const speedChoice = document.getElementById("settingsSpeechSpeed");
   if (speedChoice) {
@@ -1595,7 +1598,7 @@ document.addEventListener("touchmove", (e) => {
   const panel = overlay.querySelector(".settings-panel");
   function focusables() {
     return Array.from(panel.querySelectorAll("button, input, select, [tabindex]:not([tabindex='-1'])"))
-      .filter((el) => !el.disabled && el.offsetParent !== null);
+      .filter((el) => !el.disabled && el.tabIndex !== -1 && el.offsetParent !== null);
   }
   function setBackgroundInert(on) {
     if (on) {
@@ -1682,6 +1685,8 @@ document.addEventListener("touchmove", (e) => {
   window.__closeSettings = close;
   onTap(openBtn, (e) => { if (e.stopPropagation) e.stopPropagation(); open(); });
   onTap(closeBtn, close);
+  const dismissBtn = overlay.querySelector(".settings-dismiss");
+  if (dismissBtn) onTap(dismissBtn, close);
   // Tapping the dimmed backdrop closes too, but only if you tap outside the panel.
   overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
 
