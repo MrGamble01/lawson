@@ -292,22 +292,44 @@ body.on-lobby .menu-bubbles { display: block; }
   position: absolute;
   bottom: -120px;
   left: var(--x, 50%);
-  width: clamp(40px, 7vw, 70px);
+  /* The painted bubble can be smaller; the button itself stays a 44px target
+     even while the paint scales up as it rises. */
+  width: clamp(44px, 7vw, 70px);
   height: clamp(54px, 9vw, 96px);
-  background: radial-gradient(circle at 32% 32%, rgba(255,255,255,0.7), var(--c, #ff8ab0));
-  border-radius: 50% 50% 50% 50% / 55% 55% 45% 45%;
+  background: transparent;
+  border: none;
+  padding: 0;
   opacity: 0.22;
   animation: bubbleFloat linear infinite;
   animation-duration: var(--dur, 16s);
   animation-delay: var(--delay, 0s);
+}
+.bubble::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 100%;
+  height: 100%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle at 32% 32%, rgba(255,255,255,0.7), var(--c, #ff8ab0));
+  border-radius: 50% 50% 50% 50% / 55% 55% 45% 45%;
   filter: blur(0.3px);
+  animation: bubbleGrow linear infinite;
+  animation-duration: var(--dur, 16s);
+  animation-delay: var(--delay, 0s);
+  pointer-events: none;
 }
 html.dark .bubble { opacity: 0.16; }
 @keyframes bubbleFloat {
-  0%   { transform: translate(0, 0) scale(0.9); opacity: 0; }
+  0%   { transform: translate(0, 0); opacity: 0; }
   10%  { opacity: 0.22; }
   90%  { opacity: 0.22; }
-  100% { transform: translate(var(--drift, 20px), -120vh) scale(1.05); opacity: 0; }
+  100% { transform: translate(var(--drift, 20px), -120vh); opacity: 0; }
+}
+@keyframes bubbleGrow {
+  0%   { transform: translate(-50%, -50%) scale(0.9); }
+  100% { transform: translate(-50%, -50%) scale(1.05); }
 }
 /* The bubbles container ignores pointer events so tiles + tap zones
    underneath stay accessible; individual bubble buttons opt back in. */
@@ -2015,7 +2037,7 @@ html.dark .hub-title {
 .settings-slider-label { flex-shrink: 0; }
 .settings-slider input[type="range"] {
   flex: 1;
-  height: 28px;
+  height: 44px;
   cursor: pointer;
   accent-color: var(--c-brand);
   -webkit-tap-highlight-color: transparent;
@@ -5984,3 +6006,179 @@ html.dark .hub-title,
 html.dark .hub-screen[data-hub-theme] .hub-title { color: var(--c-foil); }
 html.dark .place-label,
 html.dark .tile .label { color: var(--c-foil); }
+
+/* ---------- 44px tap targets ----------
+   The painted graphic stays the size it already was. The control's box
+   grows around it so a phone finger lands on at least 44px. */
+.hub-title {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+@media (max-width: 520px) {
+  /* The extra target height has to come out of the title's margin,
+     or the last hub card drops below the page and can't be tapped. */
+  .hub-title { margin-top: 70px; margin-bottom: 8px; }
+}
+.badge--best { min-height: 44px; }
+.scene-switch,
+.scene-clear { min-height: 44px; }
+button.story-hint {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.doodle-brush {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  padding: 3px;
+  border: none;
+  background-clip: content-box;
+  box-shadow: none;
+}
+.doodle-brush::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  outline: 2px solid #ced4da;
+  pointer-events: none;
+}
+.doodle-brush.active { outline: none; }
+.doodle-brush.active::after { outline: 4px solid var(--c-brand-deep); }
+.doodle-size { width: 44px; height: 44px; }
+
+.farm-apple,
+.farm-fish,
+.farm-duck,
+.farm-chicken,
+.garden-bee,
+.garden-butterfly,
+.garden-cloud,
+.farm-cloud,
+.train-cloud,
+.icecream-tub {
+  min-width: 44px;
+  min-height: 44px;
+}
+.farm-apple { display: flex; align-items: center; justify-content: center; }
+.farm-apple svg { width: clamp(28px, 6vw, 38px); height: auto; }
+.farm-fish svg { width: clamp(40px, 8vw, 60px); height: auto; }
+@media (max-width: 520px) {
+  /* The coop's nest is narrower than two 44px eggs. Lay them in one
+     row beside it so each egg keeps its painted size and a clear target. */
+  .farm-eggs {
+    inset: auto -8% 0 -90%;
+    height: 48px;
+  }
+  .farm-egg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px;
+    min-height: 44px;
+    top: 0 !important;
+  }
+  .farm-egg svg { width: 26px; height: auto; }
+  .farm-egg:nth-child(1) { left: 0 !important; }
+  .farm-egg:nth-child(2) { left: 48px !important; }
+  .farm-egg:nth-child(3) { left: 96px !important; }
+  .farm-egg:nth-child(4) { left: 144px !important; }
+}
+.farm-duck svg { width: clamp(40px, 9vw, 70px); height: auto; }
+.farm-chicken {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.farm-chicken svg { width: clamp(30px, 7vw, 56px); height: auto; }
+.garden-bee svg { width: clamp(36px, 8vw, 56px); height: auto; }
+.garden-butterfly svg { width: clamp(38px, 9vw, 64px); height: auto; }
+.icecream-tub svg { width: min(100%, clamp(50px, 12vw, 86px)); height: auto; }
+
+/* Piano and xylophone keys stay the same painted width. The button
+   box overlaps the gap so the finger target is 44px without widening
+   the instrument or the page. */
+@media (max-width: 520px) {
+  .piano-whites { gap: 6px; }
+  .piano-white {
+    flex: 0 0 44px;
+    width: 44px;
+    margin: 0 -4px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+  }
+  .piano-white::before {
+    content: "";
+    position: absolute;
+    left: 4px;
+    right: 4px;
+    top: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, #fff 0%, #fff 70%, var(--c) 100%);
+    border: 3px solid #222;
+    border-radius: 0 0 14px 14px;
+    box-shadow: 0 6px 0 rgba(0,0,0,0.35), inset 0 -12px 0 var(--c);
+    pointer-events: none;
+  }
+  .piano-white .piano-label { position: relative; z-index: 1; }
+  .piano-white:active::before,
+  .piano-white.pressed::before {
+    background: linear-gradient(180deg, var(--c) 0%, #fff 60%, var(--c) 100%);
+    box-shadow: 0 0 0 rgba(0,0,0,0.35), inset 0 -12px 0 var(--c), 0 0 40px var(--c);
+  }
+  .piano-black {
+    width: 44px;
+    margin-left: -7px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+  }
+  .piano-black::before {
+    content: "";
+    position: absolute;
+    left: 7px;
+    right: 7px;
+    top: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, #333 0%, #000 100%);
+    border-radius: 0 0 10px 10px;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.6), inset 0 -6px 0 #222;
+    pointer-events: none;
+  }
+  .piano-black:active::before,
+  .piano-black.pressed::before {
+    background: linear-gradient(180deg, #888 0%, #333 100%);
+    box-shadow: 0 0 0 rgba(0,0,0,0.6), inset 0 -6px 0 #111, 0 0 30px #fff;
+  }
+
+  .music-xylo-bar {
+    position: relative;
+    flex: 1 1 44px;
+    min-width: 44px;
+    margin: 0 -5px;
+    padding: 0 5px 6px;
+    border: none;
+    background-clip: content-box;
+    box-shadow: none;
+  }
+  .music-xylo-bar::after {
+    content: "";
+    position: absolute;
+    left: 5px;
+    right: 5px;
+    top: 0;
+    bottom: 0;
+    border: 3px solid rgba(0, 0, 0, 0.45);
+    border-radius: 6px 6px 12px 12px;
+    pointer-events: none;
+  }
+}

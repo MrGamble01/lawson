@@ -145,11 +145,15 @@
       const g = svgEl("g", { transform: `translate(${d.x},${d.y})`, class: "dot" });
       dotEls.push(g);
       const circle = svgEl("circle", { r: "22", fill: "#fff", stroke: "#ff4081", "stroke-width": "4" });
+      /* Invisible disc so the dot's box is at least 44px on a phone,
+         without changing the painted circle. */
+      const hit = svgEl("circle", { r: "26", fill: "transparent", stroke: "none" });
       const label  = svgEl("text", {
         "text-anchor": "middle", "dominant-baseline": "central",
         "font-weight": "bold", "font-size": "22", fill: "#ff4081",
       });
       label.textContent = num;
+      g.appendChild(hit);
       g.appendChild(circle);
       g.appendChild(label);
       svg.appendChild(g);
