@@ -359,6 +359,9 @@
         <button class="tile" data-go="hats" style="--c:#f5c518">
           <span class="emoji">🎩</span><span class="label">Hats</span>
         </button>
+        <button class="tile" data-go="zoo" style="--c:#fab005">
+          <span class="emoji">🦁</span><span class="label">Zoo</span>
+        </button>
       </div>
     </section>
 
@@ -664,6 +667,18 @@
       </div>
     </section>
 
+    <!-- Zoo! -->
+    <section id="zooGame" class="screen" data-title="🦁 Zoo!">
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
+      <div id="zooScore" class="badge">🦁 <span id="zooScoreVal">0</span></div>
+      <div id="zooBest" class="badge badge--best">🏆 <span id="zooBestVal">0</span></div>
+      <div class="zoo-layout">
+        <p id="zooPrompt" class="zoo-prompt" role="status" aria-live="polite">Who lives here?</p>
+        <div id="zooHome" class="zoo-home" aria-hidden="true">💧</div>
+        <div id="zooChoices" class="zoo-choices" role="group" aria-label="Animals"></div>
+      </div>
+    </section>
+
     <!-- Pattern -->
     <section id="patternGame" class="screen" data-title="🧠 Pattern">
       <button class="home-btn" data-home aria-label="Home">🏠</button>
@@ -915,6 +930,7 @@
   <script src="games/blocks.js"></script>
   <script src="games/picnic.js"></script>
   <script src="games/hats.js"></script>
+  <script src="games/zoo.js"></script>
   <script src="games/mix.js"></script>
   <script src="games/cook.js"></script>
   <script src="games/dino.js"></script>

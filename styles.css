@@ -6775,3 +6775,93 @@ button.story-hint {
   .hat-btn { width: 104px; height: 108px; min-width: 104px; min-height: 104px; }
   .hats-clue { width: 120px; height: 120px; font-size: 68px; }
 }
+
+/* ---------- Zoo! ---------- */
+#zooGame {
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 12px;
+  background:
+    radial-gradient(560px 260px at 50% 0%, rgba(250, 176, 5, 0.16), transparent 62%),
+    linear-gradient(180deg, #f7f3e6, #efe6c8);
+}
+.zoo-layout {
+  width: 100%;
+  max-width: 900px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(14px, 3vh, 28px);
+  padding: 76px 12px 24px;
+}
+.zoo-prompt {
+  font-family: var(--font-display);
+  font-size: clamp(26px, 4vw, 42px);
+  font-weight: 600;
+  color: var(--c-cloth, #4e2a28);
+  text-align: center;
+  min-height: 44px;
+  line-height: 1.15;
+}
+.zoo-home {
+  width: clamp(140px, 24vw, 200px);
+  height: clamp(140px, 24vw, 200px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(72px, 12vw, 108px);
+  line-height: 1;
+  background: #fffaf3;
+  border: 3px solid var(--c-brass, #c4a46a);
+  border-radius: 50%;
+  box-shadow: 0 8px 0 rgba(90, 56, 32, 0.12);
+}
+.zoo-choices {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(12px, 2.4vw, 24px);
+  width: 100%;
+}
+.zoo-btn {
+  width: clamp(104px, 22vw, 170px);
+  height: clamp(104px, 22vw, 170px);
+  min-width: 104px;
+  min-height: 104px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(52px, 8vw, 80px);
+  line-height: 1;
+  background: #fffaf3;
+  border: 3px solid var(--c-brass, #c4a46a);
+  border-radius: 22px;
+  box-shadow: 0 8px 0 rgba(90, 56, 32, 0.12);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.zoo-btn:active { transform: translateY(4px); }
+.zoo-btn.correct {
+  background: #e7f5e4;
+  border-color: #2f9e44;
+  animation: correctPulse 0.7s cubic-bezier(.34,1.56,.64,1);
+}
+.zoo-btn.wrong {
+  background: #ffe3e3;
+  border-color: #e03131;
+  animation: shake 0.4s ease;
+}
+@media (max-height: 760px) {
+  .zoo-layout { padding-top: 68px; gap: 10px; }
+  .zoo-home { width: 112px; height: 112px; font-size: 64px; }
+  .zoo-btn { width: 112px; height: 112px; min-width: 112px; min-height: 112px; font-size: 56px; }
+}
+@media (max-width: 430px) {
+  .zoo-choices { gap: 8px; }
+  .zoo-btn { width: 104px; height: 108px; min-width: 104px; min-height: 104px; font-size: 52px; }
+  .zoo-home { width: 120px; height: 120px; font-size: 68px; }
+}
