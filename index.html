@@ -347,6 +347,9 @@
         <button class="tile" data-go="icecream" style="--c:#ff8ab0">
           <span class="emoji">🍦</span><span class="label">Ice Cream</span>
         </button>
+        <button class="tile" data-go="sky" style="--c:#74c0fc">
+          <span class="emoji">🌤️</span><span class="label">Sky</span>
+        </button>
       </div>
     </section>
 
@@ -604,6 +607,18 @@
       </div>
     </section>
 
+    <!-- Sky! -->
+    <section id="skyGame" class="screen" data-title="🌤️ Sky!">
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
+      <div id="skyScore" class="badge">🌤️ <span id="skyScoreVal">0</span></div>
+      <div id="skyBest" class="badge badge--best">🏆 <span id="skyBestVal">0</span></div>
+      <div class="sky-layout">
+        <p id="skyPrompt" class="sky-prompt" role="status" aria-live="polite">What's the weather?</p>
+        <div id="skyWindow" class="sky-window" aria-hidden="true"></div>
+        <div id="skyChoices" class="sky-choices" role="group" aria-label="Weather"></div>
+      </div>
+    </section>
+
     <!-- Pattern -->
     <section id="patternGame" class="screen" data-title="🧠 Pattern">
       <button class="home-btn" data-home aria-label="Home">🏠</button>
@@ -851,6 +866,7 @@
   <script src="games/howmany.js"></script>
   <script src="games/socks.js"></script>
   <script src="games/shadows.js"></script>
+  <script src="games/sky.js"></script>
   <script src="games/mix.js"></script>
   <script src="games/cook.js"></script>
   <script src="games/dino.js"></script>
