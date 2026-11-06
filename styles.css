@@ -6007,6 +6007,144 @@ html.dark .hub-screen[data-hub-theme] .hub-title { color: var(--c-foil); }
 html.dark .place-label,
 html.dark .tile .label { color: var(--c-foil); }
 
+/* ---------- Socks! ---------- */
+#socksGame {
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 12px;
+  background:
+    radial-gradient(520px 240px at 50% 0%, rgba(196, 140, 110, 0.16), transparent 62%),
+    linear-gradient(180deg, #f7f1e6, #f0e2d0);
+}
+.socks-layout {
+  width: 100%;
+  max-width: 880px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(14px, 3vh, 28px);
+  padding: 76px 12px 24px;
+}
+.socks-prompt {
+  font-family: var(--font-display);
+  font-size: clamp(26px, 4vw, 42px);
+  font-weight: 600;
+  color: var(--c-cloth, #4e2a28);
+  text-align: center;
+  min-height: 44px;
+  line-height: 1.2;
+}
+.socks-sample {
+  width: clamp(108px, 18vw, 150px);
+  height: clamp(120px, 20vw, 168px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fffaf3;
+  border: 3px solid var(--c-brass, #c4a46a);
+  border-radius: 18px;
+  box-shadow: 0 8px 0 rgba(90, 56, 32, 0.12);
+}
+.socks-line {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-end;
+  gap: clamp(14px, 3vw, 28px);
+  width: 100%;
+  padding-top: 18px;
+}
+.socks-line::before {
+  content: "";
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 8px;
+  height: 4px;
+  border-radius: 999px;
+  background: #6b4a38;
+  box-shadow: 0 2px 0 rgba(255, 248, 238, 0.6);
+}
+.sock-btn {
+  position: relative;
+  z-index: 1;
+  width: clamp(100px, 22vw, 160px);
+  height: clamp(124px, 26vw, 190px);
+  min-width: 100px;
+  min-height: 124px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fffaf3;
+  border: 3px solid var(--c-brass, #c4a46a);
+  border-radius: 16px 16px 26px 26px;
+  box-shadow: 0 8px 0 rgba(90, 56, 32, 0.12);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.sock-btn:active { transform: translateY(4px); }
+.sock-btn.correct {
+  background: #e7f5e4;
+  border-color: #2f9e44;
+  animation: correctPulse 0.7s cubic-bezier(.34,1.56,.64,1);
+}
+.sock-btn.wrong {
+  background: #ffe3e3;
+  border-color: #e03131;
+  animation: shake 0.4s ease;
+}
+.sock {
+  display: block;
+  width: 46%;
+  height: 72%;
+  background: var(--sock, #e03131);
+  border: 3px solid rgba(58, 42, 34, 0.4);
+  border-radius: 42% 42% 48% 48% / 28% 28% 46% 46%;
+  position: relative;
+  box-shadow: inset -8px -10px 0 rgba(0, 0, 0, 0.08);
+}
+.sock[data-pat="bands"] {
+  background: repeating-linear-gradient(180deg, var(--sock) 0 12px, #fffaf3 12px 18px);
+}
+.sock[data-pat="stripes"] {
+  background: repeating-linear-gradient(90deg, var(--sock) 0 8px, #fffaf3 8px 14px);
+}
+.sock[data-pat="dots"] {
+  background:
+    radial-gradient(circle, #fffaf3 3px, transparent 4px) 0 0 / 14px 14px,
+    var(--sock);
+}
+.sock[data-pat="spots"] {
+  background:
+    radial-gradient(circle, #fffaf3 5px, transparent 6px) 4px 8px / 20px 22px,
+    var(--sock);
+}
+.sock[data-pat="diagonal"] {
+  background: repeating-linear-gradient(45deg, var(--sock) 0 8px, #fffaf3 8px 14px);
+}
+.sock::before {
+  content: "";
+  position: absolute;
+  left: -3px;
+  right: -3px;
+  top: -3px;
+  height: 26%;
+  background:
+    repeating-linear-gradient(90deg, #fffaf3 0 7px, var(--sock, #e8590c) 7px 14px);
+  border: 3px solid rgba(58, 42, 34, 0.4);
+  border-radius: 8px 8px 4px 4px;
+}
+@media (max-height: 760px) {
+  .socks-layout { padding-top: 70px; gap: 10px; }
+  .socks-sample { width: 96px; height: 108px; }
+  .sock-btn { height: 120px; min-height: 120px; }
+}
+
 /* ---------- 44px tap targets ----------
    The painted graphic stays the size it already was. The control's box
    grows around it so a phone finger lands on at least 44px. */

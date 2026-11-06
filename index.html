@@ -367,6 +367,9 @@
         <button class="tile" data-go="dots" style="--c:#15aabf">
           <span class="emoji">🔗</span><span class="label">Dots</span>
         </button>
+        <button class="tile" data-go="socks" style="--c:#e599f7">
+          <span class="emoji">🧦</span><span class="label">Socks</span>
+        </button>
       </div>
     </section>
 
@@ -572,6 +575,18 @@
       </div>
       <div id="findPrompt" class="find-prompt">Find!</div>
       <div id="findStage" class="find-stage"></div>
+    </section>
+
+    <!-- Socks! -->
+    <section id="socksGame" class="screen" data-title="🧦 Socks!">
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
+      <div id="socksScore" class="badge">🧦 <span id="socksScoreVal">0</span></div>
+      <div id="socksBest" class="badge badge--best">🏆 <span id="socksBestVal">0</span></div>
+      <div class="socks-layout">
+        <p id="socksPrompt" class="socks-prompt" role="status" aria-live="polite">Find the sock!</p>
+        <div id="socksSample" class="socks-sample" aria-hidden="true"></div>
+        <div id="socksLine" class="socks-line" role="group" aria-label="Socks on the line"></div>
+      </div>
     </section>
 
     <!-- Pattern -->
@@ -819,6 +834,7 @@
   <script src="games/find.js"></script>
   <script src="games/story.js"></script>
   <script src="games/howmany.js"></script>
+  <script src="games/socks.js"></script>
   <script src="games/mix.js"></script>
   <script src="games/cook.js"></script>
   <script src="games/dino.js"></script>
