@@ -368,6 +368,9 @@
         <button class="tile" data-go="mail" style="--c:#ff8787">
           <span class="emoji">💌</span><span class="label">Mail</span>
         </button>
+        <button class="tile" data-go="kites" style="--c:#ffa94d">
+          <span class="emoji">🪁</span><span class="label">Kites</span>
+        </button>
       </div>
     </section>
 
@@ -709,6 +712,18 @@
       </div>
     </section>
 
+    <!-- Kites! -->
+    <section id="kitesGame" class="screen" data-title="🪁 Kites!">
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
+      <div id="kitesScore" class="badge">🪁 <span id="kitesScoreVal">0</span></div>
+      <div id="kitesBest" class="badge badge--best">🏆 <span id="kitesBestVal">0</span></div>
+      <div class="kites-layout">
+        <p id="kitesPrompt" class="kites-prompt" role="status" aria-live="polite">Which kite?</p>
+        <div id="kitesSample" class="kites-sample" aria-hidden="true"></div>
+        <div id="kitesChoices" class="kites-choices" role="group" aria-label="Kites"></div>
+      </div>
+    </section>
+
     <!-- Pattern -->
     <section id="patternGame" class="screen" data-title="🧠 Pattern">
       <button class="home-btn" data-home aria-label="Home">🏠</button>
@@ -963,6 +978,7 @@
   <script src="games/zoo.js"></script>
   <script src="games/boats.js"></script>
   <script src="games/mail.js"></script>
+  <script src="games/kites.js"></script>
   <script src="games/mix.js"></script>
   <script src="games/cook.js"></script>
   <script src="games/dino.js"></script>

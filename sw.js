@@ -45,6 +45,7 @@ const ASSETS = [
   "./games/zoo.js",
   "./games/boats.js",
   "./games/mail.js",
+  "./games/kites.js",
   "./games/mix.js",
   "./games/cook.js",
   "./games/dino.js",
