@@ -370,6 +370,9 @@
         <button class="tile" data-go="socks" style="--c:#e599f7">
           <span class="emoji">🧦</span><span class="label">Socks</span>
         </button>
+        <button class="tile" data-go="shadows" style="--c:#8d6e63">
+          <span class="emoji">🌑</span><span class="label">Shadows</span>
+        </button>
       </div>
     </section>
 
@@ -586,6 +589,18 @@
         <p id="socksPrompt" class="socks-prompt" role="status" aria-live="polite">Find the sock!</p>
         <div id="socksSample" class="socks-sample" aria-hidden="true"></div>
         <div id="socksLine" class="socks-line" role="group" aria-label="Socks on the line"></div>
+      </div>
+    </section>
+
+    <!-- Shadows! -->
+    <section id="shadowsGame" class="screen" data-title="🌑 Shadows!">
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
+      <div id="shadowsScore" class="badge">🌑 <span id="shadowsScoreVal">0</span></div>
+      <div id="shadowsBest" class="badge badge--best">🏆 <span id="shadowsBestVal">0</span></div>
+      <div class="shadows-layout">
+        <p id="shadowsPrompt" class="shadows-prompt" role="status" aria-live="polite">Whose shadow?</p>
+        <div id="shadowsWall" class="shadows-wall" aria-hidden="true"></div>
+        <div id="shadowsChoices" class="shadows-choices" role="group" aria-label="Pictures"></div>
       </div>
     </section>
 
@@ -835,6 +850,7 @@
   <script src="games/story.js"></script>
   <script src="games/howmany.js"></script>
   <script src="games/socks.js"></script>
+  <script src="games/shadows.js"></script>
   <script src="games/mix.js"></script>
   <script src="games/cook.js"></script>
   <script src="games/dino.js"></script>

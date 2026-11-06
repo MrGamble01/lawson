@@ -58,6 +58,7 @@ const GAMES = [
   { id: "count",    screen: "countGame",    expect: "#countStage" },
   { id: "howmany",  screen: "howmanyGame",  expect: "#howmanyStage" },
   { id: "socks",    screen: "socksGame",    expect: "#socksLine" },
+  { id: "shadows",  screen: "shadowsGame",  expect: "#shadowsChoices" },
   { id: "mix",      screen: "mixGame",      expect: "#mixBowl" },
   { id: "doodle",   screen: "doodleGame",   expect: "#doodleCanvas" },
   { id: "color",    screen: "colorGame",    expect: "#colorStage" },
