@@ -313,6 +313,9 @@
         <button class="tile" data-go="scene" style="--c:#845ef7">
           <span class="emoji">🖼️</span><span class="label">Scene</span>
         </button>
+        <button class="tile" data-go="blocks" style="--c:#69db7c">
+          <span class="emoji">🔷</span><span class="label">Blocks</span>
+        </button>
       </div>
     </section>
 
@@ -619,6 +622,18 @@
       </div>
     </section>
 
+    <!-- Blocks! -->
+    <section id="blocksGame" class="screen" data-title="🔷 Blocks!">
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
+      <div id="blocksScore" class="badge">🔷 <span id="blocksScoreVal">0</span></div>
+      <div id="blocksBest" class="badge badge--best">🏆 <span id="blocksBestVal">0</span></div>
+      <div class="blocks-layout">
+        <p id="blocksPrompt" class="blocks-prompt" role="status" aria-live="polite">What shape?</p>
+        <div id="blocksSample" class="blocks-sample" aria-hidden="true"></div>
+        <div id="blocksChoices" class="blocks-choices" role="group" aria-label="Shapes"></div>
+      </div>
+    </section>
+
     <!-- Pattern -->
     <section id="patternGame" class="screen" data-title="🧠 Pattern">
       <button class="home-btn" data-home aria-label="Home">🏠</button>
@@ -867,6 +882,7 @@
   <script src="games/socks.js"></script>
   <script src="games/shadows.js"></script>
   <script src="games/sky.js"></script>
+  <script src="games/blocks.js"></script>
   <script src="games/mix.js"></script>
   <script src="games/cook.js"></script>
   <script src="games/dino.js"></script>
