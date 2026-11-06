@@ -362,6 +362,9 @@
         <button class="tile" data-go="zoo" style="--c:#fab005">
           <span class="emoji">🦁</span><span class="label">Zoo</span>
         </button>
+        <button class="tile" data-go="boats" style="--c:#4dabf7">
+          <span class="emoji">⛵</span><span class="label">Boats</span>
+        </button>
       </div>
     </section>
 
@@ -679,6 +682,18 @@
       </div>
     </section>
 
+    <!-- Boats! -->
+    <section id="boatsGame" class="screen" data-title="⛵ Boats!">
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
+      <div id="boatsScore" class="badge">⛵ <span id="boatsScoreVal">0</span></div>
+      <div id="boatsBest" class="badge badge--best">🏆 <span id="boatsBestVal">0</span></div>
+      <div class="boats-layout">
+        <p id="boatsPrompt" class="boats-prompt" role="status" aria-live="polite">Who floats here?</p>
+        <div id="boatsWater" class="boats-water" aria-hidden="true">💧</div>
+        <div id="boatsChoices" class="boats-choices" role="group" aria-label="Boats"></div>
+      </div>
+    </section>
+
     <!-- Pattern -->
     <section id="patternGame" class="screen" data-title="🧠 Pattern">
       <button class="home-btn" data-home aria-label="Home">🏠</button>
@@ -931,6 +946,7 @@
   <script src="games/picnic.js"></script>
   <script src="games/hats.js"></script>
   <script src="games/zoo.js"></script>
+  <script src="games/boats.js"></script>
   <script src="games/mix.js"></script>
   <script src="games/cook.js"></script>
   <script src="games/dino.js"></script>
