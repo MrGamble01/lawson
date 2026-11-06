@@ -66,6 +66,7 @@ const GAMES = [
   { id: "zoo",      screen: "zooGame",      expect: "#zooChoices" },
   { id: "boats",    screen: "boatsGame",    expect: "#boatsChoices" },
   { id: "mail",     screen: "mailGame",     expect: "#mailChoices" },
+  { id: "kites",    screen: "kitesGame",    expect: "#kitesChoices" },
   { id: "mix",      screen: "mixGame",      expect: "#mixBowl" },
   { id: "doodle",   screen: "doodleGame",   expect: "#doodleCanvas" },
   { id: "color",    screen: "colorGame",    expect: "#colorStage" },
