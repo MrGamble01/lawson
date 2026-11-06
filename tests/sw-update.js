@@ -106,7 +106,7 @@ function serve(root) {
     await ctx.setOffline(true);
     await open(800);
     const games = await page.evaluate(() => window.Lawson ? Object.keys(window.Lawson.games).length : 0);
-    check(games === 26, `offline, the app boots from the cache with all games (${games})`);
+    check(games === 27, `offline, the app boots from the cache with all games (${games})`);
     await ctx.setOffline(false);
     check(errors.length === 0, `no page errors (${errors.join("; ") || "none"})`);
   } finally {
