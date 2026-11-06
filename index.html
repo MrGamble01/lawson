@@ -353,6 +353,9 @@
         <button class="tile" data-go="sky" style="--c:#74c0fc">
           <span class="emoji">🌤️</span><span class="label">Sky</span>
         </button>
+        <button class="tile" data-go="picnic" style="--c:#ffd8a8">
+          <span class="emoji">🧺</span><span class="label">Picnic</span>
+        </button>
       </div>
     </section>
 
@@ -634,6 +637,18 @@
       </div>
     </section>
 
+    <!-- Picnic! -->
+    <section id="picnicGame" class="screen" data-title="🧺 Picnic!">
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
+      <div id="picnicScore" class="badge">🧺 <span id="picnicScoreVal">0</span></div>
+      <div id="picnicBest" class="badge badge--best">🏆 <span id="picnicBestVal">0</span></div>
+      <div class="picnic-layout">
+        <p id="picnicPrompt" class="picnic-prompt" role="status" aria-live="polite">Feed a friend!</p>
+        <div id="picnicGuest" class="picnic-guest" aria-hidden="true">🐰</div>
+        <div id="picnicChoices" class="picnic-choices" role="group" aria-label="Snacks"></div>
+      </div>
+    </section>
+
     <!-- Pattern -->
     <section id="patternGame" class="screen" data-title="🧠 Pattern">
       <button class="home-btn" data-home aria-label="Home">🏠</button>
@@ -883,6 +898,7 @@
   <script src="games/shadows.js"></script>
   <script src="games/sky.js"></script>
   <script src="games/blocks.js"></script>
+  <script src="games/picnic.js"></script>
   <script src="games/mix.js"></script>
   <script src="games/cook.js"></script>
   <script src="games/dino.js"></script>
