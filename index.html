@@ -371,6 +371,9 @@
         <button class="tile" data-go="kites" style="--c:#ffa94d">
           <span class="emoji">🪁</span><span class="label">Kites</span>
         </button>
+        <button class="tile" data-go="balloons" style="--c:#ff6b6b">
+          <span class="emoji">🎈</span><span class="label">Balloons</span>
+        </button>
       </div>
     </section>
 
@@ -724,6 +727,18 @@
       </div>
     </section>
 
+    <!-- Balloons! -->
+    <section id="balloonsGame" class="screen" data-title="🎈 Balloons!">
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
+      <div id="balloonsScore" class="badge">🎈 <span id="balloonsScoreVal">0</span></div>
+      <div id="balloonsBest" class="badge badge--best">🏆 <span id="balloonsBestVal">0</span></div>
+      <div class="balloons-layout">
+        <p id="balloonsPrompt" class="balloons-prompt" role="status" aria-live="polite">Which balloon?</p>
+        <div id="balloonsSample" class="balloons-sample" aria-hidden="true"></div>
+        <div id="balloonsChoices" class="balloons-choices" role="group" aria-label="Balloons"></div>
+      </div>
+    </section>
+
     <!-- Pattern -->
     <section id="patternGame" class="screen" data-title="🧠 Pattern">
       <button class="home-btn" data-home aria-label="Home">🏠</button>
@@ -979,6 +994,7 @@
   <script src="games/boats.js"></script>
   <script src="games/mail.js"></script>
   <script src="games/kites.js"></script>
+  <script src="games/balloons.js"></script>
   <script src="games/mix.js"></script>
   <script src="games/cook.js"></script>
   <script src="games/dino.js"></script>
