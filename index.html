@@ -365,6 +365,9 @@
         <button class="tile" data-go="boats" style="--c:#4dabf7">
           <span class="emoji">⛵</span><span class="label">Boats</span>
         </button>
+        <button class="tile" data-go="mail" style="--c:#ff8787">
+          <span class="emoji">💌</span><span class="label">Mail</span>
+        </button>
       </div>
     </section>
 
@@ -694,6 +697,18 @@
       </div>
     </section>
 
+    <!-- Mail! -->
+    <section id="mailGame" class="screen" data-title="💌 Mail!">
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
+      <div id="mailScore" class="badge">💌 <span id="mailScoreVal">0</span></div>
+      <div id="mailBest" class="badge badge--best">🏆 <span id="mailBestVal">0</span></div>
+      <div class="mail-layout">
+        <p id="mailPrompt" class="mail-prompt" role="status" aria-live="polite">Which mailbox?</p>
+        <div id="mailLetter" class="mail-letter" aria-hidden="true"></div>
+        <div id="mailChoices" class="mail-choices" role="group" aria-label="Mailboxes"></div>
+      </div>
+    </section>
+
     <!-- Pattern -->
     <section id="patternGame" class="screen" data-title="🧠 Pattern">
       <button class="home-btn" data-home aria-label="Home">🏠</button>
@@ -947,6 +962,7 @@
   <script src="games/hats.js"></script>
   <script src="games/zoo.js"></script>
   <script src="games/boats.js"></script>
+  <script src="games/mail.js"></script>
   <script src="games/mix.js"></script>
   <script src="games/cook.js"></script>
   <script src="games/dino.js"></script>
