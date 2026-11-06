@@ -356,6 +356,9 @@
         <button class="tile" data-go="picnic" style="--c:#ffd8a8">
           <span class="emoji">🧺</span><span class="label">Picnic</span>
         </button>
+        <button class="tile" data-go="hats" style="--c:#f5c518">
+          <span class="emoji">🎩</span><span class="label">Hats</span>
+        </button>
       </div>
     </section>
 
@@ -649,6 +652,18 @@
       </div>
     </section>
 
+    <!-- Hats! -->
+    <section id="hatsGame" class="screen" data-title="🎩 Hats!">
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
+      <div id="hatsScore" class="badge">🎩 <span id="hatsScoreVal">0</span></div>
+      <div id="hatsBest" class="badge badge--best">🏆 <span id="hatsBestVal">0</span></div>
+      <div class="hats-layout">
+        <p id="hatsPrompt" class="hats-prompt" role="status" aria-live="polite">Which hat?</p>
+        <div id="hatsClue" class="hats-clue" aria-hidden="true">☀️</div>
+        <div id="hatsChoices" class="hats-choices" role="group" aria-label="Hats"></div>
+      </div>
+    </section>
+
     <!-- Pattern -->
     <section id="patternGame" class="screen" data-title="🧠 Pattern">
       <button class="home-btn" data-home aria-label="Home">🏠</button>
@@ -899,6 +914,7 @@
   <script src="games/sky.js"></script>
   <script src="games/blocks.js"></script>
   <script src="games/picnic.js"></script>
+  <script src="games/hats.js"></script>
   <script src="games/mix.js"></script>
   <script src="games/cook.js"></script>
   <script src="games/dino.js"></script>
