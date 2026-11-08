@@ -27,6 +27,10 @@ function el(tag) {
     removeEventListener() {},
     addEventListener() {},
     click() { if (this.tap) this.tap({ stopPropagation() {} }); },
+    closest(sel) {
+      if (this.tagName === "BUTTON" && /(button|a|input|select|textarea)/.test(sel)) return this;
+      return null;
+    },
     querySelectorAll(sel) {
       if (sel === ".pokequiz-btn") return this.children;
       return [];
@@ -51,7 +55,10 @@ ids.pokequizGame.classList.add("active");
 ids.pokequizAgain.tagName = "BUTTON";
 
 let pending = null;
+let celebrations = 0;
 const keys = [];
+const timers = new Map();
+let timerSeq = 1;
 const L = {
   games: {},
   pokemon: null,
@@ -65,7 +72,7 @@ const L = {
   cheer: () => "Yay!",
   bumpBadge(id, value) { ids[id].textContent = String(value); },
   bumpHighScore() {},
-  celebrateNewHigh() {},
+  celebrateNewHigh() { celebrations += 1; },
   boboCheer() {},
   say() {},
   sayPrompt() {},
@@ -92,8 +99,12 @@ const context = {
   window: { Lawson: L },
   document: documentMock,
   Math: Math,
-  setTimeout: () => 1,
-  clearTimeout() {},
+  setTimeout(fn) {
+    const id = timerSeq++;
+    timers.set(id, fn);
+    return id;
+  },
+  clearTimeout(id) { timers.delete(id); },
 };
 vm.runInNewContext(fs.readFileSync(path.join(__dirname, "../lib/pokemon.js"), "utf8"), context);
 vm.runInNewContext(fs.readFileSync(path.join(__dirname, "../games/pokequiz.js"), "utf8"), context);
@@ -132,6 +143,15 @@ assert.equal(ids.pokequizScoreVal.textContent, "0");
 assert.equal(ids.pokequizSilhouette.dataset.revealed, "1");
 flush();
 assert.equal(ids.pokequizRound.textContent, "2 / 6");
+const homeEarly = el("button");
+let blocked = 0;
+keys[0]({
+  key: "1",
+  target: homeEarly,
+  preventDefault() { blocked += 1; },
+});
+assert.equal(blocked, 0);
+assert.equal(ids.pokequizSilhouette.dataset.revealed, "0");
 
 press(answerId());
 assert.equal(ids.pokequizScoreVal.textContent, "1");
@@ -147,6 +167,24 @@ while (ids.pokequizAgain.hidden) {
 }
 assert.match(ids.pokequizPrompt.textContent, /^You found [0-6]!$/);
 assert.equal(ids.pokequizChoices.children.length, 0);
+assert.equal(timers.size, 1, "a new high schedules the celebration");
+
+const home = el("button");
+let hijacked = 0;
+const scoreBefore = ids.pokequizScoreVal.textContent;
+keys[0]({
+  key: "Enter",
+  target: home,
+  preventDefault() { hijacked += 1; },
+});
+keys[0]({
+  key: " ",
+  target: home,
+  preventDefault() { hijacked += 1; },
+});
+assert.equal(hijacked, 0, "Enter/Space on a focused button must not restart");
+assert.equal(ids.pokequizScoreVal.textContent, scoreBefore);
+assert.equal(ids.pokequizAgain.hidden, false);
 
 keys[0]({ key: "Enter", preventDefault() {} });
 assert.equal(ids.pokequizScoreVal.textContent, "0");
@@ -154,6 +192,10 @@ assert.equal(ids.pokequizRound.textContent, "1 / 6");
 assert.equal(ids.pokequizAgain.hidden, true);
 assert.equal(keys.length, 1, "replay should not stack key listeners");
 
+press(answerId());
+assert.equal(timers.size, 1, "replay can schedule a celebration again");
 L.games.pokequiz.stop();
+assert.equal(timers.size, 0, "stop cancels the celebration timer");
+assert.equal(celebrations, 0, "the celebration must not fire after leaving");
 assert.equal(keys.length, 0);
 console.log("PASS: pokequiz — guess, reveal, keyboard, bounded replay, cleanup");

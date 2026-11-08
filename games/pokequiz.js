@@ -10,6 +10,7 @@
   let used = [];
   let locked = false;
   let activeTimer = null;
+  let celebrateTimer = null;
   let cancelNext = null;
   let bestAtStart = 0;
   let celebrated = false;
@@ -20,14 +21,25 @@
   function maybeCelebrateRecord(value) {
     if (value > bestAtStart && !celebrated) {
       celebrated = true;
-      setTimeout(() => L.celebrateNewHigh(value), 800);
+      clearTimeout(celebrateTimer);
+      celebrateTimer = setTimeout(() => {
+        celebrateTimer = null;
+        L.celebrateNewHigh(value);
+      }, 800);
     }
     L.bumpHighScore("pokequizBest", value);
+  }
+
+  function focusedControl(e) {
+    const el = e && e.target;
+    if (!el || !el.closest) return false;
+    return !!el.closest("button, a, input, select, textarea");
   }
 
   function onKey(e) {
     const screen = document.getElementById("pokequizGame");
     if (!screen || !screen.classList.contains("active")) return;
+    if (focusedControl(e)) return;
     const again = document.getElementById("pokequizAgain");
     if (again && !again.hidden && (e.key === "Enter" || e.key === " ")) {
       e.preventDefault();
@@ -158,6 +170,8 @@
   function stop() {
     clearTimeout(activeTimer);
     activeTimer = null;
+    clearTimeout(celebrateTimer);
+    celebrateTimer = null;
     clearNext();
     document.removeEventListener("keydown", onKey);
   }
