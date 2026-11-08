@@ -37,19 +37,19 @@
   ];
 
   function drawBurger(svg) {
-    add(svg, "ellipse", ink({ cx: "100", cy: "46", rx: "70", ry: "26", fill: "#f3c14b", "data-part": "bun" }));
-    add(svg, "circle", { cx: "62", cy: "36", r: "4", fill: "#fffaf3" });
-    add(svg, "circle", { cx: "86", cy: "30", r: "4", fill: "#fffaf3" });
-    add(svg, "circle", { cx: "112", cy: "32", r: "4", fill: "#fffaf3" });
-    add(svg, "circle", { cx: "136", cy: "38", r: "4", fill: "#fffaf3" });
-    add(svg, "path", ink({ d: "M36,62 Q100,86 164,62", fill: "none", stroke: "#3d9a4a", "stroke-width": "8", "data-part": "lettuce" }));
-    add(svg, "rect", ink({ x: "40", y: "66", width: "120", height: "14", rx: "3", fill: "#ffd43b", "data-part": "cheese" }));
-    add(svg, "rect", ink({ x: "34", y: "78", width: "132", height: "26", rx: "8", fill: "#7a3e22", "data-part": "patty" }));
-    add(svg, "ellipse", ink({ cx: "100", cy: "112", rx: "72", ry: "20", fill: "#e0a63a", "data-part": "bun" }));
+    add(svg, "ellipse", ink({ cx: "100", cy: "78", rx: "72", ry: "24", fill: "#f3c14b", "data-part": "bun" }));
+    add(svg, "circle", { cx: "58", cy: "66", r: "4", fill: "#fffaf3" });
+    add(svg, "circle", { cx: "82", cy: "60", r: "4", fill: "#fffaf3" });
+    add(svg, "circle", { cx: "108", cy: "62", r: "4", fill: "#fffaf3" });
+    add(svg, "circle", { cx: "134", cy: "66", r: "4", fill: "#fffaf3" });
+    add(svg, "path", ink({ d: "M32,96 Q100,118 168,96", fill: "none", stroke: "#3d9a4a", "stroke-width": "8", "data-part": "lettuce" }));
+    add(svg, "rect", ink({ x: "36", y: "100", width: "128", height: "12", rx: "3", fill: "#ffd43b", "data-part": "cheese" }));
+    add(svg, "rect", ink({ x: "30", y: "112", width: "140", height: "24", rx: "8", fill: "#7a3e22", "data-part": "patty" }));
+    add(svg, "ellipse", ink({ cx: "100", cy: "142", rx: "74", ry: "18", fill: "#e0a63a", "data-part": "bun" }));
   }
 
   function drawFries(svg) {
-    const fries = [[48, 8, 16, 78], [70, 0, 18, 86], [94, 6, 16, 80], [116, 2, 18, 84], [140, 12, 14, 72]];
+    const fries = [[38, 18, 16, 100], [60, 8, 16, 92], [124, 8, 16, 92], [148, 20, 16, 98]];
     fries.forEach((fry) => {
       add(svg, "rect", ink({
         x: String(fry[0]), y: String(fry[1]), width: String(fry[2]), height: String(fry[3]),
@@ -57,31 +57,38 @@
       }));
     });
     add(svg, "path", ink({
-      d: "M40,70 L58,128 L142,128 L160,70 Z",
+      d: "M38,96 L56,150 L144,150 L162,96 Z",
       fill: "#e03131", "data-part": "box",
     }));
-    add(svg, "path", { d: "M58,86 H142", fill: "none", stroke: "#fffaf3", "stroke-width": "4" });
+    add(svg, "path", { d: "M56,112 H144", fill: "none", stroke: "#fffaf3", "stroke-width": "4" });
   }
 
   function drawHotdog(svg) {
-    add(svg, "ellipse", ink({ cx: "100", cy: "78", rx: "86", ry: "36", fill: "#f3c14b", "data-part": "bun" }));
-    add(svg, "rect", ink({ x: "22", y: "64", width: "156", height: "30", rx: "15", fill: "#d9480f", "data-part": "sausage" }));
-    add(svg, "path", { d: "M34,78 Q70,64 100,78 T166,78", fill: "none", stroke: "#f5c518", "stroke-width": "5", "data-part": "mustard" });
+    add(svg, "ellipse", ink({ cx: "100", cy: "118", rx: "88", ry: "32", fill: "#f3c14b", "data-part": "bun" }));
+    add(svg, "rect", ink({ x: "18", y: "104", width: "164", height: "28", rx: "14", fill: "#d9480f", "data-part": "sausage" }));
+    add(svg, "path", { d: "M30,118 Q68,104 100,118 T172,118", fill: "none", stroke: "#f5c518", "stroke-width": "5", "data-part": "mustard" });
   }
 
   const DRAW = { burger: drawBurger, fries: drawFries, hotdog: drawHotdog };
 
   function drawKart(parent, id) {
-    const svg = el("svg", { viewBox: "0 0 200 170" });
+    const svg = el("svg", { viewBox: "0 0 200 190" });
     svg.setAttribute("aria-hidden", "true");
     svg.setAttribute("class", "pokerace-kart-art");
     svg.setAttribute("data-kart", id);
     DRAW[id](svg);
-    add(svg, "rect", ink({ x: "36", y: "132", width: "128", height: "14", rx: "6", fill: "#3a2a22", "data-part": "chassis" }));
-    add(svg, "circle", ink({ cx: "58", cy: "150", r: "16", fill: "#241c16", "data-part": "wheel" }));
-    add(svg, "circle", ink({ cx: "142", cy: "150", r: "16", fill: "#241c16", "data-part": "wheel" }));
-    add(svg, "circle", { cx: "58", cy: "150", r: "6", fill: "#f6e7c1" });
-    add(svg, "circle", { cx: "142", cy: "150", r: "6", fill: "#f6e7c1" });
+    parent.appendChild(svg);
+  }
+
+  function drawChassis(parent) {
+    const svg = el("svg", { viewBox: "0 0 200 190" });
+    svg.setAttribute("aria-hidden", "true");
+    svg.setAttribute("class", "pokerace-kart-art");
+    add(svg, "rect", ink({ x: "46", y: "150", width: "108", height: "14", rx: "6", fill: "#3a2a22", "data-part": "chassis" }));
+    add(svg, "circle", ink({ cx: "62", cy: "172", r: "14", fill: "#241c16", "data-part": "wheel" }));
+    add(svg, "circle", ink({ cx: "138", cy: "172", r: "14", fill: "#241c16", "data-part": "wheel" }));
+    add(svg, "circle", { cx: "62", cy: "172", r: "5", fill: "#f6e7c1" });
+    add(svg, "circle", { cx: "138", cy: "172", r: "5", fill: "#f6e7c1" });
     parent.appendChild(svg);
   }
 
@@ -188,11 +195,18 @@
     player.textContent = "";
     player.dataset.driver = state.driver;
     player.dataset.kart = state.kart;
+    const back = document.createElement("div");
+    back.className = "pokerace-kart-back";
+    drawChassis(back);
     const rider = document.createElement("div");
     rider.className = "pokerace-rider";
     L.pokemon.drawCreature(rider, state.driver, { silhouette: false });
+    const front = document.createElement("div");
+    front.className = "pokerace-kart-front";
+    drawKart(front, state.kart);
+    player.appendChild(back);
     player.appendChild(rider);
-    drawKart(player, state.kart);
+    player.appendChild(front);
   }
 
   function placeMarker(node, remaining, markerHeight, contactPx) {
@@ -222,9 +236,56 @@
       FINISH_HEIGHT,
       contact,
     );
+    const finish = document.getElementById("pokeraceFinishLine");
+    if (!finish.hidden) {
+      const travel = 1 - Math.max(0, Math.min(VIEW_AHEAD, FINISH_AT - state.distance)) / VIEW_AHEAD;
+      const inset = 34 - travel * 16;
+      finish.style.left = inset + "%";
+      finish.style.right = inset + "%";
+    }
+    placeWorld(contact);
     const boost = document.getElementById("pokeraceBoost");
     boost.dataset.charges = String(state.charges);
     boost.textContent = "Boost " + state.charges;
+  }
+
+  function placeWorld(contact) {
+    const dashes = document.getElementById("pokeraceDashes");
+    const trees = document.getElementById("pokeraceTrees");
+    if (!dashes || !trees) return;
+    const gap = 46;
+    const first = Math.ceil((state.distance + 8) / gap) * gap;
+    for (let i = 0; i < dashes.children.length; i++) {
+      const remaining = first + i * gap - state.distance;
+      const dash = dashes.children[i];
+      if (!markerVisible(remaining, 12)) {
+        dash.hidden = true;
+        continue;
+      }
+      dash.hidden = false;
+      const travel = 1 - Math.max(0, remaining) / VIEW_AHEAD;
+      const width = 8 + travel * 26;
+      dash.style.top = approachTop(remaining, contact, 12) + "px";
+      dash.style.width = width + "px";
+      dash.style.marginLeft = (-width / 2) + "px";
+    }
+    const spacing = 150;
+    const treeBase = Math.floor(state.distance / spacing) * spacing;
+    for (let i = 0; i < trees.children.length; i++) {
+      const remaining = treeBase + (i + 1) * (spacing / 2) - state.distance;
+      const tree = trees.children[i];
+      if (!markerVisible(remaining, 28)) {
+        tree.hidden = true;
+        continue;
+      }
+      tree.hidden = false;
+      const travel = 1 - Math.max(0, remaining) / VIEW_AHEAD;
+      const scale = 0.4 + travel * 0.8;
+      tree.style.top = approachTop(remaining, contact, 28) + "px";
+      tree.style.transform = "scale(" + scale + ")";
+      const side = tree.dataset.side === "right";
+      tree.style.left = side ? (62 + travel * 24) + "%" : (18 - travel * 12) + "%";
+    }
   }
 
   function ensurePads() {
@@ -237,6 +298,23 @@
       padEl.textContent = "⚡";
       pads.appendChild(padEl);
     });
+  }
+
+  function ensureWorld() {
+    const dashes = document.getElementById("pokeraceDashes");
+    const trees = document.getElementById("pokeraceTrees");
+    if (!dashes || !trees || dashes.children.length) return;
+    for (let i = 0; i < 6; i++) {
+      const dash = document.createElement("div");
+      dash.className = "pokerace-dash";
+      dashes.appendChild(dash);
+    }
+    for (let i = 0; i < 4; i++) {
+      const tree = document.createElement("div");
+      tree.className = "pokerace-tree";
+      tree.dataset.side = i % 2 ? "right" : "left";
+      trees.appendChild(tree);
+    }
   }
 
   function frame(now) {
@@ -266,6 +344,7 @@
     boostQueued = false;
     last = 0;
     ensurePads();
+    ensureWorld();
     showOnly("race");
     drawPlayer();
     render();

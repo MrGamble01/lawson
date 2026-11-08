@@ -7583,21 +7583,33 @@ button.story-hint {
 }
 .pokerace-road {
   position: absolute;
-  left: 18%;
-  right: 18%;
-  top: 52px;
+  left: 6%;
+  right: 6%;
+  top: 64px;
   bottom: 0;
   z-index: 2;
-  background-color: #4a5160;
-  background-image: repeating-linear-gradient(
-    to bottom,
-    #f7f3ea 0 14px,
-    transparent 14px 38px
-  );
-  background-size: 12px 38px;
-  background-repeat: repeat-y;
-  background-position: center top;
-  box-shadow: inset 10px 0 0 #f7f3ea, inset -10px 0 0 #f7f3ea;
+  background: #4a5160;
+  clip-path: polygon(24% 0, 76% 0, 100% 100%, 0 100%);
+  box-shadow: inset 0 0 0 8px rgba(247, 243, 234, 0.9);
+}
+.pokerace-dashes { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+.pokerace-dash {
+  position: absolute;
+  left: 50%;
+  height: 14px;
+  background: #f7f3ea;
+  border-radius: 3px;
+}
+.pokerace-trees { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.pokerace-tree {
+  position: absolute;
+  width: 26px;
+  height: 34px;
+  margin-left: -13px;
+  border-radius: 40% 40% 8px 8px;
+  background: #2f9e44;
+  border: 3px solid #1f6b30;
+  box-shadow: inset 0 -8px 0 #1f6b30;
 }
 .pokerace-pads { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
 .pokerace-finish, .pokerace-player { position: absolute; z-index: 4; }
@@ -7634,19 +7646,26 @@ button.story-hint {
 }
 .pokerace-rider {
   position: absolute;
-  left: 52px;
-  top: 4px;
-  width: 64px;
-  height: 64px;
-  z-index: 5;
-  border-radius: 50%;
-  background: #fffaf3;
-  border: 3px solid #241c16;
-  overflow: hidden;
+  left: 50%;
+  top: -8px;
+  width: 78px;
+  height: 78px;
+  margin-left: -39px;
+  z-index: 2;
+  background: none;
+  border: 0;
+  overflow: visible;
 }
+.pokerace-kart-back,
+.pokerace-kart-front {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.pokerace-kart-back { z-index: 1; }
+.pokerace-kart-front { z-index: 3; }
 .pokerace-rider .poke-art,
-.pokerace-player .pokerace-kart-art { width: 100%; height: 100%; }
-.pokerace-player .pokerace-kart-art { position: absolute; left: 0; bottom: 0; }
+.pokerace-kart-art { width: 100%; height: 100%; }
 .pokerace-dock {
   width: min(560px, 100%);
   display: flex;
