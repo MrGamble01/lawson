@@ -42,8 +42,8 @@
     add(svg, "circle", { cx: "82", cy: "60", r: "4", fill: "#fffaf3" });
     add(svg, "circle", { cx: "108", cy: "62", r: "4", fill: "#fffaf3" });
     add(svg, "circle", { cx: "134", cy: "66", r: "4", fill: "#fffaf3" });
-    add(svg, "path", ink({ d: "M32,96 Q100,118 168,96", fill: "none", stroke: "#3d9a4a", "stroke-width": "8", "data-part": "lettuce" }));
-    add(svg, "rect", ink({ x: "36", y: "100", width: "128", height: "12", rx: "3", fill: "#ffd43b", "data-part": "cheese" }));
+    add(svg, "path", ink({ d: "M28,92 Q100,122 172,92", fill: "none", stroke: "#3d9a4a", "stroke-width": "12", "data-part": "lettuce" }));
+    add(svg, "rect", ink({ x: "32", y: "98", width: "136", height: "16", rx: "3", fill: "#ffd43b", "data-part": "cheese" }));
     add(svg, "rect", ink({ x: "30", y: "112", width: "140", height: "24", rx: "8", fill: "#7a3e22", "data-part": "patty" }));
     add(svg, "ellipse", ink({ cx: "100", cy: "142", rx: "74", ry: "18", fill: "#e0a63a", "data-part": "bun" }));
   }
