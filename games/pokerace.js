@@ -255,6 +255,8 @@
     if (!dashes || !trees) return;
     const gap = 46;
     const first = Math.ceil((state.distance + 8) / gap) * gap;
+    const road = document.getElementById("pokeraceRoad");
+    const roadTop = road ? road.offsetTop : 0;
     for (let i = 0; i < dashes.children.length; i++) {
       const remaining = first + i * gap - state.distance;
       const dash = dashes.children[i];
@@ -265,7 +267,7 @@
       dash.hidden = false;
       const travel = 1 - Math.max(0, remaining) / VIEW_AHEAD;
       const width = 8 + travel * 26;
-      dash.style.top = approachTop(remaining, contact, 12) + "px";
+      dash.style.top = (approachTop(remaining, contact, 12) - roadTop) + "px";
       dash.style.width = width + "px";
       dash.style.marginLeft = (-width / 2) + "px";
     }

@@ -7590,9 +7590,10 @@ button.story-hint {
   z-index: 2;
   background: #4a5160;
   clip-path: polygon(24% 0, 76% 0, 100% 100%, 0 100%);
+  overflow: hidden;
   box-shadow: inset 0 0 0 8px rgba(247, 243, 234, 0.9);
 }
-.pokerace-dashes { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+.pokerace-dashes { position: absolute; inset: 0; pointer-events: none; }
 .pokerace-dash {
   position: absolute;
   left: 50%;
