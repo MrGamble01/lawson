@@ -344,6 +344,7 @@
   function onKeyDown(e) {
     const screen = document.getElementById("pokeraceGame");
     if (!screen || !screen.classList.contains("active")) return;
+    if (phase === "race" && steerDown(e)) return;
     if (focusedControl(e)) return;
     if (phase === "driver" && e.key >= "1" && e.key <= "8") {
       const btn = document.querySelectorAll("#pokeraceDrivers .pokerace-pick")[Number(e.key) - 1];
@@ -356,17 +357,27 @@
       return;
     }
     if (phase !== "race" && phase !== "done") return;
-    if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") { held.left = true; e.preventDefault(); }
-    if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") { held.right = true; e.preventDefault(); }
     if ((e.key === " " || e.key === "ArrowUp") && !e.repeat) { boostQueued = true; e.preventDefault(); }
     if ((e.key === "r" || e.key === "R" || e.key === "Enter") && phase === "done") {
       e.preventDefault();
       restartRace();
     }
   }
+  function steerDown(e) {
+    const dir = steerDir(e.key);
+    if (!dir) return false;
+    held[dir] = true;
+    if (e.preventDefault) e.preventDefault();
+    return true;
+  }
+  function steerDir(key) {
+    if (key === "ArrowLeft" || key === "a" || key === "A") return "left";
+    if (key === "ArrowRight" || key === "d" || key === "D") return "right";
+    return "";
+  }
   function onKeyUp(e) {
-    if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") held.left = false;
-    if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") held.right = false;
+    const dir = steerDir(e.key);
+    if (dir) held[dir] = false;
   }
 
   function releaseHeld() {
@@ -383,6 +394,20 @@
     btn.addEventListener("pointerup", up);
     btn.addEventListener("pointercancel", up);
     btn.addEventListener("pointerleave", up);
+    btn.addEventListener("keydown", (e) => {
+      const dir = steerDir(e.key);
+      const activate = e.key === " " || e.key === "Enter";
+      if (dir && dir !== key) return;
+      if (!activate && !dir) return;
+      if (e.repeat) return;
+      held[key] = true;
+      if (e.preventDefault) e.preventDefault();
+    });
+    btn.addEventListener("keyup", (e) => {
+      const dir = steerDir(e.key);
+      if (e.key === " " || e.key === "Enter" || dir === key) held[key] = false;
+    });
+    btn.addEventListener("blur", up);
   }
 
   function bindStable() {

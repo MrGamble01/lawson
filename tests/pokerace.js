@@ -212,31 +212,74 @@ assert.equal(stolen, 0, "Space on a focused button is left to that button");
 assert.equal(ids.pokeraceBoost.dataset.charges, "2");
 
 const left = ids.pokeraceLeft;
-const heldAt = ids.pokeracePlayer.style.left;
+const right = ids.pokeraceRight;
+let clock = 5000;
+function roll(n) {
+  let pos = ids.pokeracePlayer.style.left;
+  for (let i = 0; i < n; i++) pos = tick();
+  return pos;
+}
+function tick() {
+  clock += 200;
+  rafFn(clock);
+  return ids.pokeracePlayer.style.left;
+}
+const parked = ids.pokeracePlayer.style.left;
+const homeDuring = el("button");
+docOn.keydown[0]({ key: "ArrowLeft", target: homeDuring, preventDefault() {} });
+const homeSteered = roll(2);
+assert.ok(parseFloat(homeSteered) < parseFloat(parked), "ArrowLeft steers while Home is focused");
+docOn.keyup[0]({ key: "ArrowLeft", target: homeDuring });
+assert.equal(roll(1), homeSteered, "releasing the arrow stops the turn");
+let nativeHome = 0;
+docOn.keydown[0]({ key: "Enter", target: homeDuring, preventDefault() { nativeHome += 1; } });
+docOn.keydown[0]({ key: " ", repeat: false, target: homeDuring, preventDefault() { nativeHome += 1; } });
+assert.equal(nativeHome, 0, "Enter and Space on Home stay native");
+assert.equal(ids.pokeraceBoost.dataset.charges, "2", "Space on Home does not spend a boost");
+
+left._on.keydown[0]({ key: " ", preventDefault() {} });
+const fromLeft = roll(2);
+assert.ok(parseFloat(fromLeft) < parseFloat(homeSteered), "focused Left steers while its key is held");
+left._on.keyup[0]({ key: " " });
+assert.equal(roll(1), fromLeft, "keyup on Left releases the turn");
+left._on.keydown[0]({ key: "Enter", preventDefault() {} });
+left._on.blur[0]();
+assert.equal(roll(1), fromLeft, "blur on Left releases the turn");
+
+right._on.keydown[0]({ key: "ArrowRight", preventDefault() {} });
+const fromRight = roll(2);
+assert.ok(parseFloat(fromRight) > parseFloat(fromLeft), "focused Right steers while ArrowRight is held");
+right._on.keyup[0]({ key: "ArrowRight" });
+assert.equal(roll(1), fromRight, "keyup on Right releases the turn");
+
+const heldAt = fromRight;
 left._on.pointerdown[0]({ preventDefault() {} });
-rafFn(2400);
-rafFn(2800);
+tick();
+tick();
 const turned = ids.pokeracePlayer.style.left;
 assert.notEqual(turned, heldAt, "touch hold steers");
 left._on.pointerup[0]();
-rafFn(3200);
+tick();
 assert.equal(ids.pokeracePlayer.style.left, turned, "touch release stops the turn");
 
 left._on.pointerdown[0]({ preventDefault() {} });
 winOn.blur[0]();
-rafFn(3600);
-rafFn(4000);
+tick();
+tick();
 assert.equal(ids.pokeracePlayer.style.left, turned, "blur clears a stuck turn");
 
 left._on.pointerdown[0]({ preventDefault() {} });
 documentMock.hidden = true;
 docOn.visibilitychange[0]();
 documentMock.hidden = false;
-rafFn(4400);
+tick();
 assert.equal(ids.pokeracePlayer.style.left, turned, "hiding the page clears a stuck turn");
 
 const step = rafFn;
-for (let t = 0; t < 140; t++) step(10000 + t * 50);
+for (let i = 0; i < 200; i++) {
+  clock += 50;
+  step(clock);
+}
 assert.equal(ids.pokeracePrompt.textContent, "Finished!");
 const home = el("button");
 let finishHijack = 0;
