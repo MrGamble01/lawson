@@ -7570,6 +7570,7 @@ button.story-hint {
 .pokerace-pads { position: absolute; inset: 0; pointer-events: none; }
 .pokerace-finish, .pokerace-player { position: absolute; }
 .pokerace-pad {
+  position: absolute;
   left: 50%;
   width: 36px;
   height: 36px;

@@ -7,6 +7,11 @@
   const INK = "#241c16";
   const FINISH_AT = 480;
   const PADS = [140, 300];
+  const VIEW_AHEAD = 240;
+  const PLAYER_BOTTOM = 12;
+  const PLAYER_HEIGHT = 96;
+  const PAD_HEIGHT = 36;
+  const FINISH_HEIGHT = 18;
 
   function el(name, attrs) {
     const node = document.createElementNS(NS, name);
@@ -111,11 +116,31 @@
     return createRace(state.driver, state.kart);
   }
 
+  function contactLine(stageHeight) {
+    return stageHeight - PLAYER_BOTTOM - PLAYER_HEIGHT;
+  }
+
+  // Ahead of the kart is the top of the road. Remaining distance shrinks
+  // the marker down toward the kart's nose, and zero remaining puts the
+  // marker's center on that line.
+  function approachTop(remaining, contactPx, markerHeight) {
+    const clamped = Math.max(-markerHeight, Math.min(VIEW_AHEAD, remaining));
+    const travel = 1 - clamped / VIEW_AHEAD;
+    const horizon = 8;
+    const atContact = contactPx - markerHeight / 2;
+    return horizon + travel * (atContact - horizon);
+  }
+
+  function markerVisible(remaining, markerHeight) {
+    return remaining <= VIEW_AHEAD && remaining >= -markerHeight;
+  }
+
   let state = null;
   let phase = "driver";
   let running = false;
   let raf = 0;
   let last = 0;
+  let epoch = 0;
   let boostQueued = false;
   let bound = false;
   const held = { left: false, right: false };
@@ -154,22 +179,33 @@
     drawKart(player, state.kart);
   }
 
+  function placeMarker(node, remaining, markerHeight, contactPx) {
+    if (!markerVisible(remaining, markerHeight)) {
+      node.hidden = true;
+      return;
+    }
+    node.hidden = false;
+    node.style.top = approachTop(remaining, contactPx, markerHeight) + "px";
+  }
+
   function render() {
     const player = document.getElementById("pokeracePlayer");
     player.style.left = (50 + state.x * 28) + "%";
     const road = document.getElementById("pokeraceRoad");
     road.style.backgroundPositionY = (state.distance * 2) + "px";
-    const view = 240;
+    const stage = document.getElementById("pokeraceStage");
+    const stageH = stage.clientHeight || 320;
+    const contact = contactLine(stageH);
     const pads = document.getElementById("pokeracePads");
     for (let i = 0; i < pads.children.length; i++) {
-      const rel = (PADS[i] - state.distance) / view;
-      pads.children[i].hidden = rel < -0.08 || rel > 1.05;
-      pads.children[i].style.top = (rel * 78 + 6) + "%";
+      placeMarker(pads.children[i], PADS[i] - state.distance, PAD_HEIGHT, contact);
     }
-    const finish = document.getElementById("pokeraceFinishLine");
-    const relF = (FINISH_AT - state.distance) / view;
-    finish.hidden = relF < -0.08 || relF > 1.05;
-    finish.style.top = (relF * 78) + "%";
+    placeMarker(
+      document.getElementById("pokeraceFinishLine"),
+      FINISH_AT - state.distance,
+      FINISH_HEIGHT,
+      contact,
+    );
     const boost = document.getElementById("pokeraceBoost");
     boost.dataset.charges = String(state.charges);
     boost.textContent = "Boost " + state.charges;
@@ -188,13 +224,16 @@
   }
 
   function frame(now) {
+    const mine = epoch;
     if (!running) return;
     const dt = Math.min(0.05, last ? (now - last) / 1000 : 0.016);
     last = now;
+    if (mine !== epoch || !running) return;
     const steer = (held.left ? -1 : 0) + (held.right ? 1 : 0);
     const boost = boostQueued;
     boostQueued = false;
     stepRace(state, dt, { steer: steer, boost: boost });
+    if (mine !== epoch || !running) return;
     render();
     if (state.finished) {
       finishRace();
@@ -204,6 +243,7 @@
   }
 
   function beginRace(driver, kart) {
+    epoch += 1;
     state = createRace(driver, kart);
     held.left = false;
     held.right = false;
@@ -295,9 +335,16 @@
     fillKarts();
   }
 
+  function focusedControl(e) {
+    const el = e && e.target;
+    if (!el || !el.closest) return false;
+    return !!el.closest("button, a, input, select, textarea");
+  }
+
   function onKeyDown(e) {
     const screen = document.getElementById("pokeraceGame");
     if (!screen || !screen.classList.contains("active")) return;
+    if (focusedControl(e)) return;
     if (phase === "driver" && e.key >= "1" && e.key <= "8") {
       const btn = document.querySelectorAll("#pokeraceDrivers .pokerace-pick")[Number(e.key) - 1];
       if (btn) { e.preventDefault(); btn.click(); }
@@ -321,6 +368,13 @@
     if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") held.left = false;
     if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") held.right = false;
   }
+
+  function releaseHeld() {
+    held.left = false;
+    held.right = false;
+  }
+  function onBlur() { releaseHeld(); }
+  function onHide() { if (document.hidden) releaseHeld(); }
 
   function holdButton(btn, key) {
     const down = (e) => { held[key] = true; if (e.preventDefault) e.preventDefault(); };
@@ -358,25 +412,46 @@
     showOnly("driver");
     document.addEventListener("keydown", onKeyDown);
     document.addEventListener("keyup", onKeyUp);
+    window.addEventListener("blur", onBlur);
+    document.addEventListener("visibilitychange", onHide);
   }
 
   function stop() {
     running = false;
     cancelAnimationFrame(raf);
     raf = 0;
-    held.left = false;
-    held.right = false;
+    releaseHeld();
     document.removeEventListener("keydown", onKeyDown);
     document.removeEventListener("keyup", onKeyUp);
+    window.removeEventListener("blur", onBlur);
+    document.removeEventListener("visibilitychange", onHide);
+  }
+
+  function preview(distance) {
+    if (!state) return;
+    epoch += 1;
+    running = false;
+    cancelAnimationFrame(raf);
+    raf = 0;
+    state.distance = Math.max(0, distance);
+    state.finished = false;
+    render();
   }
 
   L.race = {
     karts: KARTS,
     finishAt: FINISH_AT,
+    pads: PADS,
+    viewAhead: VIEW_AHEAD,
+    padHeight: PAD_HEIGHT,
+    finishHeight: FINISH_HEIGHT,
+    contactLine: contactLine,
+    approachTop: approachTop,
     createRace: createRace,
     stepRace: stepRace,
     resetRace: resetRace,
     drawKart: drawKart,
+    preview: preview,
   };
   L.games.pokerace = { screen: "pokeraceGame", start: start, stop: stop };
 })();
