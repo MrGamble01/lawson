@@ -99,7 +99,7 @@
 
     const choices = document.getElementById("pokequizChoices");
     choices.textContent = "";
-    round.choices.forEach((mon) => {
+    round.choices.forEach((mon, index) => {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "pokequiz-btn";
@@ -111,7 +111,7 @@
       L.pokemon.drawCreature(art, mon.id, { silhouette: false });
       const label = document.createElement("span");
       label.className = "pokequiz-name";
-      label.textContent = mon.name;
+      label.textContent = (index + 1) + "  " + mon.name;
       btn.appendChild(art);
       btn.appendChild(label);
       L.onTap(btn, (e) => {
