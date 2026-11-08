@@ -7481,27 +7481,28 @@ button.story-hint {
   justify-content: flex-start;
   padding: 12px;
   background:
-    radial-gradient(560px 240px at 50% 0%, rgba(224, 49, 49, 0.14), transparent 64%),
+    radial-gradient(640px 280px at 50% 0%, rgba(126, 200, 238, 0.45), transparent 60%),
     linear-gradient(180deg, #f8f1e8, #f3e6d4);
 }
 .pokerace-layout {
   width: 100%;
-  max-width: 900px;
+  max-width: 720px;
   height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 76px 12px 16px;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 72px 10px 12px;
 }
 .pokerace-prompt {
   font-family: var(--font-display);
-  font-size: clamp(26px, 4vw, 40px);
+  font-size: clamp(22px, 4vw, 34px);
   font-weight: 600;
   color: var(--c-cloth, #4e2a28);
   text-align: center;
   min-height: 44px;
+  margin: 0;
 }
 .pokerace-picks {
   display: flex;
@@ -7512,63 +7513,94 @@ button.story-hint {
 }
 .pokerace-pick,
 .pokerace-kart,
-.pokerace-controls button,
+.pokerace-steer button,
+.pokerace-restart,
 .pokerace-done button {
   font-family: var(--font-display);
-  color: var(--c-cloth, #4e2a28);
+  color: #3a2a22;
   background: #fffaf3;
-  border: 3px solid var(--c-brass, #c4a46a);
+  border: 3px solid #c4a46a;
   border-radius: 18px;
-  box-shadow: 0 6px 0 rgba(90, 56, 32, 0.12);
+  box-shadow: 0 5px 0 rgba(58, 42, 34, 0.18);
   cursor: pointer;
   touch-action: manipulation;
 }
 .pokerace-pick {
-  flex: 1 1 140px;
-  max-width: 180px;
-  min-width: 120px;
-  min-height: 96px;
+  flex: 1 1 150px;
+  max-width: 200px;
+  min-width: 132px;
+  min-height: 92px;
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 8px;
+  gap: 8px;
+  padding: 6px 10px;
+  font-size: 18px;
 }
-.pokerace-mini { width: 52px; height: 52px; flex: 0 0 52px; }
+.pokerace-mini {
+  width: 64px;
+  height: 64px;
+  flex: 0 0 64px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid #241c16;
+  overflow: hidden;
+}
 .pokerace-mini .poke-art { width: 100%; height: 100%; }
 .pokerace-kart {
-  flex: 1 1 150px;
-  max-width: 220px;
-  min-width: 120px;
-  min-height: 150px;
+  flex: 1 1 180px;
+  max-width: 240px;
+  min-width: 140px;
+  min-height: 168px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 4px;
   padding: 8px;
+  font-size: 20px;
 }
-.pokerace-kart-preview { width: 120px; height: 84px; }
+.pokerace-kart-preview { width: 150px; height: 120px; }
 .pokerace-kart-preview .pokerace-kart-art { width: 100%; height: 100%; }
 .pokerace-stage {
   position: relative;
-  width: min(440px, 100%);
-  height: min(320px, 42vh);
-  min-height: 220px;
+  width: min(560px, 100%);
+  height: min(380px, 48vh);
+  min-height: 260px;
   overflow: hidden;
-  border-radius: 24px;
+  border-radius: 28px;
   border: 4px solid #3a2a22;
-  background: #7dce6a;
+  background: #6fbf63;
+  box-shadow: 0 10px 0 rgba(58, 42, 34, 0.12);
+}
+.pokerace-sky {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 58px;
+  background: linear-gradient(#79c7ee, #d7f3c4);
+  z-index: 1;
 }
 .pokerace-road {
   position: absolute;
   left: 18%;
   right: 18%;
-  top: 0;
+  top: 52px;
   bottom: 0;
-  background: repeating-linear-gradient(#5c5346 0 18px, #3f3a32 18px 36px);
+  z-index: 2;
+  background-color: #4a5160;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    #f7f3ea 0 14px,
+    transparent 14px 38px
+  );
+  background-size: 12px 38px;
+  background-repeat: repeat-y;
+  background-position: center top;
+  box-shadow: inset 10px 0 0 #f7f3ea, inset -10px 0 0 #f7f3ea;
 }
-.pokerace-pads { position: absolute; inset: 0; pointer-events: none; }
-.pokerace-finish, .pokerace-player { position: absolute; }
+.pokerace-pads { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+.pokerace-finish, .pokerace-player { position: absolute; z-index: 4; }
 .pokerace-pad {
   position: absolute;
   left: 50%;
@@ -7576,65 +7608,89 @@ button.story-hint {
   height: 36px;
   margin-left: -18px;
   border-radius: 50%;
-  background: #ffd43b;
+  background: radial-gradient(circle at 35% 35%, #fff3bf, #f5c518 55%, #e67700);
   border: 3px solid #3a2a22;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 18px;
 }
 .pokerace-finish {
   left: 18%;
   right: 18%;
-  height: 18px;
-  background: repeating-linear-gradient(90deg, #fff 0 12px, #111 12px 24px);
+  height: 22px;
+  background: repeating-linear-gradient(90deg, #fff 0 14px, #241c16 14px 28px);
+  border-top: 3px solid #241c16;
+  border-bottom: 3px solid #241c16;
   color: transparent;
 }
 .pokerace-player {
-  bottom: 12px;
-  width: 110px;
-  height: 96px;
+  bottom: 14px;
+  width: 168px;
+  height: 140px;
   transform: translateX(-50%);
+  filter: drop-shadow(0 8px 0 rgba(36, 28, 22, 0.25));
 }
 .pokerace-rider {
   position: absolute;
-  left: 28px;
-  top: -36px;
-  width: 52px;
-  height: 52px;
-  z-index: 2;
+  left: 52px;
+  top: 4px;
+  width: 64px;
+  height: 64px;
+  z-index: 5;
+  border-radius: 50%;
+  background: #fffaf3;
+  border: 3px solid #241c16;
+  overflow: hidden;
 }
 .pokerace-rider .poke-art,
 .pokerace-player .pokerace-kart-art { width: 100%; height: 100%; }
 .pokerace-player .pokerace-kart-art { position: absolute; left: 0; bottom: 0; }
-.pokerace-controls {
+.pokerace-dock {
+  width: min(560px, 100%);
   display: flex;
+  flex-direction: column;
   gap: 8px;
-  width: min(520px, 100%);
+  padding: 10px;
+  background: #3a2a22;
+  border-radius: 24px;
 }
-.pokerace-controls button {
+.pokerace-steer { display: flex; gap: 8px; }
+.pokerace-steer button {
   flex: 1;
-  min-width: 64px;
-  min-height: 72px;
+  min-width: 72px;
+  min-height: 76px;
+  font-size: 20px;
+}
+.pokerace-steer .pokerace-boost { background: #ffd43b; }
+.pokerace-restart {
+  min-height: 48px;
+  background: transparent;
+  color: #fffaf3;
+  border-color: #c4a46a;
   font-size: 18px;
 }
 .pokerace-done {
   position: absolute;
   left: 8%;
   right: 8%;
-  top: 18%;
+  top: 22%;
+  z-index: 6;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  padding: 12px;
+  padding: 14px;
   background: #fffaf3;
-  border: 3px solid var(--c-brass, #c4a46a);
+  border: 3px solid #c4a46a;
   border-radius: 18px;
 }
 .pokerace-done p {
   font-family: var(--font-display);
   font-size: 22px;
   text-align: center;
-  color: var(--c-cloth, #4e2a28);
+  color: #3a2a22;
+  margin: 0;
 }
 .pokerace-done button { min-height: 56px; min-width: 160px; font-size: 22px; padding: 8px 14px; }

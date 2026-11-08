@@ -769,6 +769,7 @@
         <div id="pokeraceDrivers" class="pokerace-picks" role="group" aria-label="Drivers"></div>
         <div id="pokeraceKarts" class="pokerace-picks" role="group" aria-label="Karts" hidden></div>
         <div id="pokeraceStage" class="pokerace-stage" hidden>
+          <div class="pokerace-sky" aria-hidden="true"></div>
           <div id="pokeraceRoad" class="pokerace-road"></div>
           <div id="pokeracePads" class="pokerace-pads"></div>
           <div id="pokeraceFinishLine" class="pokerace-finish">Finish</div>
@@ -779,13 +780,15 @@
             <button id="pokeraceChange" type="button">Change driver</button>
           </div>
         </div>
-        <div id="pokeraceControls" class="pokerace-controls" hidden>
-          <button id="pokeraceLeft" type="button" aria-label="Steer left">Left</button>
-          <button id="pokeraceBoost" type="button" aria-label="Boost">Boost 2</button>
-          <button id="pokeraceRight" type="button" aria-label="Steer right">Right</button>
-          <button id="pokeraceRestart" type="button" aria-label="Restart race">Restart</button>
+        <div id="pokeraceControls" class="pokerace-dock" hidden>
+          <div class="pokerace-steer">
+            <button id="pokeraceLeft" type="button" aria-label="Steer left">Left</button>
+            <button id="pokeraceBoost" class="pokerace-boost" type="button" aria-label="Boost">Boost 2</button>
+            <button id="pokeraceRight" type="button" aria-label="Steer right">Right</button>
+          </div>
+          <button id="pokeraceRestart" class="pokerace-restart" type="button" aria-label="Restart race">Restart</button>
         </div>
-        <p class="poke-note">Unofficial drawings. Not made or endorsed by Nintendo.</p>
+        <p class="poke-note">Unofficial drawings of Pokémon characters. Not licensed or endorsed.</p>
       </div>
     </section>
 

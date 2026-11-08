@@ -8,10 +8,10 @@
   const FINISH_AT = 480;
   const PADS = [140, 300];
   const VIEW_AHEAD = 240;
-  const PLAYER_BOTTOM = 12;
-  const PLAYER_HEIGHT = 96;
+  const PLAYER_BOTTOM = 14;
+  const PLAYER_HEIGHT = 140;
   const PAD_HEIGHT = 36;
-  const FINISH_HEIGHT = 18;
+  const FINISH_HEIGHT = 22;
 
   function el(name, attrs) {
     const node = document.createElementNS(NS, name);
@@ -37,35 +37,51 @@
   ];
 
   function drawBurger(svg) {
-    add(svg, "ellipse", ink({ cx: "70", cy: "28", rx: "40", ry: "16", fill: "#f6d27a", "data-part": "bun" }));
-    add(svg, "path", ink({ d: "M32,40 Q70,52 108,40", fill: "none", stroke: "#2f9e44", "stroke-width": "6", "data-part": "lettuce" }));
-    add(svg, "rect", ink({ x: "30", y: "44", width: "80", height: "16", rx: "6", fill: "#8a4b24", "data-part": "patty" }));
-    add(svg, "ellipse", ink({ cx: "70", cy: "70", rx: "40", ry: "14", fill: "#e7b84b", "data-part": "bun" }));
+    add(svg, "ellipse", ink({ cx: "100", cy: "46", rx: "70", ry: "26", fill: "#f3c14b", "data-part": "bun" }));
+    add(svg, "circle", { cx: "62", cy: "36", r: "4", fill: "#fffaf3" });
+    add(svg, "circle", { cx: "86", cy: "30", r: "4", fill: "#fffaf3" });
+    add(svg, "circle", { cx: "112", cy: "32", r: "4", fill: "#fffaf3" });
+    add(svg, "circle", { cx: "136", cy: "38", r: "4", fill: "#fffaf3" });
+    add(svg, "path", ink({ d: "M36,62 Q100,86 164,62", fill: "none", stroke: "#3d9a4a", "stroke-width": "8", "data-part": "lettuce" }));
+    add(svg, "rect", ink({ x: "40", y: "66", width: "120", height: "14", rx: "3", fill: "#ffd43b", "data-part": "cheese" }));
+    add(svg, "rect", ink({ x: "34", y: "78", width: "132", height: "26", rx: "8", fill: "#7a3e22", "data-part": "patty" }));
+    add(svg, "ellipse", ink({ cx: "100", cy: "112", rx: "72", ry: "20", fill: "#e0a63a", "data-part": "bun" }));
   }
 
   function drawFries(svg) {
-    add(svg, "rect", ink({ x: "46", y: "18", width: "10", height: "36", rx: "3", fill: "#f5c518", "data-part": "fry" }));
-    add(svg, "rect", ink({ x: "64", y: "10", width: "12", height: "44", rx: "3", fill: "#ffd43b", "data-part": "fry" }));
-    add(svg, "rect", ink({ x: "84", y: "20", width: "10", height: "34", rx: "3", fill: "#f5c518", "data-part": "fry" }));
-    add(svg, "path", ink({ d: "M36,40 L48,88 L92,88 L104,40 Z", fill: "#e03131", "data-part": "box" }));
+    const fries = [[48, 8, 16, 78], [70, 0, 18, 86], [94, 6, 16, 80], [116, 2, 18, 84], [140, 12, 14, 72]];
+    fries.forEach((fry) => {
+      add(svg, "rect", ink({
+        x: String(fry[0]), y: String(fry[1]), width: String(fry[2]), height: String(fry[3]),
+        rx: "5", fill: "#ffd43b", "data-part": "fry",
+      }));
+    });
+    add(svg, "path", ink({
+      d: "M40,70 L58,128 L142,128 L160,70 Z",
+      fill: "#e03131", "data-part": "box",
+    }));
+    add(svg, "path", { d: "M58,86 H142", fill: "none", stroke: "#fffaf3", "stroke-width": "4" });
   }
 
   function drawHotdog(svg) {
-    add(svg, "ellipse", ink({ cx: "70", cy: "48", rx: "58", ry: "26", fill: "#f6d27a", "data-part": "bun" }));
-    add(svg, "rect", ink({ x: "22", y: "38", width: "96", height: "20", rx: "10", fill: "#e03131", "data-part": "sausage" }));
-    add(svg, "path", { d: "M30,48 Q50,40 70,48 T110,48", fill: "none", stroke: "#f5c518", "stroke-width": "4", "data-part": "mustard" });
+    add(svg, "ellipse", ink({ cx: "100", cy: "78", rx: "86", ry: "36", fill: "#f3c14b", "data-part": "bun" }));
+    add(svg, "rect", ink({ x: "22", y: "64", width: "156", height: "30", rx: "15", fill: "#d9480f", "data-part": "sausage" }));
+    add(svg, "path", { d: "M34,78 Q70,64 100,78 T166,78", fill: "none", stroke: "#f5c518", "stroke-width": "5", "data-part": "mustard" });
   }
 
   const DRAW = { burger: drawBurger, fries: drawFries, hotdog: drawHotdog };
 
   function drawKart(parent, id) {
-    const svg = el("svg", { viewBox: "0 0 140 100" });
+    const svg = el("svg", { viewBox: "0 0 200 170" });
     svg.setAttribute("aria-hidden", "true");
     svg.setAttribute("class", "pokerace-kart-art");
     svg.setAttribute("data-kart", id);
     DRAW[id](svg);
-    add(svg, "circle", ink({ cx: "40", cy: "86", r: "10", fill: "#241c16", "data-part": "wheel" }));
-    add(svg, "circle", ink({ cx: "100", cy: "86", r: "10", fill: "#241c16", "data-part": "wheel" }));
+    add(svg, "rect", ink({ x: "36", y: "132", width: "128", height: "14", rx: "6", fill: "#3a2a22", "data-part": "chassis" }));
+    add(svg, "circle", ink({ cx: "58", cy: "150", r: "16", fill: "#241c16", "data-part": "wheel" }));
+    add(svg, "circle", ink({ cx: "142", cy: "150", r: "16", fill: "#241c16", "data-part": "wheel" }));
+    add(svg, "circle", { cx: "58", cy: "150", r: "6", fill: "#f6e7c1" });
+    add(svg, "circle", { cx: "142", cy: "150", r: "6", fill: "#f6e7c1" });
     parent.appendChild(svg);
   }
 
@@ -192,7 +208,7 @@
     const player = document.getElementById("pokeracePlayer");
     player.style.left = (50 + state.x * 28) + "%";
     const road = document.getElementById("pokeraceRoad");
-    road.style.backgroundPositionY = (state.distance * 2) + "px";
+    road.style.backgroundPosition = "center " + (state.distance * 2) + "px";
     const stage = document.getElementById("pokeraceStage");
     const stageH = stage.clientHeight || 320;
     const contact = contactLine(stageH);

@@ -151,7 +151,7 @@ assert.equal(again.charges, 2);
 
 const stageH = 320;
 const contact = race.contactLine(stageH);
-assert.equal(contact, stageH - 12 - 96);
+assert.equal(contact, stageH - 14 - 140);
 const padAt = race.approachTop(0, contact, race.padHeight);
 const finishAt = race.approachTop(0, contact, race.finishHeight);
 assert.equal(padAt + race.padHeight / 2, contact, "a pad meets the kart nose when it is hit");
