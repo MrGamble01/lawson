@@ -12,6 +12,30 @@
   const PLAYER_HEIGHT = 140;
   const PAD_HEIGHT = 36;
   const FINISH_HEIGHT = 22;
+  const CURVE_AMP = 14;
+  const CURVE_LEN = 240;
+  const ROAD_TOP = 64;
+
+  function roadShift(distance) {
+    return Math.sin((distance / CURVE_LEN) * Math.PI * 2) * CURVE_AMP;
+  }
+
+  function lanePercent(distance) {
+    return 50 + roadShift(distance);
+  }
+
+  function roadHalf(remaining) {
+    const clamped = Math.max(0, Math.min(VIEW_AHEAD, remaining));
+    const travel = 1 - clamped / VIEW_AHEAD;
+    return 8 + travel * 30;
+  }
+
+  function remainingForY(y, contact) {
+    const span = contact - 8;
+    if (span <= 0) return 0;
+    const travel = (y - 8) / span;
+    return VIEW_AHEAD * (1 - Math.max(0, Math.min(1, travel)));
+  }
 
   function el(name, attrs) {
     const node = document.createElementNS(NS, name);
@@ -37,15 +61,15 @@
   ];
 
   function drawBurger(svg) {
-    add(svg, "ellipse", ink({ cx: "100", cy: "78", rx: "72", ry: "24", fill: "#f3c14b", "data-part": "bun" }));
-    add(svg, "circle", { cx: "58", cy: "66", r: "4", fill: "#fffaf3" });
-    add(svg, "circle", { cx: "82", cy: "60", r: "4", fill: "#fffaf3" });
-    add(svg, "circle", { cx: "108", cy: "62", r: "4", fill: "#fffaf3" });
-    add(svg, "circle", { cx: "134", cy: "66", r: "4", fill: "#fffaf3" });
-    add(svg, "path", ink({ d: "M28,92 Q100,122 172,92", fill: "none", stroke: "#3d9a4a", "stroke-width": "12", "data-part": "lettuce" }));
-    add(svg, "rect", ink({ x: "32", y: "98", width: "136", height: "16", rx: "3", fill: "#ffd43b", "data-part": "cheese" }));
-    add(svg, "rect", ink({ x: "30", y: "112", width: "140", height: "24", rx: "8", fill: "#7a3e22", "data-part": "patty" }));
-    add(svg, "ellipse", ink({ cx: "100", cy: "142", rx: "74", ry: "18", fill: "#e0a63a", "data-part": "bun" }));
+    add(svg, "ellipse", ink({ cx: "100", cy: "96", rx: "72", ry: "22", fill: "#f3c14b", "data-part": "bun" }));
+    add(svg, "circle", { cx: "58", cy: "84", r: "4", fill: "#fffaf3" });
+    add(svg, "circle", { cx: "82", cy: "78", r: "4", fill: "#fffaf3" });
+    add(svg, "circle", { cx: "108", cy: "80", r: "4", fill: "#fffaf3" });
+    add(svg, "circle", { cx: "134", cy: "84", r: "4", fill: "#fffaf3" });
+    add(svg, "path", ink({ d: "M28,112 Q100,138 172,112", fill: "none", stroke: "#3d9a4a", "stroke-width": "12", "data-part": "lettuce" }));
+    add(svg, "rect", ink({ x: "32", y: "116", width: "136", height: "14", rx: "3", fill: "#ffd43b", "data-part": "cheese" }));
+    add(svg, "rect", ink({ x: "30", y: "128", width: "140", height: "22", rx: "8", fill: "#7a3e22", "data-part": "patty" }));
+    add(svg, "ellipse", ink({ cx: "100", cy: "156", rx: "74", ry: "16", fill: "#e0a63a", "data-part": "bun" }));
   }
 
   function drawFries(svg) {
@@ -169,7 +193,8 @@
   const held = { left: false, right: false };
 
   function show(id, on) {
-    document.getElementById(id).hidden = !on;
+    const node = document.getElementById(id);
+    if (node) node.hidden = !on;
   }
 
   function showOnly(which) {
@@ -179,6 +204,7 @@
     show("pokeraceStage", which === "race" || which === "done");
     show("pokeraceControls", which === "race");
     show("pokeraceDone", which === "done");
+    show("pokeraceMeter", which === "race" || which === "done");
   }
 
   function driverName(id) {
@@ -209,41 +235,85 @@
     player.appendChild(front);
   }
 
-  function placeMarker(node, remaining, markerHeight, contactPx) {
+  function placeMarker(node, remaining, markerHeight, contactPx, worldDistance) {
     if (!markerVisible(remaining, markerHeight)) {
       node.hidden = true;
       return;
     }
+    const top = approachTop(remaining, contactPx, markerHeight);
+    if (top + markerHeight / 2 < ROAD_TOP) {
+      node.hidden = true;
+      return;
+    }
     node.hidden = false;
-    node.style.top = approachTop(remaining, contactPx, markerHeight) + "px";
+    node.style.top = top + "px";
+    if (typeof worldDistance === "number") node.style.left = lanePercent(worldDistance) + "%";
+  }
+
+  function paintRoad(stageH, contact) {
+    const path = document.getElementById("pokeraceRoadPath");
+    const edge = document.getElementById("pokeraceRoadEdge");
+    if (!path || !stageH) return;
+    const steps = 16;
+    const left = [];
+    const right = [];
+    for (let i = 0; i <= steps; i++) {
+      const yPx = ROAD_TOP + (stageH - ROAD_TOP) * (i / steps);
+      const y = (yPx / stageH) * 100;
+      const pastNose = yPx >= contact;
+      const remaining = pastNose ? 0 : remainingForY(yPx, contact);
+      const world = pastNose ? state.distance : state.distance + remaining;
+      const half = roadHalf(remaining);
+      const center = lanePercent(world);
+      left.push([center - half, y]);
+      right.push([center + half, y]);
+    }
+    const line = (pts) => pts.map((p) => p[0].toFixed(2) + " " + p[1].toFixed(2)).join(" L");
+    path.setAttribute("d", "M" + line(left) + " L" + line(right.slice().reverse()) + " Z");
+    if (edge) edge.setAttribute("d", "M" + line(left) + " M" + line(right));
+  }
+
+  function paintMeter() {
+    const meter = document.getElementById("pokeraceMeter");
+    const fill = document.getElementById("pokeraceMeterFill");
+    const label = document.getElementById("pokeraceMeterLabel");
+    if (!meter || !fill || !label || !state) return;
+    const pct = Math.max(0, Math.min(100, (state.distance / FINISH_AT) * 100));
+    fill.style.width = pct + "%";
+    meter.setAttribute("aria-valuenow", String(Math.round(state.distance)));
+    label.textContent = pct >= 100 ? "Finish" : (pct < 8 ? "Start" : "On the way");
   }
 
   function render() {
     const player = document.getElementById("pokeracePlayer");
-    player.style.left = (50 + state.x * 28) + "%";
-    const road = document.getElementById("pokeraceRoad");
-    road.style.backgroundPosition = "center " + (state.distance * 2) + "px";
+    player.style.left = (lanePercent(state.distance) + state.x * 28) + "%";
+    player.dataset.steer = state.x.toFixed(4);
     const stage = document.getElementById("pokeraceStage");
     const stageH = stage.clientHeight || 320;
     const contact = contactLine(stageH);
+    paintRoad(stageH, contact);
     const pads = document.getElementById("pokeracePads");
     for (let i = 0; i < pads.children.length; i++) {
-      placeMarker(pads.children[i], PADS[i] - state.distance, PAD_HEIGHT, contact);
+      placeMarker(pads.children[i], PADS[i] - state.distance, PAD_HEIGHT, contact, PADS[i]);
     }
+    const finishRemaining = FINISH_AT - state.distance;
     placeMarker(
       document.getElementById("pokeraceFinishLine"),
-      FINISH_AT - state.distance,
+      finishRemaining,
       FINISH_HEIGHT,
       contact,
+      FINISH_AT,
     );
     const finish = document.getElementById("pokeraceFinishLine");
     if (!finish.hidden) {
-      const travel = 1 - Math.max(0, Math.min(VIEW_AHEAD, FINISH_AT - state.distance)) / VIEW_AHEAD;
-      const inset = 34 - travel * 16;
-      finish.style.left = inset + "%";
-      finish.style.right = inset + "%";
+      const half = roadHalf(Math.max(0, finishRemaining));
+      const center = lanePercent(FINISH_AT);
+      finish.style.left = (center - half) + "%";
+      finish.style.width = (half * 2) + "%";
+      finish.style.right = "auto";
     }
     placeWorld(contact);
+    paintMeter();
     const boost = document.getElementById("pokeraceBoost");
     boost.dataset.charges = String(state.charges);
     boost.textContent = "Boost " + state.charges;
@@ -255,19 +325,19 @@
     if (!dashes || !trees) return;
     const gap = 46;
     const first = Math.ceil((state.distance + 8) / gap) * gap;
-    const road = document.getElementById("pokeraceRoad");
-    const roadTop = road ? road.offsetTop : 0;
     for (let i = 0; i < dashes.children.length; i++) {
       const remaining = first + i * gap - state.distance;
       const dash = dashes.children[i];
-      if (!markerVisible(remaining, 12)) {
+      const top = approachTop(remaining, contact, 12);
+      if (!markerVisible(remaining, 12) || top < ROAD_TOP) {
         dash.hidden = true;
         continue;
       }
       dash.hidden = false;
       const travel = 1 - Math.max(0, remaining) / VIEW_AHEAD;
       const width = 8 + travel * 26;
-      dash.style.top = (approachTop(remaining, contact, 12) - roadTop) + "px";
+      dash.style.top = top + "px";
+      dash.style.left = lanePercent(state.distance + remaining) + "%";
       dash.style.width = width + "px";
       dash.style.marginLeft = (-width / 2) + "px";
     }
@@ -276,17 +346,25 @@
     for (let i = 0; i < trees.children.length; i++) {
       const remaining = treeBase + (i + 1) * (spacing / 2) - state.distance;
       const tree = trees.children[i];
-      if (!markerVisible(remaining, 28)) {
+      const top = approachTop(remaining, contact, 28);
+      if (!markerVisible(remaining, 28) || top < ROAD_TOP) {
         tree.hidden = true;
         continue;
       }
       tree.hidden = false;
       const travel = 1 - Math.max(0, remaining) / VIEW_AHEAD;
-      const scale = 0.4 + travel * 0.8;
-      tree.style.top = approachTop(remaining, contact, 28) + "px";
+      const scale = 0.45 + travel * 0.7;
+      const side = tree.dataset.side === "right" ? 1 : -1;
+      tree.style.top = top + "px";
       tree.style.transform = "scale(" + scale + ")";
-      const side = tree.dataset.side === "right";
-      tree.style.left = side ? (62 + travel * 24) + "%" : (18 - travel * 12) + "%";
+      tree.style.left = (lanePercent(state.distance + remaining) + side * (roadHalf(remaining) + 7)) + "%";
+    }
+    const clouds = document.getElementById("pokeraceClouds");
+    if (clouds) {
+      for (let i = 0; i < clouds.children.length; i++) {
+        const drift = ((i * 48 + state.distance * 0.4) % 130) - 18;
+        clouds.children[i].style.left = drift + "%";
+      }
     }
   }
 
@@ -311,11 +389,19 @@
       dash.className = "pokerace-dash";
       dashes.appendChild(dash);
     }
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 6; i++) {
       const tree = document.createElement("div");
-      tree.className = "pokerace-tree";
+      tree.className = i < 4 ? "pokerace-tree" : "pokerace-bush";
       tree.dataset.side = i % 2 ? "right" : "left";
       trees.appendChild(tree);
+    }
+    const clouds = document.getElementById("pokeraceClouds");
+    if (clouds && !clouds.children.length) {
+      for (let i = 0; i < 3; i++) {
+        const cloud = document.createElement("div");
+        cloud.className = "pokerace-cloud";
+        clouds.appendChild(cloud);
+      }
     }
   }
 
@@ -569,6 +655,11 @@
     finishHeight: FINISH_HEIGHT,
     contactLine: contactLine,
     approachTop: approachTop,
+    curveAmp: CURVE_AMP,
+    curveLen: CURVE_LEN,
+    roadShift: roadShift,
+    lanePercent: lanePercent,
+    roadHalf: roadHalf,
     createRace: createRace,
     stepRace: stepRace,
     resetRace: resetRace,

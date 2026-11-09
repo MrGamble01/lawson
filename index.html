@@ -766,14 +766,22 @@
       <div id="pokeraceBest" class="badge badge--best">🏁 <span id="pokeraceBestVal">–</span></div>
       <div class="pokerace-layout">
         <p id="pokeracePrompt" class="pokerace-prompt" role="status" aria-live="polite">Who drives?</p>
+        <div id="pokeraceMeter" class="pokerace-meter" role="meter" aria-valuemin="0" aria-valuemax="480" aria-valuenow="0" aria-label="Trip to the finish" hidden>
+          <div class="pokerace-meter-track" aria-hidden="true"><div id="pokeraceMeterFill"></div></div>
+          <span id="pokeraceMeterLabel">Start</span>
+        </div>
         <div id="pokeraceDrivers" class="pokerace-picks" role="group" aria-label="Drivers"></div>
         <div id="pokeraceKarts" class="pokerace-picks" role="group" aria-label="Karts" hidden></div>
         <div id="pokeraceStage" class="pokerace-stage" hidden>
-          <div class="pokerace-sky" aria-hidden="true"></div>
-          <div id="pokeraceTrees" class="pokerace-trees" aria-hidden="true"></div>
-          <div id="pokeraceRoad" class="pokerace-road">
-            <div id="pokeraceDashes" class="pokerace-dashes" aria-hidden="true"></div>
+          <div class="pokerace-sky" aria-hidden="true">
+            <div id="pokeraceClouds" class="pokerace-clouds"></div>
           </div>
+          <div id="pokeraceTrees" class="pokerace-trees" aria-hidden="true"></div>
+          <svg id="pokeraceRoad" class="pokerace-road" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            <path id="pokeraceRoadPath" fill="#4a5160"></path>
+            <path id="pokeraceRoadEdge" fill="none" stroke="#f7f3ea" stroke-width="1.4"></path>
+          </svg>
+          <div id="pokeraceDashes" class="pokerace-dashes" aria-hidden="true"></div>
           <div id="pokeracePads" class="pokerace-pads"></div>
           <div id="pokeraceFinishLine" class="pokerace-finish">Finish</div>
           <div id="pokeracePlayer" class="pokerace-player"></div>

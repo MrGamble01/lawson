@@ -162,6 +162,22 @@ const padPast = race.approachTop(-18, contact, race.padHeight);
 assert.ok(padFar < padMid && padMid < padAt, "closing the gap moves the pad down toward the kart");
 assert.ok(padPast > padAt, "after contact the pad continues past the kart");
 
+assert.equal(race.roadShift(0), 0, "the road starts centered");
+assert.ok(Math.abs(race.roadShift(race.curveLen / 4) - race.curveAmp) < 0.001, "the bend reaches its widest offset");
+assert.ok(Math.abs(race.roadShift(race.curveLen)) < 0.001, "the bend repeats");
+assert.ok(race.roadHalf(0) > race.roadHalf(race.viewAhead), "the road is wider at the kart than at the horizon");
+for (let step = 0; step <= race.finishAt; step += 20) {
+  const lane = race.lanePercent(step);
+  assert.ok(lane >= 50 - race.curveAmp - 0.001 && lane <= 50 + race.curveAmp + 0.001, "the lane stays inside the bend");
+  assert.equal(race.lanePercent(step), 50 + race.roadShift(step));
+}
+const bend = 90;
+assert.equal(
+  race.lanePercent(bend),
+  race.lanePercent(bend),
+  "a marker that reaches the kart shares the kart's lane center",
+);
+
 function pick(driver, kart) {
   L.games.pokerace.start();
   const driverBtn = ids.pokeraceDrivers.children.find((btn) => btn.dataset.id === driver);
@@ -185,11 +201,11 @@ pick("charmander", "fries");
 assert.equal(ids.pokeracePlayer.dataset.driver, "charmander");
 assert.ok(ids.pokeracePlayer.querySelector('[data-part="box"]'), "fries kart draws a carton");
 
-const leftBefore = ids.pokeracePlayer.style.left;
+const leftBefore = ids.pokeracePlayer.dataset.steer;
 docOn.keydown[0]({ key: "ArrowRight", preventDefault() {} });
 rafFn(1000);
 rafFn(1400);
-assert.notEqual(ids.pokeracePlayer.style.left, leftBefore, "holding right moves the kart");
+assert.notEqual(ids.pokeracePlayer.dataset.steer, leftBefore, "holding right moves the kart");
 docOn.keydown[0]({ key: " ", repeat: false, preventDefault() {} });
 rafFn(1600);
 assert.equal(ids.pokeraceBoost.dataset.charges, "1");
@@ -215,16 +231,16 @@ const left = ids.pokeraceLeft;
 const right = ids.pokeraceRight;
 let clock = 5000;
 function roll(n) {
-  let pos = ids.pokeracePlayer.style.left;
+  let pos = ids.pokeracePlayer.dataset.steer;
   for (let i = 0; i < n; i++) pos = tick();
   return pos;
 }
 function tick() {
   clock += 200;
   rafFn(clock);
-  return ids.pokeracePlayer.style.left;
+  return ids.pokeracePlayer.dataset.steer;
 }
-const parked = ids.pokeracePlayer.style.left;
+const parked = ids.pokeracePlayer.dataset.steer;
 const homeDuring = el("button");
 docOn.keydown[0]({ key: "ArrowLeft", target: homeDuring, preventDefault() {} });
 const homeSteered = roll(2);
@@ -256,24 +272,24 @@ const heldAt = fromRight;
 left._on.pointerdown[0]({ preventDefault() {} });
 tick();
 tick();
-const turned = ids.pokeracePlayer.style.left;
+const turned = ids.pokeracePlayer.dataset.steer;
 assert.notEqual(turned, heldAt, "touch hold steers");
 left._on.pointerup[0]();
 tick();
-assert.equal(ids.pokeracePlayer.style.left, turned, "touch release stops the turn");
+assert.equal(ids.pokeracePlayer.dataset.steer, turned, "touch release stops the turn");
 
 left._on.pointerdown[0]({ preventDefault() {} });
 winOn.blur[0]();
 tick();
 tick();
-assert.equal(ids.pokeracePlayer.style.left, turned, "blur clears a stuck turn");
+assert.equal(ids.pokeracePlayer.dataset.steer, turned, "blur clears a stuck turn");
 
 left._on.pointerdown[0]({ preventDefault() {} });
 documentMock.hidden = true;
 docOn.visibilitychange[0]();
 documentMock.hidden = false;
 tick();
-assert.equal(ids.pokeracePlayer.style.left, turned, "hiding the page clears a stuck turn");
+assert.equal(ids.pokeracePlayer.dataset.steer, turned, "hiding the page clears a stuck turn");
 
 const step = rafFn;
 for (let i = 0; i < 200; i++) {
