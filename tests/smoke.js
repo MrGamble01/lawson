@@ -70,6 +70,7 @@ const GAMES = [
   { id: "balloons", screen: "balloonsGame", expect: "#balloonsChoices" },
   { id: "cupcakes", screen: "cupcakesGame", expect: "#cupcakesChoices" },
   { id: "pokequiz", screen: "pokequizGame", expect: "#pokequizChoices" },
+  { id: "pokerace", screen: "pokeraceGame", expect: "#pokeraceDrivers" },
   { id: "mix",      screen: "mixGame",      expect: "#mixBowl" },
   { id: "doodle",   screen: "doodleGame",   expect: "#doodleCanvas" },
   { id: "color",    screen: "colorGame",    expect: "#colorStage" },

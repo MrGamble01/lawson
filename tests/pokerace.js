@@ -1,0 +1,316 @@
+// Food Karts: steering, boost, finish, reset, and three different karts.
+// Run: node tests/pokerace.js
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+const vm = require("node:vm");
+
+function el(tag) {
+  const attrs = {};
+  const classes = new Set();
+  let text = "";
+  const node = {
+    tagName: String(tag || "div").toUpperCase(),
+    hidden: false,
+    dataset: {},
+    children: [],
+    style: {},
+    _on: {},
+    classList: {
+      add: (...names) => names.forEach((name) => classes.add(name)),
+      remove: (...names) => names.forEach((name) => classes.delete(name)),
+      contains: (name) => classes.has(name),
+    },
+    setAttribute(key, value) { attrs[key] = String(value); },
+    getAttribute(key) { return attrs[key]; },
+    appendChild(child) { this.children.push(child); return child; },
+    addEventListener(type, fn) { (this._on[type] ||= []).push(fn); },
+    removeEventListener() {},
+    closest(sel) {
+      if (this.tagName === "BUTTON" && /button|a|input|select|textarea/.test(sel)) return this;
+      return null;
+    },
+    click() { if (this.tap) this.tap({ stopPropagation() {} }); },
+    querySelector(sel) { return find(this, sel); },
+    querySelectorAll(sel) {
+      if (sel === ".pokerace-pick" || sel === ".pokerace-kart") return this.children;
+      return [];
+    },
+  };
+  Object.defineProperty(node, "textContent", {
+    get() { return text; },
+    set(value) {
+      text = String(value);
+      node.children = [];
+    },
+  });
+  return node;
+}
+function find(node, sel) {
+  const part = sel.match(/\[data-part="([^"]+)"\]/);
+  if (part && node.getAttribute("data-part") === part[1]) return node;
+  if (sel === "[data-kart]" && node.getAttribute("data-kart")) return node;
+  for (let i = 0; i < node.children.length; i++) {
+    const found = find(node.children[i], sel);
+    if (found) return found;
+  }
+  return null;
+}
+
+const ids = {};
+[
+  "pokeraceGame", "pokeracePrompt", "pokeraceBestVal", "pokeraceDrivers", "pokeraceKarts",
+  "pokeraceStage", "pokeraceRoad", "pokeracePads", "pokeraceFinishLine", "pokeracePlayer",
+  "pokeraceControls", "pokeraceLeft", "pokeraceBoost", "pokeraceRight", "pokeraceRestart",
+  "pokeraceDone", "pokeraceTime", "pokeraceAgain", "pokeraceChange",
+].forEach((id) => { ids[id] = el(id.indexOf("pokerace") === 0 && /Left|Boost|Right|Restart|Again|Change/.test(id) ? "button" : "div"); });
+ids.pokeraceGame.classList.add("active");
+
+const docOn = {};
+let rafFn = null;
+const L = {
+  games: {},
+  pokemon: null,
+  onTap(node, fn) { node.tap = fn; },
+  onTapOnce(node, fn) { node.tap = fn; },
+  getHighScore: () => 0,
+  setHighScore() {},
+  happySound() {},
+  say() {},
+};
+const documentMock = {
+  getElementById: (id) => ids[id],
+  createElement: (tag) => el(tag),
+  createElementNS: () => el("svg"),
+  hidden: false,
+  addEventListener(type, fn) { (docOn[type] ||= []).push(fn); },
+  removeEventListener(type, fn) {
+    const list = docOn[type] || [];
+    const at = list.indexOf(fn);
+    if (at >= 0) list.splice(at, 1);
+  },
+  querySelectorAll(sel) {
+    if (sel === "#pokeraceDrivers .pokerace-pick") return ids.pokeraceDrivers.children;
+    if (sel === "#pokeraceKarts .pokerace-kart") return ids.pokeraceKarts.children;
+    return [];
+  },
+};
+const winOn = {};
+const context = {
+  window: {
+    Lawson: L,
+    addEventListener(type, fn) { (winOn[type] ||= []).push(fn); },
+    removeEventListener(type, fn) {
+      const list = winOn[type] || [];
+      const at = list.indexOf(fn);
+      if (at >= 0) list.splice(at, 1);
+    },
+  },
+  document: documentMock,
+  Math: Math,
+  requestAnimationFrame(fn) { rafFn = fn; return 1; },
+  cancelAnimationFrame() { rafFn = null; },
+};
+vm.runInNewContext(fs.readFileSync(path.join(__dirname, "../lib/pokemon.js"), "utf8"), context);
+vm.runInNewContext(fs.readFileSync(path.join(__dirname, "../games/pokerace.js"), "utf8"), context);
+
+const race = L.race;
+const steered = race.createRace("eevee", "fries");
+race.stepRace(steered, 1, { steer: -1 });
+assert.ok(steered.x < 0, "steering left moves the kart left");
+
+const boosted = race.createRace("eevee", "fries");
+const plain = race.createRace("eevee", "fries");
+race.stepRace(boosted, 1, { boost: true });
+race.stepRace(plain, 1, {});
+assert.equal(boosted.charges, 1);
+assert.ok(boosted.speed > plain.speed, "a boost is faster than cruising");
+
+const grass = race.createRace("eevee", "fries");
+grass.x = 0.9;
+race.stepRace(grass, 1, {});
+assert.ok(grass.speed < plain.speed, "leaving the road slows the kart");
+
+const pad = race.createRace("pikachu", "burger");
+pad.distance = 130;
+race.stepRace(pad, 0.2, {});
+assert.ok(pad.padsTaken.indexOf(140) >= 0, "a boost pad on the road triggers");
+assert.ok(pad.boostTime > 0);
+
+const done = race.createRace("pikachu", "hotdog");
+race.stepRace(done, 10, {});
+assert.equal(done.finished, true);
+assert.equal(done.distance, race.finishAt);
+
+const again = race.resetRace(done);
+assert.equal(again.driver, "pikachu");
+assert.equal(again.kart, "hotdog");
+assert.equal(again.distance, 0);
+assert.equal(again.finished, false);
+assert.equal(again.charges, 2);
+
+const stageH = 320;
+const contact = race.contactLine(stageH);
+assert.equal(contact, stageH - 14 - 140);
+const padAt = race.approachTop(0, contact, race.padHeight);
+const finishAt = race.approachTop(0, contact, race.finishHeight);
+assert.equal(padAt + race.padHeight / 2, contact, "a pad meets the kart nose when it is hit");
+assert.equal(finishAt + race.finishHeight / 2, contact, "the finish line meets the kart when the race ends");
+const padFar = race.approachTop(race.viewAhead, contact, race.padHeight);
+const padMid = race.approachTop(race.viewAhead / 2, contact, race.padHeight);
+const padPast = race.approachTop(-18, contact, race.padHeight);
+assert.ok(padFar < padMid && padMid < padAt, "closing the gap moves the pad down toward the kart");
+assert.ok(padPast > padAt, "after contact the pad continues past the kart");
+
+assert.equal(race.roadShift(0), 0, "the road starts centered");
+assert.ok(Math.abs(race.roadShift(race.curveLen / 4) - race.curveAmp) < 0.001, "the bend reaches its widest offset");
+assert.ok(Math.abs(race.roadShift(race.curveLen)) < 0.001, "the bend repeats");
+assert.ok(race.roadHalf(0) > race.roadHalf(race.viewAhead), "the road is wider at the kart than at the horizon");
+for (let step = 0; step <= race.finishAt; step += 20) {
+  const lane = race.lanePercent(step);
+  assert.ok(lane >= 50 - race.curveAmp - 0.001 && lane <= 50 + race.curveAmp + 0.001, "the lane stays inside the bend");
+  assert.equal(race.lanePercent(step), 50 + race.roadShift(step));
+}
+const bend = 90;
+assert.equal(
+  race.lanePercent(bend),
+  race.lanePercent(bend),
+  "a marker that reaches the kart shares the kart's lane center",
+);
+
+function pick(driver, kart) {
+  L.games.pokerace.start();
+  const driverBtn = ids.pokeraceDrivers.children.find((btn) => btn.dataset.id === driver);
+  driverBtn.tap();
+  const kartBtn = ids.pokeraceKarts.children.find((btn) => btn.dataset.id === kart);
+  kartBtn.tap();
+}
+["burger", "fries", "hotdog"].forEach((kart) => {
+  pick("pikachu", kart);
+  const player = ids.pokeracePlayer;
+  assert.equal(player.dataset.driver, "pikachu", kart + " keeps the driver");
+  assert.equal(player.dataset.kart, kart);
+  assert.equal(player.querySelector("[data-kart]").getAttribute("data-kart"), kart);
+});
+assert.ok(ids.pokeracePlayer.querySelector('[data-part="sausage"]'), "hot dog kart draws a sausage");
+pick("charmander", "burger");
+assert.equal(ids.pokeracePlayer.dataset.driver, "charmander");
+assert.ok(ids.pokeracePlayer.querySelector('[data-part="patty"]'), "burger kart draws a patty");
+assert.equal(ids.pokeracePlayer.querySelector('[data-part="sausage"]'), null);
+pick("charmander", "fries");
+assert.equal(ids.pokeracePlayer.dataset.driver, "charmander");
+assert.ok(ids.pokeracePlayer.querySelector('[data-part="box"]'), "fries kart draws a carton");
+
+const leftBefore = ids.pokeracePlayer.dataset.steer;
+docOn.keydown[0]({ key: "ArrowRight", preventDefault() {} });
+rafFn(1000);
+rafFn(1400);
+assert.notEqual(ids.pokeracePlayer.dataset.steer, leftBefore, "holding right moves the kart");
+docOn.keydown[0]({ key: " ", repeat: false, preventDefault() {} });
+rafFn(1600);
+assert.equal(ids.pokeraceBoost.dataset.charges, "1");
+
+ids.pokeraceRestart.tap();
+assert.equal(ids.pokeracePlayer.dataset.driver, "charmander");
+assert.equal(ids.pokeracePlayer.dataset.kart, "fries");
+assert.equal(ids.pokeraceBoost.dataset.charges, "2");
+
+pick("pikachu", "burger");
+let stolen = 0;
+docOn.keydown[0]({
+  key: " ",
+  repeat: false,
+  target: ids.pokeraceBoost,
+  preventDefault() { stolen += 1; },
+});
+rafFn(2000);
+assert.equal(stolen, 0, "Space on a focused button is left to that button");
+assert.equal(ids.pokeraceBoost.dataset.charges, "2");
+
+const left = ids.pokeraceLeft;
+const right = ids.pokeraceRight;
+let clock = 5000;
+function roll(n) {
+  let pos = ids.pokeracePlayer.dataset.steer;
+  for (let i = 0; i < n; i++) pos = tick();
+  return pos;
+}
+function tick() {
+  clock += 200;
+  rafFn(clock);
+  return ids.pokeracePlayer.dataset.steer;
+}
+const parked = ids.pokeracePlayer.dataset.steer;
+const homeDuring = el("button");
+docOn.keydown[0]({ key: "ArrowLeft", target: homeDuring, preventDefault() {} });
+const homeSteered = roll(2);
+assert.ok(parseFloat(homeSteered) < parseFloat(parked), "ArrowLeft steers while Home is focused");
+docOn.keyup[0]({ key: "ArrowLeft", target: homeDuring });
+assert.equal(roll(1), homeSteered, "releasing the arrow stops the turn");
+let nativeHome = 0;
+docOn.keydown[0]({ key: "Enter", target: homeDuring, preventDefault() { nativeHome += 1; } });
+docOn.keydown[0]({ key: " ", repeat: false, target: homeDuring, preventDefault() { nativeHome += 1; } });
+assert.equal(nativeHome, 0, "Enter and Space on Home stay native");
+assert.equal(ids.pokeraceBoost.dataset.charges, "2", "Space on Home does not spend a boost");
+
+left._on.keydown[0]({ key: " ", preventDefault() {} });
+const fromLeft = roll(2);
+assert.ok(parseFloat(fromLeft) < parseFloat(homeSteered), "focused Left steers while its key is held");
+left._on.keyup[0]({ key: " " });
+assert.equal(roll(1), fromLeft, "keyup on Left releases the turn");
+left._on.keydown[0]({ key: "Enter", preventDefault() {} });
+left._on.blur[0]();
+assert.equal(roll(1), fromLeft, "blur on Left releases the turn");
+
+right._on.keydown[0]({ key: "ArrowRight", preventDefault() {} });
+const fromRight = roll(2);
+assert.ok(parseFloat(fromRight) > parseFloat(fromLeft), "focused Right steers while ArrowRight is held");
+right._on.keyup[0]({ key: "ArrowRight" });
+assert.equal(roll(1), fromRight, "keyup on Right releases the turn");
+
+const heldAt = fromRight;
+left._on.pointerdown[0]({ preventDefault() {} });
+tick();
+tick();
+const turned = ids.pokeracePlayer.dataset.steer;
+assert.notEqual(turned, heldAt, "touch hold steers");
+left._on.pointerup[0]();
+tick();
+assert.equal(ids.pokeracePlayer.dataset.steer, turned, "touch release stops the turn");
+
+left._on.pointerdown[0]({ preventDefault() {} });
+winOn.blur[0]();
+tick();
+tick();
+assert.equal(ids.pokeracePlayer.dataset.steer, turned, "blur clears a stuck turn");
+
+left._on.pointerdown[0]({ preventDefault() {} });
+documentMock.hidden = true;
+docOn.visibilitychange[0]();
+documentMock.hidden = false;
+tick();
+assert.equal(ids.pokeracePlayer.dataset.steer, turned, "hiding the page clears a stuck turn");
+
+const step = rafFn;
+for (let i = 0; i < 200; i++) {
+  clock += 50;
+  step(clock);
+}
+assert.equal(ids.pokeracePrompt.textContent, "Finished!");
+const home = el("button");
+let finishHijack = 0;
+docOn.keydown[0]({
+  key: "Enter",
+  target: home,
+  preventDefault() { finishHijack += 1; },
+});
+assert.equal(finishHijack, 0, "Enter on Home must not restart the race");
+assert.equal(ids.pokeracePrompt.textContent, "Finished!");
+docOn.keydown[0]({ key: "Enter", preventDefault() {} });
+assert.match(ids.pokeracePrompt.textContent, /Pikachu/);
+
+L.games.pokerace.stop();
+assert.equal(rafFn, null);
+assert.equal(docOn.keydown.length, 0);
+assert.equal((winOn.blur || []).length, 0);
+console.log("PASS: pokerace — steer, boost, pad, finish, reset, three karts, focus, blur");
