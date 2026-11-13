@@ -403,6 +403,9 @@
         <button class="tile" data-go="shadows" style="--c:#8d6e63">
           <span class="emoji">🌑</span><span class="label">Shadows</span>
         </button>
+        <button class="tile" data-go="pokequiz" style="--c:#ffd43b">
+          <span class="emoji">🐾</span><span class="label">Who's That</span>
+        </button>
       </div>
     </section>
 
@@ -754,6 +757,24 @@
       </div>
     </section>
 
+    <!-- Who's That! -->
+    <section id="pokequizGame" class="screen" data-title="🐾 Who's That!">
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
+      <div id="pokequizScore" class="badge">🐾 <span id="pokequizScoreVal">0</span></div>
+      <div id="pokequizBest" class="badge badge--best">🏆 <span id="pokequizBestVal">0</span></div>
+      <div class="pokequiz-layout">
+        <p id="pokequizPrompt" class="pokequiz-prompt" role="status" aria-live="polite">Who is this?</p>
+        <p id="pokequizRound" class="pokequiz-round">1 / 6</p>
+        <div class="pokequiz-stage">
+          <p class="pokequiz-kicker">Match this shadow</p>
+          <div id="pokequizSilhouette" class="pokequiz-silhouette" aria-hidden="true"></div>
+        </div>
+        <div id="pokequizChoices" class="pokequiz-choices" role="group" aria-label="Choices"></div>
+        <button id="pokequizAgain" class="pokequiz-again" type="button" hidden>Play again</button>
+        <p class="poke-note">Unofficial drawings of Pokémon characters. Not licensed or endorsed.</p>
+      </div>
+    </section>
+
     <!-- Pattern -->
     <section id="patternGame" class="screen" data-title="🧠 Pattern">
       <button class="home-btn" data-home aria-label="Home">🏠</button>
@@ -985,6 +1006,7 @@
   <script src="lib/achievements.js"></script>
   <script src="lib/tutorial.js"></script>
   <script src="app.js"></script>
+  <script src="lib/pokemon.js"></script>
   <script src="games/pop.js"></script>
   <script src="games/piano.js"></script>
   <script src="games/whack.js"></script>
@@ -1011,6 +1033,7 @@
   <script src="games/kites.js"></script>
   <script src="games/balloons.js"></script>
   <script src="games/cupcakes.js"></script>
+  <script src="games/pokequiz.js"></script>
   <script src="games/mix.js"></script>
   <script src="games/cook.js"></script>
   <script src="games/dino.js"></script>
