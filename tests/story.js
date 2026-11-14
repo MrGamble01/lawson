@@ -60,6 +60,8 @@ const document = { getElementById: id => ids[id] || null, createElement: () => e
 // ---- Lawson stub ----
 const spoken = [];      // [text, resolve]
 let stickers = 0;
+let sparkles = 0;
+let reduceMotion = false;
 let inFlight = null;    // like lib/audio.js: a new line cuts off (settles) the one in flight
 let lastSaid = Promise.resolve();
 const L = {
@@ -95,7 +97,8 @@ const L = {
     return () => { done = true; vClearTimeout(timer); };
   },
   onTap: (node, fn) => node.handlers.push(fn),
-  beep() {}, haptic() {}, happySound() {}, sparkleAt() {},
+  beep() {}, haptic() {}, happySound() {}, sparkleAt() { sparkles++; },
+  prefersReducedMotion() { return reduceMotion; },
   cheer: () => 'Yay!',
   // Like lib/achievements.js: the first award announces itself a beat
   // later, through afterSpeech, so it never talks over the cheer.
@@ -239,9 +242,11 @@ const ceilFor = s => floorFor(s) * 2 + 4000;
   screenTap2({ target: { closest: () => null } }); // → 4 / 4
   assert.equal(counter(), '4 / 4');
   const stickersBefore = stickers;
+  const sparklesAtEnd = sparkles;
   screenTap2({ target: { closest: () => null } }); // → The end!
   const endsBefore = spoken.filter(s => s.text.startsWith('The end!')).length;
   await runUntil(clock.now + 1000); // let the 12 sparkle timers (≤ 605 ms) fire
+  assert.equal(sparkles, sparklesAtEnd + 12, 'the ending tosses twelve sparkles');
   assert.equal(pendingTimers().length, 1, 'only the ending ceiling remains');
   await finishLine(lastLine());      // "The end!" heard → sticker (already earned) → beat armed
   assert.equal(stickers, stickersBefore + 1);
@@ -467,6 +472,23 @@ const ceilFor = s => floorFor(s) * 2 + 4000;
   assert.equal(counter(), '1 / 4', 'the hear-again button never turns the page');
   await finishLine(lastLine());
   assert.equal(counter(), '1 / 4', 'the page waits for the re-read to be heard (pacing as in 18)');
+
+  // 23. Reduce Motion skips the ending sparkles. The words still announce
+  //     as the page changes.
+  reduceMotion = true;
+  await runUntil(clock.now + 1000);
+  const sparklesBefore = sparkles;
+  story.stop();
+  story.start();
+  assert.equal(ids.storyText.getAttribute('aria-live'), 'polite', 'page changes are announced');
+  const skipEnd = ids.storyGame.handlers[0];
+  skipEnd({ target: { closest: () => null } });
+  skipEnd({ target: { closest: () => null } });
+  skipEnd({ target: { closest: () => null } });
+  skipEnd({ target: { closest: () => null } });
+  await runUntil(clock.now + 1000);
+  assert.equal(sparkles, sparklesBefore, 'reduce motion skips the ending sparkles');
+  story.stop();
 
   console.log('PASS: story pacing — floor, slow-voice wait, no-end ceiling, single ending, muted, tap-ahead, stop, lock/unlock freeze + resume, poke-then-resume, ending heard before sticker + next story, tap the words to hear the line again, hear-again button');
 })().catch(e => { console.error(e); process.exit(1); });

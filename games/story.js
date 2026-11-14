@@ -438,11 +438,13 @@
       L.happySound();
       const stage = document.getElementById("storyStage");
       const r = stage.getBoundingClientRect();
-      for (let k = 0; k < 12; k++) {
-        setTimeout(() => L.sparkleAt(
-          r.left + r.width / 2 + (Math.random() - 0.5) * 220,
-          r.top  + r.height / 2 + (Math.random() - 0.5) * 220,
-        ), k * 55);
+      if (!(L.prefersReducedMotion && L.prefersReducedMotion())) {
+        for (let k = 0; k < 12; k++) {
+          setTimeout(() => L.sparkleAt(
+            r.left + r.width / 2 + (Math.random() - 0.5) * 220,
+            r.top  + r.height / 2 + (Math.random() - 0.5) * 220,
+          ), k * 55);
+        }
       }
       atEnd = true;
       const seq = pageSeq;
@@ -520,6 +522,8 @@
     if (storyIdx < 0) storyIdx = 0;
     pageIdx = 0;
     active = true;
+    const words = document.getElementById("storyText");
+    if (words && !words.getAttribute("aria-live")) words.setAttribute("aria-live", "polite");
     const screen = document.getElementById("storyGame");
     if (screen && !tapAttached) {
       // Tap the background to advance. Tapping a story-character
