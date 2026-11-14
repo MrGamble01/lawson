@@ -346,7 +346,7 @@
     L.bumpBadge("trainScoreVal", stationsVisited);
     if (stationsVisited > bestAtStart && !celebrated) {
       celebrated = true;
-      setTimeout(() => L.celebrateNewHigh(stationsVisited), 700);
+      (L.whileHere || setTimeout)(() => L.celebrateNewHigh(stationsVisited), 700);
     }
     L.bumpHighScore("trainBest", stationsVisited);
     refreshBestBadge();

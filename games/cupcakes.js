@@ -63,7 +63,7 @@
   function maybeCelebrateRecord(value) {
     if (value > bestAtStart && !celebrated) {
       celebrated = true;
-      setTimeout(() => L.celebrateNewHigh(value), 800);
+      (L.whileHere || setTimeout)(() => L.celebrateNewHigh(value), 800);
     }
     L.bumpHighScore("cupcakesBest", value);
   }
@@ -141,6 +141,7 @@
   }
 
   function start() {
+    stop();
     score = 0;
     bestAtStart = L.getHighScore("cupcakesBest");
     celebrated = false;

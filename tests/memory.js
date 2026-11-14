@@ -186,5 +186,16 @@ const tap = (i) => board.children[i].handlers[0]();
   assert.equal(texts().filter(t => /matched them all/.test(t)).length, cheersAfterWin,
     'stop() cancels the win cheer');
 
+  const buzzes = { n: 0 };
+  const realBuzz = L.buzzSound;
+  L.buzzSound = () => { buzzes.n += 1; realBuzz(); };
+  memory.start();
+  await finishLine(lastLine());
+  tap(0);
+  tap(1);
+  memory.stop();
+  await runUntil(clock.now + 1100);
+  assert.equal(buzzes.n, 0, 'leaving during a mismatch does not buzz on the next screen');
+
   console.log('PASS: memory — last card name heard before the win cheer, stop cancels the waiter');
 })().catch((e) => { console.error(e); process.exit(1); });
