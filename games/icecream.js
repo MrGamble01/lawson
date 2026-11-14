@@ -464,7 +464,7 @@
     L.bumpBadge("icecreamScoreVal", sundaesEaten);
     if (sundaesEaten > bestAtStart && !celebrated) {
       celebrated = true;
-      setTimeout(() => L.celebrateNewHigh(sundaesEaten), 700);
+      (L.whileHere || setTimeout)(() => L.celebrateNewHigh(sundaesEaten), 700);
     }
     L.bumpHighScore("icecreamBest", sundaesEaten);
     const bestEl = $("icecreamBestVal");

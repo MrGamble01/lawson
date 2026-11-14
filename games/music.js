@@ -177,7 +177,7 @@
     L.bumpBadge("musicScoreVal", beatTotal);
     if (beatTotal > bestAtStart && !celebrated) {
       celebrated = true;
-      setTimeout(() => L.celebrateNewHigh(beatTotal), 700);
+      (L.whileHere || setTimeout)(() => L.celebrateNewHigh(beatTotal), 700);
     }
     L.bumpHighScore("musicBest", beatTotal);
     refreshBestBadge();

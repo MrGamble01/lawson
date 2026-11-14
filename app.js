@@ -964,15 +964,28 @@ window.Lawson = {
   KID_NAME, cheer, shuffled, celebrateNewHigh, confettiRain, boboCheer,
   setCaptionsEnabled, isCaptionsEnabled, prefersReducedMotion,
   setSlowPace, isSlowPace, paceScale, setLessMotion, isLessMotion,
-  tapToUse, putDownTool, heldTool,
+  tapToUse, putDownTool, heldTool, whileHere,
   games: {}, // each game adds { screen, start, stop } here
 };
+
+// A "new best" is scheduled a beat after the score. Home and Back must
+// drop it, or the cheer and confetti land on the menu.
+let _here = 0;
+function whileHere(fn, ms) {
+  const here = _here;
+  return setTimeout(() => {
+    if (here !== _here) return;
+    fn();
+  }, ms);
+}
+function leaveHere() { _here += 1; }
 
 // ---------- Routing ----------
 let activeGame = null;
 function leaveActiveGame() {
   if (activeGame && typeof activeGame.stop === "function") activeGame.stop();
   activeGame = null;
+  leaveHere();
 }
 
 // ---------- Back button / swipe-back / Escape = step back in the app ----------
