@@ -222,6 +222,14 @@
     let ghost = null;
     let downX = 0;
     let downY = 0;
+    let ghostFrame = 0;
+    let ghostPoint = null;
+
+    function flushGhost() {
+      ghostFrame = 0;
+      if (!dragging || !ghostPoint) return;
+      moveGhost(ghostPoint.x, ghostPoint.y);
+    }
 
     function makeGhost(x, y) {
       ghost = document.createElement("div");
@@ -264,7 +272,11 @@
     });
     btn.addEventListener("pointermove", (e) => {
       if (!dragging) return;
-      moveGhost(e.clientX, e.clientY);
+      // One layout write per frame. A finger on an older iPad can emit
+      // far more move events than the screen can paint.
+      ghostPoint = { x: e.clientX, y: e.clientY };
+      if (ghostFrame) return;
+      ghostFrame = requestAnimationFrame(flushGhost);
     });
     // A tap (or Enter / Space) drops the sticker at the centre of the
     // scene — the single-tap path that stands in for the drag.
@@ -277,6 +289,10 @@
 
     btn.addEventListener("pointerup", (e) => {
       if (!dragging) return;
+      if (ghostFrame) cancelAnimationFrame(ghostFrame);
+      ghostFrame = 0;
+      if (ghostPoint) moveGhost(e.clientX, e.clientY);
+      ghostPoint = null;
       dragging = false;
       btn.classList.remove("grabbed");
       const label = btn.getAttribute("aria-label");
@@ -293,6 +309,9 @@
     // events, so without this the tray was dead to Tab users.
     btn.addEventListener("click", (e) => { if (e.detail === 0) placeAtCentre(); });
     btn.addEventListener("pointercancel", () => {
+      if (ghostFrame) cancelAnimationFrame(ghostFrame);
+      ghostFrame = 0;
+      ghostPoint = null;
       dragging = false;
       btn.classList.remove("grabbed");
       const label = btn.getAttribute("aria-label");
