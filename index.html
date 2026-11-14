@@ -774,12 +774,15 @@
         <div id="pokeraceKarts" class="pokerace-picks" role="group" aria-label="Karts" hidden></div>
         <div id="pokeraceStage" class="pokerace-stage" hidden>
           <div class="pokerace-sky" aria-hidden="true">
+            <div id="pokeraceHills" class="pokerace-hills"></div>
             <div id="pokeraceClouds" class="pokerace-clouds"></div>
           </div>
+          <div id="pokeraceGrass" class="pokerace-grass" aria-hidden="true"></div>
           <div id="pokeraceTrees" class="pokerace-trees" aria-hidden="true"></div>
           <svg id="pokeraceRoad" class="pokerace-road" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            <path id="pokeraceShoulder" fill="#c4a574"></path>
             <path id="pokeraceRoadPath" fill="#4a5160"></path>
-            <path id="pokeraceRoadEdge" fill="none" stroke="#f7f3ea" stroke-width="1.4"></path>
+            <path id="pokeraceRoadEdge" fill="none" stroke="#f7f3ea" stroke-width="1.15"></path>
           </svg>
           <div id="pokeraceDashes" class="pokerace-dashes" aria-hidden="true"></div>
           <div id="pokeracePads" class="pokerace-pads"></div>
@@ -812,8 +815,10 @@
         <p id="pokequizPrompt" class="pokequiz-prompt" role="status" aria-live="polite">Who is this?</p>
         <p id="pokequizRound" class="pokequiz-round">1 / 6</p>
         <div class="pokequiz-stage">
+          <div class="pokequiz-sky" aria-hidden="true"></div>
           <p class="pokequiz-kicker">Match this shadow</p>
           <div id="pokequizSilhouette" class="pokequiz-silhouette" aria-hidden="true"></div>
+          <div class="pokequiz-hill" aria-hidden="true"></div>
         </div>
         <div id="pokequizChoices" class="pokequiz-choices" role="group" aria-label="Choices"></div>
         <button id="pokequizAgain" class="pokequiz-again" type="button" hidden>Play again</button>
