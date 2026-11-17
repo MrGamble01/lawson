@@ -12,9 +12,9 @@
   const PLAYER_HEIGHT = 140;
   const PAD_HEIGHT = 36;
   const FINISH_HEIGHT = 22;
-  const CURVE_AMP = 14;
-  const CURVE_LEN = 240;
-  const ROAD_TOP = 64;
+  const CURVE_AMP = 16;
+  const CURVE_LEN = 130;
+  const ROAD_TOP = 52;
 
   function roadShift(distance) {
     return Math.sin((distance / CURVE_LEN) * Math.PI * 2) * CURVE_AMP;
@@ -27,7 +27,7 @@
   function roadHalf(remaining) {
     const clamped = Math.max(0, Math.min(VIEW_AHEAD, remaining));
     const travel = 1 - clamped / VIEW_AHEAD;
-    return 8 + travel * 30;
+    return 6 + travel * 14;
   }
 
   function remainingForY(y, contact) {
@@ -60,47 +60,93 @@
     { id: "hotdog", name: "Hot dog" },
   ];
 
-  function drawBurger(svg) {
-    add(svg, "ellipse", ink({ cx: "100", cy: "96", rx: "72", ry: "22", fill: "#f3c14b", "data-part": "bun" }));
-    add(svg, "circle", { cx: "58", cy: "84", r: "4", fill: "#fffaf3" });
-    add(svg, "circle", { cx: "82", cy: "78", r: "4", fill: "#fffaf3" });
-    add(svg, "circle", { cx: "108", cy: "80", r: "4", fill: "#fffaf3" });
-    add(svg, "circle", { cx: "134", cy: "84", r: "4", fill: "#fffaf3" });
-    add(svg, "path", ink({ d: "M28,112 Q100,138 172,112", fill: "none", stroke: "#3d9a4a", "stroke-width": "12", "data-part": "lettuce" }));
-    add(svg, "rect", ink({ x: "32", y: "116", width: "136", height: "14", rx: "3", fill: "#ffd43b", "data-part": "cheese" }));
-    add(svg, "rect", ink({ x: "30", y: "128", width: "140", height: "22", rx: "8", fill: "#7a3e22", "data-part": "patty" }));
-    add(svg, "ellipse", ink({ cx: "100", cy: "156", rx: "74", ry: "16", fill: "#e0a63a", "data-part": "bun" }));
+  function seeds(svg, points) {
+    points.forEach((p) => add(svg, "ellipse", { cx: String(p[0]), cy: String(p[1]), rx: "4", ry: "3", fill: "#fffaf3" }));
   }
 
-  function drawFries(svg) {
-    const fries = [[38, 18, 16, 100], [60, 8, 16, 92], [124, 8, 16, 92], [148, 20, 16, 98]];
-    fries.forEach((fry) => {
-      add(svg, "rect", ink({
-        x: String(fry[0]), y: String(fry[1]), width: String(fry[2]), height: String(fry[3]),
-        rx: "5", fill: "#ffd43b", "data-part": "fry",
+  // layer "all" is the picker picture. "back" sits behind the driver and
+  // "front" crosses the lap, so the same food reads as a seat in the race.
+  function drawBurger(svg, layer) {
+    const bottom = () => add(svg, "ellipse", ink({ cx: "100", cy: "158", rx: "74", ry: "16", fill: "#e0a63a", "data-part": "bun" }));
+    const top = () => {
+      add(svg, "ellipse", ink({ cx: "100", cy: "78", rx: "70", ry: "26", fill: "#f3c14b", "data-part": "bun" }));
+      seeds(svg, [[62, 66], [86, 58], [114, 60], [140, 68]]);
+    };
+    const filling = () => {
+      add(svg, "path", ink({ d: "M24,112 Q100,138 176,112", fill: "none", stroke: "#3d9a4a", "stroke-width": "14", "data-part": "lettuce" }));
+      add(svg, "rect", ink({ x: "28", y: "116", width: "144", height: "16", rx: "3", fill: "#ffd43b", "data-part": "cheese" }));
+      add(svg, "rect", ink({ x: "32", y: "128", width: "136", height: "20", rx: "8", fill: "#7a3e22", "data-part": "patty" }));
+    };
+    // A bun ring in front of the driver, with a hole the face shows through.
+    const bunRing = () => {
+      add(svg, "path", ink({
+        d: "M22,96 Q100,28 178,96 Q100,132 22,96 Z M62,78 a 38 26 0 1 0 76 0 a 38 26 0 1 0 -76 0 Z",
+        "fill-rule": "evenodd",
+        fill: "#f3c14b",
+        "data-part": "bun",
       }));
-    });
-    add(svg, "path", ink({
-      d: "M38,96 L56,150 L144,150 L162,96 Z",
-      fill: "#e03131", "data-part": "box",
-    }));
-    add(svg, "path", { d: "M56,112 H144", fill: "none", stroke: "#fffaf3", "stroke-width": "4" });
+      seeds(svg, [[48, 78], [152, 78], [100, 52]]);
+    };
+    if (layer === "back") { bottom(); return; }
+    if (layer === "front") { filling(); bunRing(); return; }
+    bottom();
+    filling();
+    top();
   }
 
-  function drawHotdog(svg) {
-    add(svg, "ellipse", ink({ cx: "100", cy: "118", rx: "88", ry: "32", fill: "#f3c14b", "data-part": "bun" }));
-    add(svg, "rect", ink({ x: "18", y: "104", width: "164", height: "28", rx: "14", fill: "#d9480f", "data-part": "sausage" }));
-    add(svg, "path", { d: "M30,118 Q68,104 100,118 T172,118", fill: "none", stroke: "#f5c518", "stroke-width": "5", "data-part": "mustard" });
+  function fry(svg, x, y, h) {
+    add(svg, "rect", ink({
+      x: String(x), y: String(y), width: "16", height: String(h),
+      rx: "5", fill: "#ffd43b", "data-part": "fry",
+    }));
+  }
+
+  function drawFries(svg, layer) {
+    if (!layer || layer === "all") {
+      fry(svg, 46, 16, 96);
+      fry(svg, 68, 6, 104);
+      fry(svg, 116, 6, 104);
+      fry(svg, 138, 16, 96);
+      add(svg, "path", ink({ d: "M38,96 L56,152 L144,152 L162,96 Z", fill: "#e03131", "data-part": "box" }));
+      add(svg, "path", { d: "M58,112 H142", fill: "none", stroke: "#fffaf3", "stroke-width": "4" });
+      return;
+    }
+    if (layer === "back") {
+      fry(svg, 78, 20, 90);
+      fry(svg, 104, 12, 96);
+      add(svg, "path", ink({ d: "M48,112 L64,152 L136,152 L152,112 Z", fill: "#b92b2b", "data-part": "box" }));
+      return;
+    }
+    add(svg, "path", ink({ d: "M36,108 L54,158 L146,158 L164,108 Z", fill: "#e03131", "data-part": "box" }));
+    add(svg, "path", { d: "M56,122 H144", fill: "none", stroke: "#fffaf3", "stroke-width": "4" });
+    fry(svg, 16, 4, 120);
+    fry(svg, 38, 16, 104);
+    fry(svg, 146, 14, 106);
+    fry(svg, 168, 6, 118);
+  }
+
+  function drawHotdog(svg, layer) {
+    const back = !layer || layer === "all" || layer === "back";
+    const front = !layer || layer === "all" || layer === "front";
+    if (back) {
+      add(svg, "ellipse", ink({ cx: "100", cy: "124", rx: "86", ry: "34", fill: "#e8b84a", "data-part": "bun" }));
+      add(svg, "ellipse", { cx: "100", cy: "112", rx: "46", ry: "16", fill: "#f6d98a", "data-part": "seat" });
+    }
+    if (front) {
+      add(svg, "rect", ink({ x: "18", y: "118", width: "164", height: "24", rx: "12", fill: "#d9480f", "data-part": "sausage" }));
+      add(svg, "path", { d: "M32,130 Q70,118 100,130 T170,130", fill: "none", stroke: "#f5c518", "stroke-width": "5", "data-part": "mustard" });
+      add(svg, "ellipse", ink({ cx: "100", cy: "146", rx: "70", ry: "12", fill: "#f3c14b", "data-part": "bun" }));
+    }
   }
 
   const DRAW = { burger: drawBurger, fries: drawFries, hotdog: drawHotdog };
 
-  function drawKart(parent, id) {
+  function drawKart(parent, id, layer) {
     const svg = el("svg", { viewBox: "0 0 200 190" });
     svg.setAttribute("aria-hidden", "true");
     svg.setAttribute("class", "pokerace-kart-art");
     svg.setAttribute("data-kart", id);
-    DRAW[id](svg);
+    DRAW[id](svg, layer || "all");
     parent.appendChild(svg);
   }
 
@@ -108,11 +154,12 @@
     const svg = el("svg", { viewBox: "0 0 200 190" });
     svg.setAttribute("aria-hidden", "true");
     svg.setAttribute("class", "pokerace-kart-art");
-    add(svg, "rect", ink({ x: "46", y: "150", width: "108", height: "14", rx: "6", fill: "#3a2a22", "data-part": "chassis" }));
-    add(svg, "circle", ink({ cx: "62", cy: "172", r: "14", fill: "#241c16", "data-part": "wheel" }));
-    add(svg, "circle", ink({ cx: "138", cy: "172", r: "14", fill: "#241c16", "data-part": "wheel" }));
-    add(svg, "circle", { cx: "62", cy: "172", r: "5", fill: "#f6e7c1" });
-    add(svg, "circle", { cx: "138", cy: "172", r: "5", fill: "#f6e7c1" });
+    add(svg, "ellipse", { cx: "100", cy: "168", rx: "70", ry: "10", fill: "rgba(36,28,22,0.28)", "data-part": "shadow" });
+    add(svg, "rect", ink({ x: "40", y: "156", width: "120", height: "12", rx: "6", fill: "#3a2a22", "data-part": "chassis" }));
+    add(svg, "circle", ink({ cx: "58", cy: "172", r: "14", fill: "#241c16", "data-part": "wheel" }));
+    add(svg, "circle", ink({ cx: "142", cy: "172", r: "14", fill: "#241c16", "data-part": "wheel" }));
+    add(svg, "circle", { cx: "58", cy: "172", r: "5", fill: "#f6e7c1" });
+    add(svg, "circle", { cx: "142", cy: "172", r: "5", fill: "#f6e7c1" });
     parent.appendChild(svg);
   }
 
@@ -224,12 +271,13 @@
     const back = document.createElement("div");
     back.className = "pokerace-kart-back";
     drawChassis(back);
+    drawKart(back, state.kart, "back");
     const rider = document.createElement("div");
     rider.className = "pokerace-rider";
     L.pokemon.drawCreature(rider, state.driver, { silhouette: false });
     const front = document.createElement("div");
     front.className = "pokerace-kart-front";
-    drawKart(front, state.kart);
+    drawKart(front, state.kart, "front");
     player.appendChild(back);
     player.appendChild(rider);
     player.appendChild(front);
@@ -253,24 +301,30 @@
   function paintRoad(stageH, contact) {
     const path = document.getElementById("pokeraceRoadPath");
     const edge = document.getElementById("pokeraceRoadEdge");
+    const shoulder = document.getElementById("pokeraceShoulder");
     if (!path || !stageH) return;
-    const steps = 16;
-    const left = [];
-    const right = [];
-    for (let i = 0; i <= steps; i++) {
-      const yPx = ROAD_TOP + (stageH - ROAD_TOP) * (i / steps);
-      const y = (yPx / stageH) * 100;
-      const pastNose = yPx >= contact;
-      const remaining = pastNose ? 0 : remainingForY(yPx, contact);
-      const world = pastNose ? state.distance : state.distance + remaining;
-      const half = roadHalf(remaining);
-      const center = lanePercent(world);
-      left.push([center - half, y]);
-      right.push([center + half, y]);
+    const steps = 24;
+    function ribbon(extra) {
+      const left = [];
+      const right = [];
+      for (let i = 0; i <= steps; i++) {
+        const yPx = ROAD_TOP + (stageH - ROAD_TOP) * (i / steps);
+        const y = (yPx / stageH) * 100;
+        const pastNose = yPx >= contact;
+        const remaining = pastNose ? 0 : remainingForY(yPx, contact);
+        const world = pastNose ? state.distance : state.distance + remaining;
+        const half = roadHalf(remaining) + extra;
+        const center = lanePercent(world);
+        left.push([center - half, y]);
+        right.push([center + half, y]);
+      }
+      const line = (pts) => pts.map((p) => p[0].toFixed(2) + " " + p[1].toFixed(2)).join(" L");
+      return { d: "M" + line(left) + " L" + line(right.slice().reverse()) + " Z", edge: "M" + line(left) + " M" + line(right) };
     }
-    const line = (pts) => pts.map((p) => p[0].toFixed(2) + " " + p[1].toFixed(2)).join(" L");
-    path.setAttribute("d", "M" + line(left) + " L" + line(right.slice().reverse()) + " Z");
-    if (edge) edge.setAttribute("d", "M" + line(left) + " M" + line(right));
+    const asphalt = ribbon(0);
+    path.setAttribute("d", asphalt.d);
+    if (shoulder) shoulder.setAttribute("d", ribbon(3).d);
+    if (edge) edge.setAttribute("d", asphalt.edge);
   }
 
   function paintMeter() {
@@ -286,7 +340,12 @@
 
   function render() {
     const player = document.getElementById("pokeracePlayer");
-    player.style.left = (lanePercent(state.distance) + state.x * 28) + "%";
+    player.style.left = (lanePercent(state.distance) + state.x * 26) + "%";
+    player.style.transform = "translateX(-50%) rotate(" + (-state.x * 8).toFixed(2) + "deg)";
+    if (state.boostTime > 0) player.classList.add("is-boost");
+    else player.classList.remove("is-boost");
+    if (Math.abs(state.x) > 0.75) player.classList.add("is-off");
+    else player.classList.remove("is-off");
     player.dataset.steer = state.x.toFixed(4);
     const stage = document.getElementById("pokeraceStage");
     const stageH = stage.clientHeight || 320;
@@ -323,7 +382,7 @@
     const dashes = document.getElementById("pokeraceDashes");
     const trees = document.getElementById("pokeraceTrees");
     if (!dashes || !trees) return;
-    const gap = 46;
+    const gap = 36;
     const first = Math.ceil((state.distance + 8) / gap) * gap;
     for (let i = 0; i < dashes.children.length; i++) {
       const remaining = first + i * gap - state.distance;
@@ -335,36 +394,58 @@
       }
       dash.hidden = false;
       const travel = 1 - Math.max(0, remaining) / VIEW_AHEAD;
-      const width = 8 + travel * 26;
+      const width = 6 + travel * 22;
       dash.style.top = top + "px";
       dash.style.left = lanePercent(state.distance + remaining) + "%";
       dash.style.width = width + "px";
       dash.style.marginLeft = (-width / 2) + "px";
     }
-    const spacing = 150;
+    const spacing = 90;
     const treeBase = Math.floor(state.distance / spacing) * spacing;
     for (let i = 0; i < trees.children.length; i++) {
-      const remaining = treeBase + (i + 1) * (spacing / 2) - state.distance;
+      const remaining = treeBase + (i + 1) * (spacing / 3) - state.distance;
       const tree = trees.children[i];
       const top = approachTop(remaining, contact, 28);
-      if (!markerVisible(remaining, 28) || top < ROAD_TOP) {
+      if (!markerVisible(remaining, 28) || top < ROAD_TOP - 8) {
         tree.hidden = true;
         continue;
       }
       tree.hidden = false;
       const travel = 1 - Math.max(0, remaining) / VIEW_AHEAD;
-      const scale = 0.45 + travel * 0.7;
+      const scale = 0.4 + travel * 0.85;
       const side = tree.dataset.side === "right" ? 1 : -1;
+      const gutter = roadHalf(remaining) + 6 + (i % 3) * 2;
       tree.style.top = top + "px";
-      tree.style.transform = "scale(" + scale + ")";
-      tree.style.left = (lanePercent(state.distance + remaining) + side * (roadHalf(remaining) + 7)) + "%";
+      tree.style.transform = "scale(" + scale.toFixed(3) + ")";
+      tree.style.left = (lanePercent(state.distance + remaining) + side * gutter) + "%";
+    }
+    const grass = document.getElementById("pokeraceGrass");
+    if (grass) {
+      const bandGap = 54;
+      const bandFirst = Math.ceil(state.distance / bandGap) * bandGap;
+      for (let i = 0; i < grass.children.length; i++) {
+        const remaining = bandFirst + i * bandGap - state.distance;
+        const band = grass.children[i];
+        const top = approachTop(remaining, contact, 8);
+        if (!markerVisible(remaining, 8) || top < ROAD_TOP) {
+          band.hidden = true;
+          continue;
+        }
+        band.hidden = false;
+        band.style.top = top + "px";
+      }
     }
     const clouds = document.getElementById("pokeraceClouds");
     if (clouds) {
       for (let i = 0; i < clouds.children.length; i++) {
-        const drift = ((i * 48 + state.distance * 0.4) % 130) - 18;
+        const drift = ((i * 37 + state.distance * 0.55) % 120) - 12;
         clouds.children[i].style.left = drift + "%";
       }
+    }
+    const hills = document.getElementById("pokeraceHills");
+    if (hills) {
+      const slide = -((state.distance * 0.35) % 80);
+      hills.style.transform = "translateX(" + slide.toFixed(1) + "px)";
     }
   }
 
@@ -384,23 +465,32 @@
     const dashes = document.getElementById("pokeraceDashes");
     const trees = document.getElementById("pokeraceTrees");
     if (!dashes || !trees || dashes.children.length) return;
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 10; i++) {
       const dash = document.createElement("div");
       dash.className = "pokerace-dash";
       dashes.appendChild(dash);
     }
-    for (let i = 0; i < 6; i++) {
+    const props = ["tree", "bush", "flower", "tree", "hay", "bush", "flower", "tree", "hay", "bush", "flower", "tree"];
+    props.forEach((kind, i) => {
       const tree = document.createElement("div");
-      tree.className = i < 4 ? "pokerace-tree" : "pokerace-bush";
+      tree.className = "pokerace-" + kind;
       tree.dataset.side = i % 2 ? "right" : "left";
       trees.appendChild(tree);
-    }
+    });
     const clouds = document.getElementById("pokeraceClouds");
     if (clouds && !clouds.children.length) {
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < 4; i++) {
         const cloud = document.createElement("div");
         cloud.className = "pokerace-cloud";
         clouds.appendChild(cloud);
+      }
+    }
+    const grass = document.getElementById("pokeraceGrass");
+    if (grass && !grass.children.length) {
+      for (let i = 0; i < 7; i++) {
+        const band = document.createElement("div");
+        band.className = "pokerace-grass-band";
+        grass.appendChild(band);
       }
     }
   }
