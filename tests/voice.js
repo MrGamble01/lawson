@@ -1027,5 +1027,35 @@ assert.equal(said.at(-1), 'Pop the N!');
   delete context.navigator;
   run('setSpeechVoice("sam-en"); setSoundMuted(false)');
 
+  run('audioCtx.state = "suspended"');
+  const resumesBefore = resumedCtx;
+  run('beep(440, 0.05)');
+  assert.ok(resumedCtx > resumesBefore, 'a beep resumes a suspended audio context');
+
+  let zoomBlocked = 0;
+  const tap = () => {
+    const ev = new Event('touchend', { bubbles: true, cancelable: true });
+    const block = ev.preventDefault.bind(ev);
+    ev.preventDefault = () => { zoomBlocked++; block(); };
+    document.dispatchEvent(ev);
+  };
+  tap();
+  tap();
+  assert.equal(zoomBlocked, 1, 'only the second tap inside 300ms is kept from zooming');
+
+  const origin = {
+    events: [],
+    isConnected: true,
+    contains() { return false; },
+    dispatchEvent(ev) { this.events.push(ev.type); return true; },
+  };
+  context.stuckOrigin = origin;
+  run('rememberPointer({ pointerId: 9, target: stuckOrigin })');
+  run('releasePointer({ pointerId: 9, type: "pointerup", target: {}, clientX: 4, clientY: 8, button: 0 })');
+  assert.deepEqual(origin.events, ['pointerup'], 'a pointer that lands elsewhere is delivered back to the control that held it');
+  run('rememberPointer({ pointerId: 9, target: stuckOrigin })');
+  run('cancelStuckPointers()');
+  assert.deepEqual(origin.events, ['pointerup', 'pointercancel'], 'leaving the page cancels a stuck pointer');
+
   console.log('PASS: delayed voices, natural pitch, premium and enhanced preference, saved choice, language, volume, corrupt saved volume fallback, mute, missing voice fallback, speech completion promise, caption event, hide/show lifecycle, unusable-voice fallback, speechDone, afterSpeech, swallowed utterances, speech diagnostics, chime then cheer, announcements wait their turn, storyteller speed, name sounds-like, prompt reminder, music ducks under speech, iPad voice wait');
 })().catch(e => { console.error(e); process.exit(1); });
