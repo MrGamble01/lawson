@@ -126,7 +126,7 @@ function el(tag) {
     getBoundingClientRect: () => ({ left: 0, top: 0, width: 300, height: 300 }),
     getContext: () => ({
       scale() {}, drawImage() {}, clearRect() {}, getImageData: () => ({}), putImageData() {},
-      beginPath() {}, arc() {}, fill() {}, moveTo() {}, lineTo() {}, stroke() {}, save() {}, restore() {},
+      beginPath() {}, arc() {}, fill() {}, moveTo() {}, lineTo() {}, stroke() { node.strokeCount = (node.strokeCount || 0) + 1; }, save() {}, restore() {},
       fillText() {}, createLinearGradient: () => ({ addColorStop() {} }),
       lineCap: '', lineJoin: '', fillStyle: '', strokeStyle: '', lineWidth: 0, font: '',
       textAlign: '', textBaseline: '', globalCompositeOperation: 'source-over',
@@ -137,11 +137,12 @@ function el(tag) {
   return node;
 }
 
-function loadDoodle(src) {
+function loadDoodle(src, opts) {
   clock.now = 0;
   clock.timers.clear();
   clock.nextId = 0;
   const spoken = [];
+  const frames = [];
   const canvas = el('canvas');
   canvas.id = 'doodleCanvas';
   const brushes = el('div');
@@ -176,7 +177,7 @@ function loadDoodle(src) {
   };
   const win = {
     Lawson: L,
-    devicePixelRatio: 1,
+    devicePixelRatio: (opts && opts.dpr) || 1,
     addEventListener() {},
     removeEventListener() {},
   };
@@ -187,9 +188,11 @@ function loadDoodle(src) {
     },
     Math, Date: { now: () => clock.now },
     setTimeout: vSetTimeout, clearTimeout: vClearTimeout,
+    requestAnimationFrame(fn) { frames.push(fn); return frames.length; },
+    cancelAnimationFrame() {},
     URL: { createObjectURL: () => 'blob:x', revokeObjectURL() {} },
   });
-  return { L, spoken, ids, tap: (node) => node.handlers.forEach(fn => fn({ stopPropagation() {} })) };
+  return { L, spoken, ids, frames, tap: (node) => node.handlers.forEach(fn => fn({ stopPropagation() {} })) };
 }
 
 function pressedOf(row) {
@@ -198,7 +201,7 @@ function pressedOf(row) {
 
 async function playthrough() {
   const src = fs.readFileSync(DOODLE, 'utf8');
-  const { L, spoken, ids, tap } = loadDoodle(src);
+  const { L, spoken, ids, frames, tap } = loadDoodle(src);
   L.games.doodle.start();
 
   assert.equal(ids.doodleClear.getAttribute('aria-label'), 'Clear doodle');
@@ -259,6 +262,36 @@ async function playthrough() {
   const afterStop = spoken.length;
   await runUntil(clock.now + 8000);
   assert.equal(spoken.length, afterStop, 'stop() cancels a pending Draw!');
+
+  const canvas = ids.doodleCanvas;
+  L.games.doodle.start();
+  L.games.doodle.start();
+  assert.equal(canvas.listeners.pointerdown.length, 1, 'a second start does not stack strokes');
+  const down = canvas.listeners.pointerdown[0];
+  const move = canvas.listeners.pointermove[0];
+  const cancel = canvas.listeners.pointercancel[0];
+  const ptr = (x) => ({ button: 0, pointerId: 1, clientX: x, clientY: 20, preventDefault() {} });
+  down(ptr(10));
+  move(ptr(40));
+  assert.equal(frames.length, 1, 'a drag draws once per frame');
+  frames.pop()();
+  const drawn = canvas.strokeCount;
+  assert.ok(drawn > 0, 'the frame paints the drag');
+  cancel();
+  move(ptr(80));
+  assert.equal(canvas.strokeCount, drawn, 'pointercancel ends the stroke');
+
+  const big = loadDoodle(src, { dpr: 5 });
+  big.L.games.doodle.start();
+  const bigCanvas = big.ids.doodleCanvas;
+  assert.ok(bigCanvas.width * bigCanvas.height > 1500000, 'the iPad-sized canvas is the large case');
+  const bigDown = bigCanvas.listeners.pointerdown[0];
+  for (let i = 0; i < 4; i++) bigDown(ptr(10 + i));
+  const undos = () => big.spoken.filter(t => t === 'Undo!').length;
+  big.tap(big.ids.doodleUndo);
+  big.tap(big.ids.doodleUndo);
+  big.tap(big.ids.doodleUndo);
+  assert.equal(undos(), 2, 'a retina canvas keeps two undos, not five');
 
   console.log('PASS: doodle — pickers expose aria-pressed, stamp timeout says Draw!, stop() cancels');
 }

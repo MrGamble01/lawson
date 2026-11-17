@@ -41,17 +41,24 @@
   let brush = BRUSHES[0]; // current brush; null hex => rainbow
   let size = SIZES[1];   // current stroke size
 
-  // Undo stack — one snapshot per "intent" (a single stroke or a single
-  // stamp drop). 5 levels is plenty for a 3yo and keeps the memory
-  // budget reasonable on a 12.9" iPad Pro (~22MB per raw snapshot).
+  // Five snapshots on a phone. A retina iPad frame is several megabytes,
+  // so those canvases keep two.
   const UNDO_LIMIT = 5;
   let undoStack = [];
+  let moveFrame = 0;
+  let pendingMove = null;
+
+  function undoLimit() {
+    const pixels = (canvas && canvas.width ? canvas.width : 0) * (canvas && canvas.height ? canvas.height : 0);
+    // A full-screen iPad snapshot is many megabytes. Keep two, not five.
+    return pixels > 1500000 ? 2 : UNDO_LIMIT;
+  }
 
   function snapshot() {
     if (!ctx || !canvas || !canvas.width || !canvas.height) return;
     try {
       undoStack.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
-      if (undoStack.length > UNDO_LIMIT) undoStack.shift();
+      while (undoStack.length > undoLimit()) undoStack.shift();
       updateUndoBtn();
     } catch (_) {
       // Canvas might be tainted in some weird state — fail silently.
@@ -96,8 +103,7 @@
 
   function pointIn(e) {
     const rect = canvas.getBoundingClientRect();
-    const src = e.touches && e.touches[0] ? e.touches[0] : e;
-    return { x: src.clientX - rect.left, y: src.clientY - rect.top };
+    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
   }
 
   function strokeColor(offset = 0) {
@@ -161,7 +167,11 @@
   }
 
   function onDown(e) {
-    e.preventDefault();
+    if (e && e.button != null && e.button !== 0) return;
+    if (e && e.preventDefault) e.preventDefault();
+    if (canvas.setPointerCapture && e && e.pointerId != null) {
+      try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+    }
     // Snapshot before each new intent so undo restores pre-stroke state.
     // One snapshot per pointer-down — the whole drag is one undo unit.
     snapshot();
@@ -176,12 +186,8 @@
     L.beep(300 + (hue / 360) * 400, 0.06, "sine");
   }
 
-  function onMove(e) {
-    if (!drawing) return;
-    e.preventDefault();
-    const p = pointIn(e);
+  function paintMove(p) {
     if (mode === "stamp") {
-      // Throttle so finger drags lay down a row of stamps, not a smear.
       const now = Date.now();
       const dx = p.x - last.x, dy = p.y - last.y;
       if (now - lastStampAt > 160 && (dx * dx + dy * dy) > 1600) {
@@ -193,7 +199,24 @@
     }
     line(last, p);
     last = p;
-    if (!brush.hex) hue = (hue + 4) % 360; // only rainbow mode cycles
+    if (!brush.hex) hue = (hue + 4) % 360;
+  }
+
+  function flushMove() {
+    moveFrame = 0;
+    const list = pendingMove;
+    pendingMove = null;
+    if (!drawing || !list || !last) return;
+    for (let i = 0; i < list.length; i++) paintMove(pointIn(list[i]));
+  }
+
+  function onMove(e) {
+    if (!drawing) return;
+    if (e.preventDefault) e.preventDefault();
+    // One draw per frame. Coalesced points fill the gaps a fast iPad drag skips.
+    pendingMove = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+    if (moveFrame) return;
+    moveFrame = requestAnimationFrame(flushMove);
   }
 
   function renderSizes() {
@@ -256,7 +279,12 @@
     });
   }
 
-  function onUp(e) {
+  function onUp() {
+    if (moveFrame) {
+      cancelAnimationFrame(moveFrame);
+      moveFrame = 0;
+    }
+    if (pendingMove) flushMove();
     if (!drawing) return;
     drawing = false;
     last = null;
@@ -337,17 +365,15 @@
   }
 
   function start() {
+    if (unlisten) unlisten();
     canvas = document.getElementById("doodleCanvas");
     resize();
     window.addEventListener("resize", resize);
 
-    canvas.addEventListener("touchstart", onDown, { passive: false });
-    canvas.addEventListener("touchmove",  onMove, { passive: false });
-    canvas.addEventListener("touchend",   onUp);
-    canvas.addEventListener("mousedown",  onDown);
-    canvas.addEventListener("mousemove",  onMove);
-    canvas.addEventListener("mouseup",    onUp);
-    canvas.addEventListener("mouseleave", onUp);
+    canvas.addEventListener("pointerdown", onDown);
+    canvas.addEventListener("pointermove", onMove);
+    canvas.addEventListener("pointerup", onUp);
+    canvas.addEventListener("pointercancel", onUp);
 
     const clearBtn = document.getElementById("doodleClear");
     const stampBtn = document.getElementById("doodleStamp");
@@ -359,14 +385,15 @@
     L.onTapOnce(undoBtn,  () => undo());
 
     unlisten = () => {
+      if (moveFrame) cancelAnimationFrame(moveFrame);
+      moveFrame = 0;
+      pendingMove = null;
+      drawing = false;
       window.removeEventListener("resize", resize);
-      canvas.removeEventListener("touchstart", onDown);
-      canvas.removeEventListener("touchmove",  onMove);
-      canvas.removeEventListener("touchend",   onUp);
-      canvas.removeEventListener("mousedown",  onDown);
-      canvas.removeEventListener("mousemove",  onMove);
-      canvas.removeEventListener("mouseup",    onUp);
-      canvas.removeEventListener("mouseleave", onUp);
+      canvas.removeEventListener("pointerdown", onDown);
+      canvas.removeEventListener("pointermove", onMove);
+      canvas.removeEventListener("pointerup", onUp);
+      canvas.removeEventListener("pointercancel", onUp);
     };
 
     mode = "paint";

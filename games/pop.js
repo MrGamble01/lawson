@@ -37,6 +37,18 @@
   let bestAtStart = 0;        // snapshot so the record celebration fires ONCE
   let celebrated = false;
   let spawnTimer = null;
+  let floatTimers = [];
+  function laterFloat(fn, ms) {
+    const id = setTimeout(() => {
+      floatTimers = floatTimers.filter((t) => t !== id);
+      fn();
+    }, ms);
+    floatTimers.push(id);
+  }
+  function clearFloats() {
+    floatTimers.forEach(clearTimeout);
+    floatTimers = [];
+  }
   let cancelNext = null;
   function clearNext() {
     if (cancelNext) cancelNext();
@@ -251,8 +263,9 @@
 
     area.appendChild(b);
 
-    // Floated off the top.
-    setTimeout(() => {
+    // Floated off the top. Cleared on stop so a leftover balloon cannot
+    // score or spawn another one after the kid has left.
+    laterFloat(() => {
       if (b.parentNode && !popped) {
         if (mode === "free" && streak > 0) {
           maybeCelebrateRecord(streak);
@@ -322,6 +335,7 @@
   function stop() {
     if (mode === "free" && streak > 0) L.bumpHighScore("popBest", streak);
     clearNext();
+    clearFloats();
     clearInterval(spawnTimer);
     spawnTimer = null;
     const area = document.getElementById("popArea");

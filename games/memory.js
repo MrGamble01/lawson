@@ -87,7 +87,7 @@
       const a = firstPick, b = card;
       firstPick = null;
       lock = true;
-      setTimeout(() => {
+      later(() => {
         a.classList.add("matched");
         b.classList.add("matched");
         // A matched pair stays face up and ignores taps; say so in the name.
@@ -111,7 +111,7 @@
       const a = firstPick, b = card;
       firstPick = null;
       lock = true;
-      setTimeout(() => {
+      later(() => {
         a.classList.remove("flipped");
         b.classList.remove("flipped");
         a.setAttribute("aria-label", "Hidden card");
@@ -123,6 +123,19 @@
   }
 
   let cancelNext = null;
+  let timers = [];
+  function later(fn, ms) {
+    const id = setTimeout(() => {
+      timers = timers.filter((t) => t !== id);
+      fn();
+    }, ms);
+    timers.push(id);
+    return id;
+  }
+  function clearTimers() {
+    timers.forEach(clearTimeout);
+    timers = [];
+  }
   function clearNext() {
     if (cancelNext) cancelNext();
     cancelNext = null;
@@ -139,7 +152,7 @@
     L.say(`${L.cheer()} You matched them all!`);
     const r = board.getBoundingClientRect();
     for (let k = 0; k < 14; k++) {
-      setTimeout(() => L.sparkleAt(
+      later(() => L.sparkleAt(
         r.left + r.width / 2 + (Math.random() - 0.5) * 220,
         r.top  + r.height / 2 + (Math.random() - 0.5) * 220,
       ), k * 55);
@@ -175,6 +188,7 @@
   }
 
   function stop() {
+    clearTimers();
     clearNext();
     const b = document.getElementById("memoryBoard");
     if (b) b.innerHTML = "";

@@ -559,7 +559,7 @@
     L.bumpBadge("farmScoreVal", totalCares);
     if (totalCares > bestAtStart && !celebrated) {
       celebrated = true;
-      setTimeout(() => L.celebrateNewHigh(totalCares), 700);
+      (L.whileHere || setTimeout)(() => L.celebrateNewHigh(totalCares), 700);
     }
     L.bumpHighScore("farmBest", totalCares);
     refreshBestBadge();
