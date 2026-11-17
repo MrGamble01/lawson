@@ -118,6 +118,7 @@ const L = {
   sparkleAt() {},
 };
 
+const frames = [];
 const context = vm.createContext({
   window: { Lawson: L },
   document: { body: el(), getElementById: id => ids[id] || null, createElement: () => el() },
@@ -131,6 +132,8 @@ const context = vm.createContext({
   Date: { now: () => clock.now },
   Math,
   console,
+  requestAnimationFrame(fn) { frames.push(fn); return frames.length; },
+  cancelAnimationFrame() {},
 });
 vm.runInContext(source, context);
 const game = L.games.scene;
@@ -164,6 +167,12 @@ async function reset() {
   const name = traySource.getAttribute('aria-label');
   traySource.handlers.pointerdown({ clientX: 10, clientY: 10, pointerId: 1, preventDefault() {} });
   assert.equal(traySource.getAttribute('aria-label'), `${name}, held`, 'dragging names the held sticker');
+  const queued = frames.length;
+  traySource.handlers.pointermove({ clientX: 30, clientY: 40 });
+  traySource.handlers.pointermove({ clientX: 50, clientY: 60 });
+  traySource.handlers.pointermove({ clientX: 70, clientY: 80 });
+  assert.equal(frames.length, queued + 1, 'a burst of drags paints once per frame');
+  frames.pop()();
   traySource.handlers.pointercancel();
   assert.equal(traySource.getAttribute('aria-label'), name, 'cancelling restores the sticker name');
 
