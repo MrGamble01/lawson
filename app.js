@@ -374,17 +374,41 @@ function pointOf(e) {
   return { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 }
 
-// Attach a tap handler that works reliably on iOS (touchend fires first, click fallback)
+// A finger that slides off a control, or a touch the system cancels, is
+// not a tap. The click that follows one of those is dropped too, so the
+// control under the lift does not fire in its place. A keyboard click
+// (detail 0) is never dropped.
+let _dropPointerClickUntil = 0;
 function onTap(el, fn) {
   let handled = false;
+  let start = null;
+  el.addEventListener("touchstart", (e) => {
+    const t = e.changedTouches && e.changedTouches[0];
+    start = t ? { x: t.clientX, y: t.clientY, id: t.identifier } : null;
+  }, { passive: true });
+  el.addEventListener("touchcancel", () => {
+    start = null;
+    _dropPointerClickUntil = Date.now() + 400;
+  });
   el.addEventListener("touchend", (e) => {
-    e.preventDefault();
+    const t = e.changedTouches && e.changedTouches[0];
+    const origin = start;
+    start = null;
+    if (!origin || !t || (origin.id != null && t.identifier != null && t.identifier !== origin.id)) return;
+    const r = typeof el.getBoundingClientRect === "function" ? el.getBoundingClientRect() : null;
+    const inside = !r || (t.clientX >= r.left && t.clientX <= r.right && t.clientY >= r.top && t.clientY <= r.bottom);
+    if (!inside) {
+      _dropPointerClickUntil = Date.now() + 400;
+      return;
+    }
+    if (e.cancelable) e.preventDefault();
     handled = true;
     fn(e);
     setTimeout(() => { handled = false; }, 400);
   }, { passive: false });
   el.addEventListener("click", (e) => {
     if (handled) return;
+    if (e.detail !== 0 && Date.now() < _dropPointerClickUntil) return;
     fn(e);
   });
   makeTappableAccessible(el);
