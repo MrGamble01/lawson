@@ -290,5 +290,20 @@ const targetBalloon = () => ids.popArea.querySelectorAll(`.balloon[data-glyph="$
   await runUntil(clock.now + 3000);
   assert.equal(goals().length, 1, 'stop() cancels the pending next goal');
 
+  L.prefersReducedMotion = () => false;
+  L.pageHidden = () => true;
+  pop.start();
+  await finishLine(lastLine());
+  const parked = ids.popArea.querySelectorAll('.balloon').length;
+  assert.equal(parked, 3, 'opening still puts balloons up');
+  await runUntil(clock.now + 4000);
+  assert.equal(ids.popArea.querySelectorAll('.balloon').length, parked, 'a locked screen does not keep launching balloons');
+  const before = new Set(ids.popArea.querySelectorAll('.balloon'));
+  L.pageHidden = () => false;
+  await runUntil(clock.now + 2200);
+  const fresh = ids.popArea.querySelectorAll('.balloon').filter((b) => !before.has(b));
+  assert.ok(fresh.length > 0, 'balloons launch again when the screen is back');
+  pop.stop();
+
   console.log('PASS: pop ABC — the popped letter is heard before the next goal; stop() cancels the waiter');
 })().catch((e) => { console.error(e); process.exit(1); });

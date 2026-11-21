@@ -227,6 +227,10 @@
   }
 
   function tick() {
+    if (L.pageHidden && L.pageHidden()) {
+      cycleTimer = setTimeout(tick, popInterval * L.paceScale());
+      return;
+    }
     popRandom();
     if (popInterval < 800 && Math.random() < 0.35) popRandom();
     cycleTimer = setTimeout(tick, popInterval * L.paceScale());
