@@ -123,7 +123,8 @@ function el(tag) {
       if (!list) return;
       node.listeners[type] = list.filter(f => f !== fn);
     },
-    getBoundingClientRect: () => ({ left: 0, top: 0, width: 300, height: 300 }),
+    rectReads: 0,
+    getBoundingClientRect: () => { node.rectReads += 1; return { left: 0, top: 0, width: 300, height: 300 }; },
     getContext: () => ({
       scale() {}, drawImage() {}, clearRect() {}, getImageData: () => ({}), putImageData() {},
       beginPath() {}, arc() {}, fill() {}, moveTo() {}, lineTo() {}, stroke() { node.strokeCount = (node.strokeCount || 0) + 1; }, save() {}, restore() {},
@@ -280,6 +281,18 @@ async function playthrough() {
   cancel();
   move(ptr(80));
   assert.equal(canvas.strokeCount, drawn, 'pointercancel ends the stroke');
+
+  canvas.rectReads = 0;
+  const points = [12, 30, 48, 66].map((x) => ptr(x));
+  down(points[0]);
+  const afterDown = canvas.rectReads;
+  const drag = ptr(66);
+  drag.getCoalescedEvents = () => points.slice(1);
+  move(drag);
+  assert.equal(frames.length, 1, 'coalesced points still wait for one frame');
+  frames.pop()();
+  assert.equal(canvas.rectReads - afterDown, 1, 'one layout read paints every coalesced point');
+  assert.ok(canvas.strokeCount > drawn, 'coalesced points are painted');
 
   const big = loadDoodle(src, { dpr: 5 });
   big.L.games.doodle.start();

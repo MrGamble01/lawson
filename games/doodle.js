@@ -101,9 +101,9 @@
     updateUndoBtn();
   }
 
-  function pointIn(e) {
-    const rect = canvas.getBoundingClientRect();
-    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+  function pointIn(e, rect) {
+    const r = rect || canvas.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
   }
 
   function strokeColor(offset = 0) {
@@ -207,7 +207,10 @@
     const list = pendingMove;
     pendingMove = null;
     if (!drawing || !list || !last) return;
-    for (let i = 0; i < list.length; i++) paintMove(pointIn(list[i]));
+    // One layout read for the whole frame. A fast iPad drag hands over
+    // many coalesced points, and each getBoundingClientRect forces layout.
+    const rect = canvas.getBoundingClientRect();
+    for (let i = 0; i < list.length; i++) paintMove(pointIn(list[i], rect));
   }
 
   function onMove(e) {
