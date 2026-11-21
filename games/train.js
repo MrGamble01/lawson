@@ -260,7 +260,7 @@
     L.beep(420, 0.1, "triangle");
     L.say("All aboard!");
     chugTimer = setInterval(() => {
-      if (!running) return;
+      if (!running || (L.pageHidden && L.pageHidden())) return;
       chug();
     }, CHUG_INTERVAL_MS);
     advanceTrain();
@@ -305,6 +305,10 @@
     const dir = targetX > trainPosPct ? 1 : -1;
     function step() {
       if (!running) return;
+      if (L.pageHidden && L.pageHidden()) {
+        trainMoveTimer = setTimeout(step, 32);
+        return;
+      }
       trainPosPct += dir * 0.45;
       if ((dir > 0 && trainPosPct >= targetX) || (dir < 0 && trainPosPct <= targetX)) {
         trainPosPct = targetX;

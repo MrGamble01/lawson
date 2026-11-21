@@ -261,6 +261,15 @@ const targetHole = () => upHoles().find((h) => h.querySelector('.whack-critter')
   assert.equal(randomValues.length, 0);
   whack.stop();
 
+  L.pageHidden = () => true;
+  whack.start();
+  await runUntil(clock.now + 3000);
+  assert.equal(upHoles().length, 0, 'a locked screen does not pop new moles');
+  L.pageHidden = () => false;
+  await runUntil(clock.now + 1300);
+  assert.ok(upHoles().length > 0, 'moles pop again when the screen is back');
+  whack.stop();
+
   console.log('PASS: whack ABC — the hit is heard before the next goal; stop() cancels the waiter');
   console.log('PASS: whack ABC — up holes name the next target and refresh when it changes');
 })().catch((e) => { console.error(e); process.exit(1); });
