@@ -396,6 +396,10 @@ async function pianoGame(page) {
 }
 
 async function doodleGame(page) {
+  await page.waitForFunction(() => {
+    const c = document.getElementById("doodleCanvas");
+    return c && c.width > 0 && c.getBoundingClientRect().width > 10;
+  });
   await page.evaluate(() => {
     const c = document.getElementById("doodleCanvas");
     const r = c.getBoundingClientRect();
