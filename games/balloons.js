@@ -90,6 +90,7 @@
     const sample = document.getElementById("balloonsSample");
     sample.innerHTML = "";
     paintBalloon(sample, target);
+    L.nameClue(sample, `${target.said} balloon`);
 
     const choices = document.getElementById("balloonsChoices");
     choices.innerHTML = "";

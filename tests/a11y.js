@@ -34,6 +34,8 @@
 //      Story keyboard play: Dots' SVG dots are named buttons that say who
 //      is next and connect on Enter; Story Time turns the page from a
 //      real Next button or Enter on the screen, never from a character.
+//      Picture clues in Balloons, Cupcakes, Kites, Blocks, Shadows, Sky,
+//      and Mail are named images, not hidden from assistive tech.
 //
 // Run:  node tests/a11y.js
 // Exit: 0 pass · 1 violations or failed checks · 99 runner crashed.
@@ -160,6 +162,31 @@ async function structuralChecks(page) {
         || (settingsOpen && document.getElementById("settingsOverlay").contains(ae))
         || (ae && ae.closest && ae.closest("header, .mascot, .sunny, .menu-cloud"));
       if (!okHome) out.push(`focus is on ${ae && ae.tagName}#${ae && ae.id} outside the active screen #${active.id}`);
+
+      // Picture clues used to be aria-hidden, so a screen reader heard
+      // "Which balloon?" and never the colour. The clue is an image
+      // named like the answer, and it is not a second button.
+      const CLUES = {
+        balloonsGame: "balloonsSample",
+        cupcakesGame: "cupcakesSample",
+        kitesGame: "kitesSample",
+        blocksGame: "blocksSample",
+        shadowsGame: "shadowsWall",
+        skyGame: "skyWindow",
+        mailGame: "mailLetter",
+      };
+      const clueId = CLUES[active.id];
+      if (clueId) {
+        const clue = document.getElementById(clueId);
+        const label = clue ? (clue.getAttribute("aria-label") || "").trim() : "";
+        if (!clue) out.push(`#${clueId} missing`);
+        else {
+          if (clue.getAttribute("aria-hidden") === "true") out.push(`#${clueId} is hidden from assistive tech`);
+          if (clue.getAttribute("role") !== "img") out.push(`#${clueId} is not exposed as an image`);
+          if (!/[\p{L}\p{N}]/u.test(label)) out.push(`#${clueId} has no readable name`);
+          if (clue.tabIndex >= 0) out.push(`#${clueId} is in the tab order`);
+        }
+      }
     }
 
     // Every visible button has a readable name (letters or digits, not

@@ -301,13 +301,11 @@ async function musicGame(page) {
 async function iceCream(page) {
   await page.evaluate(() => document.getElementById("icecreamEat").click());
   assert.equal(await score(page, "icecream"), "0", "an empty cone is not a sundae");
-  const box = await page.locator("#icecreamTubs button").first().boundingBox();
-  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-  await page.mouse.down();
-  await page.mouse.up();
+  // A short tap on a tub puts that scoop on the cone. Playwright's click
+  // stays on the button; a hand-moved mouse can miss it on a slow runner.
+  await page.locator("#icecreamTubs button").first().click();
   await page.evaluate(() => document.getElementById("icecreamEat").click());
-  await sleep(800);
-  assert.ok(Number(await score(page, "icecream")) > 0);
+  await page.waitForFunction(() => Number(document.getElementById("icecreamScoreVal").textContent) > 0, null, { timeout: 4000 });
   await restart(page, "icecream");
   assert.equal(await score(page, "icecream"), "0");
 }
@@ -396,15 +394,22 @@ async function pianoGame(page) {
 }
 
 async function doodleGame(page) {
+  await page.waitForFunction(() => {
+    const c = document.getElementById("doodleCanvas");
+    return c && c.width > 0 && c.getBoundingClientRect().width > 10;
+  });
   await page.evaluate(() => {
     const c = document.getElementById("doodleCanvas");
     const r = c.getBoundingClientRect();
-    const fire = (type, x, y) => c.dispatchEvent(new MouseEvent(type, {
-      bubbles: true, cancelable: true, clientX: x, clientY: y, button: 0, buttons: 1,
+    // The canvas listens for pointer events. A plain mouse event never
+    // starts a stroke, so the ink check below would see a blank canvas.
+    const fire = (type, x, y) => c.dispatchEvent(new PointerEvent(type, {
+      bubbles: true, cancelable: true, pointerId: 1, pointerType: "mouse", isPrimary: true,
+      clientX: x, clientY: y, button: 0, buttons: type === "pointerup" ? 0 : 1,
     }));
-    fire("mousedown", r.left + 30, r.top + 30);
-    fire("mousemove", r.left + 90, r.top + 70);
-    fire("mouseup", r.left + 90, r.top + 70);
+    fire("pointerdown", r.left + 30, r.top + 30);
+    fire("pointermove", r.left + 90, r.top + 70);
+    fire("pointerup", r.left + 90, r.top + 70);
   });
   const ink = await page.evaluate(() => {
     const c = document.getElementById("doodleCanvas");

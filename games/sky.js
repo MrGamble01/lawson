@@ -164,6 +164,7 @@
     win.innerHTML = "";
     win.style.setProperty("--sky", target.sky);
     paint(win, target);
+    L.nameClue(win, target.said);
 
     const choices = document.getElementById("skyChoices");
     choices.innerHTML = "";
