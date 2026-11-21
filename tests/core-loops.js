@@ -396,15 +396,22 @@ async function pianoGame(page) {
 }
 
 async function doodleGame(page) {
+  await page.waitForFunction(() => {
+    const c = document.getElementById("doodleCanvas");
+    return c && c.width > 0 && c.getBoundingClientRect().width > 10;
+  });
   await page.evaluate(() => {
     const c = document.getElementById("doodleCanvas");
     const r = c.getBoundingClientRect();
-    const fire = (type, x, y) => c.dispatchEvent(new MouseEvent(type, {
-      bubbles: true, cancelable: true, clientX: x, clientY: y, button: 0, buttons: 1,
+    // The canvas listens for pointer events. A plain mouse event never
+    // starts a stroke, so the ink check below would see a blank canvas.
+    const fire = (type, x, y) => c.dispatchEvent(new PointerEvent(type, {
+      bubbles: true, cancelable: true, pointerId: 1, pointerType: "mouse", isPrimary: true,
+      clientX: x, clientY: y, button: 0, buttons: type === "pointerup" ? 0 : 1,
     }));
-    fire("mousedown", r.left + 30, r.top + 30);
-    fire("mousemove", r.left + 90, r.top + 70);
-    fire("mouseup", r.left + 90, r.top + 70);
+    fire("pointerdown", r.left + 30, r.top + 30);
+    fire("pointermove", r.left + 90, r.top + 70);
+    fire("pointerup", r.left + 90, r.top + 70);
   });
   const ink = await page.evaluate(() => {
     const c = document.getElementById("doodleCanvas");
