@@ -41,6 +41,7 @@ function el(tag) {
     },
     setAttribute(k, v) { node.attrs[k] = String(v); },
     getAttribute(k) { return node.attrs[k]; },
+    removeAttribute(k) { delete node.attrs[k]; },
     appendChild(c) { node.children.push(c); return c; },
     set innerHTML(_) { node.children = []; },
   };
@@ -77,6 +78,12 @@ const L = {
   bumpHighScore() {},
   getHighScore: () => 0,
   celebrateNewHigh() {},
+  nameClue(el, label) {
+    if (!el || !label) return;
+    el.removeAttribute("aria-hidden");
+    el.setAttribute("role", "img");
+    el.setAttribute("aria-label", label);
+  },
 };
 const document = {
   getElementById: (id) => ids[id] || null,
@@ -104,6 +111,9 @@ assert.equal(spoken.filter((s) => s.startsWith("prompt:")).length, 1, "the quest
 assert.equal(ids.cupcakesChoices.children.length, 3, "three cupcakes");
 const names = ids.cupcakesChoices.children.map((b) => b.getAttribute("aria-label"));
 assert.equal(new Set(names).size, 3, "the three frostings are different");
+assert.equal(ids.cupcakesSample.getAttribute("role"), "img", "the sample is an image");
+assert.ok(!ids.cupcakesSample.getAttribute("aria-hidden"), "the sample is not hidden from assistive tech");
+assert.ok(names.includes(ids.cupcakesSample.getAttribute("aria-label")), "the sample is named like a cupcake");
 
 const right = ids.cupcakesChoices.children[0];
 const wrong = ids.cupcakesChoices.children[1];
@@ -123,3 +133,4 @@ runUntil(clock.now + 2000);
 assert.equal(spoken.filter((s) => s.startsWith("prompt:")).length, prompts, "leaving cancels the question");
 
 console.log("PASS: cupcakes — miss then match, one score, stop cancels the prompt");
+require("./picture-clues");

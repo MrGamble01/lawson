@@ -98,6 +98,7 @@
     const letter = document.getElementById("mailLetter");
     letter.innerHTML = "";
     paintLetter(letter, target);
+    L.nameClue(letter, `${target.said} letter`);
 
     const choices = document.getElementById("mailChoices");
     choices.innerHTML = "";

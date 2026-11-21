@@ -92,6 +92,7 @@
     const sample = document.getElementById("kitesSample");
     sample.innerHTML = "";
     paintKite(sample, target);
+    L.nameClue(sample, `${target.said} kite`);
 
     const choices = document.getElementById("kitesChoices");
     choices.innerHTML = "";

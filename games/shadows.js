@@ -125,6 +125,7 @@
     const wall = document.getElementById("shadowsWall");
     wall.innerHTML = "";
     paint(wall, target, true);
+    L.nameClue(wall, `${target.name} shadow`);
 
     const choices = document.getElementById("shadowsChoices");
     choices.innerHTML = "";
