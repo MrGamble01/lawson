@@ -1,4 +1,5 @@
-// Held tool names, including a bucket refreshed while milking; no whole app needed.
+// Held tool names, including a bucket refreshed while milking, and taps
+// that slide off a control. No whole app needed.
 // Run: node tests/tap-to-use.js
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -73,3 +74,73 @@ bucket.setAttribute('aria-label', 'Updated bucket name');
 ctx.putDownTool();
 assert.equal(bucket.getAttribute('aria-label'), 'Updated bucket name');
 console.log('tap-to-use: held tool names passed');
+
+function control(rect) {
+  const listeners = {};
+  return {
+    tagName: 'BUTTON',
+    listeners,
+    addEventListener(type, fn) { (listeners[type] || (listeners[type] = [])).push(fn); },
+    getBoundingClientRect: () => rect,
+  };
+}
+function fire(el, type, ev) {
+  (el.listeners[type] || []).forEach((fn) => fn(ev));
+}
+function touch(id, x, y) {
+  return { identifier: id, clientX: x, clientY: y };
+}
+
+let now = 1000;
+const tapCtx = vm.createContext({
+  Date: { now: () => now },
+  setTimeout() { return 0; },
+  makeTappableAccessible() {},
+});
+vm.runInContext(extract('app.js', 'let _dropPointerClickUntil', 'function onTapOnce'), tapCtx);
+
+const box = { left: 10, top: 10, right: 110, bottom: 110 };
+const a = control(box);
+const b = control({ left: 200, top: 10, right: 300, bottom: 110 });
+const hits = { a: 0, b: 0 };
+tapCtx.onTap(a, () => { hits.a += 1; });
+tapCtx.onTap(b, () => { hits.b += 1; });
+
+fire(b, 'click', { detail: 1 });
+assert.equal(hits.b, 1, 'a mouse click with no touch still counts');
+
+const kept = { defaultPrevented: false };
+fire(a, 'touchstart', { changedTouches: [touch(1, 40, 40)] });
+fire(a, 'touchend', {
+  cancelable: true,
+  preventDefault() { kept.defaultPrevented = true; },
+  changedTouches: [touch(1, 50, 50)],
+});
+assert.equal(hits.a, 1, 'a lift inside the control counts');
+assert.equal(kept.defaultPrevented, true, 'a real tap still swallows the trailing click');
+fire(a, 'click', { detail: 1 });
+assert.equal(hits.a, 1, 'the click after that lift does not count twice');
+
+fire(a, 'touchstart', { changedTouches: [touch(2, 40, 40)] });
+fire(a, 'touchend', {
+  cancelable: true,
+  preventDefault() { throw new Error('a slide should not cancel the click itself'); },
+  changedTouches: [touch(2, 220, 40)],
+});
+assert.equal(hits.a, 1, 'a finger that slides off does not activate the control');
+fire(b, 'click', { detail: 1 });
+assert.equal(hits.b, 1, 'the control under the lift does not take the slid tap');
+fire(b, 'click', { detail: 0 });
+assert.equal(hits.b, 2, 'a keyboard click still lands during that window');
+now += 500;
+fire(b, 'click', { detail: 1 });
+assert.equal(hits.b, 3, 'a later mouse click counts again');
+
+fire(a, 'touchstart', { changedTouches: [touch(3, 40, 40)] });
+fire(a, 'touchcancel', {});
+fire(a, 'click', { detail: 1 });
+assert.equal(hits.a, 1, 'a cancelled touch does not activate on the trailing click');
+fire(b, 'click', { detail: 1 });
+assert.equal(hits.b, 3, 'a cancelled touch also drops the click on the control underneath');
+
+console.log('tap-to-use: slid-off taps passed');
