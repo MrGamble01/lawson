@@ -281,7 +281,10 @@
 
   function startSpawning(area) {
     clearInterval(spawnTimer);
-    spawnTimer = setInterval(() => spawn(area), (mode === "free" ? 1100 : 1300) * L.paceScale());
+    spawnTimer = setInterval(() => {
+      if (L.pageHidden && L.pageHidden()) return;
+      spawn(area);
+    }, (mode === "free" ? 1100 : 1300) * L.paceScale());
   }
 
   function setMode(m, area) {

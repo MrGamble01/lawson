@@ -297,5 +297,21 @@ const boarded = () => {
   await runUntil(clock.now + 3000);
   assert.equal(passengers().length, 0, 'stop() cancels the pending passenger line');
 
+  let chugs = 0;
+  L.pageHidden = () => true;
+  L.beep = () => { chugs += 1; };
+  train.start();
+  await finishLine(lastLine());
+  tap(goBtn());
+  chugs = 0;
+  await finishLine(lastLine());
+  await runUntil(clock.now + 2100);
+  assert.equal(chugs, 0, 'a locked screen does not keep chugging');
+  assert.deepEqual(stationNames(), ['Station 1', 'Station 2', 'Station 3'], 'a locked screen leaves the train between stations');
+  L.pageHidden = () => false;
+  await runUntil(clock.now + 2100);
+  assert.equal(lastLine().text, 'Station 2!', 'the train rolls on when the screen is back');
+  train.stop();
+
   console.log('PASS: train — the station is heard before the passenger; stop() cancels the waiter');
 })().catch((e) => { console.error(e); process.exit(1); });
