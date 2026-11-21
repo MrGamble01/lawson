@@ -301,13 +301,11 @@ async function musicGame(page) {
 async function iceCream(page) {
   await page.evaluate(() => document.getElementById("icecreamEat").click());
   assert.equal(await score(page, "icecream"), "0", "an empty cone is not a sundae");
-  const box = await page.locator("#icecreamTubs button").first().boundingBox();
-  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-  await page.mouse.down();
-  await page.mouse.up();
+  // A short tap on a tub puts that scoop on the cone. Playwright's click
+  // stays on the button; a hand-moved mouse can miss it on a slow runner.
+  await page.locator("#icecreamTubs button").first().click();
   await page.evaluate(() => document.getElementById("icecreamEat").click());
-  await sleep(800);
-  assert.ok(Number(await score(page, "icecream")) > 0);
+  await page.waitForFunction(() => Number(document.getElementById("icecreamScoreVal").textContent) > 0, null, { timeout: 4000 });
   await restart(page, "icecream");
   assert.equal(await score(page, "icecream"), "0");
 }
