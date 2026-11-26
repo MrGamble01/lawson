@@ -140,7 +140,7 @@
     <!-- Home menu — six themed "places" Bobo can visit. Each card opens
          a hub screen with that place's activities. App-Store style: fewer
          choices per screen, clearer hierarchy, every tap is curated. -->
-    <!-- Home: the three games Lawson plays, each with Free / ABC / 123. -->
+    <!-- Home: the games that open first, plus More for the rest. -->
     <section id="menu" class="screen active" aria-label="Home">
       <div class="menu-places menu-home3">
         <button class="place place--game" data-go="pop" style="--c:#ff922b">
@@ -958,7 +958,7 @@
         <h2 id="settingsTitle">Settings</h2>
         <button type="button" class="settings-dismiss" tabindex="-1" aria-label="Close settings">✕</button>
       </div>
-      <div class="settings-body">
+      <div class="settings-body" id="settingsForm">
         <div class="settings-columns">
           <div class="settings-col">
             <label class="settings-field">
@@ -966,6 +966,10 @@
               <input id="settingsName" type="text" maxlength="20" autocomplete="off" autocapitalize="words" spellcheck="false" />
             </label>
             <p class="settings-hint">Used in cheers across every game.</p>
+            <div id="settingsPlayRow">
+              <button id="settingsPlay" class="settings-tips" type="button" aria-label="Play stats">📊 Play stats</button>
+              <p class="settings-hint">Sessions, games, and how long they lasted. Stays in Settings.</p>
+            </div>
             <label class="settings-field">
               <span>Sounds like (optional)</span>
               <input id="settingsNameSpoken" type="text" maxlength="30" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="e.g. Shi-vawn" />
@@ -1043,6 +1047,30 @@
           <button id="settingsClose" class="settings-close" type="button" aria-label="Done">✅ Done</button>
         </div>
       </div>
+      <div class="settings-body play-stats" id="playStats" aria-hidden="true">
+        <div class="play-stats-ranges" role="group" aria-label="Time range">
+          <button id="playRangeToday" type="button" aria-pressed="true" aria-label="Today">Today</button>
+          <button id="playRangeWeek" type="button" aria-pressed="false" aria-label="7 days">7 days</button>
+          <button id="playRangeAll" type="button" aria-pressed="false" aria-label="All time">All time</button>
+        </div>
+        <div id="playStatsSummary" class="play-stats-summary"></div>
+        <div class="play-stats-sort" role="group" aria-label="Sort games">
+          <button id="playSortTime" type="button" aria-pressed="true" aria-label="By time">By time</button>
+          <button id="playSortPlays" type="button" aria-pressed="false" aria-label="By plays">By plays</button>
+        </div>
+        <h3>Games</h3>
+        <div id="playStatsGames"></div>
+        <h3>Recent sessions</h3>
+        <div id="playStatsSessions"></div>
+        <p class="settings-hint">Screen locks and leaving the app are not counted.</p>
+        <p id="playStatsStatus" class="settings-hint" role="status" aria-live="polite"></p>
+        <textarea id="playStatsJson" class="play-stats-json" readonly hidden aria-label="Play stats JSON"></textarea>
+        <div class="settings-actions">
+          <button id="playStatsCopy" class="settings-tips" type="button" aria-label="Copy stats">Copy stats</button>
+          <button id="playStatsReset" class="settings-reset" type="button" aria-label="Reset play stats">Reset play stats</button>
+          <button id="playStatsBack" class="settings-close" type="button" aria-label="Back to settings">Back to settings</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1051,6 +1079,7 @@
   <script src="lib/storage.js"></script>
   <script src="lib/achievements.js"></script>
   <script src="lib/tutorial.js"></script>
+  <script src="lib/playlog.js"></script>
   <script src="app.js"></script>
   <script src="lib/pokemon.js"></script>
   <script src="games/pop.js"></script>

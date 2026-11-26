@@ -287,6 +287,7 @@
   function setMode(m, area) {
     clearNext();
     mode = m;
+    if (L.noteMode) L.noteMode(m);
     score = 0;
     streak = 0;
     lastTarget = null;

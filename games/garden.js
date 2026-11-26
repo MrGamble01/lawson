@@ -9,41 +9,38 @@
   const L = window.Lawson;
 
   // ====================================================================
-  //  Plant catalogue — eight varieties, each with stem color, fruit
-  //  emoji, harvest line, and growth "speed" weight (some grow with
-  //  fewer waters than others, so picking is varied).
+  //  Plant catalogue — stem color, fruit emoji, and the harvest line.
   // ====================================================================
   const PLANTS = [
     { id: "strawberry", name: "strawberry", emoji: "🍓",
-      say: "Strawberries!", stem: "#2f9e44", fruitColor: "#fa5252", weight: 1 },
+      say: "Strawberries!", stem: "#2f9e44", fruitColor: "#fa5252" },
     { id: "tomato",     name: "tomato",     emoji: "🍅",
-      say: "Tomato!",      stem: "#2b8a3e", fruitColor: "#fa5252", weight: 1 },
+      say: "Tomato!",      stem: "#2b8a3e", fruitColor: "#fa5252" },
     { id: "carrot",     name: "carrot",     emoji: "🥕",
-      say: "Carrot!",      stem: "#37b24d", fruitColor: "#f76707", weight: 1 },
+      say: "Carrot!",      stem: "#37b24d", fruitColor: "#f76707" },
     { id: "sunflower",  name: "sunflower",  emoji: "🌻",
-      say: "Sunflower!",   stem: "#2f9e44", fruitColor: "#fab005", weight: 1 },
+      say: "Sunflower!",   stem: "#2f9e44", fruitColor: "#fab005" },
     { id: "tulip",      name: "tulip",      emoji: "🌷",
-      say: "Tulip!",       stem: "#37b24d", fruitColor: "#ff8ab0", weight: 1 },
+      say: "Tulip!",       stem: "#37b24d", fruitColor: "#ff8ab0" },
     { id: "pumpkin",    name: "pumpkin",    emoji: "🎃",
-      say: "Pumpkin!",     stem: "#40c057", fruitColor: "#f76707", weight: 1 },
+      say: "Pumpkin!",     stem: "#40c057", fruitColor: "#f76707" },
     { id: "pepper",     name: "pepper",     emoji: "🌶️",
-      say: "Pepper!",      stem: "#2b8a3e", fruitColor: "#fa5252", weight: 1 },
+      say: "Pepper!",      stem: "#2b8a3e", fruitColor: "#fa5252" },
     { id: "blueberry",  name: "blueberry",  emoji: "🫐",
-      say: "Blueberries!", stem: "#2f9e44", fruitColor: "#5c7cfa", weight: 1 },
+      say: "Blueberries!", stem: "#2f9e44", fruitColor: "#5c7cfa" },
     { id: "watermelon", name: "watermelon", emoji: "🍉",
-      say: "Watermelon!",  stem: "#2b8a3e", fruitColor: "#fa5252", weight: 1 },
+      say: "Watermelon!",  stem: "#2b8a3e", fruitColor: "#fa5252" },
     { id: "apple",      name: "apple",      emoji: "🍎",
-      say: "Apple!",       stem: "#2f9e44", fruitColor: "#fa5252", weight: 1 },
+      say: "Apple!",       stem: "#2f9e44", fruitColor: "#fa5252" },
     { id: "lemon",      name: "lemon",      emoji: "🍋",
-      say: "Lemon!",       stem: "#40c057", fruitColor: "#fab005", weight: 1 },
+      say: "Lemon!",       stem: "#40c057", fruitColor: "#fab005" },
     { id: "grapes",     name: "grapes",     emoji: "🍇",
-      say: "Grapes!",      stem: "#2b8a3e", fruitColor: "#7950f2", weight: 1 },
+      say: "Grapes!",      stem: "#2b8a3e", fruitColor: "#7950f2" },
   ];
 
   const POT_COUNT = 6;
   const WATER_COOLDOWN_MS = 700;
   const WATER_DROP_THROTTLE_MS = 65;
-  const GROW_STAGES = ["seed", "sprout", "young", "mature"];
 
   // Each pot transitions: empty → seeded → sprout → young → mature →
   // harvesting → empty. Growing happens via tryWater(); harvest only
@@ -70,7 +67,6 @@
   let lastWaterTime = 0;
   let waterDropTime = 0;
   let weatherTimer = null;
-  let rainTimer = null;
   let rainPieces = [];
   let dayTimer = null;
   let dayPhase = 0; // 0..3 sliding around the day
@@ -833,7 +829,6 @@
     clearPower();
     clearAllTimers();
     if (weatherTimer) { clearTimeout(weatherTimer); weatherTimer = null; }
-    if (rainTimer)    { clearTimeout(rainTimer); rainTimer = null; }
     if (dayTimer)     { clearInterval(dayTimer); dayTimer = null; }
     build();
     L.bumpBadge("gardenScoreVal", 0);
@@ -845,7 +840,6 @@
     clearPower();
     clearAllTimers();
     if (weatherTimer) { clearTimeout(weatherTimer); weatherTimer = null; }
-    if (rainTimer)    { clearTimeout(rainTimer); rainTimer = null; }
     if (dayTimer)     { clearInterval(dayTimer); dayTimer = null; }
     if (birdTimer)    { clearTimeout(birdTimer); birdTimer = null; }
     if (leafTimer)    { clearTimeout(leafTimer); leafTimer = null; }

@@ -250,6 +250,7 @@
 
   function setMode(m) {
     mode = m;
+    if (L.noteMode) L.noteMode(m);
     score = 0;
     themeIdx = -1;
     celebrated = false;

@@ -1113,6 +1113,30 @@ html.dark .hub-title {
   animation: targetBannerIn 0.4s var(--ease-spring, cubic-bezier(.34,1.56,.64,1));
 }
 .target-banner[hidden] { display: none; }
+/* Phones: the centered tab row used to run under the Home button and
+   off the right edge. Sit it below that chrome and share the width. */
+@media (max-width: 520px) {
+  .mode-tabs {
+    top: 84px;
+    left: 10px;
+    right: 10px;
+    transform: none;
+    width: auto;
+    justify-content: stretch;
+  }
+  .mode-tab {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 8px 4px;
+    white-space: nowrap;
+  }
+  .target-banner {
+    top: 148px;
+    max-width: calc(100% - 24px);
+    white-space: normal;
+    text-align: center;
+  }
+}
 @keyframes targetBannerIn {
   from { opacity: 0; transform: translate(-50%, -8px) scale(0.85); }
   to   { opacity: 1; transform: translateX(-50%) scale(1); }
@@ -2024,6 +2048,7 @@ html.dark .hub-title {
 .settings-tips.done { background: var(--c-brand-deep); color: #fff8ee; }
 /* Hide destructive/utility buttons during first-run onboarding. */
 .settings-overlay.onboarding .settings-tips { display: none; }
+.settings-overlay.onboarding #settingsPlayRow { display: none; }
 
 /* ---------- Settings volume slider ---------- */
 .settings-slider {
@@ -2061,6 +2086,124 @@ html.dark .hub-title {
 }
 .settings-reset:active,
 .settings-close:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.12); }
+
+/* Play stats: a second sheet inside Settings, not a kid-facing screen. */
+#playStats { display: none; }
+.settings-panel.is-stats #settingsForm { display: none; }
+.settings-panel.is-stats #playStats { display: block; }
+#settingsPlayRow { margin-bottom: 6px; }
+.play-stats-ranges,
+.play-stats-sort {
+  display: flex;
+  gap: 8px;
+}
+.play-stats-sort { margin-top: 4px; }
+.play-stats-ranges button,
+.play-stats-sort button {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: var(--tap-min);
+  border-radius: 999px;
+  border: 3px solid #c4a484;
+  background: #fffaf3;
+  color: #3a2a22;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 800;
+  padding: 8px 6px;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.play-stats-ranges button[aria-pressed="true"],
+.play-stats-sort button[aria-pressed="true"] {
+  background: #3d6b4f;
+  color: #fff8ee;
+  border-color: #2c5340;
+}
+.play-stats-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 12px 0 4px;
+}
+.play-stats-card {
+  background: #fffdf8;
+  border: 3px solid #c4a484;
+  border-radius: 16px;
+  padding: 10px 6px;
+  text-align: center;
+  min-width: 0;
+}
+.play-stats-card strong {
+  display: block;
+  font-size: 22px;
+  color: #3a2a22;
+  line-height: 1.15;
+}
+.play-stats-card span {
+  display: block;
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #5c4636;
+}
+.play-stats h3 {
+  margin: 16px 0 6px;
+  font-size: 18px;
+  color: #3a2a22;
+}
+.play-stats-game,
+.play-stats-mode,
+.play-stats-session-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+.play-stats-game,
+.play-stats-mode,
+.play-stats-session-head span:first-child { min-width: 0; }
+.play-stats-game span:last-child,
+.play-stats-mode span:last-child,
+.play-stats-session-head span:last-child {
+  flex: 0 0 auto;
+  text-align: right;
+}
+.play-stats-game {
+  padding: 10px 2px 4px;
+  font-weight: 800;
+  color: #3a2a22;
+  font-size: 17px;
+}
+.play-stats-mode {
+  padding: 3px 2px 3px 14px;
+  color: #5c4636;
+  font-size: 15px;
+  font-weight: 700;
+}
+.play-stats-session {
+  padding: 8px 0;
+  border-top: 2px solid #ead9c4;
+}
+.play-stats-session-head {
+  font-weight: 800;
+  color: #3a2a22;
+  font-size: 16px;
+}
+.play-stats-json {
+  width: 100%;
+  min-height: 140px;
+  margin-top: 8px;
+  border: 3px solid #c4a484;
+  border-radius: 12px;
+  font: 12px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: #2c2118;
+  background: #fffdf8;
+  padding: 8px;
+}
+.play-stats-json[hidden] { display: none !important; }
+#playStatsJson:not([hidden]) { display: block; }
 
 /* ---------- Settings toggle switches ---------- */
 .settings-toggle {
@@ -2661,7 +2804,7 @@ html.dark .hub-title {
 }
 .find-prompt {
   position: absolute;
-  top: 104px;
+  top: 124px;
   left: 50%;
   transform: translateX(-50%);
   background: #fff;
@@ -2685,9 +2828,20 @@ html.dark .hub-title {
   position: relative;
   width: 100%;
   flex: 1;
-  margin-top: 160px;
+  margin-top: 180px;
   margin-bottom: 10px;
   max-width: 900px;
+}
+@media (max-width: 520px) {
+  /* The mode tabs drop below Home on a phone, so the prompt and the
+     picture move down with them instead of sitting on the tabs. */
+  .find-prompt {
+    top: 148px;
+    white-space: normal;
+    text-align: center;
+    justify-content: center;
+  }
+  .find-stage { margin-top: 210px; }
 }
 .find-item {
   position: absolute;

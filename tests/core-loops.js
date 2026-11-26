@@ -399,12 +399,14 @@ async function doodleGame(page) {
   await page.evaluate(() => {
     const c = document.getElementById("doodleCanvas");
     const r = c.getBoundingClientRect();
-    const fire = (type, x, y) => c.dispatchEvent(new MouseEvent(type, {
-      bubbles: true, cancelable: true, clientX: x, clientY: y, button: 0, buttons: 1,
+    // Doodle listens for pointer events. A plain mouse event never reaches the canvas.
+    const fire = (type, x, y) => c.dispatchEvent(new PointerEvent(type, {
+      bubbles: true, cancelable: true, clientX: x, clientY: y,
+      button: 0, buttons: 1, pointerId: 1, pointerType: "mouse",
     }));
-    fire("mousedown", r.left + 30, r.top + 30);
-    fire("mousemove", r.left + 90, r.top + 70);
-    fire("mouseup", r.left + 90, r.top + 70);
+    fire("pointerdown", r.left + 30, r.top + 30);
+    fire("pointermove", r.left + 90, r.top + 70);
+    fire("pointerup", r.left + 90, r.top + 70);
   });
   const ink = await page.evaluate(() => {
     const c = document.getElementById("doodleCanvas");

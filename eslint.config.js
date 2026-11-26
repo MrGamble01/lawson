@@ -52,6 +52,10 @@ module.exports = [
     rules,
   },
   {
+    files: ["app.js"],
+    languageOptions: { globals: { LawsonPlay: "readonly" } },
+  },
+  {
     files: ["lib/tts-voices.js"],
     languageOptions: { globals: { module: "writable" } },
   },

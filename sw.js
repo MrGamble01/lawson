@@ -22,6 +22,7 @@ const ASSETS = [
   "./lib/storage.js",
   "./lib/achievements.js",
   "./lib/tutorial.js",
+  "./lib/playlog.js",
   "./lib/pokemon.js",
   "./games/pop.js",
   "./games/piano.js",
