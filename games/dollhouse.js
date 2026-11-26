@@ -98,6 +98,10 @@
     if (!host) return;
     if (host.dataset.view !== view) delete host.dataset.done;
     host.dataset.view = view;
+    host.classList.remove("is-celebrate");
+    if (typeof L.prefersReducedMotion !== "function" || !L.prefersReducedMotion()) {
+      node.classList.add("dh-arrive");
+    }
     host.replaceChildren(node);
   }
   function finishRoom(id) {
@@ -114,8 +118,15 @@
     const host = document.getElementById("dollhouseStage");
     if (host) {
       host.dataset.done = id;
+      host.classList.remove("is-celebrate");
+      void host.offsetWidth;
+      host.classList.add("is-celebrate");
       const rect = host.getBoundingClientRect();
-      L.sparkleAt(rect.left + rect.width / 2, rect.top + rect.height * 0.35);
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height * 0.35;
+      L.sparkleAt(cx, cy);
+      L.sparkleAt(cx - 36, cy + 14);
+      L.sparkleAt(cx + 40, cy + 8);
     }
     L.happySound();
     Promise.resolve(L.say(room.done)).then(() => {

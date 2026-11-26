@@ -175,10 +175,17 @@ async function playPhone(page) {
     const el = document.getElementById("playStatsGames");
     return !!(el && el.textContent.includes("Dollhouse") && el.textContent.includes("Kitchen") && el.textContent.includes("Music Room"));
   });
+  const summaryText = await page.locator("#playStatsSummary").innerText();
   const gamesText = await page.locator("#playStatsGames").innerText();
   const sessionsText = await page.locator("#playStatsSessions").innerText();
+  if (!summaryText.includes("Today") || !summaryText.includes("7 days") || !summaryText.includes("All time")) {
+    throw new Error("play stats should compare today, 7 days, and all time: " + summaryText);
+  }
   if (!gamesText.includes("Dollhouse") || !gamesText.includes("Kitchen") || !gamesText.includes("Music Room")) {
     throw new Error("play stats view missing dollhouse time: " + gamesText);
+  }
+  if (!gamesText.includes("Favorite")) {
+    throw new Error("play stats should name a favorite: " + gamesText);
   }
   if (!/\d/.test(gamesText)) throw new Error("play stats should show a duration");
   if (!sessionsText.includes("Dollhouse") || !sessionsText.includes("Kitchen")) {
