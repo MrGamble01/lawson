@@ -1811,6 +1811,7 @@ document.addEventListener("touchmove", (e) => {
   let statsRange = "today";
   let statsSort = "time";
   let statsResetT = null;
+  let againKey = "";
 
   function press(id, on) {
     const btn = document.getElementById(id);
@@ -1953,6 +1954,113 @@ document.addEventListener("touchmove", (e) => {
       chart.appendChild(col);
     });
   }
+  function gameEmoji(id) {
+    const btn = document.querySelector('[data-go="' + id + '"]');
+    const mark = btn && btn.querySelector(".place-emoji, .emoji");
+    return mark ? mark.textContent.trim() : "";
+  }
+  function addPlayTarget(ids, id) {
+    if (!id || ids.length >= 3 || ids.indexOf(id) !== -1) return;
+    if (!document.querySelector('[data-go="' + id + '"]')) return;
+    ids.push(id);
+  }
+  function playAgainIds(snap) {
+    const miles = LawsonPlay.milestones(snap);
+    const ids = [];
+    addPlayTarget(ids, miles.favorite);
+    LawsonPlay.recentGameIds(4).forEach((id) => addPlayTarget(ids, id));
+    return { ids: ids, favorite: miles.favorite || "" };
+  }
+  // Close the parent sheet, then open the game the same way its tile does.
+  // The settings entry has to pop first. Starting the game in that same
+  // turn would push a state the pop then throws away.
+  function launchGame(id) {
+    const btn = document.querySelector('[data-go="' + id + '"]');
+    if (!btn) return;
+    hideStats({ silent: true });
+    if (nameSpokenInput) setSpokenName(KID_NAME, nameSpokenInput.value);
+    setKidName(nameInput.value);
+    const start = () => btn.click();
+    if (settingsPushed && history.state && history.state.settings) {
+      settingsPushed = false;
+      overlay.classList.remove("open");
+      overlay.classList.remove("onboarding");
+      overlay.setAttribute("aria-hidden", "true");
+      setBackgroundInert(false);
+      returnFocusTo = null;
+      const once = () => { window.removeEventListener("popstate", once); start(); };
+      window.addEventListener("popstate", once);
+      try { history.back(); } catch (_) { start(); }
+      return;
+    }
+    overlay.classList.remove("open");
+    overlay.classList.remove("onboarding");
+    overlay.setAttribute("aria-hidden", "true");
+    setBackgroundInert(false);
+    returnFocusTo = null;
+    start();
+  }
+  function renderMilestones(snap) {
+    const host = document.getElementById("playStatsMilestones");
+    if (!host) return;
+    const miles = LawsonPlay.milestones(snap);
+    const badges = [];
+    if (miles.firstGame) badges.push(["First game", "First game"]);
+    if (miles.fiveGames) badges.push(["5 games", "Five games"]);
+    if (miles.allRooms) badges.push(["All rooms", "All Dollhouse rooms"]);
+    if (miles.favorite) {
+      const title = gameTitle(miles.favorite);
+      badges.push([title, "Favorite game, " + title]);
+    }
+    host.replaceChildren();
+    if (!badges.length) { host.hidden = true; return; }
+    host.hidden = false;
+    badges.forEach((pair) => {
+      const pill = document.createElement("span");
+      pill.className = "play-milestone";
+      pill.textContent = pair[0];
+      pill.setAttribute("role", "img");
+      pill.setAttribute("aria-label", pair[1]);
+      host.appendChild(pill);
+    });
+  }
+  function renderPlayAgain(snap) {
+    const host = document.getElementById("playAgain");
+    const heading = document.getElementById("playAgainHeading");
+    if (!host || !heading) return;
+    const plan = playAgainIds(snap);
+    const key = plan.ids.join("|") + "#" + plan.favorite;
+    if (key === againKey && host.childElementCount === plan.ids.length) return;
+    againKey = key;
+    host.replaceChildren();
+    if (!plan.ids.length) {
+      host.hidden = true;
+      heading.hidden = true;
+      return;
+    }
+    host.hidden = false;
+    heading.hidden = false;
+    plan.ids.forEach((id) => {
+      const title = gameTitle(id);
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "play-again-btn" + (id === plan.favorite ? " is-favorite" : "");
+      const fav = id === plan.favorite ? ", favorite" : "";
+      btn.setAttribute("aria-label", "Play " + title + " again" + fav);
+      const emoji = gameEmoji(id);
+      if (emoji) {
+        const span = document.createElement("span");
+        span.setAttribute("aria-hidden", "true");
+        span.textContent = emoji;
+        btn.appendChild(span);
+      }
+      const name = document.createElement("span");
+      name.textContent = title;
+      btn.appendChild(name);
+      onTap(btn, () => launchGame(id));
+      host.appendChild(btn);
+    });
+  }
   function renderPlayStats() {
     const summary = document.getElementById("playStatsSummary");
     const gamesEl = document.getElementById("playStatsGames");
@@ -1969,6 +2077,8 @@ document.addEventListener("touchmove", (e) => {
     statCard(summary, "Today", formatDuration(today.ms), rangeDetail(today));
     statCard(summary, "7 days", formatDuration(week.ms), rangeDetail(week));
     statCard(summary, "All time", formatDuration(all.ms), rangeDetail(all));
+    renderMilestones(snap);
+    renderPlayAgain(snap);
     renderRhythm(snap.days);
 
     const games = (range.games || []).slice().sort((a, b) => {
@@ -2055,6 +2165,7 @@ document.addEventListener("touchmove", (e) => {
       reset.textContent = "Clear play stats";
       reset.setAttribute("aria-label", "Clear play stats");
     }
+    againKey = "";
     renderPlayStats();
     clearInterval(statsTimer);
     statsTimer = setInterval(renderPlayStats, 1000);
