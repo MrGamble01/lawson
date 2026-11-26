@@ -155,6 +155,7 @@
   function applyScene(silent) {
     const bg = $("sceneBg");
     const scene = SCENES[sceneIdx % SCENES.length];
+    if (scene && L.noteMode) L.noteMode(scene.label);
     if (bg) {
       bg.style.background = scene.bg;
       bg.dataset.scene = scene.id;
@@ -450,6 +451,7 @@
   function start() {
     placed = [];
     sceneIdx = 0;
+    if (L.noteMode && SCENES[0]) L.noteMode(SCENES[0].label);
     clearAll();
     build();
     // Bring back the kid's saved scene if there is one; otherwise name

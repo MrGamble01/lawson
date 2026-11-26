@@ -7,8 +7,17 @@ const html = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8');
 const labels = {
   settingsVoicePreview: 'Listen to this voice',
   settingsTips: 'Show tips again',
+  settingsPlay: 'Play stats',
   settingsReset: 'Reset scores',
   settingsClose: 'Done',
+  playRangeToday: 'Today',
+  playRangeWeek: '7 days',
+  playRangeAll: 'All time',
+  playSortTime: 'By time',
+  playSortPlays: 'By plays',
+  playStatsCopy: 'Copy stats',
+  playStatsReset: 'Reset play stats',
+  playStatsBack: 'Back to settings',
 };
 
 for (const [id, label] of Object.entries(labels)) {

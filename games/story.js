@@ -334,6 +334,7 @@
 
   function renderPage() {
     const story = STORIES[storyIdx];
+    if (story && L.noteMode) L.noteMode(story.title);
     const page = story.pages[pageIdx];
     const stage = document.getElementById("storyStage");
     const txt = document.getElementById("storyText");
@@ -522,6 +523,7 @@
     if (storyIdx < 0) storyIdx = 0;
     pageIdx = 0;
     active = true;
+    if (STORIES[storyIdx] && L.noteMode) L.noteMode(STORIES[storyIdx].title);
     const words = document.getElementById("storyText");
     if (words && !words.getAttribute("aria-live")) words.setAttribute("aria-live", "polite");
     const screen = document.getElementById("storyGame");

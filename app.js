@@ -958,6 +958,7 @@ window.Lawson = {
   say, sayPrompt, preloadSpeech, cancelPromptRepeat, cancelSpeech, speechDone, afterSpeech, speechLog, speechStats, setSpeechSpeed, getSpeechSpeed, setSpokenName, getSpokenName, setTtsVoice, getTtsVoice, beep, happySound, buzzSound, haptic, sparkleAt, onTap, onTapOnce, pointOf, bumpBadge, show,
   audioCtx, unlockAudio, masterGain, setVolume, getVolume, isAudioHidden,
   getHighScore, setHighScore, bumpHighScore, tryNewHighScore,
+  noteMode(mode) { try { LawsonPlay.setMode(mode); } catch (_) {} },
   setVoiceMuted, setSoundMuted, isVoiceMuted, isSoundMuted,
   setMusicEnabled, isMusicEnabled, startMusic, stopMusic, isMusicDucked,
   earnSticker, isStickerEarned, listStickers, resetStickers,
@@ -982,10 +983,57 @@ function leaveHere() { _here += 1; }
 
 // ---------- Routing ----------
 let activeGame = null;
+function trackEnter(id, mode) {
+  try { if (id) LawsonPlay.enter(id, mode || ""); } catch (_) {}
+}
+function activeMode(screenId) {
+  try {
+    const screen = document.getElementById(screenId);
+    if (!screen) return "";
+    const tab = screen.querySelector(".mode-tab.active[data-mode]");
+    return tab ? (tab.dataset.mode || "") : "";
+  } catch (_) { return ""; }
+}
+function trackLeave() {
+  try { LawsonPlay.leave(); } catch (_) {}
+}
+function trackModeFromScreen(screenId) {
+  try {
+    const screen = document.getElementById(screenId);
+    if (!screen) return;
+    const tab = screen.querySelector(".mode-tab.active[data-mode]");
+    if (tab) LawsonPlay.setMode(tab.dataset.mode || "");
+  } catch (_) {}
+}
+function gameKey(game) {
+  const games = window.Lawson && window.Lawson.games;
+  if (!games) return "";
+  for (const k in games) if (games[k] === game) return k;
+  return "";
+}
+function beginGame(game, push) {
+  show(game.screen);
+  if (push) pushScreenState(game.screen);
+  // The active tab is the mode the kid is about to play. Passing it
+  // here means a slow start() does not leave a modeless slice behind.
+  trackEnter(gameKey(game), activeMode(game.screen));
+  activeGame = game;
+  game.start();
+  trackModeFromScreen(game.screen);
+}
+function beginActivity(name, push) {
+  const activity = document.getElementById("activity");
+  if (activity) activity.setAttribute("aria-label", name.charAt(0).toUpperCase() + name.slice(1));
+  show("activity");
+  if (push) pushScreenState("activity", { activity: name });
+  buildFlashcards(name);
+  trackEnter(name);
+}
 function leaveActiveGame() {
   if (activeGame && typeof activeGame.stop === "function") activeGame.stop();
   activeGame = null;
   leaveHere();
+  trackLeave();
 }
 
 // ---------- Back button / swipe-back / Escape = step back in the app ----------
@@ -1011,12 +1059,9 @@ function navigateTo(state) {
   cancelSpeech();
   const game = Object.values(window.Lawson.games).find((g) => g && g.screen === id);
   if (game) {
-    show(id);
-    activeGame = game;
-    game.start();
+    beginGame(game, false);
   } else if (id === "activity" && state && ACTIVITIES[state.activity]) {
-    show("activity");
-    buildFlashcards(state.activity);
+    beginActivity(state.activity, false);
   } else if (document.getElementById(id)) {
     show(id);
   } else {
@@ -1220,21 +1265,22 @@ document.querySelectorAll("[data-go]").forEach((btn) => {
 
     const game = window.Lawson.games[where];
     if (game) {
-      show(game.screen);
-      pushScreenState(game.screen);
-      activeGame = game;
-      game.start();
+      beginGame(game, true);
       return;
     }
 
-    if (ACTIVITIES[where]) {
-      const activity = document.getElementById("activity");
-      if (activity) activity.setAttribute("aria-label", where.charAt(0).toUpperCase() + where.slice(1));
-      show("activity");
-      pushScreenState("activity", { activity: where });
-      buildFlashcards(where);
-    }
+    if (ACTIVITIES[where]) beginActivity(where, true);
   });
+});
+
+// Mode tabs (Pop, Find It, and any later game that uses them) split the
+// visit as soon as the tab is chosen. The game's own handler still runs.
+document.addEventListener("click", (e) => {
+  const tab = e.target && e.target.closest && e.target.closest(".mode-tab");
+  if (!tab || !activeGame) return;
+  const screen = document.getElementById(activeGame.screen);
+  if (!screen || !screen.contains(tab)) return;
+  try { LawsonPlay.setMode(tab.dataset.mode || ""); } catch (_) {}
 });
 
 document.querySelectorAll("[data-home]").forEach((btn) => {
@@ -1635,7 +1681,11 @@ document.addEventListener("touchmove", (e) => {
     }
   });
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && overlay.classList.contains("open")) { e.preventDefault(); close(); }
+    if (e.key === "Escape" && overlay.classList.contains("open")) {
+      e.preventDefault();
+      if (panel.classList.contains("is-stats")) hideStats();
+      else close();
+    }
   });
 
   let settingsPushed = false;
@@ -1664,6 +1714,7 @@ document.addEventListener("touchmove", (e) => {
     resetBtn.classList.remove("confirming");
     if (tipsBtn) tipsBtn.textContent = "💡 Show tips again";
     closeBtn.textContent = onboarding ? "✨ Let's play!" : "✅ Done";
+    hideStats({ silent: true });
     overlay.classList.toggle("onboarding", onboarding);
     overlay.classList.add("open");
     overlay.setAttribute("aria-hidden", "false");
@@ -1674,6 +1725,7 @@ document.addEventListener("touchmove", (e) => {
   }
   function close(opts) {
     if (!overlay.classList.contains("open")) return;
+    hideStats({ silent: true });
     if (nameSpokenInput) setSpokenName(KID_NAME, nameSpokenInput.value);
     if (settingsPushed) {
       settingsPushed = false;
@@ -1741,6 +1793,251 @@ document.addEventListener("touchmove", (e) => {
 
   // Submit on Enter, in case a parent prefers the keyboard.
   nameInput.addEventListener("keydown", (e) => { if (e.key === "Enter") close(); });
+
+  // Play stats stays inside Settings: the gear is the parent gate, and
+  // this view is one more step in, so it isn't a tile on the kid's menu.
+  const playBtn = document.getElementById("settingsPlay");
+  let statsTimer = null;
+  let statsRange = "today";
+  let statsSort = "time";
+  let statsResetT = null;
+
+  function press(id, on) {
+    const btn = document.getElementById(id);
+    if (btn) btn.setAttribute("aria-pressed", on ? "true" : "false");
+  }
+  function formatDuration(ms) {
+    const s = Math.max(0, Math.round((ms || 0) / 1000));
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    if (h > 0) return m ? h + "h " + m + "m" : h + "h";
+    if (m > 0) return sec ? m + "m " + sec + "s" : m + "m";
+    return sec + "s";
+  }
+  function formatClock(ts) {
+    try {
+      return new Date(ts).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+    } catch (_) { return ""; }
+  }
+  function formatDay(ts) {
+    const d = new Date(ts);
+    const start = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    const today = new Date();
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+    const diff = Math.round((todayStart - start) / 86400000);
+    if (diff === 0) return "Today";
+    if (diff === 1) return "Yesterday";
+    try { return d.toLocaleDateString(undefined, { month: "short", day: "numeric" }); }
+    catch (_) { return ""; }
+  }
+  function gameTitle(id) {
+    const btn = document.querySelector('[data-go="' + id + '"]');
+    const label = btn && btn.querySelector(".place-label, .label");
+    const text = label ? label.textContent.trim() : "";
+    return text || id;
+  }
+  function modeTitle(mode) {
+    if (!mode) return "";
+    if (mode === "free") return "Free";
+    if (mode === "letters") return "ABC";
+    if (mode === "numbers") return "123";
+    return mode;
+  }
+  function addRow(parent, className, left, right) {
+    const row = document.createElement("div");
+    row.className = className;
+    const name = document.createElement("span");
+    name.textContent = left;
+    const meta = document.createElement("span");
+    meta.textContent = right;
+    row.append(name, meta);
+    parent.appendChild(row);
+  }
+  function renderPlayStats() {
+    const summary = document.getElementById("playStatsSummary");
+    const gamesEl = document.getElementById("playStatsGames");
+    const sessionsEl = document.getElementById("playStatsSessions");
+    if (!summary || !gamesEl || !sessionsEl) return;
+    let snap;
+    try { snap = LawsonPlay.snapshot(); } catch (_) { return; }
+    const range = (snap.ranges && snap.ranges[statsRange]) || { ms: 0, plays: 0, sessions: 0, games: [] };
+    summary.replaceChildren();
+    [
+      [formatDuration(range.ms), "in the app"],
+      [String(range.sessions || 0), range.sessions === 1 ? "session" : "sessions"],
+      [String(range.plays || 0), range.plays === 1 ? "play" : "plays"],
+    ].forEach(([value, label]) => {
+      const card = document.createElement("div");
+      card.className = "play-stats-card";
+      const strong = document.createElement("strong");
+      strong.textContent = value;
+      const span = document.createElement("span");
+      span.textContent = label;
+      card.append(strong, span);
+      summary.appendChild(card);
+    });
+
+    const games = (range.games || []).slice().sort((a, b) => {
+      if (statsSort === "plays") return (b.plays || 0) - (a.plays || 0) || (b.ms || 0) - (a.ms || 0);
+      return (b.ms || 0) - (a.ms || 0) || (b.plays || 0) - (a.plays || 0);
+    });
+    gamesEl.replaceChildren();
+    if (!games.length) {
+      const empty = document.createElement("p");
+      empty.className = "settings-hint";
+      empty.textContent = "No games in this range yet.";
+      gamesEl.appendChild(empty);
+    }
+    games.forEach((g) => {
+      const plays = g.plays === 1 ? "1 play" : (g.plays || 0) + " plays";
+      addRow(gamesEl, "play-stats-game", gameTitle(g.id), formatDuration(g.ms) + " · " + plays);
+      (g.modes || []).slice().sort((a, b) => {
+        if (statsSort === "plays") return (b.plays || 0) - (a.plays || 0) || (b.ms || 0) - (a.ms || 0);
+        return (b.ms || 0) - (a.ms || 0) || (b.plays || 0) - (a.plays || 0);
+      }).forEach((m) => {
+        const modePlays = m.plays === 1 ? "1 play" : (m.plays || 0) + " plays";
+        addRow(gamesEl, "play-stats-mode", modeTitle(m.id), formatDuration(m.ms) + " · " + modePlays);
+      });
+    });
+
+    sessionsEl.replaceChildren();
+    const recent = snap.recent || [];
+    if (!recent.length) {
+      const empty = document.createElement("p");
+      empty.className = "settings-hint";
+      empty.textContent = "No sessions yet.";
+      sessionsEl.appendChild(empty);
+    }
+    recent.forEach((s) => {
+      const block = document.createElement("div");
+      block.className = "play-stats-session";
+      const when = formatDay(s.start) + ", " + formatClock(s.start) + "–" + (s.live ? "now" : formatClock(s.end));
+      addRow(block, "play-stats-session-head", when, formatDuration(s.ms));
+      if (!s.plays || !s.plays.length) {
+        const none = document.createElement("p");
+        none.className = "play-stats-mode";
+        none.textContent = "Home and hubs";
+        block.appendChild(none);
+      } else {
+        s.plays.forEach((p) => {
+          const label = modeTitle(p.mode) ? gameTitle(p.game) + " · " + modeTitle(p.mode) : gameTitle(p.game);
+          addRow(block, "play-stats-mode", label, formatDuration(p.ms));
+        });
+      }
+      sessionsEl.appendChild(block);
+    });
+  }
+  function showStats() {
+    statsRange = "today";
+    statsSort = "time";
+    press("playRangeToday", true);
+    press("playRangeWeek", false);
+    press("playRangeAll", false);
+    press("playSortTime", true);
+    press("playSortPlays", false);
+    panel.classList.add("is-stats");
+    const stats = document.getElementById("playStats");
+    const form = document.getElementById("settingsForm");
+    if (stats) stats.setAttribute("aria-hidden", "false");
+    if (form) form.setAttribute("aria-hidden", "true");
+    const title = document.getElementById("settingsTitle");
+    if (title) title.textContent = "Play stats";
+    const status = document.getElementById("playStatsStatus");
+    if (status) status.textContent = "";
+    const json = document.getElementById("playStatsJson");
+    if (json) { json.value = ""; json.hidden = true; }
+    const reset = document.getElementById("playStatsReset");
+    if (reset) {
+      reset.classList.remove("confirming");
+      reset.textContent = "Reset play stats";
+      reset.setAttribute("aria-label", "Reset play stats");
+    }
+    renderPlayStats();
+    clearInterval(statsTimer);
+    statsTimer = setInterval(renderPlayStats, 1000);
+    const today = document.getElementById("playRangeToday");
+    if (today) { try { today.focus({ preventScroll: true }); } catch (_) {} }
+  }
+  function hideStats(opts) {
+    clearInterval(statsTimer);
+    statsTimer = null;
+    clearTimeout(statsResetT);
+    panel.classList.remove("is-stats");
+    const stats = document.getElementById("playStats");
+    const form = document.getElementById("settingsForm");
+    if (stats) stats.setAttribute("aria-hidden", "true");
+    if (form) form.removeAttribute("aria-hidden");
+    const title = document.getElementById("settingsTitle");
+    if (title) title.textContent = "Settings";
+    const json = document.getElementById("playStatsJson");
+    if (json) { json.value = ""; json.hidden = true; }
+    if (!(opts && opts.silent) && playBtn && overlay.classList.contains("open")) {
+      try { playBtn.focus({ preventScroll: true }); } catch (_) {}
+    }
+  }
+  if (playBtn) onTap(playBtn, showStats);
+  const backStats = document.getElementById("playStatsBack");
+  if (backStats) onTap(backStats, () => hideStats());
+  [["playRangeToday", "today"], ["playRangeWeek", "week"], ["playRangeAll", "all"]].forEach(([id, range]) => {
+    const btn = document.getElementById(id);
+    if (btn) onTap(btn, () => {
+      statsRange = range;
+      press("playRangeToday", range === "today");
+      press("playRangeWeek", range === "week");
+      press("playRangeAll", range === "all");
+      renderPlayStats();
+    });
+  });
+  [["playSortTime", "time"], ["playSortPlays", "plays"]].forEach(([id, sort]) => {
+    const btn = document.getElementById(id);
+    if (btn) onTap(btn, () => {
+      statsSort = sort;
+      press("playSortTime", sort === "time");
+      press("playSortPlays", sort === "plays");
+      renderPlayStats();
+    });
+  });
+  const copyBtn = document.getElementById("playStatsCopy");
+  if (copyBtn) onTap(copyBtn, () => {
+    let json = "{}";
+    try { json = LawsonPlay.exportJson(); } catch (_) {}
+    const status = document.getElementById("playStatsStatus");
+    const box = document.getElementById("playStatsJson");
+    const done = () => { if (status) status.textContent = "Copied."; };
+    const showBox = () => {
+      if (box) { box.hidden = false; box.value = json; try { box.focus(); box.select(); } catch (_) {} }
+      if (status) status.textContent = "Select the text below to copy it.";
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(json).then(done, showBox);
+    } else showBox();
+  });
+  const playReset = document.getElementById("playStatsReset");
+  if (playReset) onTap(playReset, () => {
+    if (playReset.classList.contains("confirming")) {
+      clearTimeout(statsResetT);
+      try { LawsonPlay.reset(); } catch (_) {}
+      playReset.classList.remove("confirming");
+      playReset.textContent = "Cleared";
+      playReset.setAttribute("aria-label", "Reset play stats");
+      const status = document.getElementById("playStatsStatus");
+      if (status) status.textContent = "Play stats cleared. Scores and stickers are still there.";
+      happySound();
+      renderPlayStats();
+      setTimeout(() => { playReset.textContent = "Reset play stats"; }, 1400);
+    } else {
+      playReset.classList.add("confirming");
+      playReset.textContent = "Tap again to confirm";
+      playReset.setAttribute("aria-label", "Tap again to confirm");
+      buzzSound();
+      statsResetT = setTimeout(() => {
+        playReset.classList.remove("confirming");
+        playReset.textContent = "Reset play stats";
+        playReset.setAttribute("aria-label", "Reset play stats");
+      }, 4000);
+    }
+  });
 })();
 
 // ---------- Service worker (offline play) ----------
@@ -1752,3 +2049,5 @@ if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./sw.js").catch(() => {});
   });
 }
+
+try { LawsonPlay.bind(); } catch (_) {}

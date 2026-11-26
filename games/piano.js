@@ -284,6 +284,7 @@
     songTimeouts = [];
     const btn = document.getElementById("pianoSong");
     if (btn) { btn.classList.remove("playing"); btn.setAttribute("aria-pressed", "false"); btn.setAttribute("aria-label", "Play song"); }
+    if (L.noteMode) L.noteMode("Free play");
   }
 
   function scheduleNotes(song, beat) {
@@ -308,6 +309,7 @@
     songIndex += 1;
     const beat = 60 / song.bpm; // seconds per beat
     L.say(song.name);
+    if (L.noteMode) L.noteMode(song.name);
     // The name follows the toggle too: pressed tracks playback; the label names the next action.
     const btn = document.getElementById("pianoSong");
     if (btn) { btn.classList.add("playing"); btn.setAttribute("aria-pressed", "true"); btn.setAttribute("aria-label", "Stop song"); }
@@ -317,6 +319,7 @@
   }
 
   function start() {
+    if (L.noteMode) L.noteMode("Free play");
     build();
     const songBtn = document.getElementById("pianoSong");
     songBtn.setAttribute("aria-pressed", "false");

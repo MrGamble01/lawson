@@ -225,6 +225,7 @@
     const btn = $("musicSong");
     if (btn) { btn.classList.add("playing"); btn.setAttribute("aria-pressed", "true"); btn.setAttribute("aria-label", "Stop song"); }
     L.say(song.name);
+    if (L.noteMode) L.noteMode(song.name);
     // First note once the name has been heard (never sooner than the old
     // 400 ms lead, so a muted voice feels the same).
     const beat = 60 / song.bpm;
@@ -237,12 +238,14 @@
     songTimers = [];
     const btn = $("musicSong");
     if (btn) { btn.classList.remove("playing"); btn.setAttribute("aria-pressed", "false"); btn.setAttribute("aria-label", "Play song"); }
+    if (L.noteMode) L.noteMode("Free play");
   }
 
   // ====================================================================
   //  Lifecycle
   // ====================================================================
   function start() {
+    if (L.noteMode) L.noteMode("Free play");
     beatTotal = 0;
     celebrated = false;
     bestAtStart = L.getHighScore("musicBest");
