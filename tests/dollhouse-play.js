@@ -29,6 +29,8 @@ async function boot(browser, viewport) {
     document.querySelector(".welcome-toast")?.remove();
     window.Lawson.setVoiceMuted(true);
     window.Lawson.setSoundMuted(true);
+    window.__said = [];
+    window.addEventListener("lawson:say", (e) => window.__said.push(e.detail.text));
   });
   return { page, errors };
 }
@@ -81,6 +83,21 @@ async function playPhone(page) {
 
   await clickLabel(page, "Kitchen");
   await clickLabel(page, "Cake");
+  const cake = await page.evaluate(() => ({
+    pop: document.querySelector("#dollhouseStage button[aria-label='Cake']").classList.contains("is-pop"),
+    glints: document.querySelectorAll(".sparkle.dh-glint").length,
+    said: window.__said.filter((line) => line === "Cake").length,
+  }));
+  if (!cake.pop) throw new Error("cake should pop");
+  if (cake.glints < 1) throw new Error("cake should sparkle, got " + cake.glints);
+  if (cake.said < 1) throw new Error("cake should be spoken");
+  await clickLabel(page, "Cake");
+  const cakeAgain = await page.evaluate(() => ({
+    wiggle: document.querySelector("#dollhouseStage button[aria-label='Cake']").classList.contains("is-wiggle"),
+    said: window.__said.filter((line) => line === "Cake").length,
+  }));
+  if (!cakeAgain.wiggle) throw new Error("a second cake tap should wiggle");
+  if (cakeAgain.said !== cake.said) throw new Error("a repeat cake tap should stay quiet");
   await clickLabel(page, "Pink frosting");
   await clickLabel(page, "Strawberry");
   await fits(page, "phone kitchen");
@@ -110,6 +127,9 @@ async function playPhone(page) {
   await clickLabel(page, "Back to Dollhouse");
 
   await clickLabel(page, "Craft Room");
+  await clickLabel(page, "Whoopsies");
+  const whoops = await page.locator("#dollhouseStage button[aria-label='Whoopsies']").evaluate((el) => el.classList.contains("is-wiggle"));
+  if (!whoops) throw new Error("an empty Whoopsies should wiggle");
   await clickLabel(page, "Red paint");
   if (await page.locator(".dh-paper").getAttribute("data-marks") !== "1") throw new Error("paint should mark the paper");
   await clickLabel(page, "Whoopsies");
@@ -196,6 +216,25 @@ async function playPhone(page) {
     throw new Error("play stats should name a favorite: " + gamesText);
   }
   if (!/\d/.test(gamesText)) throw new Error("play stats should show a duration");
+  const badges = await page.locator(".play-milestone").allTextContents();
+  if (!badges.includes("First game")) throw new Error("missing first-game badge: " + badges.join(", "));
+  if (!badges.includes("All rooms")) throw new Error("missing all-rooms badge: " + badges.join(", "));
+  if (badges.includes("5 games")) throw new Error("one game should not earn five games: " + badges.join(", "));
+  if (!badges.includes("Dollhouse")) throw new Error("favorite badge should name Dollhouse: " + badges.join(", "));
+  const again = page.locator("#playAgain button");
+  if (await again.count() !== 1) throw new Error("play again should offer one game, got " + await again.count());
+  const againLabel = await again.first().getAttribute("aria-label");
+  if (againLabel !== "Play Dollhouse again, favorite") throw new Error("play again label: " + againLabel);
+  const saidBefore = await page.evaluate(() => window.__said.length);
+  await again.first().click();
+  await page.waitForFunction((n) => {
+    return window.__said.length > n && window.__said[window.__said.length - 1] === "Dollhouse!"
+      && !document.getElementById("settingsOverlay").classList.contains("open")
+      && document.getElementById("dollhouseGame").classList.contains("active");
+  }, saidBefore);
+  await page.locator("#settingsBtn").click();
+  await page.locator("#settingsPlay").click();
+  await page.locator("#playAgain button").first().waitFor();
   if (!sessionsText.includes("Dollhouse") || !sessionsText.includes("Kitchen")) {
     throw new Error("recent session missing dollhouse: " + sessionsText);
   }
@@ -221,9 +260,31 @@ async function playPhone(page) {
   });
   const wiped = await page.locator("#playStatsGames").innerText();
   if (wiped.includes("Dollhouse")) throw new Error("the second tap should clear play stats: " + wiped);
+  if (await page.locator("#playAgain button").count() !== 0) throw new Error("clearing stats should hide play again");
+  if (await page.locator(".play-milestone").count() !== 0) throw new Error("clearing stats should hide milestones");
   await page.locator("#playStatsBack").click();
   await page.locator("#settingsClose").click();
 
+  await page.locator("#dollhouseGame .home-btn").click();
+  await page.locator("#menu.screen.active").waitFor();
+  await page.evaluate(() => {
+    window.Lawson.setLessMotion(true);
+    document.querySelectorAll(".sparkle").forEach((el) => el.remove());
+    window.__said = [];
+  });
+  await page.locator("[data-go='dollhouse']").click();
+  await page.locator("#dollhouseStage[data-view='hub']").waitFor();
+  await page.locator("#dollhouseStage button[data-room='kitchen']").click();
+  await clickLabel(page, "Cake");
+  const quiet = await page.evaluate(() => ({
+    sparkles: document.querySelectorAll(".sparkle").length,
+    pop: document.querySelector("#dollhouseStage button[aria-label='Cake']").classList.contains("is-pop"),
+    said: window.__said.slice(),
+  }));
+  if (quiet.sparkles !== 0) throw new Error("less motion should skip dollhouse sparkles, got " + quiet.sparkles);
+  if (quiet.pop) throw new Error("less motion should skip the pop");
+  if (!quiet.said.includes("Cake")) throw new Error("less motion should still name the choice: " + quiet.said.join(", "));
+  await page.evaluate(() => window.Lawson.setLessMotion(false));
   await page.locator("#dollhouseGame .home-btn").click();
   await page.locator("#menu.screen.active").waitFor();
   if (ROOMS.length !== 7) throw new Error("room list drifted");

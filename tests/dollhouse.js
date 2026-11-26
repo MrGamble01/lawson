@@ -23,9 +23,15 @@ assert.match(game, /L\.games\.dollhouse\s*=/);
 assert.match(game, /L\.noteMode/);
 assert.match(game, /earnSticker\("gabbyCat"\)/);
 assert.match(game, /function cue/);
+assert.match(game, /function glint/);
+assert.match(game, /function delight/);
+assert.match(game, /function softSay/);
+assert.match(game, /is-wiggle/);
+assert.match(game, /dh-glint/);
 assert.match(game, /played today/);
 assert.match(game, /dh-today/);
 assert.match(game, /prefersReducedMotion/);
+assert.match(game, /motionOff\(\)/);
 for (const id of ["kitchen", "craft", "music", "bathroom", "garden", "playroom", "bedroom"]) {
   assert.ok(game.includes(id + ":"), "room cue for " + id);
 }

@@ -4,7 +4,10 @@
 // opens seven rooms. Each room is a Play Stats mode via L.noteMode, so
 // visits and time show up in the existing play log — there is no second
 // stats store. The hub marks a room played today from that log. Each
-// room's main tap has its own soft sound, and finishing one sparkles
+// room's main tap has its own soft sound. A new choice pops and leaves a
+// small sparkle; a repeat or a miss wiggles instead, so nothing feels
+// dead. A short word names a new choice, and only when another line is
+// not already being cut off by a faster tap. Finishing a room sparkles
 // unless motion is reduced. Finishing a room earns the Gabby Cat sticker.
 (function () {
   const L = window.Lawson;
@@ -23,6 +26,9 @@
   let gen = 0;
   let pending = [];
   let celebrated = false;
+  let popLabel = "";
+  let popKind = "";
+  let tapSaidAt = 0;
   const ears = { left: false, right: false };
 
   function note(mode) {
@@ -54,6 +60,8 @@
   }
   function cleanup() {
     gen += 1;
+    popLabel = "";
+    popKind = "";
     clearPending();
   }
   function arm(fn, opts) {
@@ -104,6 +112,64 @@
   function motionOff() {
     return typeof L.prefersReducedMotion === "function" && L.prefersReducedMotion();
   }
+  // A little burst, not the full cheer. Skipped when motion is reduced.
+  function glint(node) {
+    if (motionOff() || !node || typeof node.getBoundingClientRect !== "function") return;
+    const rect = node.getBoundingClientRect();
+    if (rect.width < 2 || rect.height < 2) return;
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+    ["✨", "⭐", "💫"].forEach((glyph, i) => {
+      const s = document.createElement("div");
+      s.className = "sparkle dh-glint";
+      s.setAttribute("aria-hidden", "true");
+      s.textContent = glyph;
+      s.style.left = x + "px";
+      s.style.top = y + "px";
+      const angle = -Math.PI / 2 + (i - 1) * 0.8;
+      const dist = 26 + i * 10;
+      s.style.setProperty("--dx", Math.cos(angle) * dist + "px");
+      s.style.setProperty("--dy", (Math.sin(angle) * dist - 8) + "px");
+      s.style.setProperty("--scale", "0.55");
+      s.style.setProperty("--rot", ((i - 1) * 24) + "deg");
+      document.body.appendChild(s);
+      let cancel;
+      const timer = setTimeout(() => {
+        s.remove();
+        const i = pending.indexOf(cancel);
+        if (i >= 0) pending.splice(i, 1);
+      }, 800);
+      cancel = () => { clearTimeout(timer); s.remove(); };
+      pending.push(cancel);
+    });
+  }
+  // One short word. A faster tap waits, so two lines never pile up.
+  function softSay(line) {
+    if (!line) return;
+    const now = Date.now();
+    if (now - tapSaidAt < 400) return;
+    tapSaidAt = now;
+    L.say(line);
+  }
+  // Pop a new choice, wiggle a repeat or a miss. The class is put back
+  // on after a room redraws, because redrawing replaces the button.
+  function delight(button, opts) {
+    opts = opts || {};
+    if (!button) return;
+    if (!motionOff()) {
+      const kind = opts.wiggle ? "is-wiggle" : "is-pop";
+      button.classList.remove("is-pop", "is-wiggle");
+      void button.offsetWidth;
+      button.classList.add(kind);
+      popLabel = button.getAttribute("aria-label") || "";
+      popKind = kind;
+    } else {
+      popLabel = "";
+      popKind = "";
+    }
+    if (opts.sparkle) glint(button);
+    if (opts.line) softSay(opts.line);
+  }
   function playedToday() {
     const found = new Set();
     try {
@@ -123,7 +189,7 @@
     button.setAttribute("aria-label", label);
     L.onTap(button, () => {
       try { L.haptic(8); } catch (_) {}
-      on();
+      on(button);
     });
     return button;
   }
@@ -137,6 +203,13 @@
       node.classList.add("dh-arrive");
     }
     host.replaceChildren(node);
+    if (popLabel && popKind && !motionOff()) {
+      node.querySelectorAll("button").forEach((btn) => {
+        if (btn.getAttribute("aria-label") === popLabel) btn.classList.add(popKind);
+      });
+    }
+    popLabel = "";
+    popKind = "";
   }
   function finishRoom(id) {
     if (celebrated) return;
@@ -182,7 +255,8 @@
     return button;
   }
   function backButton() {
-    const button = tap("Back to Dollhouse", "dh-back", () => {
+    const button = tap("Back to Dollhouse", "dh-back", (btn) => {
+      delight(btn, {});
       L.beep(520, 0.08, "triangle");
       openHub();
     });
@@ -200,7 +274,8 @@
     return button;
   }
 
-  function skipIntro() {
+  function skipIntro(button) {
+    delight(button, { sparkle: true });
     markSeen();
     openHub({ greet: true });
   }
@@ -212,9 +287,14 @@
     note("Hello");
     const view = el("div", "dh-view");
     view.append(text("p", "dh-kicker", "Meow-Meow"));
-    const box = tap("Open the Meow-Meow mailbox", "dh-hero", () => {
-      if (box.dataset.open === "yes") return;
+    const box = tap("Open the Meow-Meow mailbox", "dh-hero", (btn) => {
+      if (box.dataset.open === "yes") {
+        L.beep(520, 0.05, "triangle");
+        delight(btn, { wiggle: true });
+        return;
+      }
       box.dataset.open = "yes";
+      delight(btn, { sparkle: true });
       L.happySound();
       L.say("Meow meow! Come play!");
       arm(openEars, { minMs: 650 });
@@ -226,11 +306,16 @@
   }
 
   function pinch(side, button) {
-    if (ears[side]) return;
+    if (ears[side]) {
+      L.beep(side === "left" ? 500 : 620, 0.05, "triangle");
+      delight(button, { wiggle: true });
+      return;
+    }
     ears[side] = true;
     button.classList.add("is-on");
     button.setAttribute("aria-pressed", "true");
     L.beep(side === "left" ? 700 : 880, 0.08, "triangle");
+    delight(button, { sparkle: true });
     if (ears.left && ears.right) {
       L.happySound();
       L.say("Hee hee!");
@@ -261,9 +346,14 @@
     clearPending();
     note("Hello");
     const view = el("div", "dh-view");
-    const hug = tap("Pandy's hug attack", "dh-hero", () => {
-      if (hug.dataset.hug === "yes") return;
+    const hug = tap("Pandy's hug attack", "dh-hero", (btn) => {
+      if (hug.dataset.hug === "yes") {
+        L.beep(520, 0.05, "triangle");
+        delight(btn, { wiggle: true });
+        return;
+      }
       hug.dataset.hug = "yes";
+      delight(btn, { sparkle: true });
       L.happySound();
       L.say("Hug attack!");
       markSeen();
@@ -286,7 +376,10 @@
       const bits = [room.mode];
       if (finished) bits.push("all done");
       if (seen) bits.push("played today");
-      const door = tap(bits.join(", "), "dh-door" + (finished ? " is-done" : ""), () => openRoom(room.id));
+      const door = tap(bits.join(", "), "dh-door" + (finished ? " is-done" : ""), (btn) => {
+        delight(btn, { sparkle: true });
+        openRoom(room.id);
+      });
       door.dataset.room = room.id;
       if (seen) door.dataset.today = "yes";
       door.append(emoji(room.emoji), text("span", "dh-door-name", room.short));
@@ -300,7 +393,13 @@
     });
     const extra = el("div", "dh-hub-extra");
     const progress = load();
-    const cat = tap("CatRat's treasure", "dh-catrat" + (progress.catrat ? " is-found" : ""), () => {
+    const cat = tap("CatRat's treasure", "dh-catrat" + (progress.catrat ? " is-found" : ""), (btn) => {
+      if (cat.dataset.found === "yes") {
+        L.beep(660, 0.05, "triangle");
+        delight(btn, { wiggle: true });
+        return;
+      }
+      delight(btn, { sparkle: true });
       L.happySound();
       L.say("CatRat brought a treasure!");
       cat.dataset.found = "yes";
@@ -309,8 +408,6 @@
       const data = load();
       data.catrat = true;
       save(data);
-      const rect = cat.getBoundingClientRect();
-      L.sparkleAt(rect.left + rect.width / 2, rect.top + rect.height / 2);
     });
     cat.dataset.dh = "catrat";
     cat.append(emoji("🐭"), text("span", "dh-word", "CatRat"));
@@ -318,7 +415,8 @@
       cat.dataset.found = "yes";
       cat.append(gem());
     }
-    const hello = tap("Play the Hello again", "dh-replay", () => {
+    const hello = tap("Play the Hello again", "dh-replay", (btn) => {
+      delight(btn, { sparkle: true });
       L.beep(660, 0.06, "triangle");
       openMail();
     });
@@ -364,21 +462,26 @@
     ];
     let picked = { base: "", frost: "", top: "" };
     function ready() { return picked.base && picked.frost && picked.top; }
-    function choose(field, id) {
+    function choose(field, id, button) {
+      const fresh = picked[field] !== id;
       picked[field] = id;
+      const pools = { base: bases, frost: frosts, top: tops };
+      const item = pools[field].find((entry) => entry.id === id);
       cue("kitchen");
+      delight(button, fresh ? { sparkle: true, line: item.label } : { wiggle: true });
       render();
     }
-    function party() {
+    function party(button) {
       const cake = document.querySelector("#dollhouseStage .dh-cake");
       if (cake) cake.classList.add("is-party");
+      delight(button, { sparkle: true });
       if (!celebrated) finishRoom("kitchen");
       else L.beep(760, 0.08, "triangle");
     }
     function row(items, field) {
       const wrap = el("div", "dh-choices dh-row-3");
       items.forEach((item) => {
-        const button = choice(item.label, "dh-choice", picked[field] === item.id, () => choose(field, item.id));
+        const button = choice(item.label, "dh-choice", picked[field] === item.id, (btn) => choose(field, item.id, btn));
         button.append(emoji(item.emoji));
         wrap.append(button);
       });
@@ -396,6 +499,7 @@
         (tops.find((item) => item.id === picked.top) || { emoji: "" }).emoji,
       ].filter(Boolean);
       cake.textContent = bits.join(" ");
+      if (picked.base || picked.frost || picked.top) cake.classList.add("is-wiggle");
       const burst = tap("Sprinkle party", "dh-party", party);
       burst.append(emoji("🎉"), text("span", "dh-word", "Sprinkle party"));
       if (!ready()) burst.hidden = true;
@@ -422,16 +526,28 @@
     let stack = [];
     function has(kind) { return stack.some((mark) => mark.kind === kind); }
     function ready() { return has("paint") && has("glitter") && has("sticker") && has("shape"); }
-    function add(tool) {
+    function add(tool, button) {
       stack.push(tool);
-      render();
-      if (ready()) finishRoom("craft");
-      else cue("craft");
+      const finishing = ready();
+      if (finishing) {
+        delight(button, { sparkle: true });
+        render();
+        finishRoom("craft");
+      } else {
+        cue("craft");
+        delight(button, { sparkle: true, line: tool.label });
+        render();
+      }
     }
-    function undo() {
-      if (!stack.length) { L.buzzSound(); return; }
+    function undo(button) {
+      if (!stack.length) {
+        L.buzzSound();
+        delight(button, { wiggle: true });
+        return;
+      }
       stack.pop();
       L.beep(400, 0.06, "triangle");
+      delight(button, {});
       render();
     }
     function render() {
@@ -440,6 +556,7 @@
       const body = el("div", "dh-body");
       const paper = el("div", "dh-paper");
       paper.dataset.marks = String(stack.length);
+      if (stack.length) paper.classList.add("is-wiggle");
       stack.forEach((mark, index) => {
         const dot = el("span", "dh-mark" + (mark.color ? " is-paint" : ""));
         dot.setAttribute("aria-hidden", "true");
@@ -454,7 +571,7 @@
       });
       const grid = el("div", "dh-choices dh-row-4");
       tools.forEach((tool) => {
-        const button = tap(tool.label, "dh-choice", () => add(tool));
+        const button = tap(tool.label, "dh-choice", (btn) => add(tool, btn));
         if (tool.color) {
           const swatch = el("span", "dh-swatch");
           swatch.style.background = tool.color;
@@ -497,16 +614,18 @@
       { label: "Beat pad 4", freq: 330, type: "square", dur: 0.12, emoji: "🟥" },
     ];
     let hits = 0;
-    function play(note) {
+    function play(note, button) {
       cue("music", note);
       hits += 1;
+      const finishing = hits === 4;
+      delight(button, { sparkle: !finishing });
       render();
-      if (hits === 4) finishRoom("music");
+      if (finishing) finishRoom("music");
     }
     function bank(items, columns) {
       const wrap = el("div", "dh-choices dh-row-" + columns);
       items.forEach((item) => {
-        const button = tap(item.label, "dh-key", () => play(item));
+        const button = tap(item.label, "dh-key", (btn) => play(item, btn));
         button.append(emoji(item.emoji));
         wrap.append(button);
       });
@@ -528,18 +647,24 @@
 
   function makeBathroom() {
     const bottles = [
-      { id: "pink", label: "Pink bottle", color: "#ff8ab0", emoji: "🧴" },
-      { id: "blue", label: "Blue bottle", color: "#74c0fc", emoji: "🧴" },
-      { id: "gold", label: "Gold bottle", color: "#ffd43b", emoji: "🧴" },
+      { id: "pink", label: "Pink bottle", say: "Pink", color: "#ff8ab0", emoji: "🧴" },
+      { id: "blue", label: "Blue bottle", say: "Blue", color: "#74c0fc", emoji: "🧴" },
+      { id: "gold", label: "Gold bottle", say: "Gold", color: "#ffd43b", emoji: "🧴" },
     ];
     let poured = {};
-    function pour(id) {
-      if (poured[id]) { L.beep(300, 0.05, "triangle"); return; }
+    function pour(id, button) {
+      const item = bottles.find((entry) => entry.id === id);
+      if (poured[id]) {
+        L.beep(300, 0.05, "triangle");
+        delight(button, { wiggle: true });
+        return;
+      }
       poured[id] = true;
       cue("bathroom");
+      delight(button, { sparkle: true, line: item.say });
       render();
     }
-    function mix() {
+    function mix(button) {
       const tub = document.querySelector("#dollhouseStage .dh-tub");
       if (tub) {
         tub.classList.add("is-fizzy");
@@ -547,6 +672,7 @@
         bubbles.setAttribute("aria-hidden", "true");
         tub.append(bubbles);
       }
+      delight(button, { sparkle: true });
       finishRoom("bathroom");
     }
     function render() {
@@ -557,9 +683,10 @@
       tub.setAttribute("aria-hidden", "true");
       const colors = bottles.filter((item) => poured[item.id]).map((item) => item.color);
       tub.style.background = colors.length ? "linear-gradient(160deg, " + colors.join(", ") + ")" : "#e7f5ff";
+      if (colors.length) tub.classList.add("is-wiggle");
       const row = el("div", "dh-choices dh-row-3");
       bottles.forEach((item) => {
-        const button = choice(item.label, "dh-choice", !!poured[item.id], () => pour(item.id));
+        const button = choice(item.label, "dh-choice", !!poured[item.id], (btn) => pour(item.id, btn));
         const swatch = el("span", "dh-swatch");
         swatch.style.background = item.color;
         swatch.setAttribute("aria-hidden", "true");
@@ -578,34 +705,39 @@
 
   function makeGarden() {
     const flowers = [
-      { id: "rose", label: "Water the rose", emoji: "🌹" },
-      { id: "tulip", label: "Water the tulip", emoji: "🌷" },
-      { id: "daisy", label: "Water the daisy", emoji: "🌼" },
-      { id: "sun", label: "Water the sunflower", emoji: "🌻" },
+      { id: "rose", label: "Water the rose", say: "Rose", emoji: "🌹" },
+      { id: "tulip", label: "Water the tulip", say: "Tulip", emoji: "🌷" },
+      { id: "daisy", label: "Water the daisy", say: "Daisy", emoji: "🌼" },
+      { id: "sun", label: "Water the sunflower", say: "Sunflower", emoji: "🌻" },
     ];
     const stars = [
-      { id: "pink", label: "Tap the pink star", emoji: "🌟" },
-      { id: "gold", label: "Tap the gold star", emoji: "⭐" },
-      { id: "blue", label: "Tap the blue star", emoji: "✨" },
+      { id: "pink", label: "Tap the pink star", say: "Pink star", emoji: "🌟" },
+      { id: "gold", label: "Tap the gold star", say: "Gold star", emoji: "⭐" },
+      { id: "blue", label: "Tap the blue star", say: "Blue star", emoji: "✨" },
     ];
     let wet = {};
     let lit = {};
     function gardenReady() {
       return flowers.every((item) => wet[item.id]) && stars.every((item) => lit[item.id]);
     }
-    function water(id) {
-      if (wet[id]) { L.beep(400, 0.05, "triangle"); return; }
-      wet[id] = true;
-      render();
-      if (gardenReady()) finishRoom("garden");
-      else cue("garden");
-    }
-    function shine(id) {
-      if (lit[id]) { L.beep(880, 0.05, "triangle"); return; }
-      lit[id] = true;
-      render();
-      if (gardenReady()) finishRoom("garden");
-      else cue("garden");
+    function bloom(list, picked, id, button) {
+      const item = list.find((entry) => entry.id === id);
+      if (picked[id]) {
+        L.beep(400, 0.05, "triangle");
+        delight(button, { wiggle: true });
+        return;
+      }
+      picked[id] = true;
+      const finishing = gardenReady();
+      if (finishing) {
+        delight(button, { sparkle: true });
+        render();
+        finishRoom("garden");
+      } else {
+        cue("garden");
+        delight(button, { sparkle: true, line: item.say });
+        render();
+      }
     }
     function render() {
       const room = ROOMS[4];
@@ -613,14 +745,14 @@
       const body = el("div", "dh-body");
       const flowerRow = el("div", "dh-choices dh-row-2");
       flowers.forEach((item) => {
-        const button = choice(item.label, "dh-choice dh-flower", !!wet[item.id], () => water(item.id));
+        const button = choice(item.label, "dh-choice dh-flower", !!wet[item.id], (btn) => bloom(flowers, wet, item.id, btn));
         button.append(emoji(item.emoji));
         if (wet[item.id]) button.append(emoji("💧"));
         flowerRow.append(button);
       });
       const starRow = el("div", "dh-choices dh-row-3");
       stars.forEach((item) => {
-        const button = choice(item.label, "dh-choice", !!lit[item.id], () => shine(item.id));
+        const button = choice(item.label, "dh-choice", !!lit[item.id], (btn) => bloom(stars, lit, item.id, btn));
         button.append(emoji(item.emoji));
         starRow.append(button);
       });
@@ -640,24 +772,39 @@
     const where = ["left", "middle", "right"];
     let lane = 1;
     let got = {};
-    function steer(dir) {
+    let moved = false;
+    function steer(dir, button) {
       const next = lane + dir;
-      if (next < 0 || next > 2) { L.buzzSound(); return; }
+      if (next < 0 || next > 2) {
+        L.buzzSound();
+        delight(button, { wiggle: true });
+        return;
+      }
       lane = next;
+      moved = true;
       cue("playroom");
+      delight(button, {});
       render();
     }
-    function collect(item) {
+    function collect(item, button) {
       if (got[item.id]) return;
       if (item.lane !== lane) {
         L.buzzSound();
+        delight(button, { wiggle: true });
         L.say("Steer over!");
         return;
       }
       got[item.id] = true;
-      render();
-      if (items.every((entry) => got[entry.id])) finishRoom("playroom");
-      else cue("playroom");
+      const finishing = items.every((entry) => got[entry.id]);
+      if (finishing) {
+        delight(button, { sparkle: true });
+        render();
+        finishRoom("playroom");
+      } else {
+        cue("playroom");
+        delight(button, { sparkle: true, line: "Got it!" });
+        render();
+      }
     }
     function render() {
       const room = ROOMS[5];
@@ -665,10 +812,12 @@
       const body = el("div", "dh-body");
       const road = el("div", "dh-road");
       items.forEach((item) => {
-        const column = el("div", "dh-lane" + (item.lane === lane ? " is-here" : ""));
-        if (item.lane === lane) column.append(emoji("🚙"));
+        const here = item.lane === lane;
+        const column = el("div", "dh-lane" + (here ? " is-here" : ""));
+        if (here && moved) column.classList.add("is-wiggle");
+        if (here) column.append(emoji("🚙"));
         if (!got[item.id]) {
-          const button = tap(item.label, "dh-choice", () => collect(item));
+          const button = tap(item.label, "dh-choice", (btn) => collect(item, btn));
           button.append(emoji(item.emoji));
           column.append(button);
         } else column.append(emoji("✨"));
@@ -677,8 +826,8 @@
       const live = text("p", "dh-sr", "Carlita is on the " + where[lane]);
       live.setAttribute("role", "status");
       const steerRow = el("div", "dh-choices dh-row-2");
-      const left = tap("Steer left", "dh-choice", () => steer(-1));
-      const right = tap("Steer right", "dh-choice", () => steer(1));
+      const left = tap("Steer left", "dh-choice", (btn) => steer(-1, btn));
+      const right = tap("Steer right", "dh-choice", (btn) => steer(1, btn));
       left.append(emoji("⬅️"));
       right.append(emoji("➡️"));
       steerRow.append(left, right);
@@ -686,7 +835,7 @@
       view.append(roomHead(room), body, backButton());
       mount(room.id, view);
     }
-    return { reset() { lane = 1; got = {}; }, render };
+    return { reset() { lane = 1; got = {}; moved = false; }, render };
   }
 
   function makeBedroom() {
@@ -703,29 +852,41 @@
     let stuck = {};
     let pj = "";
     function anySticker() { return stickers.some((item) => stuck[item.id]); }
-    function toggle(id) {
-      stuck[id] = !stuck[id];
+    function toggle(id, button) {
+      const on = !stuck[id];
+      stuck[id] = on;
+      const item = stickers.find((entry) => entry.id === id);
       cue("bedroom");
+      delight(button, on ? { sparkle: true, line: item.label } : { wiggle: true });
       render();
     }
-    function wear(id) {
+    function wear(id, button) {
+      const fresh = pj !== id;
       pj = id;
+      const item = pjs.find((entry) => entry.id === id);
       cue("bedroom");
+      delight(button, fresh ? { sparkle: true, line: item.label } : { wiggle: true });
       render();
     }
-    function roll() {
+    function roll(button) {
       if (!pj) {
         L.buzzSound();
+        delight(button, { wiggle: true });
         L.say("Pick pajamas!");
         return;
       }
       if (!anySticker()) {
         L.buzzSound();
+        delight(button, { wiggle: true });
         L.say("Add a sticker!");
         return;
       }
       const cat = document.querySelector("#dollhouseStage .dh-pillow-cat");
-      if (cat) cat.classList.add("is-rolling");
+      if (cat) {
+        cat.classList.remove("is-wiggle");
+        cat.classList.add("is-rolling");
+      }
+      delight(button, { sparkle: true });
       finishRoom("bedroom");
     }
     function render() {
@@ -737,17 +898,18 @@
       const cat = el("div", "dh-pillow-cat");
       const worn = pjs.find((item) => item.id === pj);
       cat.textContent = "🐱" + (worn ? worn.emoji : "");
+      if (worn || anySticker()) cat.classList.add("is-wiggle");
       pillow.append(cat);
       stickers.forEach((item) => { if (stuck[item.id]) pillow.append(emoji(item.emoji)); });
       const stickerRow = el("div", "dh-choices dh-row-3");
       stickers.forEach((item) => {
-        const button = choice(item.label, "dh-choice", !!stuck[item.id], () => toggle(item.id));
+        const button = choice(item.label, "dh-choice", !!stuck[item.id], (btn) => toggle(item.id, btn));
         button.append(emoji(item.emoji));
         stickerRow.append(button);
       });
       const pjRow = el("div", "dh-choices dh-row-3");
       pjs.forEach((item) => {
-        const button = choice(item.label, "dh-choice", pj === item.id, () => wear(item.id));
+        const button = choice(item.label, "dh-choice", pj === item.id, (btn) => wear(item.id, btn));
         button.append(emoji(item.emoji));
         pjRow.append(button);
       });

@@ -190,4 +190,38 @@ function harness(initial) {
   assert.ok(Math.abs(sum - week.ms) < 5, `daily bars ${sum} should match the 7-day total ${week.ms}`);
 }
 
-console.log('PASS: play log — hidden time, modes, reset, prune, today/7-day');
+// Milestones and the recent-game list Play Again uses. Hello is not a room.
+{
+  const h = harness();
+  const empty = h.play.milestones();
+  assert.equal(empty.firstGame, false);
+  assert.equal(empty.fiveGames, false);
+  assert.equal(empty.rooms, 0);
+  assert.equal(empty.allRooms, false);
+  assert.equal(empty.favorite, '');
+  assert.deepEqual(Array.from(h.play.recentGameIds(3)), []);
+  ['pop', 'whack', 'find', 'cook', 'dino'].forEach((id) => {
+    h.play.enter(id, '');
+    h.advance(800);
+  });
+  h.play.enter('dollhouse', 'Hello');
+  h.advance(800);
+  h.play.setMode('Dollhouse');
+  h.advance(800);
+  ['Kitchen', 'Craft Room', 'Music Room', 'Bathroom', 'Fairy Tail Garden', 'Playroom', 'Bedroom'].forEach((mode) => {
+    h.play.setMode(mode);
+    h.advance(800);
+  });
+  h.play.leave();
+  const done = h.play.milestones();
+  assert.equal(done.firstGame, true);
+  assert.equal(done.fiveGames, true);
+  assert.equal(done.rooms, 7);
+  assert.equal(done.allRooms, true);
+  assert.equal(done.favorite, 'dollhouse');
+  const recent = Array.from(h.play.recentGameIds(3));
+  assert.deepEqual(recent, ['dollhouse', 'dino', 'cook']);
+  assert.equal(JSON.stringify(done).includes('<'), false);
+}
+
+console.log('PASS: play log — hidden time, modes, reset, prune, today/7-day, milestones');
