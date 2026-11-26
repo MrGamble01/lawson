@@ -267,15 +267,14 @@ html.dark .streak-badge {
 }
 .screen.active {
   display: flex;
-  transform-origin: left center;
-  /* perspective() lives on the screen, not #app, so position:fixed
-     pieces inside a game return to the viewport when the turn ends. */
-  animation: pageTurn 0.72s cubic-bezier(.16,.84,.32,1);
+  transform-origin: center top;
+  /* The rise ends at transform:none, so position:fixed pieces inside a
+     game return to the viewport once the screen has settled. */
+  animation: pageTurn 0.42s cubic-bezier(.22,.8,.28,1);
 }
 @keyframes pageTurn {
-  0%   { transform: perspective(1800px) rotateY(-78deg); filter: brightness(0.62); }
-  46%  { filter: brightness(0.9); }
-  100% { transform: none; filter: none; }
+  0%   { opacity: 0; transform: translateY(16px) scale(0.985); }
+  100% { opacity: 1; transform: none; }
 }
 
 /* ---------- Menu atmosphere (background bubbles) ---------- */
@@ -357,7 +356,7 @@ html.dark .bubble { opacity: 0.16; }
   top: clamp(90px, 14vh, 130px);
   left: -160px;
   width: clamp(80px, 14vw, 130px);
-  height: clamp(45px, 8vw, 75px);
+  height: clamp(48px, 8vw, 75px);
   z-index: 2;
   display: none;
   padding: 0;
@@ -890,6 +889,17 @@ html.dark .hub-title {
   transform: scale(0.94) translateY(4px);
   box-shadow: var(--shadow-tile-pressed);
 }
+/* A springy settle after the press, on tiles, home cards, and dollhouse doors. */
+@keyframes tilePop {
+  0%   { transform: scale(0.94) translateY(3px); }
+  48%  { transform: scale(1.045) translateY(-3px); }
+  100% { transform: none; }
+}
+button.place.is-pop,
+button.tile.is-pop,
+button.dh-door.is-pop {
+  animation: tilePop 0.4s var(--ease-spring);
+}
 @keyframes tileEntry {
   from { transform: scale(0.4) translateY(20px); opacity: 0; }
   to   { transform: scale(1) translateY(0); opacity: 1; }
@@ -1286,8 +1296,11 @@ html.dark .hub-title {
   font-size: 36px;
 }
 @keyframes sparkle {
-  0%   { transform: translate(0, 0) scale(0) rotate(0); opacity: 1; }
-  60%  { opacity: 1; }
+  0%   { transform: translate(0, 0) scale(0.2) rotate(0); opacity: 0; }
+  20%  {
+    opacity: 1;
+    transform: translate(calc(var(--dx) * 0.18), calc(var(--dy) * 0.1)) scale(calc(var(--scale, 1.2) * 1.12)) rotate(calc(var(--rot, 0deg) * 0.25));
+  }
   100% {
     transform: translate(var(--dx), var(--dy)) scale(var(--scale, 1.4)) rotate(var(--rot, 0));
     opacity: 0;
@@ -2151,21 +2164,45 @@ html.dark .hub-title {
 }
 .play-stats-card strong {
   display: block;
-  font-size: 22px;
+  font-size: clamp(16px, 4.4vw, 22px);
   color: #3a2a22;
   line-height: 1.15;
+  overflow-wrap: anywhere;
 }
 .play-stats-card span {
   display: block;
   margin-top: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #5c4636;
+  overflow-wrap: anywhere;
+}
+.play-stats-card .play-stats-kicker {
+  margin-top: 0;
+  margin-bottom: 2px;
+  font-family: var(--font-display);
   font-size: 14px;
   font-weight: 700;
-  color: #5c4636;
+  color: #6b5344;
 }
 .play-stats h3 {
   margin: 16px 0 6px;
+  font-family: var(--font-display);
   font-size: 18px;
+  font-weight: 700;
   color: #3a2a22;
+}
+.play-stats-favorite {
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: #fff6e4;
+  border: 2px solid #e7cbb8;
+  color: #3a2a22;
+  font-weight: 800;
+  font-size: 15px;
+  line-height: 1.3;
 }
 .play-stats-game,
 .play-stats-mode,
@@ -2190,6 +2227,13 @@ html.dark .hub-title {
   color: #3a2a22;
   font-size: 17px;
 }
+.play-stats-game.is-favorite {
+  margin-top: 4px;
+  padding: 8px 8px 4px;
+  border-radius: 12px;
+  background: #fffaf3;
+  box-shadow: inset 3px 0 0 #c4a46a;
+}
 .play-stats-mode {
   padding: 3px 2px 3px 14px;
   color: #5c4636;
@@ -2197,10 +2241,19 @@ html.dark .hub-title {
   font-weight: 700;
 }
 .play-stats-session {
-  padding: 8px 0;
+  padding: 10px 2px 8px;
   border-top: 2px solid #ead9c4;
 }
+.play-stats-session.is-live {
+  margin-top: 6px;
+  padding: 8px;
+  border-top: 0;
+  border-radius: 12px;
+  background: #f3faf4;
+}
 .play-stats-session-head {
+  flex-wrap: wrap;
+  row-gap: 2px;
   font-weight: 800;
   color: #3a2a22;
   font-size: 16px;
@@ -2653,6 +2706,7 @@ html.dark .hub-title {
   text-shadow: 0 1px 2px rgba(0,0,0,0.25);
 }
 .sticker-toast.show { transform: translateY(0); }
+.sticker-toast.show .sticker-toast-emoji { animation: tilePop 0.5s var(--ease-spring); }
 
 /* ---------- "All stickers!" finale overlay ---------- */
 .all-stickers-overlay {
@@ -7965,6 +8019,17 @@ html.dark #dollhouseGame {
   position: relative;
   overflow: hidden;
 }
+.dh-view.dh-arrive { animation: dhArrive 0.4s cubic-bezier(.22,.8,.28,1); }
+@keyframes dhArrive {
+  from { opacity: 0; transform: translateY(14px) scale(0.985); }
+  to   { opacity: 1; transform: none; }
+}
+#dollhouseStage.is-celebrate .dh-view { animation: dhCelebrate 0.55s var(--ease-spring); }
+@keyframes dhCelebrate {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
 .dh-body {
   flex: 1 1 auto;
   min-height: 0;
@@ -8012,8 +8077,9 @@ html.dark #dollhouseGame .dh-room-name { color: #fff6ea; }
   min-width: 0;
   padding: 6px 8px;
   overflow-wrap: anywhere;
+  transition: transform 0.16s var(--ease-spring), background 0.15s ease, box-shadow 0.15s ease;
 }
-#dollhouseGame button:active { transform: scale(0.97); }
+#dollhouseGame button:active { transform: scale(0.96) translateY(1px); }
 #dollhouseGame [hidden] { display: none !important; }
 .dh-emoji { font-size: clamp(26px, 7vw, 42px); line-height: 1; }
 .dh-word { font-size: clamp(16px, 4vw, 22px); line-height: 1.1; text-align: center; }
@@ -8052,7 +8118,7 @@ html.dark #dollhouseGame .dh-room-name { color: #fff6ea; }
   grid-auto-rows: minmax(72px, 1fr);
   gap: 8px;
 }
-.dh-door { flex-direction: column; gap: 2px; height: 100%; }
+.dh-door { flex-direction: column; gap: 2px; height: 100%; min-height: 48px; }
 .dh-door-name { font-size: clamp(13px, 3vw, 16px); line-height: 1.1; }
 .dh-door:last-child { grid-column: 1 / -1; }
 .dh-door.is-done { box-shadow: inset 0 0 0 3px #fab005; }

@@ -1189,11 +1189,11 @@ function renderStreakBadge() {
 // musical cue without being a full jingle.
 function navChime(up) {
   if (up) {
-    beep(523.25, 0.07, "triangle", 0);    // C5
-    beep(659.25, 0.09, "triangle", 0.05); // E5
+    beep(523.25, 0.07, "sine", 0);    // C5
+    beep(659.25, 0.09, "sine", 0.05); // E5
   } else {
-    beep(659.25, 0.07, "triangle", 0);    // E5
-    beep(523.25, 0.09, "triangle", 0.05); // C5
+    beep(659.25, 0.07, "sine", 0);    // E5
+    beep(523.25, 0.09, "sine", 0.05); // C5
   }
   haptic(8);
 }
@@ -1434,6 +1434,16 @@ document.querySelectorAll("[data-home]").forEach((btn) => {
     });
   });
 })();
+
+// A spring after the finger lifts, on the cards a kid actually taps.
+// Dollhouse doors are built later, so this listens on the document.
+document.addEventListener("pointerup", (e) => {
+  const el = e.target && e.target.closest && e.target.closest("button.place, button.tile, button.dh-door");
+  if (!el || prefersReducedMotion()) return;
+  el.classList.remove("is-pop");
+  void el.offsetWidth;
+  el.classList.add("is-pop");
+}, true);
 
 (function setupPlaceAndTileNames() {
   document.querySelectorAll("button.place, button.tile").forEach((btn) => {
@@ -1853,6 +1863,40 @@ document.addEventListener("touchmove", (e) => {
     meta.textContent = right;
     row.append(name, meta);
     parent.appendChild(row);
+    return row;
+  }
+  function rangeDetail(range) {
+    const sessions = range.sessions === 1 ? "1 session" : (range.sessions || 0) + " sessions";
+    const plays = range.plays === 1 ? "1 play" : (range.plays || 0) + " plays";
+    return sessions + " · " + plays;
+  }
+  function statCard(parent, kicker, value, detail) {
+    const card = document.createElement("div");
+    card.className = "play-stats-card";
+    const label = document.createElement("span");
+    label.className = "play-stats-kicker";
+    label.textContent = kicker;
+    const strong = document.createElement("strong");
+    strong.textContent = value;
+    const span = document.createElement("span");
+    span.textContent = detail;
+    card.append(label, strong, span);
+    parent.appendChild(card);
+  }
+  function byTime(games) {
+    return (games || []).slice().sort((a, b) => (b.ms || 0) - (a.ms || 0) || (b.plays || 0) - (a.plays || 0));
+  }
+  function favoritePhrase(range) {
+    const games = byTime(range.games);
+    if (!games.length) return "";
+    const top = games[0];
+    const modes = byTime(top.modes);
+    const title = gameTitle(top.id);
+    const mode = modes.length ? modeTitle(modes[0].id) : "";
+    const where = statsRange === "today" ? "today" : statsRange === "week" ? "these 7 days" : "overall";
+    const same = mode && mode.toLowerCase() === title.toLowerCase();
+    const name = mode && !same ? title + " · " + mode : title;
+    return "Favorite " + where + ": " + name;
   }
   function renderPlayStats() {
     const summary = document.getElementById("playStatsSummary");
@@ -1861,28 +1905,29 @@ document.addEventListener("touchmove", (e) => {
     if (!summary || !gamesEl || !sessionsEl) return;
     let snap;
     try { snap = LawsonPlay.snapshot(); } catch (_) { return; }
-    const range = (snap.ranges && snap.ranges[statsRange]) || { ms: 0, plays: 0, sessions: 0, games: [] };
+    const ranges = snap.ranges || {};
+    const range = ranges[statsRange] || { ms: 0, plays: 0, sessions: 0, games: [] };
+    const today = ranges.today || { ms: 0, plays: 0, sessions: 0, games: [] };
+    const week = ranges.week || { ms: 0, plays: 0, sessions: 0, games: [] };
+    const all = ranges.all || { ms: 0, plays: 0, sessions: 0, games: [] };
     summary.replaceChildren();
-    [
-      [formatDuration(range.ms), "in the app"],
-      [String(range.sessions || 0), range.sessions === 1 ? "session" : "sessions"],
-      [String(range.plays || 0), range.plays === 1 ? "play" : "plays"],
-    ].forEach(([value, label]) => {
-      const card = document.createElement("div");
-      card.className = "play-stats-card";
-      const strong = document.createElement("strong");
-      strong.textContent = value;
-      const span = document.createElement("span");
-      span.textContent = label;
-      card.append(strong, span);
-      summary.appendChild(card);
-    });
+    statCard(summary, "Today", formatDuration(today.ms), rangeDetail(today));
+    statCard(summary, "7 days", formatDuration(week.ms), rangeDetail(week));
+    statCard(summary, "All time", formatDuration(all.ms), rangeDetail(all));
 
     const games = (range.games || []).slice().sort((a, b) => {
       if (statsSort === "plays") return (b.plays || 0) - (a.plays || 0) || (b.ms || 0) - (a.ms || 0);
       return (b.ms || 0) - (a.ms || 0) || (b.plays || 0) - (a.plays || 0);
     });
+    const favId = (byTime(range.games)[0] || {}).id || "";
     gamesEl.replaceChildren();
+    const phrase = favoritePhrase(range);
+    if (phrase) {
+      const fav = document.createElement("p");
+      fav.className = "play-stats-favorite";
+      fav.textContent = phrase;
+      gamesEl.appendChild(fav);
+    }
     if (!games.length) {
       const empty = document.createElement("p");
       empty.className = "settings-hint";
@@ -1891,7 +1936,8 @@ document.addEventListener("touchmove", (e) => {
     }
     games.forEach((g) => {
       const plays = g.plays === 1 ? "1 play" : (g.plays || 0) + " plays";
-      addRow(gamesEl, "play-stats-game", gameTitle(g.id), formatDuration(g.ms) + " · " + plays);
+      const gameRow = addRow(gamesEl, "play-stats-game", gameTitle(g.id), formatDuration(g.ms) + " · " + plays);
+      if (g.id === favId) gameRow.classList.add("is-favorite");
       (g.modes || []).slice().sort((a, b) => {
         if (statsSort === "plays") return (b.plays || 0) - (a.plays || 0) || (b.ms || 0) - (a.ms || 0);
         return (b.ms || 0) - (a.ms || 0) || (b.plays || 0) - (a.plays || 0);
@@ -1911,7 +1957,7 @@ document.addEventListener("touchmove", (e) => {
     }
     recent.forEach((s) => {
       const block = document.createElement("div");
-      block.className = "play-stats-session";
+      block.className = "play-stats-session" + (s.live ? " is-live" : "");
       const when = formatDay(s.start) + ", " + formatClock(s.start) + "–" + (s.live ? "now" : formatClock(s.end));
       addRow(block, "play-stats-session-head", when, formatDuration(s.ms));
       if (!s.plays || !s.plays.length) {
