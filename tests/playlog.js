@@ -114,6 +114,8 @@ function harness(initial) {
   assert.equal(h.map.get('lawson:popBest'), '12');
   assert.equal(h.map.get('lawson:stickers'), '["finder"]');
   assert.equal(h.play.snapshot().ranges.all.plays, 0);
+  assert.equal(h.play.snapshot().days.length, 7);
+  assert.equal(h.play.snapshot().days.every((d) => d.ms === 0), true);
   const exported = h.play.exportJson();
   assert.equal(exported.includes('Lawson'), false, 'export must not contain the kid name');
   assert.equal(exported.includes('popBest'), false);
@@ -174,12 +176,18 @@ function harness(initial) {
   h.advance(4000);
   h.play.setMode('Twinkle Twinkle');
   h.advance(2000);
-  const today = h.play.snapshot().ranges.today;
-  const week = h.play.snapshot().ranges.week;
+  const snap = h.play.snapshot();
+  const today = snap.ranges.today;
+  const week = snap.ranges.week;
   assert.equal(today.games.some((g) => g.id === 'story'), false, 'a two-day-old story is not today');
   assert.ok(today.games.some((g) => g.id === 'piano'));
   assert.ok(week.games.some((g) => g.id === 'story'), 'the story is still inside 7 days');
   assert.ok(week.ms >= today.ms);
+  assert.equal(snap.days.length, 7, 'a week is seven daily bars');
+  assert.ok(snap.days[6].ms >= 6000, 'today is the last bar');
+  assert.ok(snap.days.some((d, i) => i < 6 && d.ms >= 3000), 'an older day keeps its own bar');
+  const sum = snap.days.reduce((n, d) => n + d.ms, 0);
+  assert.ok(Math.abs(sum - week.ms) < 5, `daily bars ${sum} should match the 7-day total ${week.ms}`);
 }
 
 console.log('PASS: play log — hidden time, modes, reset, prune, today/7-day');

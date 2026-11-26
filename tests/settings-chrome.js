@@ -16,7 +16,7 @@ const labels = {
   playSortTime: 'By time',
   playSortPlays: 'By plays',
   playStatsCopy: 'Copy stats',
-  playStatsReset: 'Reset play stats',
+  playStatsReset: 'Clear play stats',
   playStatsBack: 'Back to settings',
 };
 

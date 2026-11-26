@@ -22,6 +22,13 @@ assert.match(stickers, /Gabby Cat of the Day/);
 assert.match(game, /L\.games\.dollhouse\s*=/);
 assert.match(game, /L\.noteMode/);
 assert.match(game, /earnSticker\("gabbyCat"\)/);
+assert.match(game, /function cue/);
+assert.match(game, /played today/);
+assert.match(game, /dh-today/);
+assert.match(game, /prefersReducedMotion/);
+for (const id of ["kitchen", "craft", "music", "bathroom", "garden", "playroom", "bedroom"]) {
+  assert.ok(game.includes(id + ":"), "room cue for " + id);
+}
 
 const MODES = [
   "Hello",

@@ -92,6 +92,12 @@ async function playPhone(page) {
   if (!earned) throw new Error("kitchen should earn gabbyCat");
   await sleep(500);
   await clickLabel(page, "Back to Dollhouse");
+  const kitchenToday = await page.locator("#dollhouseStage .dh-door[data-room='kitchen']").getAttribute("data-today");
+  if (kitchenToday !== "yes") throw new Error("kitchen should show a played-today badge");
+  const kitchenName = await page.locator("#dollhouseStage .dh-door[data-room='kitchen']").getAttribute("aria-label");
+  if (!kitchenName || !kitchenName.includes("played today")) throw new Error("kitchen name should say played today: " + kitchenName);
+  const otherToday = await page.locator("#dollhouseStage .dh-door[data-today='yes']").count();
+  if (otherToday !== 1) throw new Error("only the kitchen has been played today, got " + otherToday);
 
   await clickLabel(page, "Music Room");
   await fits(page, "phone music");
@@ -155,6 +161,8 @@ async function playPhone(page) {
   await clickLabel(page, "That's how I roll!");
   if (await page.locator("#dollhouseStage").getAttribute("data-done") !== "bedroom") throw new Error("bedroom should finish");
   await clickLabel(page, "Back to Dollhouse");
+  const visited = await page.locator("#dollhouseStage .dh-door[data-today='yes']").count();
+  if (visited !== 7) throw new Error("every room played today should wear a check, got " + visited);
 
   const tracked = await page.evaluate(() => {
     const game = window.LawsonPlay.snapshot().ranges.today.games.find((item) => item.id === "dollhouse");
@@ -191,8 +199,28 @@ async function playPhone(page) {
   if (!sessionsText.includes("Dollhouse") || !sessionsText.includes("Kitchen")) {
     throw new Error("recent session missing dollhouse: " + sessionsText);
   }
+  const bars = await page.locator("#playStatsChart .play-rhythm-col").count();
+  if (bars !== 7) throw new Error("play stats should chart 7 days, got " + bars);
+  const todayBar = await page.locator("#playStatsChart .play-rhythm-col.is-today").count();
+  if (todayBar !== 1) throw new Error("the last bar should be today");
+  const clearBtn = page.locator("#playStatsReset");
+  if ((await clearBtn.innerText()).trim() !== "Clear play stats") {
+    throw new Error("clear button should be named Clear play stats");
+  }
   await page.locator("#playStatsGames .play-stats-game").filter({ hasText: "Dollhouse" }).scrollIntoViewIfNeeded();
   await page.locator(".settings-panel").screenshot({ path: path.join(SHOTS, "dollhouse-play-stats.png") });
+  await clearBtn.click();
+  const asking = (await clearBtn.innerText()).trim();
+  if (!asking.includes("Tap again")) throw new Error("clear should ask before wiping: " + asking);
+  const kept = await page.locator("#playStatsGames").innerText();
+  if (!kept.includes("Dollhouse")) throw new Error("the first tap must not clear play stats");
+  await clearBtn.click();
+  await page.waitForFunction(() => {
+    const status = document.getElementById("playStatsStatus");
+    return !!(status && status.textContent.includes("cleared"));
+  });
+  const wiped = await page.locator("#playStatsGames").innerText();
+  if (wiped.includes("Dollhouse")) throw new Error("the second tap should clear play stats: " + wiped);
   await page.locator("#playStatsBack").click();
   await page.locator("#settingsClose").click();
 
