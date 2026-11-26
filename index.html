@@ -167,6 +167,10 @@
           <span class="place-emoji">🌱</span>
           <span class="place-text"><span class="place-label">Garden!</span><span class="place-count">Plant, water, pick</span></span>
         </button>
+        <button class="place place--game place--dollhouse" data-go="dollhouse" style="--c:#e599f7">
+          <span class="place-emoji">🐱</span>
+          <span class="place-text"><span class="place-label">Dollhouse</span><span class="place-count">Gabby's house</span></span>
+        </button>
         <button class="place place--game place--more" data-hub="moreHub" style="--c:#845ef7">
           <span class="place-emoji">✨</span>
           <span class="place-text"><span class="place-label">More</span><span class="place-count">Stories, music, art &amp; games</span></span>
@@ -909,6 +913,12 @@
       <div id="gardenStage" class="garden-stage"></div>
     </section>
 
+    <!-- Lawson's Dollhouse: Gabby's rooms -->
+    <section id="dollhouseGame" class="screen" data-title="🐱 Dollhouse">
+      <button class="home-btn" data-home aria-label="Home">🏠</button>
+      <div id="dollhouseStage" class="dollhouse-stage"></div>
+    </section>
+
     <!-- Baby Dino: make him better -->
     <section id="dinoGame" class="screen" data-title="🦖 Baby Dino">
       <button class="home-btn" data-home aria-label="Home">🏠</button>
@@ -1114,6 +1124,7 @@
   <script src="games/cook.js"></script>
   <script src="games/dino.js"></script>
   <script src="games/garden.js"></script>
+  <script src="games/dollhouse.js"></script>
   <script src="games/scene.js"></script>
   <script src="games/farm.js"></script>
   <script src="games/icecream.js"></script>

@@ -12,11 +12,11 @@ home screen" support, serve over HTTP (e.g. `python3 -m http.server`).
 ## Home screen
 
 Tuned for a 3-year-old: no reading required, small counting numbers,
-big tap targets. The home screen surfaces the six games he plays most,
+big tap targets. The home screen surfaces the seven games he plays most,
 each opening straight into play. Everything else lives one tap away
 behind the **More** card.
 
-**Six headline games:**
+**Seven headline games:**
 
 - **Pop!** — pop floating balloons. Three modes: Free (streaks + rare
   rainbow), ABC ("Pop the B!"), 123 ("Pop the 3!") — letters and
@@ -39,6 +39,10 @@ behind the **More** card.
   Train too), so Tab / a screen reader can poke them the same way a finger
   does, and under "Less motion" the clouds rest inside the sky instead of
   parking off its left edge.
+- **Dollhouse** — Gabby's house. A hello you can skip (mailbox, pinch
+  her ears, Pandy's hug), then seven rooms: cake, crafts, music, a fizzy
+  potion, the fairy garden, Carlita's drive, and Pillow Cat's roll.
+  Finishing a room earns the Gabby Cat of the Day sticker.
 
 ## More → hubs
 

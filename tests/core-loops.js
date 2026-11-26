@@ -461,6 +461,22 @@ async function sceneGame(page) {
   await restart(page, "scene");
 }
 
+async function dollhouseGame(page) {
+  await clickLabel(page, "dollhouse", "Skip to the dollhouse");
+  await clickLabel(page, "dollhouse", "Kitchen");
+  await clickLabel(page, "dollhouse", "Cake");
+  await clickLabel(page, "dollhouse", "Pink frosting");
+  await clickLabel(page, "dollhouse", "Strawberry");
+  await clickLabel(page, "dollhouse", "Sprinkle party");
+  await sleep(80);
+  const earned = await page.evaluate(() => (localStorage.getItem("lawson:stickers") || "").includes("gabbyCat"));
+  assert.equal(earned, true, "finishing the kitchen earns the Gabby Cat sticker");
+  await clickLabel(page, "dollhouse", "Back to Dollhouse");
+  assert.equal(await page.evaluate(() => document.getElementById("dollhouseStage").dataset.view), "hub");
+  await restart(page, "dollhouse");
+  assert.equal(await page.evaluate(() => document.getElementById("dollhouseStage").dataset.view), "hub", "a return visit skips the hello");
+}
+
 async function stickersGame(page) {
   const locked = await page.locator("#stickerGrid button").count();
   assert.ok(locked > 0);
@@ -496,6 +512,7 @@ const SPECIAL = {
   story: storyGame,
   scene: sceneGame,
   stickers: stickersGame,
+  dollhouse: dollhouseGame,
 };
 
 async function main() {
