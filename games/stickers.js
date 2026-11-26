@@ -1,8 +1,8 @@
 // ---------- Stickers (collection viewer) ----------
 // Read-only grid showing every available sticker. Earned ones are full
-// color; locked ones are grayscale silhouettes with a "?". Tapping any
-// sticker speaks its title + description so a pre-reader can hear what
-// they're working toward.
+// color; locked ones are grayscale silhouettes with a "?". Tapping an
+// earned sticker pops, chimes, and says its name. A locked one stays
+// still and says to keep playing.
 (function () {
   const L = window.Lawson;
 
@@ -58,8 +58,14 @@
         <div class="sticker-card-title">${has ? s.title : "???"}</div>`;
       L.onTap(card, () => {
         if (has) {
+          const still = L.prefersReducedMotion && L.prefersReducedMotion();
+          card.classList.remove("is-admire");
+          if (!still) {
+            void card.offsetWidth;
+            card.classList.add("is-admire");
+          }
           L.happySound();
-          L.say(`${s.title}. ${s.desc}`);
+          L.say(`${s.title}! ${s.desc}`);
         } else {
           L.beep(400, 0.08, "sine");
           L.say("Locked! Keep playing to find this one.");

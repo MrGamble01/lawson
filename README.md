@@ -42,7 +42,9 @@ behind the **More** card.
 - **Dollhouse** — Gabby's house. A hello you can skip (mailbox, pinch
   her ears, Pandy's hug), then seven rooms: cake, crafts, music, a fizzy
   potion, the fairy garden, Carlita's drive, and Pillow Cat's roll.
-  Finishing a room earns the Gabby Cat of the Day sticker.
+  Each room has its own soft sound, and finishing one sparkles (a still
+  check if motion is reduced) and earns the Gabby Cat of the Day sticker.
+  Rooms played today get a small check on the dollhouse hub.
 
 ## More → hubs
 
@@ -89,8 +91,9 @@ The **More** drawer holds themed hub cards, each opening a small menu:
 
 **Collection:**
 
-- **Stickers** — 34 unlockables across every game, with a progress bar
-  and an all-stickers finale when you find them all.
+- **Stickers** — 35 unlockables across every game, with a progress bar
+  and an all-stickers finale when you find them all. Tap a sticker you
+  have earned and it pops, chimes, and says its name.
 
 ## Settings (gear icon in the header)
 
@@ -172,6 +175,9 @@ The **More** drawer holds themed hub cards, each opening a small menu:
   swipe-back) closes it too.
 - **Show tips again** — re-arms the first-visit hint for every game
 - Reset all high scores (two-tap confirm so toddlers can't fire it)
+- **Play stats** — a parent view inside Settings, not a tile on the home
+  screen: today, the last 7 days as a minutes bar, and all time. Clear
+  play stats asks for a second tap and leaves scores and stickers alone.
 
 ## Accessibility
 

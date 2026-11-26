@@ -1898,6 +1898,61 @@ document.addEventListener("touchmove", (e) => {
     const name = mode && !same ? title + " · " + mode : title;
     return "Favorite " + where + ": " + name;
   }
+  function barLabel(ms) {
+    const mins = (ms || 0) / 60000;
+    if (mins <= 0) return "0";
+    if (mins < 0.5) return "<1";
+    if (mins < 60) return Math.round(mins) + "m";
+    return Math.round(mins / 60) + "h";
+  }
+  function barSpoken(ms) {
+    if ((ms || 0) <= 0) return "0 minutes";
+    const mins = Math.round(ms / 60000);
+    if (mins < 1) return "under a minute";
+    if (mins === 1) return "1 minute";
+    if (mins < 60) return mins + " minutes";
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    const hours = h === 1 ? "1 hour" : h + " hours";
+    return m ? hours + " " + m + " minutes" : hours;
+  }
+  function dayName(key) {
+    const parts = String(key || "").split("-").map(Number);
+    const d = new Date(parts[0], (parts[1] || 1) - 1, parts[2] || 1);
+    try { return d.toLocaleDateString(undefined, { weekday: "short" }); }
+    catch (_) { return String(key || "").slice(5); }
+  }
+  function renderRhythm(days) {
+    const chart = document.getElementById("playStatsChart");
+    if (!chart) return;
+    const list = Array.isArray(days) ? days : [];
+    const peak = list.reduce((max, day) => Math.max(max, day.ms || 0), 0);
+    const todayKey = list.length ? list[list.length - 1].key : "";
+    chart.replaceChildren();
+    list.forEach((day) => {
+      const isToday = day.key === todayKey;
+      const name = dayName(day.key);
+      const col = document.createElement("div");
+      col.className = "play-rhythm-col" + (isToday ? " is-today" : "");
+      col.setAttribute("role", "img");
+      col.setAttribute("aria-label", name + (isToday ? ", today" : "") + ", " + barSpoken(day.ms));
+      const minutes = document.createElement("span");
+      minutes.className = "play-rhythm-min";
+      minutes.textContent = barLabel(day.ms);
+      const track = document.createElement("div");
+      track.className = "play-rhythm-track";
+      const bar = document.createElement("span");
+      bar.className = "play-rhythm-bar";
+      const pct = !day.ms || !peak ? 0 : Math.max(8, Math.round((day.ms / peak) * 100));
+      bar.style.height = pct + "%";
+      track.appendChild(bar);
+      const label = document.createElement("span");
+      label.className = "play-rhythm-day";
+      label.textContent = name;
+      col.append(minutes, track, label);
+      chart.appendChild(col);
+    });
+  }
   function renderPlayStats() {
     const summary = document.getElementById("playStatsSummary");
     const gamesEl = document.getElementById("playStatsGames");
@@ -1914,6 +1969,7 @@ document.addEventListener("touchmove", (e) => {
     statCard(summary, "Today", formatDuration(today.ms), rangeDetail(today));
     statCard(summary, "7 days", formatDuration(week.ms), rangeDetail(week));
     statCard(summary, "All time", formatDuration(all.ms), rangeDetail(all));
+    renderRhythm(snap.days);
 
     const games = (range.games || []).slice().sort((a, b) => {
       if (statsSort === "plays") return (b.plays || 0) - (a.plays || 0) || (b.ms || 0) - (a.ms || 0);
@@ -1996,8 +2052,8 @@ document.addEventListener("touchmove", (e) => {
     const reset = document.getElementById("playStatsReset");
     if (reset) {
       reset.classList.remove("confirming");
-      reset.textContent = "Reset play stats";
-      reset.setAttribute("aria-label", "Reset play stats");
+      reset.textContent = "Clear play stats";
+      reset.setAttribute("aria-label", "Clear play stats");
     }
     renderPlayStats();
     clearInterval(statsTimer);
@@ -2066,12 +2122,12 @@ document.addEventListener("touchmove", (e) => {
       try { LawsonPlay.reset(); } catch (_) {}
       playReset.classList.remove("confirming");
       playReset.textContent = "Cleared";
-      playReset.setAttribute("aria-label", "Reset play stats");
+      playReset.setAttribute("aria-label", "Clear play stats");
       const status = document.getElementById("playStatsStatus");
       if (status) status.textContent = "Play stats cleared. Scores and stickers are still there.";
       happySound();
       renderPlayStats();
-      setTimeout(() => { playReset.textContent = "Reset play stats"; }, 1400);
+      setTimeout(() => { playReset.textContent = "Clear play stats"; }, 1400);
     } else {
       playReset.classList.add("confirming");
       playReset.textContent = "Tap again to confirm";
@@ -2079,8 +2135,8 @@ document.addEventListener("touchmove", (e) => {
       buzzSound();
       statsResetT = setTimeout(() => {
         playReset.classList.remove("confirming");
-        playReset.textContent = "Reset play stats";
-        playReset.setAttribute("aria-label", "Reset play stats");
+        playReset.textContent = "Clear play stats";
+        playReset.setAttribute("aria-label", "Clear play stats");
       }, 4000);
     }
   });

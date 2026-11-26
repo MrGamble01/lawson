@@ -1064,6 +1064,9 @@
           <button id="playRangeAll" type="button" aria-pressed="false" aria-label="All time">All time</button>
         </div>
         <div id="playStatsSummary" class="play-stats-summary"></div>
+        <h3>Daily minutes</h3>
+        <div id="playStatsChart" class="play-rhythm" role="group" aria-label="Daily minutes for the last 7 days"></div>
+        <p class="settings-hint">Each bar is one day. The last bar is today.</p>
         <div class="play-stats-sort" role="group" aria-label="Sort games">
           <button id="playSortTime" type="button" aria-pressed="true" aria-label="By time">By time</button>
           <button id="playSortPlays" type="button" aria-pressed="false" aria-label="By plays">By plays</button>
@@ -1077,7 +1080,7 @@
         <textarea id="playStatsJson" class="play-stats-json" readonly hidden aria-label="Play stats JSON"></textarea>
         <div class="settings-actions">
           <button id="playStatsCopy" class="settings-tips" type="button" aria-label="Copy stats">Copy stats</button>
-          <button id="playStatsReset" class="settings-reset" type="button" aria-label="Reset play stats">Reset play stats</button>
+          <button id="playStatsReset" class="settings-reset" type="button" aria-label="Clear play stats">Clear play stats</button>
           <button id="playStatsBack" class="settings-close" type="button" aria-label="Back to settings">Back to settings</button>
         </div>
       </div>

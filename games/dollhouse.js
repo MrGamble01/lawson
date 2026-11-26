@@ -3,7 +3,9 @@
 // ears, Pandy) can be skipped and stays skipped on later visits. The hub
 // opens seven rooms. Each room is a Play Stats mode via L.noteMode, so
 // visits and time show up in the existing play log — there is no second
-// stats store. Finishing a room earns the Gabby Cat sticker.
+// stats store. The hub marks a room played today from that log. Each
+// room's main tap has its own soft sound, and finishing one sparkles
+// unless motion is reduced. Finishing a room earns the Gabby Cat sticker.
 (function () {
   const L = window.Lawson;
   const KEY = "lawson:dollhouse";
@@ -83,6 +85,38 @@
     node.setAttribute("aria-hidden", "true");
     return node;
   }
+  // beep() stays quiet when sound is muted. Music plays the key the kid
+  // tapped; every other room has its own two-note motif.
+  function cue(id, note) {
+    if (note) L.beep(note.freq, note.dur, note.type);
+    const motif = {
+      kitchen: [[523.25, 0.07, "sine", 0], [659.25, 0.1, "sine", 0.06]],
+      craft: [[349.23, 0.08, "triangle", 0], [440, 0.1, "sine", 0.07]],
+      music: null,
+      bathroom: [[493.88, 0.14, "sine", 0], [392, 0.16, "sine", 0.1]],
+      garden: [[698.46, 0.08, "sine", 0], [880, 0.12, "triangle", 0.07]],
+      playroom: [[246.94, 0.08, "triangle", 0], [329.63, 0.1, "sine", 0.06]],
+      bedroom: [[329.63, 0.12, "sine", 0], [261.63, 0.16, "sine", 0.1]],
+    }[id];
+    if (!motif) return;
+    motif.forEach((tone) => L.beep(tone[0], tone[1], tone[2], tone[3]));
+  }
+  function motionOff() {
+    return typeof L.prefersReducedMotion === "function" && L.prefersReducedMotion();
+  }
+  function playedToday() {
+    const found = new Set();
+    try {
+      const snap = window.LawsonPlay && window.LawsonPlay.snapshot();
+      const games = (snap && snap.ranges && snap.ranges.today && snap.ranges.today.games) || [];
+      const doll = games.find((item) => item.id === "dollhouse");
+      const modes = new Set(((doll && doll.modes) || [])
+        .filter((item) => (item.plays || 0) > 0 || (item.ms || 0) > 0)
+        .map((item) => item.id));
+      ROOMS.forEach((room) => { if (modes.has(room.mode)) found.add(room.id); });
+    } catch (_) {}
+    return found;
+  }
   function tap(label, className, on) {
     const button = el("button", className);
     button.type = "button";
@@ -116,17 +150,25 @@
     data.rooms = rooms;
     save(data);
     const host = document.getElementById("dollhouseStage");
+    const still = motionOff();
     if (host) {
       host.dataset.done = id;
       host.classList.remove("is-celebrate");
-      void host.offsetWidth;
-      host.classList.add("is-celebrate");
-      const rect = host.getBoundingClientRect();
-      const cx = rect.left + rect.width / 2;
-      const cy = rect.top + rect.height * 0.35;
-      L.sparkleAt(cx, cy);
-      L.sparkleAt(cx - 36, cy + 14);
-      L.sparkleAt(cx + 40, cy + 8);
+      host.querySelectorAll(".dh-yay").forEach((node) => node.remove());
+      const yay = text("p", "dh-yay", still ? "✓" : "⭐");
+      yay.setAttribute("aria-hidden", "true");
+      host.append(yay);
+      if (!still) {
+        void host.offsetWidth;
+        host.classList.add("is-celebrate");
+        yay.classList.add("is-pop");
+        const rect = host.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height * 0.35;
+        L.sparkleAt(cx, cy);
+        L.sparkleAt(cx - 36, cy + 14);
+        L.sparkleAt(cx + 40, cy + 8);
+      }
     }
     L.happySound();
     Promise.resolve(L.say(room.done)).then(() => {
@@ -237,13 +279,23 @@
     view.append(text("p", "dh-title", "Dollhouse"));
     const doors = el("div", "dh-doors");
     const done = doneSet();
+    const today = playedToday();
     ROOMS.forEach((room) => {
       const finished = done.has(room.id);
-      const label = finished ? room.mode + ", all done" : room.mode;
-      const door = tap(label, "dh-door" + (finished ? " is-done" : ""), () => openRoom(room.id));
+      const seen = today.has(room.id);
+      const bits = [room.mode];
+      if (finished) bits.push("all done");
+      if (seen) bits.push("played today");
+      const door = tap(bits.join(", "), "dh-door" + (finished ? " is-done" : ""), () => openRoom(room.id));
       door.dataset.room = room.id;
+      if (seen) door.dataset.today = "yes";
       door.append(emoji(room.emoji), text("span", "dh-door-name", room.short));
       if (finished) door.append(emoji("⭐"));
+      if (seen) {
+        const mark = text("span", "dh-today", "✓");
+        mark.setAttribute("aria-hidden", "true");
+        door.append(mark);
+      }
       doors.append(door);
     });
     const extra = el("div", "dh-hub-extra");
@@ -314,7 +366,7 @@
     function ready() { return picked.base && picked.frost && picked.top; }
     function choose(field, id) {
       picked[field] = id;
-      L.beep(640, 0.07, "triangle");
+      cue("kitchen");
       render();
     }
     function party() {
@@ -374,7 +426,7 @@
       stack.push(tool);
       render();
       if (ready()) finishRoom("craft");
-      else L.beep(600, 0.06, "triangle");
+      else cue("craft");
     }
     function undo() {
       if (!stack.length) { L.buzzSound(); return; }
@@ -446,7 +498,7 @@
     ];
     let hits = 0;
     function play(note) {
-      L.beep(note.freq, note.dur, note.type);
+      cue("music", note);
       hits += 1;
       render();
       if (hits === 4) finishRoom("music");
@@ -484,7 +536,7 @@
     function pour(id) {
       if (poured[id]) { L.beep(300, 0.05, "triangle"); return; }
       poured[id] = true;
-      L.beep(480, 0.12, "sine");
+      cue("bathroom");
       render();
     }
     function mix() {
@@ -538,22 +590,22 @@
     ];
     let wet = {};
     let lit = {};
-    function maybeDone() {
-      if (flowers.every((item) => wet[item.id]) && stars.every((item) => lit[item.id])) finishRoom("garden");
+    function gardenReady() {
+      return flowers.every((item) => wet[item.id]) && stars.every((item) => lit[item.id]);
     }
     function water(id) {
       if (wet[id]) { L.beep(400, 0.05, "triangle"); return; }
       wet[id] = true;
-      L.beep(620, 0.08, "sine");
       render();
-      maybeDone();
+      if (gardenReady()) finishRoom("garden");
+      else cue("garden");
     }
     function shine(id) {
       if (lit[id]) { L.beep(880, 0.05, "triangle"); return; }
       lit[id] = true;
-      L.beep(880, 0.1, "triangle");
       render();
-      maybeDone();
+      if (gardenReady()) finishRoom("garden");
+      else cue("garden");
     }
     function render() {
       const room = ROOMS[4];
@@ -592,7 +644,7 @@
       const next = lane + dir;
       if (next < 0 || next > 2) { L.buzzSound(); return; }
       lane = next;
-      L.beep(500 + lane * 90, 0.06, "triangle");
+      cue("playroom");
       render();
     }
     function collect(item) {
@@ -605,7 +657,7 @@
       got[item.id] = true;
       render();
       if (items.every((entry) => got[entry.id])) finishRoom("playroom");
-      else L.beep(720, 0.08, "triangle");
+      else cue("playroom");
     }
     function render() {
       const room = ROOMS[5];
@@ -653,12 +705,12 @@
     function anySticker() { return stickers.some((item) => stuck[item.id]); }
     function toggle(id) {
       stuck[id] = !stuck[id];
-      L.beep(600, 0.06, "triangle");
+      cue("bedroom");
       render();
     }
     function wear(id) {
       pj = id;
-      L.beep(540, 0.07, "triangle");
+      cue("bedroom");
       render();
     }
     function roll() {
