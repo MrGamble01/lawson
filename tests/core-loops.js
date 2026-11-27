@@ -500,6 +500,48 @@ async function animalTrainGame(page) {
   assert.deepEqual(await stage(), { phase: "load", filled: "0", mode: "free" }, "restart brings an empty train");
 }
 
+async function oceanFriendsGame(page) {
+  const stage = () => page.evaluate(() => {
+    const el = document.getElementById("oceanFriendsStage");
+    return { phase: el.dataset.phase, stars: el.dataset.stars, mode: el.dataset.mode, goal: el.dataset.goal || "" };
+  });
+  const prompt = () => page.locator("#oceanFriendsPrompt").textContent();
+  assert.deepEqual(await stage(), { phase: "swim", stars: "0", mode: "free", goal: "" });
+  assert.equal(await prompt(), "Let's swim!");
+  await clickLabel(page, "oceanfriends", "Whale");
+  await sleep(40);
+  assert.equal((await stage()).stars, "1");
+  await clickLabel(page, "oceanfriends", "Whale");
+  await sleep(40);
+  assert.equal((await stage()).stars, "1", "a friend already met does not add another star");
+  await clickLabel(page, "oceanfriends", "Sea Turtle");
+  await clickLabel(page, "oceanfriends", "Octopus");
+  await clickLabel(page, "oceanfriends", "Starfish");
+  await clickLabel(page, "oceanfriends", "Clownfish");
+  await clickLabel(page, "oceanfriends", "Dolphin");
+  await page.waitForFunction(() => document.getElementById("oceanFriendsStage").dataset.phase === "again", null, { timeout: 8000 });
+  assert.equal(await prompt(), "Yay! Ocean friends!");
+  await clickLabel(page, "oceanfriends", "Play again");
+  await sleep(40);
+  assert.deepEqual(await stage(), { phase: "swim", stars: "0", mode: "free", goal: "" });
+  await restart(page, "oceanfriends");
+  assert.deepEqual(await stage(), { phase: "swim", stars: "0", mode: "free", goal: "" }, "restart clears the stars");
+  await clickLabel(page, "oceanfriends", "Find Friends");
+  await sleep(40);
+  assert.equal((await stage()).mode, "find");
+  assert.equal((await stage()).goal, "turtle");
+  assert.equal(await prompt(), "Find the Sea Turtle!");
+  await clickLabel(page, "oceanfriends", "Whale");
+  await sleep(40);
+  assert.equal((await stage()).stars, "0", "another friend is a hello, not a miss");
+  assert.equal((await stage()).goal, "turtle");
+  await clickLabel(page, "oceanfriends", "Sea Turtle");
+  await sleep(40);
+  assert.equal((await stage()).stars, "1");
+  assert.equal((await stage()).goal, "whale");
+  assert.equal(await prompt(), "Find the Whale!");
+}
+
 async function stickersGame(page) {
   const locked = await page.locator("#stickerGrid button").count();
   assert.ok(locked > 0);
@@ -537,6 +579,7 @@ const SPECIAL = {
   stickers: stickersGame,
   dollhouse: dollhouseGame,
   animaltrain: animalTrainGame,
+  oceanfriends: oceanFriendsGame,
 };
 
 async function main() {
