@@ -1,3 +1,12 @@
+/* Fredoka (SIL OFL). License: fonts/OFL.txt */
+@font-face {
+  font-family: "Fredoka";
+  src: url("fonts/fredoka-700.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ---------- Design tokens ---------- */
 :root {
   --c-brand: #8a4e32;
@@ -29,7 +38,7 @@
   --dur-base: 0.32s;
 
   --font-body: Inter, "Avenir Next", "Nunito", "Noto Sans", "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
-  --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, "Liberation Serif", "DejaVu Serif", Georgia, serif;
+  --font-display: Fredoka, "Trebuchet MS", "Avenir Next", "Segoe UI", system-ui, sans-serif;
   --c-cloth: #4e2a28;
   --c-cloth-deep: #3a1e1c;
   --c-foil: #f6e7c1;
@@ -379,10 +388,10 @@ html.dark .menu-cloud { opacity: 0.55; }
 /* ---------- Sunny the sun (second mascot, top-left of menu) ---------- */
 .sunny {
   position: fixed;
-  top: calc(env(safe-area-inset-top, 0px) + 70px);
-  left: max(env(safe-area-inset-left, 0px), 14px);
-  width: clamp(54px, 9vw, 76px);
-  height: clamp(54px, 9vw, 76px);
+  top: calc(env(safe-area-inset-top, 0px) + 68px);
+  left: max(env(safe-area-inset-left, 0px), 22px);
+  width: 58px;
+  height: 58px;
   z-index: 80;
   border: none;
   background: transparent;
@@ -568,10 +577,16 @@ body.on-lobby .mascot { display: block; }
   align-items: stretch;
   justify-content: flex-start;
   gap: 0;
-  padding: 12px 12px 24px;
+  padding: 8px 10px 12px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  background:
+    radial-gradient(ellipse 84px 28px at 18% 8%, #fff 0 68%, transparent 70%),
+    radial-gradient(ellipse 52px 18px at 28% 11%, #fff 0 68%, transparent 70%),
+    radial-gradient(ellipse 70px 22px at 72% 7%, #fff 0 68%, transparent 70%),
+    radial-gradient(ellipse at 50% 100%, rgba(125, 206, 106, 0.45), transparent 42%),
+    linear-gradient(180deg, #9ad9ff 0%, #e7f6ff 28%, #fff6ea 62%, #fff1d0 100%);
 }
 #menu::-webkit-scrollbar { display: none; }
 /* ---------- Themed "places" — the new home menu ---------- */
@@ -694,23 +709,50 @@ body.on-lobby .mascot { display: block; }
    so every game is on screen without a scroll. ---------- */
 .menu-home3 {
   grid-template-columns: 1fr 1fr;
+  grid-template-rows: minmax(128px, 1.15fr) repeat(3, minmax(96px, 1fr)) minmax(72px, 0.72fr);
   max-width: 820px;
-  gap: 14px;
-  padding: 76px 8px 96px;
+  gap: 12px;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  padding: 58px 6px 88px;
+  align-content: stretch;
 }
 .place--game {
   flex-direction: column;
   justify-content: flex-end;
   align-items: center;
-  gap: 8px;
-  min-height: clamp(148px, 28vw, 220px);
-  padding: 16px 12px 14px;
+  gap: 6px;
+  min-height: 0;
+  height: 100%;
+  padding: 10px 10px 12px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--c, #c47a55) 42%, white) 0%, var(--c, #c47a55) 100%);
+  border-bottom-width: 7px;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.45),
+    0 8px 0 rgba(90, 55, 35, 0.12);
+}
+.place--game:active {
+  transform: translateY(4px) scale(0.98);
+  border-bottom-width: 3px;
 }
 .place-emoji {
   font-size: clamp(52px, 10vw, 84px);
   line-height: 1;
-  flex-shrink: 0;
-  filter: drop-shadow(0 6px 0 rgba(255,255,255,0.35));
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 6px 0 rgba(255,255,255,0.28));
+}
+.place-emoji svg {
+  width: auto;
+  height: 100%;
+  max-height: 92px;
+  max-width: 100%;
 }
 .place--game .place-text { align-items: center; }
 .place--game .place-label { text-align: center; font-size: clamp(20px, 3.4vw, 30px); }
@@ -721,48 +763,56 @@ body.on-lobby .mascot { display: block; }
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  min-height: 96px;
+  min-height: 0;
   gap: 14px;
 }
-/* Dollhouse spans the two-column home so it isn't a lone half card.
-   The four-across layout below puts it back in the grid. */
+.menu-home3 .place--more .place-emoji { flex: 0 0 auto; width: 64px; height: 64px; }
+.menu-home3 .place--more .place-emoji svg { max-height: 64px; }
+/* Dollhouse is the spotlight: a full-width storybook house. */
 .menu-home3 .place--dollhouse {
   grid-column: 1 / -1;
   flex-direction: row;
   justify-content: center;
-  min-height: 108px;
+  align-items: center;
+  min-height: 0;
+  gap: 12px;
+  background:
+    linear-gradient(180deg, #fff6ea 0%, #ffd0e8 55%, #c9f2c2 100%);
 }
+.menu-home3 .place--dollhouse .place-emoji {
+  flex: 1 1 auto;
+  width: auto;
+  height: 100%;
+  max-width: 280px;
+}
+.menu-home3 .place--dollhouse .place-emoji svg {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  max-width: 280px;
+}
+.menu-home3 .place { min-height: 0; }
 @media (min-width: 720px) and (min-height: 900px) {
-  /* iPad mini portrait (~744×1133): roomy 2-column cards. */
-  .menu-home3 { max-width: 700px; gap: 16px; padding-top: 88px; }
-  .menu-home3 .place--game { min-height: clamp(200px, 26vw, 250px); padding: 22px 14px 18px; }
-  .menu-home3 .place--more { min-height: 120px; }
-  .menu-home3 .place--dollhouse { min-height: 132px; }
+  .menu-home3 { max-width: 760px; gap: 14px; padding: 64px 10px 96px; }
 }
 @media (min-width: 980px), (min-width: 900px) and (max-height: 860px) {
-  /* iPad mini landscape (~1133×744) and desktop: four across, no scroll. */
+  /* iPad mini landscape and desktop: spotlight, then two even rows. */
   .menu-home3 {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-rows: minmax(120px, 0.9fr) minmax(120px, 1fr) minmax(120px, 1fr);
     max-width: 1120px;
     gap: 12px;
-    padding: 14px 12px 20px;
-  }
-  .menu-home3 .place--game {
-    min-height: 0;
-    aspect-ratio: 1.05 / 1;
-    padding: 14px 10px 12px;
+    padding: 16px 16px 24px;
   }
   .menu-home3 .place--game .place-label { font-size: clamp(16px, 1.8vw, 24px); }
-  .menu-home3 .place-emoji { font-size: clamp(44px, 5vw, 68px); }
   .menu-home3 .place--more {
-    grid-column: auto;
-    flex-direction: column;
-    aspect-ratio: 1.05 / 1;
+    grid-column: span 2;
+    flex-direction: row;
     min-height: 0;
   }
   .menu-home3 .place--dollhouse {
-    grid-column: auto;
-    flex-direction: column;
+    grid-column: 1 / -1;
+    flex-direction: row;
     min-height: 0;
   }
 }
@@ -8116,11 +8166,12 @@ button.story-hint {
   flex-direction: column;
   padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px));
   color: #3a2a22;
-  background: radial-gradient(120% 80% at 50% 0%, #ffe3f4 0%, #fff6ea 46%, #f3e4ff 100%);
+  font-family: Fredoka, var(--font-body);
+  background: linear-gradient(180deg, #8fd4ff 0%, #fff6ea 42%, #d9f5c8 100%);
 }
 html.dark #dollhouseGame {
   color: #fff6ea;
-  background: radial-gradient(120% 70% at 50% 0%, #5c2d4a 0%, #241820 72%);
+  background: linear-gradient(180deg, #243056 0%, #3a2848 55%, #1d3324 100%);
 }
 .dollhouse-stage {
   flex: 1 1 auto;
@@ -8130,7 +8181,67 @@ html.dark #dollhouseGame {
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  padding-top: 78px;
+  padding-top: 72px;
+  border-radius: 28px;
+  overflow: hidden;
+}
+#dollhouseStage[data-view="hub"] {
+  background:
+    radial-gradient(ellipse 92px 30px at 14% 16%, #fff 0 68%, transparent 70%),
+    radial-gradient(ellipse 56px 18px at 24% 20%, #fff 0 68%, transparent 70%),
+    radial-gradient(ellipse 70px 22px at 62% 12%, #fff 0 68%, transparent 70%),
+    linear-gradient(180deg, #79d0ff 0%, #d7f1ff 18%, #fff8ea 34%, #8fd46a 72%, #4eae45 100%);
+}
+#dollhouseStage[data-view="kitchen"] {
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255,255,255,0.7) 0 7px, transparent 8px),
+    repeating-linear-gradient(90deg, #ffe8d6 0 18px, #ffd7bc 18px 36px);
+}
+#dollhouseStage[data-view="craft"] {
+  background:
+    radial-gradient(circle at 8% 16%, #ff8fab 0 9px, transparent 11px),
+    radial-gradient(circle at 94% 14%, #74c0fc 0 9px, transparent 11px),
+    linear-gradient(180deg, #e7f5ff, #d0ebff 64%, #f6e0c0 64%);
+}
+#dollhouseStage[data-view="music"] {
+  background:
+    radial-gradient(ellipse at 50% 18%, rgba(255, 224, 102, 0.55), transparent 46%),
+    radial-gradient(circle at 16% 30%, rgba(177, 151, 252, 0.45), transparent 32%),
+    linear-gradient(180deg, #f3e8ff 0%, #e5dbff 55%, #d0bfff 100%);
+}
+#dollhouseStage[data-view="bathroom"] {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 26px, rgba(255,255,255,0.85) 26px 28px),
+    repeating-linear-gradient(90deg, transparent 0 26px, rgba(255,255,255,0.85) 26px 28px),
+    linear-gradient(#d0ebff, #e7f5ff);
+}
+#dollhouseStage[data-view="garden"] {
+  background:
+    radial-gradient(ellipse 70px 22px at 16% 12%, #fff 0 68%, transparent 70%),
+    linear-gradient(#b9e6ff 0%, #e7f5ff 36%, #b2f2bb 36%, #69db7c 100%);
+}
+#dollhouseStage[data-view="playroom"] {
+  background:
+    repeating-linear-gradient(90deg, #f8e0c8 0 14px, #f3d2b0 14px 28px);
+}
+#dollhouseStage[data-view="bedroom"] {
+  background:
+    radial-gradient(circle at 16% 22%, #fff 0 1.6px, transparent 2.2px),
+    radial-gradient(circle at 28% 14%, #fff 0 1.2px, transparent 1.8px),
+    radial-gradient(circle at 40% 26%, #fff 0 1.4px, transparent 2px),
+    radial-gradient(circle at 54% 12%, #fff 0 1px, transparent 1.6px),
+    radial-gradient(circle at 66% 20%, #fff 0 1.3px, transparent 1.8px),
+    radial-gradient(circle at 74% 32%, #fff 0 1px, transparent 1.6px),
+    linear-gradient(#241f3d 0%, #3d3a68 46%, #6b5b95 100%);
+}
+#dollhouseStage[data-view="bedroom"] .dh-room-name { color: #fff8ee; }
+#dollhouseStage[data-view="mail"],
+#dollhouseStage[data-view="ears"],
+#dollhouseStage[data-view="pandy"] {
+  background:
+    radial-gradient(circle at 84% 12%, #ffe066 0 16px, transparent 22px),
+    radial-gradient(ellipse at 18% 14%, #fff 0 16px, transparent 18px),
+    linear-gradient(180deg, #9ad9ff, #fff6ea 55%, #c9f2c2);
 }
 .dh-view {
   flex: 1 1 auto;
@@ -8156,7 +8267,7 @@ html.dark #dollhouseGame {
   position: absolute;
   left: 50%;
   top: 44px;
-  z-index: 2;
+  z-index: 3;
   margin: 0;
   pointer-events: none;
   font-size: 28px;
@@ -8175,18 +8286,32 @@ html.dark #dollhouseGame {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  position: relative;
+  z-index: 1;
 }
 .dh-title,
 .dh-kicker,
 .dh-room-name {
   margin: 0;
   min-width: 0;
-  font-family: var(--font-display);
+  font-family: Fredoka, var(--font-display);
   font-weight: 700;
   line-height: 1.1;
   text-align: center;
 }
-.dh-title { font-size: clamp(22px, 5vw, 34px); }
+.dh-title {
+  position: relative;
+  z-index: 2;
+  align-self: center;
+  font-size: clamp(20px, 4.6vw, 32px);
+  color: #5c2e12;
+  background: linear-gradient(#ffe8a8, #f0c36a);
+  border: 3px solid #6b3a28;
+  border-bottom-width: 6px;
+  border-radius: 16px;
+  padding: 6px 18px;
+  box-shadow: inset 0 2px 0 rgba(255,255,255,0.65), 0 4px 0 rgba(90,40,20,0.12);
+}
 .dh-kicker { font-size: clamp(18px, 4vw, 26px); }
 .dh-head {
   flex: 0 0 auto;
@@ -8196,18 +8321,24 @@ html.dark #dollhouseGame {
   align-items: center;
   justify-content: center;
   gap: 8px;
+  position: relative;
+  z-index: 1;
 }
-.dh-room-name { font-size: clamp(16px, 4.2vw, 28px); text-align: left; }
-html.dark #dollhouseGame .dh-title,
+.dh-head .dh-emoji { width: 44px; height: 44px; flex: 0 0 auto; }
+.dh-head .dh-emoji svg { width: 44px; height: 44px; }
+.dh-room-name { font-size: clamp(18px, 4.2vw, 28px); text-align: left; color: #3a2a22; }
+html.dark #dollhouseGame .dh-title { color: #5c2e12; }
 html.dark #dollhouseGame .dh-kicker,
 html.dark #dollhouseGame .dh-room-name { color: #fff6ea; }
 #dollhouseGame button {
   font-family: inherit;
-  font-weight: 800;
+  font-weight: 700;
   color: #3a2a22;
-  background: #fffaf3;
+  background: linear-gradient(180deg, #fffdf8 0%, #fff1dc 100%);
   border: 3px solid #6b4a38;
+  border-bottom-width: 6px;
   border-radius: 18px;
+  box-shadow: inset 0 2px 0 rgba(255,255,255,0.85);
   touch-action: manipulation;
   display: flex;
   align-items: center;
@@ -8216,20 +8347,47 @@ html.dark #dollhouseGame .dh-room-name { color: #fff6ea; }
   min-width: 0;
   padding: 6px 8px;
   overflow-wrap: anywhere;
-  transition: transform 0.16s var(--ease-spring), background 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.16s var(--ease-spring), background 0.15s ease, border-width 0.12s ease;
 }
-#dollhouseGame button:active { transform: scale(0.96) translateY(1px); }
+#dollhouseGame button:active {
+  transform: translateY(3px) scale(0.98);
+  border-bottom-width: 3px;
+}
 #dollhouseGame [hidden] { display: none !important; }
-.dh-emoji { font-size: clamp(26px, 7vw, 42px); line-height: 1; }
+.dh-emoji {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.dh-emoji svg {
+  width: 48px;
+  height: 48px;
+  display: block;
+  transform-origin: center bottom;
+  animation: dhBob 2.8s ease-in-out infinite;
+}
+.dh-door:nth-child(2n) .dh-emoji svg { animation-delay: -0.6s; }
+.dh-door:nth-child(3n) .dh-emoji svg { animation-delay: -1.2s; }
+@keyframes dhBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+#dollhouseGame button:active .dh-emoji svg {
+  animation: none;
+  transform: scale(1.08, 0.9);
+}
 .dh-word { font-size: clamp(16px, 4vw, 22px); line-height: 1.1; text-align: center; }
 .dh-hero {
   flex: 1 1 auto;
   min-height: 160px;
   border-radius: 28px;
+  background:
+    radial-gradient(circle at 50% 30%, #fff 0%, #fff6ea 70%);
 }
-.dh-hero .dh-emoji { font-size: clamp(64px, 18vw, 112px); }
-.dh-face { flex: 0 0 auto; text-align: center; }
-.dh-face .dh-emoji { font-size: clamp(56px, 16vw, 96px); }
+.dh-hero .dh-emoji svg { width: min(34vw, 140px); height: auto; }
+.dh-face { flex: 0 0 auto; text-align: center; display: flex; justify-content: center; }
+.dh-face .dh-emoji svg { width: min(42vw, 180px); height: auto; }
 .dh-ears {
   flex: 1 1 auto;
   min-height: 0;
@@ -8238,7 +8396,7 @@ html.dark #dollhouseGame .dh-room-name { color: #fff6ea; }
   gap: 10px;
 }
 .dh-ear { min-height: 96px; height: 100%; }
-.dh-ear .dh-emoji { font-size: clamp(48px, 14vw, 88px); }
+.dh-ear .dh-emoji svg { width: min(28vw, 120px); height: auto; }
 .dh-skip,
 .dh-back,
 .dh-party,
@@ -8247,8 +8405,64 @@ html.dark #dollhouseGame .dh-room-name { color: #fff6ea; }
 .dh-whoops {
   flex: 0 0 auto;
   width: 100%;
-  min-height: 68px;
+  min-height: 56px;
+  position: relative;
+  z-index: 1;
 }
+.dh-roof {
+  flex: 0 0 118px;
+  height: 118px;
+  width: 100%;
+  position: relative;
+  z-index: 4;
+  pointer-events: none;
+  margin-bottom: -8px;
+}
+.dh-roof-art { position: absolute; inset: 0; pointer-events: none; }
+.dh-shingles {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100px;
+  clip-path: polygon(0 100%, 50% 0, 100% 100%);
+}
+.dh-crown {
+  position: absolute;
+  left: 50%;
+  bottom: 28px;
+  width: min(78%, 460px);
+  height: 92px;
+  transform: translateX(-50%);
+  overflow: visible;
+}
+.dh-sun {
+  position: absolute;
+  top: 0;
+  right: 18px;
+  width: 52px;
+  height: 52px;
+}
+.dh-bloom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 70px;
+  height: 78px;
+  z-index: 3;
+  pointer-events: none;
+}
+.dh-bloom svg { width: 100%; height: 100%; display: block; }
+.dh-doors {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.28), transparent 18px),
+    repeating-linear-gradient(90deg, #f6d7b0 0 16px, #e7c194 16px 18px, #f8e0c4 18px 34px);
+  border: 4px solid #6b3a28;
+  border-radius: 4px 4px 18px 18px;
+  box-shadow: inset 0 10px 0 #6b3a28, inset 0 0 0 4px rgba(255,255,255,0.28), 0 8px 0 rgba(80, 48, 24, 0.12);
+}
+.dh-roof svg { display: block; overflow: visible; }
 .dh-doors {
   flex: 1 1 auto;
   min-height: 0;
@@ -8256,11 +8470,70 @@ html.dark #dollhouseGame .dh-room-name { color: #fff6ea; }
   grid-template-columns: 1fr 1fr;
   grid-auto-rows: minmax(72px, 1fr);
   gap: 8px;
+  position: relative;
+  z-index: 1;
+  padding: 18px 8px 8px;
 }
-.dh-door { position: relative; flex-direction: column; gap: 2px; height: 100%; min-height: 48px; }
-.dh-door-name { font-size: clamp(14px, 3vw, 16px); line-height: 1.1; }
-.dh-door:last-child { grid-column: 1 / -1; }
-.dh-door.is-done { box-shadow: inset 0 0 0 3px #fab005; }
+.dh-door {
+  position: relative;
+  flex-direction: column;
+  gap: 2px;
+  height: 100%;
+  min-height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #fffdf6, #ffe8b0);
+  box-shadow:
+    inset 0 0 0 5px #fffaf0,
+    inset 0 0 0 8px #c4a484,
+    inset 0 0 16px rgba(255, 196, 80, 0.28);
+}
+.dh-door .dh-emoji { flex: 1 1 auto; min-height: 0; width: 100%; }
+.dh-door .dh-emoji svg { width: 100%; height: 100%; max-width: none; max-height: none; }
+.dh-door-name {
+  font-size: clamp(14px, 3vw, 18px);
+  line-height: 1.1;
+  color: #3a2a22;
+  background: rgba(255, 250, 243, 0.92);
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+.dh-door[data-room="kitchen"] {
+  background:
+    repeating-linear-gradient(90deg, #fff1e0 0 10px, #ffd8b8 10px 20px);
+}
+.dh-door[data-room="craft"] {
+  background: linear-gradient(180deg, #e7f5ff 0 62%, #f6e0c0 62%);
+}
+.dh-door[data-room="music"] {
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255,255,255,0.45), transparent 28%),
+    linear-gradient(180deg, #f3e8ff, #d0bfff);
+}
+.dh-door[data-room="bathroom"] {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 12px, rgba(255,255,255,0.7) 12px 13px),
+    repeating-linear-gradient(90deg, transparent 0 12px, rgba(255,255,255,0.7) 12px 13px),
+    linear-gradient(#c5ebff, #e7f5ff);
+}
+.dh-door[data-room="garden"] {
+  background: linear-gradient(180deg, #b9e6ff 0 46%, #8ce99a 46%, #51cf66 100%);
+}
+.dh-door[data-room="playroom"] {
+  background:
+    repeating-linear-gradient(90deg, #fff4e0 0 8px, #ffe0b8 8px 16px);
+}
+.dh-door[data-room="bedroom"] {
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 78% 22%, #fff6c2 0 6px, transparent 7px),
+    radial-gradient(circle at 22% 18%, #fff 0 1px, transparent 1.6px),
+    radial-gradient(circle at 40% 30%, #fff 0 1px, transparent 1.6px),
+    linear-gradient(180deg, #2c2a4a 0 58%, #6b4a38 58% 64%, #3a315c 64%);
+  color: #3a2a22;
+}
+.dh-door[data-room="bedroom"] .dh-door-name { color: #3a2a22; }
+.dh-door:last-child { grid-column: 1 / -1; min-height: 146px; }
+.dh-door.is-done { box-shadow: inset 0 0 0 3px #fab005, 0 0 0 3px rgba(255, 214, 80, 0.45); }
 .dh-today {
   position: absolute;
   top: 4px;
@@ -8276,36 +8549,69 @@ html.dark #dollhouseGame .dh-room-name { color: #fff6ea; }
   text-align: center;
   pointer-events: none;
 }
-.dh-hub-extra { flex: 0 0 auto; display: flex; gap: 8px; }
+.dh-path {
+  flex: 0 0 18px;
+  height: 18px;
+  margin: 0 18px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 10px 9px, #efeae4 5px, transparent 6px) 0 0 / 20px 18px,
+    linear-gradient(#cfc6bc, #b7aea4);
+  box-shadow: inset 0 2px 0 rgba(255,255,255,0.4);
+}
+.dh-hub-extra { flex: 0 0 auto; display: flex; gap: 8px; position: relative; z-index: 1; padding: 0 4px 6px; }
 .dh-catrat,
-.dh-replay { flex: 1 1 0; min-height: 68px; }
-.dh-catrat.is-found { border-color: #fab005; }
+.dh-replay { flex: 1 1 0; min-height: 56px; }
+.dh-catrat.is-found { border-color: #fab005; background: linear-gradient(180deg, #fff8dc, #ffe08a); }
 .dh-choices {
   display: grid;
   gap: 8px;
   min-width: 0;
   flex: 0 0 auto;
+  position: relative;
+  z-index: 1;
 }
 .dh-row-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .dh-row-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .dh-row-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .dh-row-5 { grid-template-columns: repeat(5, minmax(44px, 1fr)); }
 .dh-choice,
-.dh-key { flex-direction: column; min-width: 44px; min-height: 60px; width: 100%; }
+.dh-key { flex-direction: column; min-width: 44px; min-height: 56px; width: 100%; }
+.dh-choice .dh-emoji {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff, #ffe8c2 72%);
+  box-shadow: inset 0 -3px 0 rgba(160, 100, 40, 0.16), 0 2px 0 rgba(255,255,255,0.6);
+}
+.dh-choice .dh-emoji svg { width: 52px; height: 52px; }
+#dollhouseStage[data-view="kitchen"] .dh-choice .dh-emoji { background: radial-gradient(circle at 35% 30%, #fff, #ffd8a8 74%); }
+#dollhouseStage[data-view="craft"] .dh-choice .dh-emoji { background: radial-gradient(circle at 35% 30%, #fff, #d0ebff 74%); }
+#dollhouseStage[data-view="music"] .dh-choice .dh-emoji { background: radial-gradient(circle at 35% 30%, #fff, #d0bfff 74%); }
+#dollhouseStage[data-view="bathroom"] .dh-choice .dh-emoji { background: radial-gradient(circle at 35% 30%, #fff, #a5d8ff 74%); }
+#dollhouseStage[data-view="garden"] .dh-choice .dh-emoji { background: radial-gradient(circle at 35% 30%, #fff, #b2f2bb 74%); }
+#dollhouseStage[data-view="playroom"] .dh-choice .dh-emoji { background: radial-gradient(circle at 35% 30%, #fff, #ffd8a8 74%); }
+#dollhouseStage[data-view="bedroom"] .dh-choice .dh-emoji { background: radial-gradient(circle at 35% 30%, #fff, #d0bfff 74%); }
 .dh-choice.is-on,
-.dh-ear.is-on { background: #ffe3f2; border-color: #e599f7; }
+.dh-ear.is-on {
+  background: linear-gradient(180deg, #fff, #ffd0e8);
+  border-color: #e599f7;
+  box-shadow: inset 0 2px 0 #fff, 0 0 0 3px rgba(229, 153, 247, 0.35);
+}
 .dh-swatch {
   width: 28px;
   height: 28px;
   border-radius: 50%;
   border: 2px solid #3a2a22;
+  box-shadow: inset 0 3px 0 rgba(255,255,255,0.45);
 }
 .dh-whoops { grid-column: 1 / -1; }
 .dh-cake,
 .dh-paper,
 .dh-tub,
 .dh-pillow,
-.dh-road { flex: 1 1 auto; min-height: 72px; }
+.dh-road,
+.dh-stage { flex: 1 1 auto; min-height: 72px; position: relative; z-index: 1; }
 .dh-cake,
 .dh-paper,
 .dh-pillow {
@@ -8313,12 +8619,13 @@ html.dark #dollhouseGame .dh-room-name { color: #fff6ea; }
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border: 3px solid #e7cbb8;
   border-radius: 24px;
-  background: #fff;
+  background: transparent;
+  border: 0;
 }
-.dh-cake { font-size: clamp(36px, 9vw, 64px); }
-.dh-cake.is-party { background: #fff0f6; }
+.dh-prop { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.dh-prop svg { width: 100%; height: 100%; max-height: 100%; }
+.dh-cake.is-party { filter: saturate(1.2); }
 #dollhouseGame button.is-pop { animation: tilePop 0.34s var(--ease-spring); }
 #dollhouseGame button.is-wiggle,
 .dh-cake.is-wiggle,
@@ -8335,7 +8642,32 @@ html.dark #dollhouseGame .dh-room-name { color: #fff6ea; }
   100% { transform: none; }
 }
 .sparkle.dh-glint { font-size: 22px; }
-.dh-paper { position: relative; overflow: hidden; align-items: stretch; justify-content: flex-start; }
+.dh-paper {
+  position: relative;
+  overflow: hidden;
+  align-items: stretch;
+  justify-content: flex-start;
+  background:
+    repeating-linear-gradient(180deg, transparent 0 26px, rgba(255, 182, 193, 0.28) 26px 28px),
+    linear-gradient(#fffefb, #fff) padding-box;
+  border: 3px solid #f3d2b0;
+  box-shadow: inset 0 0 0 8px #fffaf3, 0 8px 0 rgba(168, 107, 32, 0.12);
+}
+.dh-paper::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 18%;
+  width: 18px; height: 16px;
+  background: rgba(255, 214, 120, 0.75);
+  transform: rotate(-8deg);
+}
+.dh-paper .dh-prop {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  width: min(62%, 240px);
+  height: 62%;
+}
 .dh-mark {
   position: absolute;
   width: 28px;
@@ -8343,52 +8675,103 @@ html.dark #dollhouseGame .dh-room-name { color: #fff6ea; }
   font-size: 26px;
   line-height: 28px;
   text-align: center;
+  z-index: 1;
 }
-.dh-mark.is-paint { border-radius: 50%; }
+.dh-mark.is-paint {
+  border-radius: 50%;
+  box-shadow: inset 0 3px 0 rgba(255,255,255,0.45), 0 2px 0 rgba(0,0,0,0.08);
+}
 .dh-tub {
-  border: 4px solid #4dabf7;
-  border-radius: 24px;
-  background: #e7f5ff;
+  border: 0;
+  background: transparent;
   position: relative;
-  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  box-shadow: none;
+  overflow: visible;
+}
+.dh-tub .dh-prop {
+  position: relative;
+  width: 100%;
+  height: 100%;
 }
 .dh-bubbles {
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 12px;
-  text-align: center;
-  font-size: 28px;
-  letter-spacing: 8px;
-  color: #fff;
+  right: 8%;
+  top: 16%;
+  width: 72px;
+  height: 72px;
+  pointer-events: none;
 }
-.dh-pillow { font-size: 48px; flex-wrap: wrap; }
+.dh-bubbles svg { width: 72px; height: 72px; animation: dhBob 1.4s ease-in-out infinite; }
+.dh-pillow { align-items: flex-end; justify-content: center; background: #241f3d; }
+.dh-pillow-cat { width: 100%; height: 100%; }
+.dh-pillow-cat svg { width: 100%; height: 100%; }
+.dh-pillow .dh-emoji { position: absolute; }
+.dh-pillow .dh-emoji:nth-of-type(1) { top: 12%; left: 10%; }
+.dh-pillow .dh-emoji:nth-of-type(2) { top: 18%; right: 12%; }
+.dh-pillow .dh-emoji:nth-of-type(3) { top: 8%; left: 42%; }
 .dh-pillow-cat.is-rolling { animation: dhRoll 0.7s ease-in-out; }
 @keyframes dhRoll { to { transform: rotate(360deg); } }
 .dh-road {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
+  padding: 8px;
+  border-radius: 22px;
+  background:
+    repeating-linear-gradient(90deg, #ffe8a3 0 16px, #ffd43b 16px 32px);
+  box-shadow: inset 0 0 0 4px #e67700;
 }
 .dh-lane {
   min-width: 0;
-  border: 3px solid #e7cbb8;
+  border: 3px solid #fff;
   border-radius: 18px;
-  background: #fff;
+  background:
+    radial-gradient(circle at 22% 16%, rgba(255,255,255,0.85) 0 12px, transparent 14px),
+    radial-gradient(circle at 70% 28%, rgba(255,255,255,0.7) 0 16px, transparent 18px),
+    radial-gradient(circle at 40% 78%, rgba(255,255,255,0.45) 0 10px, transparent 12px),
+    linear-gradient(180deg, #d0ebff, #74c0fc);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 6px;
+  gap: 8px;
+  padding: 8px;
 }
-.dh-lane.is-here { border-color: #e599f7; background: #fff0f6; }
-.dh-lane .dh-choice { max-width: 100%; }
+.dh-lane .dh-emoji { width: 100%; flex: 1 1 auto; }
+.dh-lane .dh-emoji svg { width: min(86%, 240px); height: min(86%, 240px); }
+.dh-lane.is-here {
+  border-style: solid;
+  border-color: #ffd43b;
+  background: rgba(255, 243, 191, 0.28);
+}
+.dh-lane .dh-choice { max-width: 100%; background: #fff; }
+.dh-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 88px;
+}
 .dh-pips { display: flex; justify-content: center; gap: 8px; flex: 0 0 auto; }
-.dh-pip { width: 16px; height: 16px; border-radius: 50%; background: #e7cbb8; }
-.dh-pip.is-on { background: #e599f7; }
+.dh-pip {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #e5dbff;
+  border: 2px solid #9775fa;
+}
+.dh-pip.is-on { background: #9775fa; box-shadow: 0 0 0 3px rgba(151, 117, 250, 0.25); }
 .dh-body > .dh-row-2:first-child { flex: 1 1 auto; min-height: 0; }
 .dh-flower { height: 100%; min-height: 64px; }
+#dollhouseStage[data-view="garden"] .dh-flower {
+  background: linear-gradient(180deg, #ebfbee, #b2f2bb);
+  border-color: #2b8a3e;
+  border-radius: 18px 18px 42% 42%;
+}
+#dollhouseStage[data-view="garden"] .dh-flower .dh-emoji { flex: 1; width: 100%; height: 72%; min-height: 0; }
+#dollhouseStage[data-view="garden"] .dh-flower .dh-emoji svg { width: 100%; height: 100%; max-width: none; max-height: none; }
 .dh-sr {
   position: absolute;
   width: 1px;
@@ -8400,5 +8783,175 @@ html.dark #dollhouseGame .dh-room-name { color: #fff6ea; }
 @keyframes dhPop { from { transform: translateY(12px) scale(0.92); } }
 @media (min-width: 700px) {
   .dh-doors { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .dh-door:last-child { grid-column: auto; }
+  .dh-door:last-child { grid-column: auto; min-height: 0; }
+  .dh-door[data-room="bedroom"] {
+    grid-column: span 2;
+    border-radius: 48px 48px 16px 16px;
+  }
+}
+
+/* Home cards, sticker book, and play stats — placed last so they win
+   over the cloth-cover rules above. */
+#menu.screen {
+  background-color: #e7f6ff;
+  background-image:
+    radial-gradient(ellipse 96px 32px at 78% 9%, #fff 0 68%, transparent 70%),
+    radial-gradient(ellipse 64px 22px at 86% 13%, #fff 0 68%, transparent 70%),
+    radial-gradient(ellipse 80px 26px at 22% 11%, #fff 0 68%, transparent 70%),
+    radial-gradient(ellipse at 50% 108%, rgba(125, 206, 106, 0.55), transparent 42%),
+    linear-gradient(180deg, #b9e3ff 0%, #fff6ea 38%, #fff1d6 100%);
+}
+.menu-home3 .place--game:not(.place--dollhouse):not(.place--more) {
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+}
+.menu-home3 .place--game:not(.place--dollhouse):not(.place--more) .place-text { align-items: flex-start; min-width: 0; }
+.menu-home3 .place--game:not(.place--dollhouse):not(.place--more) .place-label,
+.menu-home3 .place--game:not(.place--dollhouse):not(.place--more) .place-count { text-align: left; }
+.menu-home3 .place--game {
+  padding: 8px 10px 10px;
+  justify-content: center;
+  gap: 4px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--c, #ffb15a) 24%, #fffaf3) 0%, color-mix(in srgb, var(--c, #ffb15a) 62%, #fff) 100%);
+  color: #3a2a22;
+  border: 3px solid #6b3a28;
+  border-bottom-width: 7px;
+  border-radius: 22px;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.75),
+    0 5px 0 rgba(90, 50, 30, 0.14);
+}
+.menu-home3 .place--game::after { display: none; }
+.menu-home3 .place--game:active {
+  transform: translateY(4px) scale(0.98);
+  border-bottom-width: 3px;
+}
+.menu-home3 .place-label {
+  color: #3a2a22;
+  text-shadow: none;
+  background: rgba(255, 250, 243, 0.92);
+  border-radius: 999px;
+  padding: 2px 10px;
+}
+.menu-home3 .place-count {
+  color: #5c4636;
+  background: transparent;
+}
+.menu-home3 .place-emoji {
+  width: 72px;
+  height: 72px;
+  max-height: none;
+  aspect-ratio: auto;
+  flex: 0 0 72px;
+  min-width: 72px;
+  min-height: 0;
+  background:
+    radial-gradient(circle at 32% 28%, #fff, #ffe8c4 72%);
+  box-shadow: 0 0 0 3px #fff, 0 4px 0 rgba(107, 58, 40, 0.12);
+  border-radius: 50%;
+}
+.menu-home3 .place-emoji svg { width: 78%; height: 78%; max-height: none; }
+.menu-home3 .place--dollhouse {
+  background:
+    linear-gradient(180deg, #c9ecff 0%, #fff6ea 42%, #d6f5c4 100%);
+}
+.menu-home3 .place--dollhouse .place-text { flex: 0 0 auto; align-items: flex-start; }
+.menu-home3 .place--dollhouse .place-emoji {
+  background: none;
+  border-radius: 0;
+  box-shadow: none;
+  width: auto;
+  height: 100%;
+  max-width: 340px;
+  max-height: none;
+  min-height: 0;
+  min-width: 0;
+  flex: 1 1 auto;
+  animation: none;
+}
+.menu-home3 .place--dollhouse .place-emoji svg {
+  width: 100%;
+  height: 100%;
+  max-width: 340px;
+  max-height: none;
+}
+.menu-home3 .place--more .place-emoji {
+  width: 64px;
+  height: 64px;
+  flex: 0 0 auto;
+}
+@media (max-width: 520px) {
+  .menu-home3 {
+    grid-template-rows: minmax(108px, 1fr) repeat(3, minmax(124px, 1.12fr)) minmax(64px, 0.6fr);
+  }
+  .menu-home3 .place--game:not(.place--dollhouse):not(.place--more) {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 6px 8px;
+  }
+  .menu-home3 .place--game:not(.place--dollhouse):not(.place--more) .place-text { align-items: center; }
+  .menu-home3 .place--game:not(.place--dollhouse):not(.place--more) .place-label,
+  .menu-home3 .place--game:not(.place--dollhouse):not(.place--more) .place-count { text-align: center; }
+  .menu-home3 .place-emoji {
+    width: 64px;
+    height: 64px;
+    flex-basis: 64px;
+    min-width: 64px;
+  }
+}
+#stickersGame.screen {
+  font-family: Fredoka, var(--font-body);
+  background:
+    radial-gradient(circle at 18% 12%, rgba(255,255,255,0.8) 0 2px, transparent 3px),
+    repeating-linear-gradient(180deg, transparent 0 32px, rgba(196, 140, 90, 0.16) 32px 33px),
+    linear-gradient(180deg, #fff8ee 0%, #ffe7c2 100%);
+}
+.stickers-header h2 {
+  font-family: Fredoka, var(--font-display);
+  color: #8a3d12;
+}
+.sticker-card {
+  border: 3px solid #e2b15a;
+  border-bottom-width: 6px;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 30% 20%, #fff, transparent 55%),
+    linear-gradient(180deg, #fffdf8, #fff3d6);
+  box-shadow: inset 0 2px 0 #fff, 0 4px 0 rgba(180, 120, 40, 0.12);
+}
+.sticker-card.locked {
+  background: linear-gradient(180deg, #f1f3f5, #dee2e6);
+  border-color: #adb5bd;
+}
+.sticker-empty {
+  background:
+    radial-gradient(circle at 50% 0%, #fff, transparent 60%),
+    linear-gradient(#fffaf3, #fff1d6);
+  border: 3px dashed #e2b15a;
+  border-radius: 28px;
+}
+.play-stats-card {
+  border-bottom-width: 5px;
+  border-radius: 18px;
+  box-shadow: inset 0 2px 0 #fff;
+}
+.play-stats-ranges button,
+.play-stats-sort button,
+.play-again-btn {
+  border-bottom-width: 4px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+}
+.play-rhythm-track {
+  border-radius: 14px;
+  background: linear-gradient(180deg, #fff, #f6efe4);
+}
+.play-rhythm-bar {
+  background: linear-gradient(180deg, #8ce99a, #2f9e44);
+  border-radius: 8px 8px 3px 3px;
 }
