@@ -162,6 +162,15 @@
             <span class="place-play">Play</span>
           </span>
         </button>
+        <button class="place place--game place--ocean place--spotlight" data-go="oceanfriends" style="--c:#1c7ed6">
+          <span class="place-artwin place-artwin--hero" aria-hidden="true">
+            <img class="place-illu" src="assets/art/card-ocean-friends.webp" alt="" width="1200" height="675" decoding="async">
+          </span>
+          <span class="place-text place-hero-pill">
+            <span class="place-label">Ocean Friends</span>
+            <span class="place-play">Play</span>
+          </span>
+        </button>
         <button class="place place--game place--card" data-go="pop" style="--c:#ff922b">
           <span class="place-artwin" aria-hidden="true"><img class="place-illu" src="assets/art/card-pop.webp" alt="" width="512" height="512" decoding="async"></span>
           <span class="place-text"><span class="place-label">Pop!</span><span class="place-count">Free · ABC · 123</span></span>
@@ -958,6 +967,26 @@
       </div>
     </section>
 
+    <!-- Ocean Friends: tap a sea friend and pop a bubble -->
+    <section id="oceanFriendsGame" class="screen" data-title="🐠 Ocean Friends">
+      <div id="oceanFriendsStage" class="of-stage" data-phase="swim" data-mode="free" data-stars="0">
+        <div class="of-scene" id="oceanFriendsScene"></div>
+        <div class="of-top">
+          <button class="home-btn" data-home type="button" aria-label="Home">Home</button>
+          <div class="of-modes" role="group" aria-label="Swim">
+            <button type="button" class="mode-tab of-mode active" data-mode="Free Swim" data-swim="free" aria-pressed="true" aria-label="Free Swim">
+              <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="24" cy="40" r="10" fill="#a5d8ff" stroke="#2c4a5e" stroke-width="3"/><circle cx="40" cy="26" r="12" fill="#d0ebff" stroke="#2c4a5e" stroke-width="3"/><circle cx="46" cy="44" r="7" fill="#fff" stroke="#2c4a5e" stroke-width="3"/></svg>
+            </button>
+            <button type="button" class="mode-tab of-mode" data-mode="Find Friends" data-swim="find" aria-pressed="false" aria-label="Find Friends">
+              <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="30" cy="30" r="16" fill="#e7f5ff" stroke="#2c4a5e" stroke-width="3"/><polygon points="30,18 34,26 42,26 36,32 38,40 30,35 22,40 24,32 18,26 26,26" fill="#ffd43b" stroke="#2c4a5e" stroke-width="2" stroke-linejoin="round"/><path d="M42 42 L54 54" stroke="#2c4a5e" stroke-width="4" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+        </div>
+        <p id="oceanFriendsLive" class="of-live" role="status"></p>
+        <div class="of-dock" id="oceanFriendsDock"></div>
+      </div>
+    </section>
+
     <!-- Baby Dino: make him better -->
     <section id="dinoGame" class="screen" data-title="🦖 Baby Dino">
       <button class="home-btn" data-home aria-label="Home">🏠</button>
@@ -1176,6 +1205,7 @@
   <script src="games/icecream.js"></script>
   <script src="games/train.js"></script>
   <script src="games/animaltrain.js"></script>
+  <script src="games/oceanfriends.js"></script>
   <script src="games/music.js"></script>
   <script src="games/stickers.js"></script>
 </body>

@@ -196,6 +196,21 @@ async function main() {
     });
     tiny.forEach((problem) => failures.push(viewport.name + " animal train: " + problem));
 
+    await openGame(page, "oceanfriends");
+    await page.locator("#oceanFriendsDock button[aria-label='Sea Turtle']").click();
+    await page.locator("#oceanFriendsDock button[aria-label='Whale']").click();
+    await note("ocean friends");
+    const oceanTiny = await page.evaluate(() => {
+      const problems = [];
+      document.querySelectorAll("#oceanFriendsDock .of-friend, #oceanFriendsGame .of-mode").forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        const name = el.getAttribute("aria-label") || "control";
+        if (rect.width < 64 || rect.height < 64) problems.push(name + " is " + Math.round(rect.width) + "×" + Math.round(rect.height));
+      });
+      return problems;
+    });
+    oceanTiny.forEach((problem) => failures.push(viewport.name + " ocean friends: " + problem));
+
     const games = await page.evaluate(() => Object.keys(window.Lawson.games).filter((id) => id !== "dollhouse"));
     for (const id of games) {
       await openGame(page, id);

@@ -51,6 +51,10 @@ behind the **More** card.
   green car. The whistle always toots, the train rolls, and a fresh one
   comes back. Free Ride starts so every tap wins; Color Ride glows one
   car and a few dots. Each toot is a ride in Play stats.
+- **Ocean Friends** — a painted coral reef. Tap a whale, sea turtle,
+  octopus, starfish, clownfish, or dolphin and a bubble pops. Free Swim
+  starts so every tap wins; Find Friends asks for one friend, and any
+  other tap still says hello. Each new friend is a star in Play stats.
 
 ## More → hubs
 
@@ -184,9 +188,9 @@ The **More** drawer holds themed hub cards, each opening a small menu:
 - **Play stats** — a parent view inside Settings, not a tile on the home
   screen: today, the last 7 days as a minutes bar, and all time. Small
   badges mark a first game, five different games, every Dollhouse room,
-  an Animal Train ride, and the favorite. Play again opens a recent or
-  favorite game. Clear play stats asks for a second tap and leaves
-  scores and stickers alone.
+  an Animal Train ride, an Ocean Friends star, and the favorite. Play
+  again opens a recent or favorite game. Clear play stats asks for a
+  second tap and leaves scores and stickers alone.
 
 ## Accessibility
 

@@ -78,6 +78,24 @@ const INDEX = "file://" + path.join(path.resolve(__dirname, ".."), "index.html")
   check(lines.includes("Bear! Roar!") && !lines.includes("Choo-choo!"),
     `no choo-choo after leaving a full train (heard: ${JSON.stringify(lines)})`);
 
+  // 5. Ocean Friends speaks its welcome, and leaving a full reef
+  //    before the celebration must not cheer over the menu.
+  await tap('[data-home]');
+  await page.waitForTimeout(300);
+  await said();
+  await tap("[data-go='oceanfriends']");
+  await page.waitForTimeout(400);
+  lines = await said();
+  check(lines.includes("Let's swim!"), `ocean friends welcome (heard: ${JSON.stringify(lines)})`);
+  for (const name of ["Whale", "Sea Turtle", "Octopus", "Starfish", "Clownfish", "Dolphin"]) {
+    await tap("#oceanFriendsDock button[aria-label='" + name + "']");
+  }
+  await tap('[data-home]');
+  await page.waitForTimeout(1600);
+  lines = await said();
+  check(lines.includes("Yay! Whale!") && !lines.includes("Yay! Ocean friends!"),
+    `no reef cheer after leaving a full swim (heard: ${JSON.stringify(lines)})`);
+
   check(errors.length === 0, `no page errors (${errors.join("; ")})`);
   await browser.close();
   if (failures) { console.log(`Nav speech: ${failures} failure(s)`); process.exit(1); }

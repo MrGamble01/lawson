@@ -1863,6 +1863,12 @@ document.addEventListener("touchmove", (e) => {
     try { return d.toLocaleDateString(undefined, { month: "short", day: "numeric" }); }
     catch (_) { return ""; }
   }
+  function roundPhrase(id, rounds) {
+    const n = rounds || 0;
+    if (!n) return "";
+    if (id === "oceanfriends") return n === 1 ? " · 1 star" : " · " + n + " stars";
+    return n === 1 ? " · 1 ride" : " · " + n + " rides";
+  }
   function gameTitle(id) {
     const btn = document.querySelector('[data-go="' + id + '"]');
     const label = btn && btn.querySelector(".place-label, .label");
@@ -2030,6 +2036,7 @@ document.addEventListener("touchmove", (e) => {
     if (miles.fiveGames) badges.push(["5 games", "Five games"]);
     if (miles.allRooms) badges.push(["All rooms", "All Dollhouse rooms"]);
     if (miles.trainRide) badges.push(["Animal Train", "Animal Train ride"]);
+    if (miles.oceanStar) badges.push(["Ocean Friends", "Ocean Friends star"]);
     if (miles.favorite) {
       const title = gameTitle(miles.favorite);
       badges.push([title, "Favorite game, " + title]);
@@ -2124,7 +2131,7 @@ document.addEventListener("touchmove", (e) => {
     }
     games.forEach((g) => {
       const plays = g.plays === 1 ? "1 play" : (g.plays || 0) + " plays";
-      const rides = g.rounds === 1 ? " · 1 ride" : (g.rounds > 1 ? " · " + g.rounds + " rides" : "");
+      const rides = roundPhrase(g.id, g.rounds);
       const gameRow = addRow(gamesEl, "play-stats-game", gameTitle(g.id), formatDuration(g.ms) + " · " + plays + rides);
       if (g.id === favId) gameRow.classList.add("is-favorite");
       (g.modes || []).slice().sort((a, b) => {
