@@ -59,6 +59,25 @@ const INDEX = "file://" + path.join(path.resolve(__dirname, ".."), "index.html")
   lines = await said();
   check(!lines.includes("Lots more to explore!"), `no hub welcome after Home (heard: ${JSON.stringify(lines)})`);
 
+  // 4. Animal Train speaks its welcome, and leaving a full train
+  //    before the toot must not choo-choo over the menu.
+  await tap('[data-home]');
+  await page.waitForTimeout(300);
+  await said();
+  await tap("[data-go='animaltrain']");
+  await page.waitForTimeout(400);
+  lines = await said();
+  check(lines.includes("All aboard!"), `animal train welcome (heard: ${JSON.stringify(lines)})`);
+  await tap("#animalTrainDock button[aria-label='Bear']");
+  await tap("#animalTrainDock button[aria-label='Puppy']");
+  await tap("#animalTrainDock button[aria-label='Bunny']");
+  await tap("#animalTrainDock button[aria-label='Kitty']");
+  await tap('[data-home]');
+  await page.waitForTimeout(1600);
+  lines = await said();
+  check(lines.includes("Bear! Roar!") && !lines.includes("Choo-choo!"),
+    `no choo-choo after leaving a full train (heard: ${JSON.stringify(lines)})`);
+
   check(errors.length === 0, `no page errors (${errors.join("; ")})`);
   await browser.close();
   if (failures) { console.log(`Nav speech: ${failures} failure(s)`); process.exit(1); }

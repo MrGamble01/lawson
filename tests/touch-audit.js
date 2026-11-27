@@ -180,6 +180,22 @@ async function main() {
       await page.locator("#dollhouseStage[data-view='hub']").waitFor();
     }
 
+    await openGame(page, "animaltrain");
+    await page.locator("#animalTrainDock button[aria-label='Bear']").click();
+    await page.locator("#animalTrainDock button[aria-label='Puppy']").click();
+    await page.locator("#animalTrainDock button[aria-label='Bunny']").click();
+    await note("animal train");
+    const tiny = await page.evaluate(() => {
+      const problems = [];
+      document.querySelectorAll("#animalTrainDock .at-animal, #animalTrainDock .at-whistle, #animalTrainGame .at-mode").forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        const name = el.getAttribute("aria-label") || "control";
+        if (rect.width < 64 || rect.height < 64) problems.push(name + " is " + Math.round(rect.width) + "×" + Math.round(rect.height));
+      });
+      return problems;
+    });
+    tiny.forEach((problem) => failures.push(viewport.name + " animal train: " + problem));
+
     const games = await page.evaluate(() => Object.keys(window.Lawson.games).filter((id) => id !== "dollhouse"));
     for (const id of games) {
       await openGame(page, id);
