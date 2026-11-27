@@ -84,8 +84,18 @@
     return node;
   }
   function emoji(char) {
-    const node = text("span", "dh-emoji", char);
+    const node = el("span", "dh-emoji");
     node.setAttribute("aria-hidden", "true");
+    const picture = window.LawsonDollArt && window.LawsonDollArt.glyph(char);
+    if (picture) node.append(picture);
+    else node.textContent = char;
+    return node;
+  }
+  function prop(name, picked) {
+    const art = window.LawsonDollArt;
+    const node = el("div", "dh-prop");
+    node.setAttribute("aria-hidden", "true");
+    if (art && art[name]) node.append(art[name](picked));
     return node;
   }
   function gem() {
@@ -367,6 +377,12 @@
   function paintHub() {
     const view = el("div", "dh-view dh-hub");
     view.append(text("p", "dh-title", "Dollhouse"));
+    const roof = el("div", "dh-roof");
+    roof.setAttribute("aria-hidden", "true");
+    if (window.LawsonDollArt) roof.append(window.LawsonDollArt.roof());
+    const blooms = el("div", "dh-bloom");
+    blooms.setAttribute("aria-hidden", "true");
+    if (window.LawsonDollArt) blooms.append(window.LawsonDollArt.blooms());
     const doors = el("div", "dh-doors");
     const done = doneSet();
     const today = playedToday();
@@ -422,7 +438,9 @@
     });
     hello.append(emoji("📬"), text("span", "dh-word", "Hello"));
     extra.append(cat, hello);
-    view.append(doors, extra);
+    const path = el("div", "dh-path");
+    path.setAttribute("aria-hidden", "true");
+    view.append(blooms, roof, doors, path, extra);
     mount("hub", view);
   }
 
@@ -493,12 +511,7 @@
       const body = el("div", "dh-body");
       const cake = el("div", "dh-cake");
       cake.setAttribute("aria-hidden", "true");
-      const bits = [
-        (bases.find((item) => item.id === picked.base) || { emoji: "🍽️" }).emoji,
-        (frosts.find((item) => item.id === picked.frost) || { emoji: "" }).emoji,
-        (tops.find((item) => item.id === picked.top) || { emoji: "" }).emoji,
-      ].filter(Boolean);
-      cake.textContent = bits.join(" ");
+      cake.append(prop("cake", picked));
       if (picked.base || picked.frost || picked.top) cake.classList.add("is-wiggle");
       const burst = tap("Sprinkle party", "dh-party", party);
       burst.append(emoji("🎉"), text("span", "dh-word", "Sprinkle party"));
@@ -555,6 +568,7 @@
       const view = el("div", "dh-view");
       const body = el("div", "dh-body");
       const paper = el("div", "dh-paper");
+      paper.append(prop("craftPal"));
       paper.dataset.marks = String(stack.length);
       if (stack.length) paper.classList.add("is-wiggle");
       stack.forEach((mark, index) => {
@@ -638,7 +652,9 @@
       const pips = el("div", "dh-pips");
       pips.setAttribute("aria-hidden", "true");
       for (let i = 0; i < 4; i++) pips.append(el("span", "dh-pip" + (i < Math.min(hits, 4) ? " is-on" : "")));
-      body.append(pips, bank(keys, 5), bank(bells, 3), bank(drums, 2), bank(pads, 4));
+      const stage = el("div", "dh-stage");
+      stage.append(prop("dj"));
+      body.append(stage, pips, bank(keys, 5), bank(bells, 3), bank(drums, 2), bank(pads, 4));
       view.append(roomHead(room), body, backButton());
       mount(room.id, view);
     }
@@ -668,8 +684,9 @@
       const tub = document.querySelector("#dollhouseStage .dh-tub");
       if (tub) {
         tub.classList.add("is-fizzy");
-        const bubbles = text("span", "dh-bubbles", "○ ○ ○");
+        const bubbles = el("span", "dh-bubbles");
         bubbles.setAttribute("aria-hidden", "true");
+        bubbles.append(emoji("🫧"));
         tub.append(bubbles);
       }
       delight(button, { sparkle: true });
@@ -684,6 +701,7 @@
       const colors = bottles.filter((item) => poured[item.id]).map((item) => item.color);
       tub.style.background = colors.length ? "linear-gradient(160deg, " + colors.join(", ") + ")" : "#e7f5ff";
       if (colors.length) tub.classList.add("is-wiggle");
+      tub.append(prop("tubFriend"));
       const row = el("div", "dh-choices dh-row-3");
       bottles.forEach((item) => {
         const button = choice(item.label, "dh-choice", !!poured[item.id], (btn) => pour(item.id, btn));
@@ -897,7 +915,7 @@
       pillow.setAttribute("aria-hidden", "true");
       const cat = el("div", "dh-pillow-cat");
       const worn = pjs.find((item) => item.id === pj);
-      cat.textContent = "🐱" + (worn ? worn.emoji : "");
+      if (window.LawsonDollArt) cat.append(window.LawsonDollArt.pillowCat(worn ? worn.id : ""));
       if (worn || anySticker()) cat.classList.add("is-wiggle");
       pillow.append(cat);
       stickers.forEach((item) => { if (stuck[item.id]) pillow.append(emoji(item.emoji)); });
