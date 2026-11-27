@@ -56,7 +56,7 @@ const ASSETS = [
   "./games/cook.js",
   "./games/dino.js",
   "./games/garden.js",
-  "./games/dollhouse-art.js",
+  "./lib/dollhouse-art.js",
   "./games/dollhouse.js",
   "./fonts/fredoka-700.woff2",
   "./games/scene.js",
