@@ -398,7 +398,14 @@
       });
       door.dataset.room = room.id;
       if (seen) door.dataset.today = "yes";
-      door.append(emoji(room.emoji), text("span", "dh-door-name", room.short));
+      const scene = window.LawsonDollArt && window.LawsonDollArt.doorScene && window.LawsonDollArt.doorScene(room.id);
+      if (scene) {
+        const icon = el("span", "dh-emoji");
+        icon.append(scene);
+        door.append(icon, text("span", "dh-door-name", room.short));
+      } else {
+        door.append(emoji(room.emoji), text("span", "dh-door-name", room.short));
+      }
       if (finished) door.append(emoji("⭐"));
       if (seen) {
         const mark = text("span", "dh-today", "✓");
@@ -708,7 +715,10 @@
         const swatch = el("span", "dh-swatch");
         swatch.style.background = item.color;
         swatch.setAttribute("aria-hidden", "true");
-        button.append(emoji(item.emoji), swatch);
+        const icon = el("span", "dh-emoji");
+        if (window.LawsonDollArt && window.LawsonDollArt.bottle) icon.append(window.LawsonDollArt.bottle(item.color));
+        else icon.append(emoji(item.emoji));
+        button.append(icon, swatch);
         row.append(button);
       });
       const mixBtn = tap("Mix a fizzy potion", "dh-mix", mix);
@@ -915,7 +925,11 @@
       pillow.setAttribute("aria-hidden", "true");
       const cat = el("div", "dh-pillow-cat");
       const worn = pjs.find((item) => item.id === pj);
-      if (window.LawsonDollArt) cat.append(window.LawsonDollArt.pillowCat(worn ? worn.id : ""));
+      if (window.LawsonDollArt) {
+        const pic = window.LawsonDollArt.pillowCat(worn ? worn.id : "");
+        pic.setAttribute("preserveAspectRatio", "xMidYMid slice");
+        cat.append(pic);
+      }
       if (worn || anySticker()) cat.classList.add("is-wiggle");
       pillow.append(cat);
       stickers.forEach((item) => { if (stuck[item.id]) pillow.append(emoji(item.emoji)); });
