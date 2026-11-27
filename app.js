@@ -21,9 +21,17 @@ function setKidName(name) {
   if (typeof setSpokenName === "function") setSpokenName(KID_NAME, getSpokenName());
   // Live-update branding (splash is gone by now, but header + tab title
   // reflect the new name without a reload).
-  const header = document.querySelector("header h1");
-  if (header) header.textContent = `${KID_NAME}'s Playground`;
+  paintWorldTitle();
   document.title = `${KID_NAME}'s Playground`;
+}
+function paintWorldTitle() {
+  const text = `${KID_NAME}'s World`;
+  const title = document.querySelector("header h1 .world-title");
+  if (title) title.textContent = text;
+  else {
+    const header = document.querySelector("header h1");
+    if (header) header.textContent = text;
+  }
 }
 
 // Dark mode: a `dark` class on <html> swaps the background gradients
@@ -125,8 +133,7 @@ function prefersReducedMotion() {
   function apply() {
     const title = document.querySelector(".splash-title");
     if (title) title.textContent = `${KID_NAME}'s Playground`;
-    const header = document.querySelector("header h1");
-    if (header) header.textContent = `${KID_NAME}'s Playground`;
+    paintWorldTitle();
     document.title = `${KID_NAME}'s Playground`;
   }
   if (document.readyState === "loading") {
@@ -1635,10 +1642,23 @@ document.addEventListener("touchmove", (e) => {
   // of the muted flag.
   voiceTgl.addEventListener("change", () => setVoiceMuted(!voiceTgl.checked));
   voiceTgl.addEventListener("change", refreshVoices);
-  soundTgl.addEventListener("change", () => {
-    setSoundMuted(!soundTgl.checked);
-    if (soundTgl.checked) beep(500, 0.08); // little chirp when re-enabling
-  });
+  const soundPill = document.getElementById("soundToggle");
+  function paintSoundPill() {
+    if (!soundPill) return;
+    const on = !isSoundMuted();
+    soundPill.setAttribute("aria-pressed", on ? "true" : "false");
+    soundPill.setAttribute("aria-label", on ? "Sound on" : "Sound off");
+    soundPill.textContent = on ? "Sound" : "Muted";
+  }
+  function applySound(on) {
+    setSoundMuted(!on);
+    if (soundTgl) soundTgl.checked = on;
+    paintSoundPill();
+    if (on) beep(500, 0.08);
+  }
+  soundTgl.addEventListener("change", () => applySound(soundTgl.checked));
+  if (soundPill) onTap(soundPill, () => applySound(isSoundMuted()));
+  paintSoundPill();
   // Volume slider drives the shared master gain. Chirp on release so the
   // parent hears the new level. `input` updates live; `change` chirps.
   if (volumeInput) {

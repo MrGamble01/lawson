@@ -13,7 +13,7 @@ const game = fs.readFileSync(path.join(root, "games/dollhouse.js"), "utf8");
 const stickers = fs.readFileSync(path.join(root, "lib/achievements.js"), "utf8");
 
 assert.match(html, /data-go="dollhouse"/, "home screen opens the dollhouse");
-assert.match(html, /class="place-label">Dollhouse</, "play stats can title it Dollhouse");
+assert.match(html, /class="place-label">Lawson's Dollhouse</, "play stats can title it Lawson's Dollhouse");
 assert.match(html, /id="dollhouseGame"/);
 assert.match(html, /src="games\/dollhouse\.js"/);
 assert.match(sw, /"\.\/games\/dollhouse\.js"/);

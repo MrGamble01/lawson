@@ -8955,3 +8955,728 @@ html.dark #dollhouseGame .dh-room-name { color: #fff6ea; }
   background: linear-gradient(180deg, #8ce99a, #2f9e44);
   border-radius: 8px 8px 3px 3px;
 }
+
+/* ---------- Storybook home + dollhouse ---------- */
+body.on-menu {
+  background-color: #9fd4f2;
+  background-image: url("assets/art/home-sky.webp");
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+}
+body.on-menu .sunny,
+body.on-menu .mascot,
+body.on-menu .menu-cloud,
+body.on-menu .menu-bubbles { display: none !important; }
+body.on-menu header {
+  background: linear-gradient(180deg, rgba(255, 248, 230, 0.78), rgba(255, 244, 214, 0.28));
+  box-shadow: none;
+  border-bottom: 0;
+}
+body.on-menu header::after { display: none; }
+header {
+  min-height: 64px;
+}
+header h1 {
+  width: 100%;
+  padding: 0 112px;
+  box-sizing: border-box;
+}
+header h1 .world-title {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fffdf8 0%, #ffe4b5 100%);
+  color: #3a2418;
+  border: 3px solid #5c3a28;
+  border-bottom-width: 6px;
+  box-shadow: inset 0 2px 0 #fff, 0 4px 0 rgba(90, 45, 20, 0.18);
+  font-family: Fredoka, var(--font-display);
+  font-weight: 700;
+  font-size: clamp(15px, 2.2vw, 28px);
+  letter-spacing: 0;
+  text-shadow: none;
+  line-height: 1;
+  white-space: nowrap;
+}
+html.dark header h1 .world-title { color: #3a2418; }
+.world-pill {
+  min-height: 48px;
+  height: 48px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 3px solid #5c3a28;
+  border-bottom-width: 6px;
+  background: linear-gradient(180deg, #fffdf8, #ffe4b5);
+  color: #3a2418;
+  font-family: Fredoka, var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1;
+  box-shadow: inset 0 2px 0 #fff, 0 4px 0 rgba(90, 45, 20, 0.18);
+  cursor: pointer;
+}
+.world-pill--side {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: auto;
+  min-width: 72px;
+}
+#soundToggle { left: max(8px, env(safe-area-inset-left, 0px)); }
+#soundToggle[aria-pressed="false"] {
+  background: linear-gradient(180deg, #efe6dc, #d9cbb8);
+  color: #3a2418;
+}
+#settingsBtn.world-pill {
+  right: max(8px, env(safe-area-inset-right, 0px));
+  width: auto;
+  font-size: 16px;
+}
+#settingsBtn.world-pill:active,
+#soundToggle:active {
+  transform: translateY(calc(-50% + 3px));
+  border-bottom-width: 3px;
+}
+.streak-badge { right: 112px; }
+body.captions-on .captions.show {
+  left: 118px;
+  right: 118px;
+}
+#menu.screen {
+  background: transparent;
+  position: relative;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  inset: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+body.on-menu #app::before { display: none; }
+#menu.screen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: linear-gradient(180deg, rgba(255, 248, 230, 0.34) 0%, rgba(255, 244, 220, 0.08) 32%, rgba(70, 42, 24, 0.12) 100%);
+}
+html.dark #menu.screen,
+html.dark body.on-menu {
+  background-color: transparent;
+  background-image: none;
+}
+html.dark body.on-menu {
+  background-color: #16324a;
+  background-image: linear-gradient(rgba(20, 12, 8, 0.28), rgba(20, 12, 8, 0.28)), url("assets/art/home-sky.webp");
+  background-size: cover;
+  background-position: center top;
+}
+.menu-home3 {
+  position: relative;
+  z-index: 1;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: auto;
+  grid-auto-rows: auto;
+  align-content: start;
+  width: 100%;
+  max-width: 860px;
+  min-width: 0;
+  box-sizing: border-box;
+  gap: 12px;
+  padding: 8px 10px 20px;
+}
+.menu-home3 .place::before { display: none; }
+.menu-home3 .place--game {
+  height: auto;
+  padding: 0;
+  gap: 0;
+  overflow: hidden;
+  border: 3px solid #6b3a28;
+  border-bottom-width: 8px;
+  border-radius: 26px;
+  background: #fff8ee;
+  color: #3a2418;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 10px 18px rgba(80, 40, 20, 0.2);
+}
+.menu-home3 .place--game:active {
+  transform: translateY(5px) scale(0.985);
+  border-bottom-width: 3px;
+}
+.menu-home3 .place--dollhouse {
+  grid-column: 1 / -1;
+  position: relative;
+  display: block;
+  min-height: clamp(168px, 26vh, 250px);
+  flex-direction: column;
+}
+.menu-home3 .place-artwin {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  min-height: 0;
+}
+.menu-home3 .place--game.place--card:not(.place--dollhouse) {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  aspect-ratio: 5 / 6;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+.menu-home3 .place--card .place-artwin { flex: 1 1 auto; }
+.menu-home3 .place--dollhouse .place-artwin--hero {
+  position: absolute;
+  inset: 0;
+}
+.menu-home3 .place-illu {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.menu-home3 .place--dollhouse .place-illu { object-position: center 62%; }
+.menu-home3 .place--card .place-text {
+  flex: 0 0 auto;
+  width: 100%;
+  min-height: 52px;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  padding: 7px 8px 9px;
+  background: linear-gradient(180deg, #fffdf8 0%, #ffe7c2 100%);
+}
+.menu-home3 .place--card .place-label,
+.menu-home3 .place--card .place-count,
+html.dark .menu-home3 .place-label,
+html.dark .menu-home3 .place-count {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  text-shadow: none;
+  text-align: center;
+}
+.menu-home3 .place--card .place-label {
+  color: #3a2418;
+  font-family: Fredoka, var(--font-display);
+  font-size: clamp(16px, 2.5vw, 24px);
+  font-weight: 700;
+  line-height: 1.1;
+}
+.menu-home3 .place--card .place-count {
+  color: #5c4032;
+  font-size: 13px;
+  font-weight: 700;
+}
+.place-hero-pill {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  z-index: 2;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100% - 20px);
+  padding: 6px 8px 6px 16px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fffdf8, #ffe08a);
+  border: 3px solid #5c3a28;
+  border-bottom-width: 6px;
+  box-shadow: inset 0 2px 0 #fff, 0 6px 0 rgba(90, 40, 20, 0.2), 0 12px 18px rgba(60, 30, 10, 0.18);
+}
+.place-hero-pill .place-label,
+html.dark .place-hero-pill .place-label {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: #3a2418;
+  font-family: Fredoka, var(--font-display);
+  font-size: clamp(16px, 2.6vw, 28px);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.place-play {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ffe066, #f08c00);
+  color: #4a2800;
+  font-family: Fredoka, var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+}
+.menu-home3 .place--more {
+  grid-column: auto;
+  flex-direction: column;
+  min-height: 0;
+}
+@media (min-width: 980px), (min-width: 900px) and (max-height: 860px) {
+  .menu-home3 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    max-width: 1180px;
+    padding: 10px 16px 16px;
+  }
+  .menu-home3 .place--dollhouse { min-height: 200px; }
+}
+@media (max-width: 520px) {
+  header h1 { padding: 0 100px; }
+  header h1 .world-title { font-size: 15px; padding: 0 10px; }
+  body.captions-on .captions.show { left: 108px; right: 108px; }
+  .menu-home3 { gap: 10px; padding: 6px 8px 16px; }
+  .menu-home3 .place--dollhouse { min-height: 168px; }
+}
+
+#dollhouseGame {
+  background: #f3d7b5;
+}
+.dollhouse-stage { padding-top: 0; background: #f6e2c8; }
+#dollhouseStage[data-view] { background: transparent; }
+.dh-paint {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.dh-paint {
+  background-repeat: no-repeat;
+  background-size: auto 142%;
+  background-position: 50% 42%;
+}
+.dh-paint-img { display: none; }
+#dollhouseStage[data-view="kitchen"] .dh-paint {
+  background-image: url("assets/art/room-kitchen.webp");
+  background-size: auto 140%;
+  background-position: 46% 96%;
+}
+#dollhouseStage[data-view="garden"] .dh-paint {
+  background-image: url("assets/art/room-garden.webp");
+  background-size: auto 128%;
+  background-position: 62% 58%;
+}
+#dollhouseStage[data-view="playroom"] .dh-paint {
+  background-image: url("assets/art/room-playroom.webp");
+  background-size: auto 132%;
+  background-position: 48% 78%;
+}
+#dollhouseStage[data-view="music"] .dh-paint {
+  background-image: url("assets/art/room-music.webp");
+  background-size: auto 146%;
+  background-position: 50% 38%;
+}
+#dollhouseStage[data-view="bedroom"] .dh-paint {
+  background-image: url("assets/art/room-bedroom.webp");
+  background-size: auto 150%;
+  background-position: 54% 44%;
+}
+#dollhouseStage[data-view="bathroom"] .dh-paint {
+  background-image: url("assets/art/room-bathroom.webp");
+  background-size: auto 150%;
+  background-position: 50% 40%;
+}
+#dollhouseStage[data-view="craft"] .dh-paint {
+  background-image: url("assets/art/room-craft.webp");
+  background-size: auto 148%;
+  background-position: 48% 40%;
+}
+#dollhouseStage[data-view="mail"] .dh-paint,
+#dollhouseStage[data-view="ears"] .dh-paint,
+#dollhouseStage[data-view="pandy"] .dh-paint {
+  background-image: url("assets/art/dollhouse-facade.webp");
+  background-size: cover;
+  background-position: center 60%;
+}
+.dh-body,
+.dh-head,
+.dh-back,
+.dh-skip,
+.dh-hero,
+.dh-face,
+.dh-ears,
+.dh-kicker,
+.dh-title,
+.dh-doors,
+.dh-hub-extra,
+.dh-facade { position: relative; z-index: 2; }
+#dollhouseStage .dh-doors {
+  background: rgba(255, 248, 238, 0.78);
+  border: 3px solid rgba(92, 58, 40, 0.28);
+  border-radius: 22px;
+  box-shadow: none;
+  padding: 10px;
+}
+.dh-plate,
+.dh-meadow,
+.dh-notes,
+.dh-bubble-field,
+#dollhouseStage .dh-paper,
+#dollhouseStage .dh-pillow,
+#dollhouseStage .dh-road,
+#dollhouseStage .dh-tub { z-index: 2; }
+.dh-room .dh-meadow,
+.dh-room .dh-plate,
+.dh-room .dh-notes,
+.dh-room .dh-bubble-field,
+#dollhouseStage .dh-paper,
+#dollhouseStage .dh-pillow,
+#dollhouseStage .dh-tub { pointer-events: none; }
+#dollhouseStage[data-view="playroom"] .dh-road { pointer-events: none; }
+#dollhouseStage[data-view="playroom"] .dh-road button { pointer-events: auto; }
+.dh-bubble { pointer-events: auto; }
+.dh-star {
+  position: absolute;
+  top: 4px;
+  left: 6px;
+  color: #b45309;
+  font-size: 16px;
+  line-height: 1;
+  pointer-events: none;
+}
+#dollhouseStage[data-view="mail"] .dh-view,
+#dollhouseStage[data-view="ears"] .dh-view,
+#dollhouseStage[data-view="pandy"] .dh-view { padding-top: 72px; }
+.dh-facade {
+  flex: 0 0 auto;
+  height: clamp(128px, 24vh, 230px);
+  margin: 4px 2px 8px;
+  border-radius: 22px;
+  overflow: hidden;
+  border: 4px solid #fff8ee;
+  box-shadow: 0 0 0 3px #e7a0b8, 0 12px 20px rgba(80, 40, 30, 0.22);
+}
+.dh-facade-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 60%;
+  display: block;
+}
+.dh-hub { padding-top: 68px; }
+.dh-door,
+.dh-door[data-room] {
+  background: #fffaf4;
+  border: 3px solid #e7b08a;
+  border-bottom-width: 7px;
+  border-radius: 18px;
+  padding: 6px 6px 4px;
+  box-shadow: inset 0 1px 0 #fff, 0 5px 0 rgba(120, 72, 40, 0.08);
+  min-height: 48px;
+}
+.dh-door:last-child,
+.dh-door[data-room="bedroom"] {
+  grid-column: auto;
+  min-height: 0;
+  border-radius: 18px;
+}
+.dh-door .dh-thumb {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 52px;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 2px solid #fff6ea;
+}
+.dh-thumb-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.dh-door-name,
+html.dark #dollhouseGame .dh-door-name {
+  font-family: Fredoka, var(--font-display);
+  font-weight: 700;
+  color: #3a2418;
+  background: #fff6e8;
+}
+.dh-room .dh-head {
+  position: absolute;
+  top: 74px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+  min-height: 44px;
+  padding: 4px 16px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fffdf8, #ffe4b5);
+  border: 3px solid #5c3a28;
+  border-bottom-width: 6px;
+  box-shadow: inset 0 2px 0 #fff, 0 4px 0 rgba(90, 40, 20, 0.16);
+}
+.dh-room .dh-room-name,
+html.dark #dollhouseGame .dh-room-name,
+html.dark #dollhouseGame .dh-title,
+#dollhouseStage[data-view="bedroom"] .dh-room-name {
+  color: #3a2418;
+  text-align: center;
+}
+.dh-room .dh-body {
+  justify-content: flex-end;
+  background: linear-gradient(180deg, transparent 0%, transparent 62%, rgba(255, 244, 224, 0.94) 82%);
+  padding: 10px 8px 6px;
+  gap: 6px;
+  pointer-events: none;
+}
+#dollhouseGame.screen {
+  padding: 0;
+  box-shadow: none;
+}
+.dh-room .dh-body > * { pointer-events: auto; }
+#dollhouseGame .dh-choice,
+#dollhouseGame .dh-key,
+#dollhouseGame .dh-back,
+#dollhouseGame .dh-party,
+#dollhouseGame .dh-mix,
+#dollhouseGame .dh-roll,
+#dollhouseGame .dh-whoops,
+#dollhouseGame .dh-skip,
+#dollhouseGame .dh-catrat,
+#dollhouseGame .dh-replay {
+  min-height: 48px;
+  border-bottom-width: 6px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #fffdf8, #ffe7c4);
+  color: #3a2418;
+  box-shadow: inset 0 2px 0 #fff, 0 3px 0 rgba(90, 50, 30, 0.08);
+}
+#dollhouseGame .dh-choice .dh-emoji,
+#dollhouseGame .dh-key .dh-emoji {
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  box-shadow: none;
+}
+#dollhouseGame .dh-choice .dh-emoji svg,
+#dollhouseGame .dh-key .dh-emoji svg {
+  width: 34px;
+  height: 34px;
+  animation: none;
+}
+#dollhouseGame .dh-word { font-size: 16px; color: #3a2418; }
+.dh-plate {
+  position: absolute;
+  z-index: 2;
+  left: 68%;
+  top: 52%;
+  width: 16%;
+  height: 14%;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0;
+  pointer-events: none;
+  background: transparent;
+}
+.dh-plate .dh-emoji { width: 78%; height: 46%; margin-top: -8%; }
+.dh-plate .dh-emoji svg { width: 100%; height: 100%; max-height: none; animation: none; }
+.dh-plate.is-party::after {
+  content: "✦";
+  position: absolute;
+  top: -8px;
+  right: 8%;
+  font-size: 28px;
+  color: #f08c00;
+}
+#dollhouseStage[data-view="craft"] .dh-paper {
+  position: absolute;
+  left: 20%;
+  right: 14%;
+  top: 40%;
+  height: 28%;
+  z-index: 2;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  pointer-events: none;
+}
+#dollhouseStage[data-view="craft"] .dh-paper::before { display: none; }
+.dh-meadow {
+  position: absolute;
+  left: 30%;
+  right: 8%;
+  top: 46%;
+  height: 22%;
+  z-index: 2;
+  pointer-events: none;
+}
+.dh-bfly, .dh-spark { display: none; }
+#dollhouseStage[data-view="garden"] .dh-body > .dh-choices.dh-row-2 {
+  position: absolute;
+  left: 16%;
+  right: 4%;
+  top: 44%;
+  z-index: 3;
+}
+.dh-room .dh-body > .dh-row-2:first-child,
+.dh-room .dh-body > .dh-choices {
+  flex: 0 0 auto;
+  height: auto;
+  min-height: 0;
+}
+#dollhouseStage[data-view="garden"] .dh-flower {
+  height: auto;
+  min-height: 48px;
+  background: linear-gradient(180deg, #fffdf8, #ffe7c4);
+}
+#dollhouseStage[data-view="garden"] .dh-flower .dh-emoji {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  min-height: 0;
+}
+#dollhouseStage[data-view="garden"] .dh-flower .dh-emoji svg {
+  width: 34px;
+  height: 34px;
+  max-width: 34px;
+  max-height: 34px;
+}
+#dollhouseStage[data-view="bathroom"] .dh-tub {
+  position: absolute;
+  left: 18%;
+  right: 16%;
+  top: 38%;
+  height: 22%;
+  border-radius: 46%;
+  background: linear-gradient(160deg, var(--wash, transparent));
+  opacity: 0.62;
+  pointer-events: none;
+  z-index: 1;
+}
+.dh-bubble-field {
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  top: 14%;
+  height: 34%;
+  z-index: 3;
+  pointer-events: none;
+}
+.dh-bubble {
+  pointer-events: auto;
+  position: absolute;
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+  min-height: 52px;
+  padding: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, #fff 0%, rgba(224, 242, 254, 0.95) 46%, rgba(125, 211, 252, 0.72) 100%);
+  color: #0c4a6e;
+}
+.dh-bubble .dh-word { font-size: 13px; color: #0c4a6e; }
+.dh-bubble-1 { left: 6%; top: 28%; }
+.dh-bubble-2 { left: 40%; top: 2%; }
+.dh-bubble-3 { right: 4%; top: 24%; }
+.dh-bubble.is-popped { opacity: 0.2; }
+.dh-tub.is-splash { box-shadow: inset 0 0 0 6px rgba(255, 255, 255, 0.65); }
+.dh-notes {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 22%;
+  height: 18%;
+  min-height: 0;
+  flex: none;
+  pointer-events: none;
+  z-index: 2;
+}
+.dh-note {
+  position: absolute;
+  font-size: 28px;
+  font-weight: 700;
+  color: #5b21b6;
+  text-shadow: 0 2px 0 #fff;
+}
+.dh-note:nth-child(1) { left: 8%; top: 10%; }
+.dh-note:nth-child(2) { left: 46%; top: 0; color: #be185d; }
+.dh-note:nth-child(3) { right: 10%; top: 18%; color: #b45309; }
+#dollhouseGame .dh-row-5 .dh-key:nth-child(5n + 1) { background: linear-gradient(180deg, #fecaca, #fb7185); }
+#dollhouseGame .dh-row-5 .dh-key:nth-child(5n + 2) { background: linear-gradient(180deg, #fde68a, #f59e0b); }
+#dollhouseGame .dh-row-5 .dh-key:nth-child(5n + 3) { background: linear-gradient(180deg, #bbf7d0, #34d399); }
+#dollhouseGame .dh-row-5 .dh-key:nth-child(5n + 4) { background: linear-gradient(180deg, #bfdbfe, #60a5fa); }
+#dollhouseGame .dh-row-5 .dh-key:nth-child(5n + 5) { background: linear-gradient(180deg, #ddd6fe, #a78bfa); }
+#dollhouseGame .dh-row-4 .dh-key:nth-child(4n + 1) { background: linear-gradient(180deg, #ddd6fe, #8b5cf6); }
+#dollhouseGame .dh-row-4 .dh-key:nth-child(4n + 2) { background: linear-gradient(180deg, #bbf7d0, #22c55e); }
+#dollhouseGame .dh-row-4 .dh-key:nth-child(4n + 3) { background: linear-gradient(180deg, #fde68a, #eab308); }
+#dollhouseGame .dh-row-4 .dh-key:nth-child(4n + 4) { background: linear-gradient(180deg, #fecaca, #ef4444); }
+#dollhouseStage[data-view="playroom"] .dh-road {
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  top: auto;
+  bottom: 136px;
+  height: 124px;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  z-index: 2;
+}
+#dollhouseStage[data-view="playroom"] .dh-lane {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  min-height: 0;
+  padding: 0;
+  justify-content: flex-end;
+}
+#dollhouseStage[data-view="playroom"] .dh-lane .dh-emoji { flex: 0 0 auto; width: 88px; height: 56px; }
+#dollhouseStage[data-view="playroom"] .dh-lane .dh-emoji svg { width: 88px; height: 56px; max-width: 88px; }
+#dollhouseStage[data-view="bedroom"] .dh-pillow {
+  position: absolute;
+  left: 12%;
+  right: 10%;
+  top: 22%;
+  height: 34%;
+  background: transparent;
+  pointer-events: none;
+  z-index: 2;
+}
+.dh-room.is-lullaby .dh-pillow::after {
+  content: "♪   z z z";
+  position: absolute;
+  top: 4%;
+  right: 4%;
+  font-family: Fredoka, var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff8ee;
+  text-shadow: 0 2px 0 #3a2a55;
+}
+.dh-room.is-starry .dh-pillow::before {
+  content: "✦";
+  position: absolute;
+  top: 8%;
+  left: 8%;
+  font-size: 26px;
+  color: #fff4c2;
+  text-shadow: 0 0 8px #ffe08a;
+}
+.dh-room.is-glow .dh-paint::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 70% 30%, rgba(255, 236, 180, 0.5), transparent 48%);
+}
+@media (max-width: 520px) {
+  .dh-facade { height: 112px; }
+  .dh-plate { left: 64%; top: 54%; width: 28%; height: 14%; }
+  .dh-room .dh-head { max-width: calc(100% - 24px); }
+  .dh-room .dh-room-name { font-size: 16px; }
+}
