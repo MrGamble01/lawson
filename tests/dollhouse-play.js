@@ -220,11 +220,11 @@ async function playPhone(page) {
   if (!badges.includes("First game")) throw new Error("missing first-game badge: " + badges.join(", "));
   if (!badges.includes("All rooms")) throw new Error("missing all-rooms badge: " + badges.join(", "));
   if (badges.includes("5 games")) throw new Error("one game should not earn five games: " + badges.join(", "));
-  if (!badges.includes("Dollhouse")) throw new Error("favorite badge should name Dollhouse: " + badges.join(", "));
+  if (!badges.some((badge) => badge.includes("Dollhouse"))) throw new Error("favorite badge should name Dollhouse: " + badges.join(", "));
   const again = page.locator("#playAgain button");
   if (await again.count() !== 1) throw new Error("play again should offer one game, got " + await again.count());
   const againLabel = await again.first().getAttribute("aria-label");
-  if (againLabel !== "Play Dollhouse again, favorite") throw new Error("play again label: " + againLabel);
+  if (againLabel !== "Play Lawson's Dollhouse again, favorite") throw new Error("play again label: " + againLabel);
   const saidBefore = await page.evaluate(() => window.__said.length);
   await again.first().click();
   await page.waitForFunction((n) => {

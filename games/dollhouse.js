@@ -91,12 +91,31 @@
     else node.textContent = char;
     return node;
   }
-  function prop(name, picked) {
-    const art = window.LawsonDollArt;
-    const node = el("div", "dh-prop");
-    node.setAttribute("aria-hidden", "true");
-    if (art && art[name]) node.append(art[name](picked));
-    return node;
+  const ROOM_ART = {
+    kitchen: "assets/art/room-kitchen.webp",
+    craft: "assets/art/room-craft.webp",
+    music: "assets/art/room-music.webp",
+    bathroom: "assets/art/room-bathroom.webp",
+    garden: "assets/art/room-garden.webp",
+    playroom: "assets/art/room-playroom.webp",
+    bedroom: "assets/art/room-bedroom.webp",
+  };
+  function picture(src, className) {
+    const img = el("img", className || "");
+    img.src = src;
+    img.alt = "";
+    img.decoding = "async";
+    img.draggable = false;
+    return img;
+  }
+  function scenePaint(src) {
+    const frame = el("div", "dh-paint");
+    frame.setAttribute("aria-hidden", "true");
+    frame.append(picture(src, "dh-paint-img"));
+    return frame;
+  }
+  function backdrop(id) {
+    return scenePaint(ROOM_ART[id]);
   }
   function gem() {
     const node = text("span", "dh-gem", "💎");
@@ -270,12 +289,12 @@
       L.beep(520, 0.08, "triangle");
       openHub();
     });
-    button.append(emoji("🏠"), text("span", "dh-word", "Back to Dollhouse"));
+    button.append(text("span", "dh-word", "Back"));
     return button;
   }
   function roomHead(room) {
     const head = el("div", "dh-head");
-    head.append(emoji(room.emoji), text("p", "dh-room-name", room.mode));
+    head.append(text("p", "dh-room-name", room.mode));
     return head;
   }
   function choice(label, className, pressed, on) {
@@ -296,6 +315,7 @@
     ears.right = false;
     note("Hello");
     const view = el("div", "dh-view");
+    view.append(scenePaint("assets/art/dollhouse-facade.webp"));
     view.append(text("p", "dh-kicker", "Meow-Meow"));
     const box = tap("Open the Meow-Meow mailbox", "dh-hero", (btn) => {
       if (box.dataset.open === "yes") {
@@ -337,6 +357,7 @@
     clearPending();
     note("Hello");
     const view = el("div", "dh-view");
+    view.append(scenePaint("assets/art/dollhouse-facade.webp"));
     const face = el("div", "dh-face");
     face.setAttribute("aria-hidden", "true");
     face.append(emoji("🐱"));
@@ -356,6 +377,7 @@
     clearPending();
     note("Hello");
     const view = el("div", "dh-view");
+    view.append(scenePaint("assets/art/dollhouse-facade.webp"));
     const hug = tap("Pandy's hug attack", "dh-hero", (btn) => {
       if (hug.dataset.hug === "yes") {
         L.beep(520, 0.05, "triangle");
@@ -376,13 +398,10 @@
 
   function paintHub() {
     const view = el("div", "dh-view dh-hub");
-    view.append(text("p", "dh-title", "Dollhouse"));
-    const roof = el("div", "dh-roof");
-    roof.setAttribute("aria-hidden", "true");
-    if (window.LawsonDollArt) roof.append(window.LawsonDollArt.roof());
-    const blooms = el("div", "dh-bloom");
-    blooms.setAttribute("aria-hidden", "true");
-    if (window.LawsonDollArt) blooms.append(window.LawsonDollArt.blooms());
+    const hero = el("div", "dh-facade");
+    hero.setAttribute("aria-hidden", "true");
+    hero.append(picture("assets/art/dollhouse-facade.webp", "dh-facade-img"));
+    view.append(hero, text("p", "dh-title", "Lawson's Dollhouse"));
     const doors = el("div", "dh-doors");
     const done = doneSet();
     const today = playedToday();
@@ -398,15 +417,10 @@
       });
       door.dataset.room = room.id;
       if (seen) door.dataset.today = "yes";
-      const scene = window.LawsonDollArt && window.LawsonDollArt.doorScene && window.LawsonDollArt.doorScene(room.id);
-      if (scene) {
-        const icon = el("span", "dh-emoji");
-        icon.append(scene);
-        door.append(icon, text("span", "dh-door-name", room.short));
-      } else {
-        door.append(emoji(room.emoji), text("span", "dh-door-name", room.short));
-      }
-      if (finished) door.append(emoji("⭐"));
+      const thumb = el("span", "dh-emoji dh-thumb");
+      thumb.append(picture(ROOM_ART[room.id], "dh-thumb-img"));
+      door.append(thumb, text("span", "dh-door-name", room.short));
+      if (finished) door.append(text("span", "dh-star", "★"));
       if (seen) {
         const mark = text("span", "dh-today", "✓");
         mark.setAttribute("aria-hidden", "true");
@@ -445,9 +459,7 @@
     });
     hello.append(emoji("📬"), text("span", "dh-word", "Hello"));
     extra.append(cat, hello);
-    const path = el("div", "dh-path");
-    path.setAttribute("aria-hidden", "true");
-    view.append(blooms, roof, doors, path, extra);
+    view.append(doors, extra);
     mount("hub", view);
   }
 
@@ -514,17 +526,21 @@
     }
     function render() {
       const room = ROOMS[0];
-      const view = el("div", "dh-view");
+      const view = el("div", "dh-view dh-room");
       const body = el("div", "dh-body");
-      const cake = el("div", "dh-cake");
+      const cake = el("div", "dh-cake dh-plate");
       cake.setAttribute("aria-hidden", "true");
-      cake.append(prop("cake", picked));
+      const pools = { base: bases, frost: frosts, top: tops };
+      ["base", "frost", "top"].forEach((field) => {
+        const item = pools[field].find((entry) => entry.id === picked[field]);
+        if (item) cake.append(emoji(item.emoji));
+      });
       if (picked.base || picked.frost || picked.top) cake.classList.add("is-wiggle");
       const burst = tap("Sprinkle party", "dh-party", party);
       burst.append(emoji("🎉"), text("span", "dh-word", "Sprinkle party"));
       if (!ready()) burst.hidden = true;
-      body.append(cake, row(bases, "base"), row(frosts, "frost"), row(tops, "top"), burst);
-      view.append(roomHead(room), body, backButton());
+      body.append(row(bases, "base"), row(frosts, "frost"), row(tops, "top"), burst);
+      view.append(backdrop("kitchen"), roomHead(room), cake, body, backButton());
       mount(room.id, view);
     }
     return { reset() { picked = { base: "", frost: "", top: "" }; }, render };
@@ -572,10 +588,10 @@
     }
     function render() {
       const room = ROOMS[1];
-      const view = el("div", "dh-view");
+      const view = el("div", "dh-view dh-room");
       const body = el("div", "dh-body");
       const paper = el("div", "dh-paper");
-      paper.append(prop("craftPal"));
+      paper.setAttribute("aria-hidden", "true");
       paper.dataset.marks = String(stack.length);
       if (stack.length) paper.classList.add("is-wiggle");
       stack.forEach((mark, index) => {
@@ -605,7 +621,7 @@
       whoops.append(emoji("↩️"), text("span", "dh-word", "Whoopsies"));
       grid.append(whoops);
       body.append(paper, grid);
-      view.append(roomHead(room), body, backButton());
+      view.append(backdrop("craft"), roomHead(room), body, backButton());
       mount(room.id, view);
     }
     return { reset() { stack = []; }, render };
@@ -654,15 +670,19 @@
     }
     function render() {
       const room = ROOMS[2];
-      const view = el("div", "dh-view");
+      const view = el("div", "dh-view dh-room");
       const body = el("div", "dh-body");
       const pips = el("div", "dh-pips");
       pips.setAttribute("aria-hidden", "true");
       for (let i = 0; i < 4; i++) pips.append(el("span", "dh-pip" + (i < Math.min(hits, 4) ? " is-on" : "")));
-      const stage = el("div", "dh-stage");
-      stage.append(prop("dj"));
+      const stage = el("div", "dh-stage dh-notes");
+      stage.setAttribute("aria-hidden", "true");
+      if (hits) {
+        ["♪", "♫", "✦"].forEach((mark) => stage.append(text("span", "dh-note", mark)));
+        stage.classList.add("is-dancing");
+      }
       body.append(stage, pips, bank(keys, 5), bank(bells, 3), bank(drums, 2), bank(pads, 4));
-      view.append(roomHead(room), body, backButton());
+      view.append(backdrop("music"), roomHead(room), body, backButton());
       mount(room.id, view);
     }
     return { reset() { hits = 0; }, render };
@@ -701,14 +721,15 @@
     }
     function render() {
       const room = ROOMS[3];
-      const view = el("div", "dh-view");
+      const view = el("div", "dh-view dh-room");
       const body = el("div", "dh-body");
       const tub = el("div", "dh-tub");
       tub.setAttribute("aria-hidden", "true");
       const colors = bottles.filter((item) => poured[item.id]).map((item) => item.color);
-      tub.style.background = colors.length ? "linear-gradient(160deg, " + colors.join(", ") + ")" : "#e7f5ff";
-      if (colors.length) tub.classList.add("is-wiggle");
-      tub.append(prop("tubFriend"));
+      if (colors.length) {
+        tub.style.setProperty("--wash", colors.join(", "));
+        tub.classList.add("is-wiggle");
+      }
       const row = el("div", "dh-choices dh-row-3");
       bottles.forEach((item) => {
         const button = choice(item.label, "dh-choice", !!poured[item.id], (btn) => pour(item.id, btn));
@@ -724,8 +745,30 @@
       const mixBtn = tap("Mix a fizzy potion", "dh-mix", mix);
       mixBtn.append(emoji("🫧"), text("span", "dh-word", "Mix a fizzy potion"));
       if (colors.length < 2) mixBtn.hidden = true;
-      body.append(tub, row, mixBtn);
-      view.append(roomHead(room), body, backButton());
+      const squeak = tap("Squeak the ducky", "dh-choice dh-squeak", (btn) => {
+        cue("bathroom");
+        delight(btn, { sparkle: true, line: "Squeak!" });
+      });
+      squeak.append(text("span", "dh-word", "Squeak"));
+      row.append(squeak);
+      const bubbles = el("div", "dh-bubble-field");
+      ["Pop a bubble", "Pop another bubble", "Pop a soap bubble"].forEach((label, index) => {
+        const bubble = tap(label, "dh-bubble dh-bubble-" + (index + 1), (btn) => {
+          if (btn.classList.contains("is-popped")) {
+            delight(btn, { wiggle: true });
+            return;
+          }
+          btn.classList.add("is-popped");
+          cue("bathroom");
+          delight(btn, { sparkle: true });
+          const tubNode = document.querySelector("#dollhouseStage .dh-tub");
+          if (tubNode) tubNode.classList.add("is-splash");
+        });
+        bubble.append(text("span", "dh-word", "Pop"));
+        bubbles.append(bubble);
+      });
+      body.append(tub, bubbles, row, mixBtn);
+      view.append(backdrop("bathroom"), roomHead(room), body, backButton());
       mount(room.id, view);
     }
     return { reset() { poured = {}; }, render };
@@ -769,8 +812,11 @@
     }
     function render() {
       const room = ROOMS[4];
-      const view = el("div", "dh-view");
+      const view = el("div", "dh-view dh-room");
       const body = el("div", "dh-body");
+      const meadow = el("div", "dh-meadow");
+      meadow.setAttribute("aria-hidden", "true");
+      meadow.append(text("span", "dh-bfly", ""), text("span", "dh-bfly dh-bfly-2", ""), text("span", "dh-spark", ""));
       const flowerRow = el("div", "dh-choices dh-row-2");
       flowers.forEach((item) => {
         const button = choice(item.label, "dh-choice dh-flower", !!wet[item.id], (btn) => bloom(flowers, wet, item.id, btn));
@@ -784,8 +830,8 @@
         button.append(emoji(item.emoji));
         starRow.append(button);
       });
-      body.append(flowerRow, starRow);
-      view.append(roomHead(room), body, backButton());
+      body.append(meadow, flowerRow, starRow);
+      view.append(backdrop("garden"), roomHead(room), body, backButton());
       mount(room.id, view);
     }
     return { reset() { wet = {}; lit = {}; }, render };
@@ -836,7 +882,7 @@
     }
     function render() {
       const room = ROOMS[5];
-      const view = el("div", "dh-view");
+      const view = el("div", "dh-view dh-room");
       const body = el("div", "dh-body");
       const road = el("div", "dh-road");
       items.forEach((item) => {
@@ -853,14 +899,20 @@
       });
       const live = text("p", "dh-sr", "Carlita is on the " + where[lane]);
       live.setAttribute("role", "status");
-      const steerRow = el("div", "dh-choices dh-row-2");
+      const steerRow = el("div", "dh-choices dh-row-3");
       const left = tap("Steer left", "dh-choice", (btn) => steer(-1, btn));
       const right = tap("Steer right", "dh-choice", (btn) => steer(1, btn));
+      const horn = tap("Honk the horn", "dh-choice dh-horn", (btn) => {
+        cue("playroom");
+        L.beep(523, 0.1, "triangle");
+        delight(btn, { sparkle: true, line: "Beep beep!" });
+      });
       left.append(emoji("⬅️"));
       right.append(emoji("➡️"));
-      steerRow.append(left, right);
+      horn.append(text("span", "dh-word", "Honk"));
+      steerRow.append(left, horn, right);
       body.append(road, live, steerRow);
-      view.append(roomHead(room), body, backButton());
+      view.append(backdrop("playroom"), roomHead(room), body, backButton());
       mount(room.id, view);
     }
     return { reset() { lane = 1; got = {}; moved = false; }, render };
@@ -919,17 +971,16 @@
     }
     function render() {
       const room = ROOMS[6];
-      const view = el("div", "dh-view");
+      const view = el("div", "dh-view dh-room");
+      if (stuck.moon || pj === "moon") view.classList.add("is-glow");
+      if (stuck.star) view.classList.add("is-starry");
+      if (anySticker() || pj) view.classList.add("is-lullaby");
       const body = el("div", "dh-body");
       const pillow = el("div", "dh-pillow");
       pillow.setAttribute("aria-hidden", "true");
       const cat = el("div", "dh-pillow-cat");
       const worn = pjs.find((item) => item.id === pj);
-      if (window.LawsonDollArt) {
-        const pic = window.LawsonDollArt.pillowCat(worn ? worn.id : "");
-        pic.setAttribute("preserveAspectRatio", "xMidYMid slice");
-        cat.append(pic);
-      }
+      if (worn) cat.append(emoji(worn.emoji));
       if (worn || anySticker()) cat.classList.add("is-wiggle");
       pillow.append(cat);
       stickers.forEach((item) => { if (stuck[item.id]) pillow.append(emoji(item.emoji)); });
@@ -948,7 +999,7 @@
       const rollBtn = tap("That's how I roll!", "dh-roll", roll);
       rollBtn.append(emoji("😸"), text("span", "dh-word", "That's how I roll!"));
       body.append(pillow, stickerRow, pjRow, rollBtn);
-      view.append(roomHead(room), body, backButton());
+      view.append(backdrop("bedroom"), roomHead(room), body, backButton());
       mount(room.id, view);
     }
     return { reset() { stuck = {}; pj = ""; }, render };
