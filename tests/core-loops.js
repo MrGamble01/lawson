@@ -477,6 +477,29 @@ async function dollhouseGame(page) {
   assert.equal(await page.evaluate(() => document.getElementById("dollhouseStage").dataset.view), "hub", "a return visit skips the hello");
 }
 
+async function animalTrainGame(page) {
+  const stage = () => page.evaluate(() => {
+    const el = document.getElementById("animalTrainStage");
+    return { phase: el.dataset.phase, filled: el.dataset.filled, mode: el.dataset.mode };
+  });
+  assert.deepEqual(await stage(), { phase: "load", filled: "0", mode: "free" });
+  await clickLabel(page, "animaltrain", "Frog");
+  await sleep(40);
+  assert.equal((await stage()).filled, "1");
+  await clickLabel(page, "animaltrain", "Frog");
+  await sleep(40);
+  assert.equal((await stage()).filled, "1", "a friend already aboard does not take a second car");
+  await clickLabel(page, "animaltrain", "Bear");
+  await clickLabel(page, "animaltrain", "Puppy");
+  await clickLabel(page, "animaltrain", "Whistle, choo-choo");
+  await page.waitForFunction(() => document.getElementById("animalTrainStage").dataset.phase === "again", null, { timeout: 8000 });
+  await clickLabel(page, "animaltrain", "Play again");
+  await sleep(40);
+  assert.deepEqual(await stage(), { phase: "load", filled: "0", mode: "free" });
+  await restart(page, "animaltrain");
+  assert.deepEqual(await stage(), { phase: "load", filled: "0", mode: "free" }, "restart brings an empty train");
+}
+
 async function stickersGame(page) {
   const locked = await page.locator("#stickerGrid button").count();
   assert.ok(locked > 0);
@@ -513,6 +536,7 @@ const SPECIAL = {
   scene: sceneGame,
   stickers: stickersGame,
   dollhouse: dollhouseGame,
+  animaltrain: animalTrainGame,
 };
 
 async function main() {
