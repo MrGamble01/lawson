@@ -12,11 +12,11 @@ home screen" support, serve over HTTP (e.g. `python3 -m http.server`).
 ## Home screen
 
 Tuned for a 3-year-old: no reading required, small counting numbers,
-big tap targets. The home screen surfaces the seven games he plays most,
+big tap targets. The home screen surfaces the games he plays most,
 each opening straight into play. Everything else lives one tap away
 behind the **More** card.
 
-**Seven headline games:**
+**Headline games:**
 
 - **Pop!** — pop floating balloons. Three modes: Free (streaks + rare
   rainbow), ABC ("Pop the B!"), 123 ("Pop the 3!") — letters and
@@ -46,6 +46,11 @@ behind the **More** card.
   repeat wiggles, and a short word names what you picked. Finishing one
   sparkles (a still check if motion is reduced) and earns the Gabby Cat
   of the Day sticker. Rooms played today get a small check on the hub.
+- **Animal Train** — a painted meadow railroad. Tap a bear, puppy,
+  bunny, kitty, duck, or frog and they hop into a red, blue, yellow, or
+  green car. The whistle always toots, the train rolls, and a fresh one
+  comes back. Free Ride starts so every tap wins; Color Ride glows one
+  car and a few dots. Each toot is a ride in Play stats.
 
 ## More → hubs
 
@@ -179,8 +184,9 @@ The **More** drawer holds themed hub cards, each opening a small menu:
 - **Play stats** — a parent view inside Settings, not a tile on the home
   screen: today, the last 7 days as a minutes bar, and all time. Small
   badges mark a first game, five different games, every Dollhouse room,
-  and the favorite. Play again opens a recent or favorite game. Clear
-  play stats asks for a second tap and leaves scores and stickers alone.
+  an Animal Train ride, and the favorite. Play again opens a recent or
+  favorite game. Clear play stats asks for a second tap and leaves
+  scores and stickers alone.
 
 ## Accessibility
 

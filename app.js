@@ -966,6 +966,7 @@ window.Lawson = {
   audioCtx, unlockAudio, masterGain, setVolume, getVolume, isAudioHidden,
   getHighScore, setHighScore, bumpHighScore, tryNewHighScore,
   noteMode(mode) { try { LawsonPlay.setMode(mode); } catch (_) {} },
+  noteRound() { try { LawsonPlay.noteRound(); } catch (_) {} },
   setVoiceMuted, setSoundMuted, isVoiceMuted, isSoundMuted,
   setMusicEnabled, isMusicEnabled, startMusic, stopMusic, isMusicDucked,
   earnSticker, isStickerEarned, listStickers, resetStickers,
@@ -2028,6 +2029,7 @@ document.addEventListener("touchmove", (e) => {
     if (miles.firstGame) badges.push(["First game", "First game"]);
     if (miles.fiveGames) badges.push(["5 games", "Five games"]);
     if (miles.allRooms) badges.push(["All rooms", "All Dollhouse rooms"]);
+    if (miles.trainRide) badges.push(["Animal Train", "Animal Train ride"]);
     if (miles.favorite) {
       const title = gameTitle(miles.favorite);
       badges.push([title, "Favorite game, " + title]);
@@ -2122,7 +2124,8 @@ document.addEventListener("touchmove", (e) => {
     }
     games.forEach((g) => {
       const plays = g.plays === 1 ? "1 play" : (g.plays || 0) + " plays";
-      const gameRow = addRow(gamesEl, "play-stats-game", gameTitle(g.id), formatDuration(g.ms) + " · " + plays);
+      const rides = g.rounds === 1 ? " · 1 ride" : (g.rounds > 1 ? " · " + g.rounds + " rides" : "");
+      const gameRow = addRow(gamesEl, "play-stats-game", gameTitle(g.id), formatDuration(g.ms) + " · " + plays + rides);
       if (g.id === favId) gameRow.classList.add("is-favorite");
       (g.modes || []).slice().sort((a, b) => {
         if (statsSort === "plays") return (b.plays || 0) - (a.plays || 0) || (b.ms || 0) - (a.ms || 0);
