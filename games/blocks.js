@@ -96,6 +96,7 @@
     const sample = document.getElementById("blocksSample");
     sample.innerHTML = "";
     paint(sample, target);
+    L.nameClue(sample, target.said);
 
     const choices = document.getElementById("blocksChoices");
     choices.innerHTML = "";

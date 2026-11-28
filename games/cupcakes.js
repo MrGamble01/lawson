@@ -90,6 +90,7 @@
     const sample = document.getElementById("cupcakesSample");
     sample.innerHTML = "";
     paintCupcake(sample, target);
+    L.nameClue(sample, `${target.said} cupcake`);
 
     const choices = document.getElementById("cupcakesChoices");
     choices.innerHTML = "";

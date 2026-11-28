@@ -132,6 +132,16 @@ function pageHidden() {
   catch (_) { return false; }
 }
 
+// A picture clue (the balloon to match, the shadow on the wall) is not a
+// button. Naming it as an image lets a screen reader read the target
+// without changing what is drawn.
+function nameClue(el, label) {
+  if (!el || !label) return;
+  el.removeAttribute("aria-hidden");
+  el.setAttribute("role", "img");
+  el.setAttribute("aria-label", label);
+}
+
 // Personalize branding with the saved kid name. Default-named runs are
 // unchanged (still "Lawson's"). Once a parent sets a different name in
 // Settings, the splash, header, and tab title all reflect it on the
@@ -1002,7 +1012,7 @@ window.Lawson = {
   setMusicEnabled, isMusicEnabled, startMusic, stopMusic, isMusicDucked,
   earnSticker, isStickerEarned, listStickers, resetStickers,
   KID_NAME, cheer, shuffled, celebrateNewHigh, confettiRain, boboCheer,
-  setCaptionsEnabled, isCaptionsEnabled, prefersReducedMotion, pageHidden,
+  setCaptionsEnabled, isCaptionsEnabled, prefersReducedMotion, pageHidden, nameClue,
   setSlowPace, isSlowPace, paceScale, setLessMotion, isLessMotion,
   tapToUse, putDownTool, heldTool, whileHere,
   games: {}, // each game adds { screen, start, stop } here
