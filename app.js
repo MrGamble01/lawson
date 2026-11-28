@@ -125,6 +125,13 @@ function prefersReducedMotion() {
   catch (_) { return false; }
 }
 
+// The screen is locked or the app is in the switcher. Loops that spawn,
+// chug, or pop should skip a turn and try again when the kid is back.
+function pageHidden() {
+  try { return !!document.hidden; }
+  catch (_) { return false; }
+}
+
 // Personalize branding with the saved kid name. Default-named runs are
 // unchanged (still "Lawson's"). Once a parent sets a different name in
 // Settings, the splash, header, and tab title all reflect it on the
@@ -995,7 +1002,7 @@ window.Lawson = {
   setMusicEnabled, isMusicEnabled, startMusic, stopMusic, isMusicDucked,
   earnSticker, isStickerEarned, listStickers, resetStickers,
   KID_NAME, cheer, shuffled, celebrateNewHigh, confettiRain, boboCheer,
-  setCaptionsEnabled, isCaptionsEnabled, prefersReducedMotion,
+  setCaptionsEnabled, isCaptionsEnabled, prefersReducedMotion, pageHidden,
   setSlowPace, isSlowPace, paceScale, setLessMotion, isLessMotion,
   tapToUse, putDownTool, heldTool, whileHere,
   games: {}, // each game adds { screen, start, stop } here
