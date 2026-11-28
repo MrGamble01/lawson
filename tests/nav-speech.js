@@ -96,6 +96,24 @@ const INDEX = "file://" + path.join(path.resolve(__dirname, ".."), "index.html")
   check(lines.includes("Yay! Whale!") && !lines.includes("Yay! Ocean friends!"),
     `no reef cheer after leaving a full swim (heard: ${JSON.stringify(lines)})`);
 
+  // 6. Night Friends speaks its welcome, and leaving a full meadow
+  //    before the celebration must not cheer over the menu.
+  await tap('[data-home]');
+  await page.waitForTimeout(300);
+  await said();
+  await tap("[data-go='nightfriends']");
+  await page.waitForTimeout(400);
+  lines = await said();
+  check(lines.includes("Let's glow!"), `night friends welcome (heard: ${JSON.stringify(lines)})`);
+  for (const name of ["Owl", "Fox", "Bunny", "Firefly", "Hedgehog", "Moon"]) {
+    await tap("#nightFriendsDock button[aria-label='" + name + "']");
+  }
+  await tap('[data-home]');
+  await page.waitForTimeout(1600);
+  lines = await said();
+  check(lines.includes("Yay! Owl!") && !lines.includes("Yay! Night friends!"),
+    `no meadow cheer after leaving a full glow (heard: ${JSON.stringify(lines)})`);
+
   check(errors.length === 0, `no page errors (${errors.join("; ")})`);
   await browser.close();
   if (failures) { console.log(`Nav speech: ${failures} failure(s)`); process.exit(1); }

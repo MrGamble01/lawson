@@ -1867,6 +1867,7 @@ document.addEventListener("touchmove", (e) => {
     const n = rounds || 0;
     if (!n) return "";
     if (id === "oceanfriends") return n === 1 ? " · 1 star" : " · " + n + " stars";
+    if (id === "nightfriends") return n === 1 ? " · 1 light" : " · " + n + " lights";
     return n === 1 ? " · 1 ride" : " · " + n + " rides";
   }
   function gameTitle(id) {
@@ -2037,6 +2038,7 @@ document.addEventListener("touchmove", (e) => {
     if (miles.allRooms) badges.push(["All rooms", "All Dollhouse rooms"]);
     if (miles.trainRide) badges.push(["Animal Train", "Animal Train ride"]);
     if (miles.oceanStar) badges.push(["Ocean Friends", "Ocean Friends star"]);
+    if (miles.nightLight) badges.push(["Night Friends", "Night Friends light"]);
     if (miles.favorite) {
       const title = gameTitle(miles.favorite);
       badges.push([title, "Favorite game, " + title]);

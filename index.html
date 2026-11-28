@@ -171,6 +171,15 @@
             <span class="place-play">Play</span>
           </span>
         </button>
+        <button class="place place--game place--night place--spotlight" data-go="nightfriends" style="--c:#5c4d9a">
+          <span class="place-artwin place-artwin--hero" aria-hidden="true">
+            <img class="place-illu" src="assets/art/card-night-friends.webp" alt="" width="1400" height="788" decoding="async">
+          </span>
+          <span class="place-text place-hero-pill">
+            <span class="place-label">Night Friends</span>
+            <span class="place-play">Play</span>
+          </span>
+        </button>
         <button class="place place--game place--card" data-go="pop" style="--c:#ff922b">
           <span class="place-artwin" aria-hidden="true"><img class="place-illu" src="assets/art/card-pop.webp" alt="" width="512" height="512" decoding="async"></span>
           <span class="place-text"><span class="place-label">Pop!</span><span class="place-count">Free · ABC · 123</span></span>
@@ -987,6 +996,26 @@
       </div>
     </section>
 
+    <!-- Night Friends: tap a meadow friend and light the night -->
+    <section id="nightFriendsGame" class="screen" data-title="🌙 Night Friends">
+      <div id="nightFriendsStage" class="nf-stage" data-phase="glow" data-mode="free" data-lights="0">
+        <div class="nf-scene" id="nightFriendsScene"></div>
+        <div class="nf-top">
+          <button class="home-btn" data-home type="button" aria-label="Home">Home</button>
+          <div class="nf-modes" role="group" aria-label="Glow">
+            <button type="button" class="mode-tab nf-mode active" data-mode="Free Glow" data-glow="free" aria-pressed="true" aria-label="Free Glow">
+              <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="10" fill="#ffe066" stroke="#5c3a28" stroke-width="3"/><path d="M32 12 V18 M32 46 V52 M12 32 H18 M46 32 H52 M18 18 L22 22 M42 42 L46 46 M46 18 L42 22 M22 42 L18 46" stroke="#f08c00" stroke-width="3" stroke-linecap="round"/></svg>
+            </button>
+            <button type="button" class="mode-tab nf-mode" data-mode="Find a Friend" data-glow="find" aria-pressed="false" aria-label="Find a Friend">
+              <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="28" cy="28" r="14" fill="#fff3bf" stroke="#5c3a28" stroke-width="3"/><path d="M38 38 L52 52" stroke="#5c3a28" stroke-width="4" stroke-linecap="round"/><circle cx="28" cy="28" r="4" fill="#f08c00"/></svg>
+            </button>
+          </div>
+        </div>
+        <p id="nightFriendsLive" class="nf-live" role="status"></p>
+        <div class="nf-dock" id="nightFriendsDock"></div>
+      </div>
+    </section>
+
     <!-- Baby Dino: make him better -->
     <section id="dinoGame" class="screen" data-title="🦖 Baby Dino">
       <button class="home-btn" data-home aria-label="Home">🏠</button>
@@ -1206,6 +1235,7 @@
   <script src="games/train.js"></script>
   <script src="games/animaltrain.js"></script>
   <script src="games/oceanfriends.js"></script>
+  <script src="games/nightfriends.js"></script>
   <script src="games/music.js"></script>
   <script src="games/stickers.js"></script>
 </body>

@@ -542,6 +542,48 @@ async function oceanFriendsGame(page) {
   assert.equal(await prompt(), "Find the Whale!");
 }
 
+async function nightFriendsGame(page) {
+  const stage = () => page.evaluate(() => {
+    const el = document.getElementById("nightFriendsStage");
+    return { phase: el.dataset.phase, lights: el.dataset.lights, mode: el.dataset.mode, goal: el.dataset.goal || "" };
+  });
+  const prompt = () => page.locator("#nightFriendsPrompt").textContent();
+  assert.deepEqual(await stage(), { phase: "glow", lights: "0", mode: "free", goal: "" });
+  assert.equal(await prompt(), "Let's glow!");
+  await clickLabel(page, "nightfriends", "Owl");
+  await sleep(40);
+  assert.equal((await stage()).lights, "1");
+  await clickLabel(page, "nightfriends", "Owl");
+  await sleep(40);
+  assert.equal((await stage()).lights, "1", "a friend already met does not add another light");
+  await clickLabel(page, "nightfriends", "Fox");
+  await clickLabel(page, "nightfriends", "Bunny");
+  await clickLabel(page, "nightfriends", "Firefly");
+  await clickLabel(page, "nightfriends", "Hedgehog");
+  await clickLabel(page, "nightfriends", "Moon");
+  await page.waitForFunction(() => document.getElementById("nightFriendsStage").dataset.phase === "again", null, { timeout: 8000 });
+  assert.equal(await prompt(), "Yay! Night friends!");
+  await clickLabel(page, "nightfriends", "Play again");
+  await sleep(40);
+  assert.deepEqual(await stage(), { phase: "glow", lights: "0", mode: "free", goal: "" });
+  await restart(page, "nightfriends");
+  assert.deepEqual(await stage(), { phase: "glow", lights: "0", mode: "free", goal: "" }, "restart clears the lights");
+  await clickLabel(page, "nightfriends", "Find a Friend");
+  await sleep(40);
+  assert.equal((await stage()).mode, "find");
+  assert.equal((await stage()).goal, "owl");
+  assert.equal(await prompt(), "Find the Owl!");
+  await clickLabel(page, "nightfriends", "Fox");
+  await sleep(40);
+  assert.equal((await stage()).lights, "0", "another friend is a hello, not a miss");
+  assert.equal((await stage()).goal, "owl");
+  await clickLabel(page, "nightfriends", "Owl");
+  await sleep(40);
+  assert.equal((await stage()).lights, "1");
+  assert.equal((await stage()).goal, "fox");
+  assert.equal(await prompt(), "Find the Fox!");
+}
+
 async function stickersGame(page) {
   const locked = await page.locator("#stickerGrid button").count();
   assert.ok(locked > 0);
@@ -580,6 +622,7 @@ const SPECIAL = {
   dollhouse: dollhouseGame,
   animaltrain: animalTrainGame,
   oceanfriends: oceanFriendsGame,
+  nightfriends: nightFriendsGame,
 };
 
 async function main() {

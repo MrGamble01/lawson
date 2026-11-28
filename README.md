@@ -55,6 +55,10 @@ behind the **More** card.
   octopus, starfish, clownfish, or dolphin and a bubble pops. Free Swim
   starts so every tap wins; Find Friends asks for one friend, and any
   other tap still says hello. Each new friend is a star in Play stats.
+- **Night Friends** — a painted moonlit meadow. Tap an owl, fox,
+  bunny, firefly, hedgehog, or moon and a light glows. Free Glow
+  starts so every tap wins; Find a Friend asks for one friend, and any
+  other tap still says hello. Each new friend is a light in Play stats.
 
 ## More → hubs
 
@@ -188,7 +192,8 @@ The **More** drawer holds themed hub cards, each opening a small menu:
 - **Play stats** — a parent view inside Settings, not a tile on the home
   screen: today, the last 7 days as a minutes bar, and all time. Small
   badges mark a first game, five different games, every Dollhouse room,
-  an Animal Train ride, an Ocean Friends star, and the favorite. Play
+  an Animal Train ride, an Ocean Friends star, a Night Friends light,
+  and the favorite. Play
   again opens a recent or favorite game. Clear play stats asks for a
   second tap and leaves scores and stickers alone.
 

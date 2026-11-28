@@ -47,6 +47,7 @@ const GAMES = [
   { id: "dollhouse", screen: "dollhouseGame", expect: "#dollhouseStage" },
   { id: "animaltrain", screen: "animalTrainGame", expect: "#animalTrainStage" },
   { id: "oceanfriends", screen: "oceanFriendsGame", expect: "#oceanFriendsStage" },
+  { id: "nightfriends", screen: "nightFriendsGame", expect: "#nightFriendsStage" },
   { id: "scene",    screen: "sceneGame",    expect: "#sceneStage" },
   { id: "farm",     screen: "farmGame",     expect: "#farmStage" },
   { id: "icecream", screen: "icecreamGame", expect: "#icecreamStage" },

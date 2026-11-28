@@ -46,6 +46,7 @@ jobs:
       - run: node tests/core-loops.js
       - run: node tests/dollhouse-play.js
       - run: node tests/oceanfriends-play.js
+      - run: node tests/nightfriends-play.js
       - run: node tests/touch-audit.js
       - run: npm run test:nav
       - run: npm run test:sw

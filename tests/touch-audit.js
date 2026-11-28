@@ -211,6 +211,21 @@ async function main() {
     });
     oceanTiny.forEach((problem) => failures.push(viewport.name + " ocean friends: " + problem));
 
+    await openGame(page, "nightfriends");
+    await page.locator("#nightFriendsDock button[aria-label='Owl']").click();
+    await page.locator("#nightFriendsDock button[aria-label='Fox']").click();
+    await note("night friends");
+    const nightTiny = await page.evaluate(() => {
+      const problems = [];
+      document.querySelectorAll("#nightFriendsDock .nf-friend, #nightFriendsGame .nf-mode, #nightFriendsGame .home-btn").forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        const name = el.getAttribute("aria-label") || "control";
+        if (rect.width < 64 || rect.height < 64) problems.push(name + " is " + Math.round(rect.width) + "×" + Math.round(rect.height));
+      });
+      return problems;
+    });
+    nightTiny.forEach((problem) => failures.push(viewport.name + " night friends: " + problem));
+
     const games = await page.evaluate(() => Object.keys(window.Lawson.games).filter((id) => id !== "dollhouse"));
     for (const id of games) {
       await openGame(page, id);
